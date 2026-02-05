@@ -10,7 +10,7 @@ export default function Contact() {
                         </p>
                     </header>
 
-                    <form action="https://formspree.io/f/ton_form_id" method="POST" className="space-y-6">
+                    <form action="https://formspree.io/f/xvzbpbjd" method="POST" className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Nom</label>
