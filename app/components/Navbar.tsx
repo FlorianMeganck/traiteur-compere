@@ -26,6 +26,7 @@ export default function Navbar() {
 
                 <div className="hidden md:flex space-x-8">
                     <NavLink href="/" label="Accueil" />
+                    <NavLink href="/about" label="À Propos" />
                     <NavLink href="/services" label="Services" />
                     <NavLink href="/contact" label="Contact" />
                 </div>
