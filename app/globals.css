@@ -3,13 +3,14 @@
 :root {
   --background: #ffffff;
   --foreground: #000000;
-  --gold: #D4AF37;
+  --primary: #0F3057;
+  /* Dark Blue */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-gold: var(--gold);
+  --color-primary: var(--primary);
   --font-serif: var(--font-playfair);
   --font-sans: var(--font-lato);
 }
@@ -20,6 +21,11 @@ body {
   font-family: var(--font-sans);
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-serif);
 }

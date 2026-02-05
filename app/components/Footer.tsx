@@ -1,9 +1,9 @@
 
 export default function Footer() {
     return (
-        <footer className="bg-black text-white py-12 border-t border-gold/20">
+        <footer className="bg-black text-white py-12 border-t border-primary/20">
             <div className="max-w-7xl mx-auto px-6 flex flex-col items-center justify-center text-center">
-                <h3 className="text-2xl font-serif text-red-600 mb-4">Traiteur Compère</h3>
+                <h3 className="text-2xl font-serif text-primary mb-4">Traiteur Compère</h3>
                 <p className="mb-6 font-light text-gray-300">
                     L'Excellence du Goût à votre service.
                 </p>

@@ -7,14 +7,14 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-screen w-full">
         <Image
-          src="/images/hero_v3.png"
+          src="/images/hero.png"
           alt="Traiteur haut de gamme presentation"
           fill
           className="object-cover brightness-[0.6]"
           priority
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
-          <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-wide drop-shadow-lg text-orange-500">
+          <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-wide drop-shadow-lg text-white">
             L'Excellence du Goût
           </h1>
           <p className="text-xl md:text-2xl font-light max-w-2xl mb-10 tracking-wider drop-shadow-md">
@@ -33,7 +33,7 @@ export default function Home() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="text-gold uppercase tracking-widest text-sm font-bold">Nos Savoir-Faire</span>
+            <span className="text-primary uppercase tracking-widest text-sm font-bold">Nos Savoir-Faire</span>
             <h2 className="text-4xl font-serif mt-4 text-black">Créateurs d'Émotions</h2>
           </div>
 
@@ -72,7 +72,7 @@ function ServiceCard({ title, image, desc }: { title: string; image: string; des
         />
         <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
       </div>
-      <h3 className="text-2xl font-serif mb-3 text-black group-hover:text-gold transition-colors">{title}</h3>
+      <h3 className="text-2xl font-serif mb-3 text-black group-hover:text-primary transition-colors">{title}</h3>
       <p className="text-gray-600 font-light leading-relaxed">{desc}</p>
     </Link>
   );

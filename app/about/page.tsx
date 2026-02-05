@@ -6,7 +6,7 @@ export default function About() {
             <div className="max-w-7xl mx-auto px-6">
                 <header className="text-center mb-16">
                     <h1 className="text-5xl font-serif text-black mb-4">À Propos</h1>
-                    <div className="w-24 h-1 bg-gold mx-auto" />
+                    <div className="w-24 h-1 bg-primary mx-auto" />
                 </header>
 
                 <section className="flex flex-col md:flex-row gap-12 items-center mb-24">
@@ -55,7 +55,7 @@ export default function About() {
 
 function ValueCard({ title, desc }: { title: string; desc: string }) {
     return (
-        <div className="text-center space-y-4 p-6 bg-white shadow-sm border-t-2 border-gold">
+        <div className="text-center space-y-4 p-6 bg-white shadow-sm border-t-2 border-primary">
             <h3 className="text-xl font-serif text-black">{title}</h3>
             <p className="text-gray-600 font-light text-sm">{desc}</p>
         </div>

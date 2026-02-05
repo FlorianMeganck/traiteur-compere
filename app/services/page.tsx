@@ -6,7 +6,7 @@ export default function Services() {
             <div className="max-w-7xl mx-auto px-6">
                 <header className="text-center mb-16">
                     <h1 className="text-5xl font-serif text-black mb-4">Nos Services</h1>
-                    <div className="w-24 h-1 bg-gold mx-auto" />
+                    <div className="w-24 h-1 bg-primary mx-auto" />
                     <p className="mt-6 text-gray-600 max-w-2xl mx-auto font-light">
                         Découvrez nos prestations sur mesure, conçues pour sublimer chaque instant de vos événements.
                     </p>
@@ -76,7 +76,7 @@ function ServiceSection({ title, image, desc, details, reverse }: { title: strin
                 <ul className="space-y-2">
                     {details.map((item, idx) => (
                         <li key={idx} className="flex items-center text-gray-700">
-                            <span className="w-2 h-2 bg-gold rounded-full mr-3" />
+                            <span className="w-2 h-2 bg-primary rounded-full mr-3" />
                             {item}
                         </li>
                     ))}
