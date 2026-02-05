@@ -14,7 +14,7 @@ export default function Home() {
           priority
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
-          <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-wide drop-shadow-lg">
+          <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-wide drop-shadow-lg text-red-600">
             L'Excellence du Goût
           </h1>
           <p className="text-xl md:text-2xl font-light max-w-2xl mb-10 tracking-wider drop-shadow-md">
