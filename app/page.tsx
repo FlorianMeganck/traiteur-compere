@@ -7,7 +7,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative h-screen w-full">
         <Image
-          src="/images/hero_new.png"
+          src="/images/hero_v3.png"
           alt="Traiteur haut de gamme presentation"
           fill
           className="object-cover brightness-[0.6]"
