@@ -20,7 +20,7 @@ export default function Navbar() {
                 }`}
         >
             <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-                <Link href="/" className="text-2xl font-bold font-serif tracking-widest uppercase">
+                <Link href="/" className="text-2xl font-bold font-serif tracking-widest uppercase text-red-600">
                     Traiteur Compère
                 </Link>
 
