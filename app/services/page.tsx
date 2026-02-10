@@ -133,22 +133,46 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
 }) {
     const ref = useRef(null);
     const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-    const y = useTransform(scrollYProgress, [0, 1], [0, -50]); // Floating parallax for decor
 
-    // Decor Image Selection (Using Unsplash placeholders that look like decor or abstract shapes)
-    // In a real project, these would be local transparent PNGs.
-    const decorSrc =
-        decorType === 'flower' ? "https://images.unsplash.com/photo-1490750967868-58cb9bdda31c?q=80&w=400&auto=format&fit=crop" : // Flower
-            decorType === 'herb' ? "https://images.unsplash.com/photo-1515276427842-f85802d514a2?q=80&w=400&auto=format&fit=crop" : // Rosemary/Greenery
-                "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=400&auto=format&fit=crop"; // Abstract lines
+    // Parallax Effects
+    const yBg = useTransform(scrollYProgress, [0, 1], [0, 100]); // Background moves slower (down)
+    const yDecor = useTransform(scrollYProgress, [0, 1], [0, -150]); // Decor floats upwards
+
+    // Organic Shapes Configuration
+    // Using arbitrary values for deep, organic curves
+    const bgShapeClass = reverse
+        ? "rounded-l-[120px] rounded-bg-organic-left" // Custom class concept
+        : "rounded-r-[120px] rounded-bg-organic-right";
+
+    // Asymmetric organic radii inline for simplicity and control
+    const borderRadiusStyle = reverse
+        ? { borderTopLeftRadius: '200px', borderBottomLeftRadius: '80px', borderTopRightRadius: '0', borderBottomRightRadius: '0' }
+        : { borderTopRightRadius: '200px', borderBottomRightRadius: '80px', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' };
+
+    // Decor Image Selection (Nature/Organic)
+    let decorSrc = "";
+    let decorClass = "";
+
+    if (decorType === 'flower') {
+        decorSrc = "https://images.unsplash.com/photo-1490750967868-58cb9bdda31c?q=80&w=600&auto=format&fit=crop"; // Flower/Peony
+        decorClass = "w-64 -bottom-20 -right-20 opacity-80 blur-[1px]";
+    } else if (decorType === 'herb') {
+        decorSrc = "https://images.unsplash.com/photo-1515276427842-f85802d514a2?q=80&w=600&auto=format&fit=crop"; // Rosemary/Herb
+        decorClass = "w-56 -top-20 -left-10 opacity-70";
+    } else {
+        // Geometric/Plant Structure
+        decorSrc = "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=600&auto=format&fit=crop"; // Monstera/Green
+        decorClass = "w-72 -top-12 -right-12 opacity-40 mix-blend-multiply";
+    }
 
     return (
         <section ref={ref} className="relative py-32 w-full overflow-hidden">
 
-            {/* A. TEXTURE LAYER (Background Beige Block) */}
-            <div
-                className={`absolute top-0 bottom-0 bg-[#F9F7F1] w-[80%] md:w-[65%] -z-10 
-                ${reverse ? 'left-0 rounded-r-3xl' : 'right-0 rounded-l-3xl'}
+            {/* A. TEXTURE LAYER (Organic Background) */}
+            <motion.div
+                style={{ y: yBg, ...borderRadiusStyle }}
+                className={`absolute top-0 bottom-0 bg-[#F9F7F1] w-[85%] md:w-[70%] -z-20 
+                ${reverse ? 'left-0' : 'right-0'}
                 transition-all duration-700 ease-out`}
             />
 
@@ -156,40 +180,56 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                 <div className={`flex flex-col md:flex-row items-center gap-16 md:gap-24 ${reverse ? 'md:flex-row-reverse' : ''}`}>
 
                     {/* B. CONTENT EDITORIAL */}
-                    <motion.div
-                        initial={{ opacity: 0, x: reverse ? 50 : -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                        className="w-full md:w-5/12 space-y-8"
-                    >
-                        <h2 className="text-4xl md:text-5xl font-serif uppercase tracking-widest text-black">
-                            {title}
-                        </h2>
+                    <div className="w-full md:w-5/12 space-y-8 relative">
+                        {/* Floating Decor Element (Parallax) */}
+                        <motion.div
+                            style={{ y: yDecor }}
+                            className={`absolute pointer-events-none z-0 ${decorClass} hidden md:block`}
+                        >
+                            <Image
+                                src={decorSrc}
+                                alt="Decor"
+                                width={400}
+                                height={400}
+                                className="object-contain"
+                            />
+                        </motion.div>
 
-                        <div className="border-l border-gray-300 pl-6 py-2">
-                            <p className="font-serif italic text-gray-400 text-lg">
-                                &ldquo;{quote}&rdquo;
-                            </p>
-                            {quoteAuthor && (
-                                <p className="font-sans text-xs uppercase tracking-widest text-gray-500 mt-2">
-                                    {quoteAuthor}
+                        <motion.div
+                            initial={{ opacity: 0, x: reverse ? 50 : -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                            className="relative z-10 bg-white/50 backdrop-blur-sm p-6 rounded-2xl md:bg-transparent md:backdrop-blur-none md:p-0"
+                        >
+                            <h2 className="text-4xl md:text-5xl font-serif uppercase tracking-widest text-black">
+                                {title}
+                            </h2>
+
+                            <div className="border-l border-gray-300 pl-6 py-2 mt-8">
+                                <p className="font-serif italic text-gray-400 text-lg">
+                                    &ldquo;{quote}&rdquo;
                                 </p>
-                            )}
-                        </div>
+                                {quoteAuthor && (
+                                    <p className="font-sans text-xs uppercase tracking-widest text-gray-500 mt-2">
+                                        {quoteAuthor}
+                                    </p>
+                                )}
+                            </div>
 
-                        <p className="text-gray-600 font-sans font-light leading-relaxed text-lg">
-                            {desc}
-                        </p>
+                            <p className="text-gray-600 font-sans font-light leading-relaxed text-lg mt-8">
+                                {desc}
+                            </p>
 
-                        <div className="pt-4">
-                            <Link href="/contact" className="group inline-flex items-center text-sm font-bold uppercase tracking-widest text-black">
-                                {ctaLabel}
-                                <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-[#D4AF37] w-full absolute bottom-0"></span>
-                                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                            </Link>
-                        </div>
-                    </motion.div>
+                            <div className="pt-8">
+                                <Link href="/contact" className="group inline-flex items-center text-sm font-bold uppercase tracking-widest text-black">
+                                    {ctaLabel}
+                                    <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-[#D4AF37] w-full absolute bottom-0"></span>
+                                    <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                </Link>
+                            </div>
+                        </motion.div>
+                    </div>
 
                     {/* C. MOSAIC GRID (2x2) */}
                     <div className="w-full md:w-7/12 relative">
@@ -201,7 +241,7 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.6, delay: 0.2 + (idx * 0.1) }}
-                                    className={`relative aspect-[3/4] overflow-hidden shadow-2xl shadow-neutral-200
+                                    className={`relative aspect-[3/4] overflow-hidden shadow-2xl shadow-neutral-200 rounded-lg
                                         ${idx === 1 ? 'mt-8 md:mt-12' : ''} 
                                         ${idx === 2 ? '-mt-8 md:-mt-12' : ''}
                                     `}
@@ -215,23 +255,6 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                                 </motion.div>
                             ))}
                         </div>
-
-                        {/* D. FLOATING DECOR */}
-                        <motion.div
-                            style={{ y }}
-                            className={`absolute -z-10 w-48 md:w-64 opacity-20 pointer-events-none grayscale mix-blend-multiply
-                                ${reverse ? '-right-12 -bottom-12' : '-left-12 -top-12'}
-                            `}
-                        >
-                            <Image
-                                src={decorSrc}
-                                alt="Decor"
-                                width={300}
-                                height={300}
-                                className="mask-image-gradient" // Concept class, would need CSS or rounded-full
-                                style={{ borderRadius: '50%' }}
-                            />
-                        </motion.div>
                     </div>
 
                 </div>
