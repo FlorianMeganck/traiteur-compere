@@ -71,25 +71,32 @@ export default function Navbar() {
                Let's make navbar transparent if menu is open, so black overlay shines through.
             */}
 
-            <div className="w-full max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <div className="w-full max-w-7xl mx-auto px-6 relative">
 
-                {/* LOGO */}
-                <Link href="/" className={`relative z-50 transition-colors duration-500 ${finalLogoColor}`}>
-                    <Logo className="h-16 w-auto" />
-                </Link>
+                {/* --- DESKTOP LAYOUT (Grid 3 Cols) --- */}
+                <div className="hidden md:grid grid-cols-3 items-center w-full relative">
 
-                {/* DESKTOP MENU (Hidden on Mobile) */}
-                <div className="hidden md:flex items-center gap-12">
-                    <div className="flex items-center gap-8">
-                        {NAV_LINKS.map((link) => (
-                            <NavLink key={link.href} href={link.href} label={link.label} textColor={desktopTextColor} />
-                        ))}
+                    {/* LEFT ZONE: Accueil & À Propos (Aligned Right -> Center) */}
+                    <div className="flex justify-end items-center gap-12 pr-12">
+                        <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} />
+                        <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} />
                     </div>
 
-                    <div className={`w-[1px] h-6 ${isTransparent ? "bg-white/30" : "bg-black/10"}`}></div>
+                    {/* CENTER ZONE: Logo */}
+                    <div className="flex justify-center items-center">
+                        <Link href="/" className={`relative z-50 transition-colors duration-500 ${finalLogoColor} hover:scale-105 transition-transform duration-300`}>
+                            <Logo className="h-20 w-auto" />
+                        </Link>
+                    </div>
 
-                    {/* Desktop Socials */}
-                    <div className="flex items-center gap-4">
+                    {/* RIGHT ZONE: Services & Contact (Aligned Left -> Center) */}
+                    <div className="flex justify-start items-center gap-12 pl-12">
+                        <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} />
+                        <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} />
+                    </div>
+
+                    {/* SOCIALS (Absolute Right) */}
+                    <div className="absolute right-0 flex items-center gap-4">
                         <SocialLink
                             href="https://www.facebook.com/profile.php?id=61582940090708"
                             icon={<FacebookIcon />}
@@ -103,28 +110,36 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                {/* MOBILE BURGER (md:hidden) */}
-                <div className="md:hidden relative z-50">
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 focus:outline-none"
-                    >
-                        {/* Top Line */}
-                        <motion.span
-                            animate={isMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
-                        />
-                        {/* Middle Line */}
-                        <motion.span
-                            animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
-                        />
-                        {/* Bottom Line */}
-                        <motion.span
-                            animate={isMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
-                        />
-                    </button>
+                {/* --- MOBILE LAYOUT (Flex Between) --- */}
+                <div className="md:hidden flex justify-between items-center w-full">
+                    {/* LOGO */}
+                    <Link href="/" className={`relative z-50 transition-colors duration-500 ${finalLogoColor}`}>
+                        <Logo className="h-14 w-auto" />
+                    </Link>
+
+                    {/* BURGER */}
+                    <div className="relative z-50">
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 focus:outline-none"
+                        >
+                            {/* Top Line */}
+                            <motion.span
+                                animate={isMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+                                className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
+                            />
+                            {/* Middle Line */}
+                            <motion.span
+                                animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
+                                className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
+                            />
+                            {/* Bottom Line */}
+                            <motion.span
+                                animate={isMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+                                className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
+                            />
+                        </button>
+                    </div>
                 </div>
 
                 {/* MOBILE OVERLAY */}
