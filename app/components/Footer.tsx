@@ -53,7 +53,7 @@ export default function Footer() {
                         <div className="flex flex-col gap-3 text-sm">
                             <FooterLink href="#" label="Mentions Légales" />
                             <FooterLink href="/legal/confidentialite" label="Politique de Confidentialité" />
-                            <FooterLink href="#" label="CGV" />
+                            <FooterLink href="/legal/cgv" label="CGV" />
                             <FooterLink href="#" label="Gestion des Cookies" />
                         </div>
                     </div>
