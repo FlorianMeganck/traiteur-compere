@@ -1,16 +1,24 @@
+"use client";
+
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function Services() {
     return (
         <main className="min-h-screen pt-24 pb-12">
             <div className="max-w-7xl mx-auto px-6">
-                <header className="text-center mb-16">
+                <motion.header
+                    className="text-center mb-16"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                >
                     <h1 className="text-5xl font-serif text-black mb-4">Nos Services</h1>
                     <div className="w-24 h-1 bg-primary mx-auto" />
                     <p className="mt-6 text-gray-600 max-w-2xl mx-auto font-light">
                         Découvrez nos prestations sur mesure, conçues pour sublimer chaque instant de vos événements.
                     </p>
-                </header>
+                </motion.header>
 
                 <div className="space-y-24">
                     <ServiceSection
@@ -59,7 +67,13 @@ export default function Services() {
 
 function ServiceSection({ title, image, desc, details, reverse }: { title: string; image: string; desc: string; details: string[]; reverse: boolean }) {
     return (
-        <div className={`flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} gap-12 items-center`}>
+        <motion.div
+            className={`flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} gap-12 items-center`}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+        >
             <div className="w-full md:w-1/2 h-[400px] relative">
                 <Image
                     src={image}
@@ -82,6 +96,6 @@ function ServiceSection({ title, image, desc, details, reverse }: { title: strin
                     ))}
                 </ul>
             </div>
-        </div>
+        </motion.div>
     );
 }

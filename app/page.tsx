@@ -1,43 +1,100 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function Home() {
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 500], [0, 200]);
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2, // increased delay for cascade
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: "easeOut",
+      },
+    },
+  };
+
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-screen w-full">
-        <Image
-          src="/images/hero.png"
-          alt="Traiteur haut de gamme presentation"
-          fill
-          className="object-cover brightness-[0.6]"
-          priority
-        />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
-          <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-wide drop-shadow-lg text-white">
-            L'Excellence du Goût
-          </h1>
-          <p className="text-xl md:text-2xl font-light max-w-2xl mb-10 tracking-wider drop-shadow-md">
-            Votre partenaire traiteur pour des moments inoubliables.
-          </p>
-          <Link
-            href="/services"
-            className="border-2 border-white text-white px-8 py-3 uppercase tracking-widest text-sm font-bold hover:bg-white hover:text-black transition-all duration-300"
+      <section className="relative h-screen w-full overflow-hidden">
+        <motion.div style={{ y }} className="absolute inset-0 h-[120%] w-full -top-[10%]">
+          <Image
+            src="/images/hero.png"
+            alt="Traiteur haut de gamme presentation"
+            fill
+            className="object-cover brightness-[0.6]"
+            priority
+          />
+        </motion.div>
+        <motion.div
+          className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
+          <motion.h1
+            className="text-5xl md:text-7xl font-serif mb-6 tracking-wide drop-shadow-lg text-white"
+            variants={itemVariants}
           >
-            Découvrir nos services
-          </Link>
-        </div>
+            L'Excellence du Goût
+          </motion.h1>
+          <motion.p
+            className="text-xl md:text-2xl font-light max-w-2xl mb-10 tracking-wider drop-shadow-md"
+            variants={itemVariants}
+          >
+            Votre partenaire traiteur pour des moments inoubliables.
+          </motion.p>
+          <motion.div variants={itemVariants}>
+            <Link
+              href="/services"
+              className="border-2 border-white text-white px-8 py-3 uppercase tracking-widest text-sm font-bold hover:bg-white hover:text-black transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] inline-block"
+            >
+              Découvrir nos services
+            </Link>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Services Preview */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
+          <motion.div
+            className="text-center mb-16"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
             <span className="text-primary uppercase tracking-widest text-sm font-bold">Nos Savoir-Faire</span>
             <h2 className="text-4xl font-serif mt-4 text-black">Créateurs d'Émotions</h2>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+            variants={containerVariants}
+          >
             <ServiceCard
               title="Mariages"
               image="/images/wedding.png"
@@ -53,7 +110,7 @@ export default function Home() {
               image="/images/corporate.png"
               desc="L'élégance et le professionnalisme pour vos événements."
             />
-          </div>
+          </motion.div>
         </div>
       </section>
     </main>
@@ -61,19 +118,30 @@ export default function Home() {
 }
 
 function ServiceCard({ title, image, desc }: { title: string; image: string; desc: string }) {
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: "easeOut" },
+    },
+  };
+
   return (
-    <Link href="/services" className="group cursor-pointer block">
-      <div className="relative h-[400px] w-full overflow-hidden mb-6">
-        <Image
-          src={image}
-          alt={title}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
-      </div>
-      <h3 className="text-2xl font-serif mb-3 text-black group-hover:text-primary transition-colors">{title}</h3>
-      <p className="text-gray-600 font-light leading-relaxed">{desc}</p>
-    </Link>
+    <motion.div variants={cardVariants}>
+      <Link href="/services" className="group cursor-pointer block">
+        <div className="relative h-[400px] w-full overflow-hidden mb-6">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+        </div>
+        <h3 className="text-2xl font-serif mb-3 text-black group-hover:text-primary transition-colors">{title}</h3>
+        <p className="text-gray-600 font-light leading-relaxed">{desc}</p>
+      </Link>
+    </motion.div>
   );
 }

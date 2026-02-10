@@ -338,7 +338,7 @@ export default function Contact() {
                             <button
                                 type="submit"
                                 disabled={status === "submitting"}
-                                className={`w-full bg-black text-white py-4 uppercase tracking-widest text-sm font-bold hover:bg-primary transition-colors duration-300 mt-8 ${status === "submitting" ? "opacity-75 cursor-not-allowed" : ""}`}
+                                className={`w-full bg-black text-white py-4 uppercase tracking-widest text-sm font-bold hover:bg-primary transition-all duration-300 mt-8 hover:-translate-y-1 hover:shadow-xl active:scale-95 ${status === "submitting" ? "opacity-75 cursor-not-allowed" : ""}`}
                             >
                                 {status === "submitting" ? "Envoi en cours..." : "Envoyer la demande"}
                             </button>
