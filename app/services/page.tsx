@@ -135,50 +135,67 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
     const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
 
     // Parallax Effects
-    const yBg = useTransform(scrollYProgress, [0, 1], [0, 80]);
-    const yDecor = useTransform(scrollYProgress, [0, 1], [0, -80]);
+    const yBg = useTransform(scrollYProgress, [0, 1], [0, 60]);
+    const yDecor = useTransform(scrollYProgress, [0, 1], [0, -60]);
 
-    // Organic Shapes Configuration
-    // Slightly darker beige #F2EFE9 for better visibility
-    const borderRadiusStyle = reverse
-        ? { borderTopLeftRadius: '200px', borderBottomLeftRadius: '80px', borderTopRightRadius: '0', borderBottomRightRadius: '0' }
-        : { borderTopRightRadius: '200px', borderBottomRightRadius: '80px', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' };
+    // Organic Background Blob (CSS only)
+    // Using complex border-radius for 'liquid' feel
+    const blobRadius = reverse
+        ? "30% 70% 70% 30% / 30% 30% 70% 70%"
+        : "70% 30% 30% 70% / 70% 70% 30% 30%";
 
-    // Decor Image Selection (Nature/Organic)
-    let decorSrc = "";
+    // Decor SVG Configuration
+    let DecorSVG = null;
     let decorClass = "";
 
-    // Positioning logic:
-    // If reverse (Text Right), decor usually looks good on Top Right or Bottom Left of text.
-    // If normal (Text Left), decor on Top Left or Bottom Right of text.
-
     if (decorType === 'flower') {
-        // Mariage: Pres de l'intitulé (Near title). Title is top.
-        // Flower (Peony)
-        decorSrc = "https://images.unsplash.com/photo-1563241527-961f74f67d26?q=80&w=600&auto=format&fit=crop";
-        // Position: Top Right of text container, slightly floating over.
-        decorClass = "w-48 md:w-64 -top-20 -right-10 md:-right-20 opacity-90 rotate-12";
+        // Mariage: Peony / Soft Flower Line Art
+        decorClass = "w-48 md:w-64 -top-24 -right-16 md:-right-24 rotate-12 opacity-30 text-[#D4AF37]"; // Gold
+        DecorSVG = (
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5" className="w-full h-full">
+                <path d="M50 50 C20 80 0 50 20 20 C40 0 60 0 80 20 C100 50 80 80 50 50 Z M50 50 Q30 30 50 10 M50 50 Q70 30 50 10 M50 50 Q30 70 50 90 M50 50 Q70 70 50 90" />
+                <path d="M50 50 C35 60 25 40 35 30 C45 20 65 20 75 30 C85 40 75 60 50 50" />
+                <path d="M50 90 Q50 100 55 100" strokeWidth="1" />
+            </svg>
+        );
     } else if (decorType === 'herb') {
-        // Particulier: Herb (Eucalyptus/Rosemary)
-        decorSrc = "https://images.unsplash.com/photo-1515276427842-f85802d514a2?q=80&w=600&auto=format&fit=crop";
-        // Position: Bottom Left of text container
-        decorClass = "w-40 md:w-56 -bottom-16 -left-10 md:-left-16 opacity-80 -rotate-12";
+        // Particulier: Olive/Rosemary Branch
+        decorClass = "w-40 md:w-56 -bottom-20 -left-12 md:-left-20 -rotate-12 opacity-30 text-gray-400";
+        DecorSVG = (
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1" className="w-full h-full">
+                <path d="M50 100 Q50 50 80 10" />
+                <path d="M50 80 Q30 70 20 60" />
+                <path d="M55 70 Q75 60 85 50" />
+                <path d="M60 50 Q40 40 30 30" />
+                <path d="M65 30 Q85 20 90 10" />
+            </svg>
+        );
     } else {
-        // Entreprise: Geometric/Plant
-        decorSrc = "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=600&auto=format&fit=crop";
-        // Position: Top Left
-        decorClass = "w-48 md:w-64 -top-16 -left-10 md:-left-20 opacity-50 mix-blend-multiply";
+        // Entreprise: Abstract Geometric lines
+        decorClass = "w-56 md:w-72 -top-20 -left-16 md:-left-24 opacity-20 text-[#D4AF37]";
+        DecorSVG = (
+            <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5" className="w-full h-full">
+                <circle cx="50" cy="50" r="40" />
+                <circle cx="50" cy="50" r="30" />
+                <line x1="10" y1="50" x2="90" y2="50" />
+                <line x1="50" y1="10" x2="50" y2="90" />
+                <rect x="35" y="35" width="30" height="30" transform="rotate(45 50 50)" />
+            </svg>
+        );
     }
+
 
     return (
         <section ref={ref} className="relative py-32 w-full overflow-hidden">
 
-            {/* A. TEXTURE LAYER (Organic Background) */}
-            {/* Added mix-blend-multiply to ensure it's visible on white, and darkened color slightly to #F2EFE9 */}
+            {/* A. TEXTURE LAYER (CSS Organic Blob) */}
             <motion.div
-                style={{ y: yBg, ...borderRadiusStyle }}
-                className={`absolute top-0 bottom-0 bg-[#F2EFE9] w-[85%] md:w-[70%] -z-20 
-                ${reverse ? 'left-0' : 'right-0'}
+                style={{
+                    y: yBg,
+                    borderRadius: blobRadius,
+                }}
+                className={`absolute top-0 bottom-0 bg-[#F9F7F1] w-[90%] md:w-[75%] -z-20 
+                ${reverse ? '-left-20' : '-right-20'}
                 transition-all duration-700 ease-out`}
             />
 
@@ -188,18 +205,12 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                     {/* B. CONTENT EDITORIAL */}
                     <div className="w-full md:w-5/12 space-y-8 relative">
 
-                        {/* Floating Decor Element (Parallax) - Now INSIDE the text column for relative positioning */}
+                        {/* Floating Decor Element (SVG Vector) */}
                         <motion.div
                             style={{ y: yDecor }}
                             className={`absolute pointer-events-none z-0 ${decorClass} hidden md:block`}
                         >
-                            <Image
-                                src={decorSrc}
-                                alt="Decor Nature"
-                                width={400}
-                                height={400}
-                                className="object-contain"
-                            />
+                            {DecorSVG}
                         </motion.div>
 
                         <motion.div
