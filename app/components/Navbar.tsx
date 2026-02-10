@@ -2,16 +2,32 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence, Variants } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import Logo from "./Logo";
 
 export default function Navbar() {
+    const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+    // Chameleon Logic
+    // If Home ("/") AND Scroll < 50 => Transparent
+    // Else => White
+    const isHome = pathname === "/";
+    const isTransparent = isHome && !scrolled;
+
+    // Derived Colors
+    // If Transparent => White Elements
+    // Else => Black Elements
+    // EXCEPT: When Mobile Menu is OPEN, Toggle Button must be WHITE (on black overlay)
+    const textColor = isTransparent ? "text-white" : "text-black";
+    const burgerColor = isMenuOpen || isTransparent ? "bg-white" : "bg-black";
+    const logoClass = isTransparent ? "text-white" : "text-black"; // SVG uses currentColor
+
     useEffect(() => {
         const handleScroll = () => {
-            setScrolled(window.scrollY > 10);
+            setScrolled(window.scrollY > 50);
         };
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
@@ -29,125 +45,98 @@ export default function Navbar() {
         };
     }, [isMenuOpen]);
 
-    const menuVars: Variants = {
-        initial: {
-            scaleY: 0,
-        },
-        animate: {
-            scaleY: 1,
-            transition: {
-                duration: 0.5,
-                ease: [0.12, 0, 0.39, 0],
-            },
-        },
-        exit: {
-            scaleY: 0,
-            transition: {
-                delay: 0.5,
-                duration: 0.5,
-                ease: [0.22, 1, 0.36, 1],
-            },
-        },
-    };
-
-    const containerVars: Variants = {
-        initial: {
-            transition: {
-                staggerChildren: 0.09,
-                staggerDirection: -1,
-            },
-        },
-        open: {
-            transition: {
-                delayChildren: 0.3,
-                staggerChildren: 0.09,
-                staggerDirection: 1,
-            },
-        },
-    };
-
-    const mobileLinkVars: Variants = {
-        initial: {
-            y: "30vh",
-            transition: {
-                duration: 0.5,
-                ease: [0.37, 0, 0.63, 1],
-            },
-        },
-        open: {
-            y: 0,
-            transition: {
-                ease: [0, 0.55, 0.45, 1],
-                duration: 0.7,
-            },
-        },
-    };
-
     return (
         <nav
-            className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-2" : "bg-transparent py-4"
+            className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
                 }`}
         >
-            <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-                <Link href="/" className="flex items-center gap-2 group z-50">
-                    <Logo className={`h-12 w-auto transition-transform duration-300 group-hover:scale-105 ${isMenuOpen ? "brightness-0 invert" : ""}`} />
-                    <span className="sr-only">Traiteur Compère</span>
+            <div className="w-full max-w-7xl mx-auto px-6 flex justify-between items-center">
+
+                {/* LOGO */}
+                <Link href="/" className={`relative z-50 transition-colors duration-500 ${logoClass}`}>
+                    <Logo className="h-16 w-auto" />
                 </Link>
 
-                {/* Mobile Menu Button */}
-                <div className="md:hidden z-50">
+                {/* DESKTOP MENU (Hidden on Mobile) */}
+                <div className="hidden md:flex items-center gap-12">
+                    <div className="flex items-center gap-8">
+                        <NavLink href="/" label="Accueil" textColor={textColor} />
+                        <NavLink href="/services" label="Services" textColor={textColor} />
+                        <NavLink href="/contact" label="Contact" textColor={textColor} />
+                    </div>
+
+                    <div className={`w-[1px] h-6 ${isTransparent ? "bg-white/30" : "bg-black/10"}`}></div>
+
+                    {/* Desktop Socials */}
+                    <div className="flex items-center gap-4">
+                        <SocialLink
+                            href="https://www.facebook.com/profile.php?id=100057328099329"
+                            icon={<FacebookIcon />}
+                            className={textColor}
+                        />
+                        <SocialLink
+                            href="https://www.instagram.com"
+                            icon={<InstagramIcon />}
+                            className={textColor}
+                        />
+                    </div>
+                </div>
+
+                {/* MOBILE BURGER (md:hidden) */}
+                <div className="md:hidden relative z-50">
                     <button
-                        onClick={() => setIsMenuOpen((prev) => !prev)}
-                        className="text-white focus:outline-none"
-                        aria-label="Toggle menu"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 focus:outline-none"
                     >
-                        <div className="w-8 h-8 flex flex-col justify-center items-center gap-[6px]">
-                            <motion.span
-                                animate={isMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-                                className={`block w-8 h-[2px] bg-white transition-colors duration-300 ${!isMenuOpen && scrolled ? "bg-black" : "bg-white"}`}
-                            ></motion.span>
-                            <motion.span
-                                animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                                className={`block w-8 h-[2px] bg-white transition-colors duration-300 ${!isMenuOpen && scrolled ? "bg-black" : "bg-white"}`}
-                            ></motion.span>
-                            <motion.span
-                                animate={isMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-                                className={`block w-8 h-[2px] bg-white transition-colors duration-300 ${!isMenuOpen && scrolled ? "bg-black" : "bg-white"}`}
-                            ></motion.span>
-                        </div>
+                        {/* Top Line */}
+                        <motion.span
+                            animate={isMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${burgerColor}`}
+                        />
+                        {/* Middle Line */}
+                        <motion.span
+                            animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
+                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${burgerColor}`}
+                        />
+                        {/* Bottom Line */}
+                        <motion.span
+                            animate={isMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${burgerColor}`}
+                        />
                     </button>
                 </div>
 
-                {/* Desktop Menu */}
-                <div className="hidden md:flex items-center space-x-12">
-                    <DesktopLink href="/" label="Accueil" />
-                    <DesktopLink href="/about" label="À Propos" />
-                    <DesktopLink href="/services" label="Services" />
-                    <DesktopLink href="/contact" label="Contact" />
-                </div>
-
-                {/* Mobile Menu Overlay */}
+                {/* MOBILE OVERLAY */}
                 <AnimatePresence>
                     {isMenuOpen && (
                         <motion.div
-                            variants={menuVars}
-                            initial="initial"
-                            animate="animate"
-                            exit="exit"
-                            className="fixed inset-0 bg-black/95 backdrop-blur-md origin-top flex flex-col justify-center items-center z-40"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="fixed inset-0 bg-black/95 backdrop-blur-md z-40 flex flex-col items-center justify-center text-center"
                         >
-                            <motion.div
-                                variants={containerVars}
-                                initial="initial"
-                                animate="open"
-                                exit="initial"
-                                className="flex flex-col items-center gap-8"
-                            >
-                                <MobileLink href="/" label="Accueil" onClick={() => setIsMenuOpen(false)} variants={mobileLinkVars} />
-                                <MobileLink href="/about" label="À Propos" onClick={() => setIsMenuOpen(false)} variants={mobileLinkVars} />
-                                <MobileLink href="/services" label="Services" onClick={() => setIsMenuOpen(false)} variants={mobileLinkVars} />
-                                <MobileLink href="/contact" label="Contact" onClick={() => setIsMenuOpen(false)} variants={mobileLinkVars} />
-                            </motion.div>
+                            <div className="flex flex-col gap-8 mb-12">
+                                <MobileLink href="/" label="Accueil" onClick={() => setIsMenuOpen(false)} />
+                                <MobileLink href="/services" label="Services" onClick={() => setIsMenuOpen(false)} />
+                                <MobileLink href="/contact" label="Contact" onClick={() => setIsMenuOpen(false)} />
+                            </div>
+
+                            <div className="w-16 h-[1px] bg-white/20 mb-8"></div>
+
+                            {/* Mobile Socials */}
+                            <div className="flex items-center gap-8">
+                                <SocialLink
+                                    href="https://www.facebook.com/profile.php?id=100057328099329"
+                                    icon={<FacebookIcon size={32} />}
+                                    className="text-white"
+                                />
+                                <SocialLink
+                                    href="https://www.instagram.com"
+                                    icon={<InstagramIcon size={32} />}
+                                    className="text-white"
+                                />
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -156,28 +145,62 @@ export default function Navbar() {
     );
 }
 
-function DesktopLink({ href, label }: { href: string; label: string }) {
+// --- SUB-COMPONENTS ---
+
+function NavLink({ href, label, textColor }: { href: string; label: string; textColor: string }) {
     return (
         <Link
             href={href}
-            className="text-sm font-bold uppercase tracking-widest text-black hover:text-[#D4AF37] transition-colors duration-300 relative group"
+            className={`relative py-1 text-sm font-bold tracking-widest uppercase transition-colors duration-300 group ${textColor} hover:text-[#D4AF37]`}
         >
             {label}
-            <span className="absolute -bottom-2 left-0 w-0 h-[2px] bg-[#D4AF37] transition-all duration-300 group-hover:w-full"></span>
+            {/* Golden Underline Animation */}
+            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-[#D4AF37] transition-all duration-300 group-hover:w-full"></span>
         </Link>
     );
 }
 
-function MobileLink({ href, label, onClick, variants }: { href: string; label: string; onClick: () => void; variants: Variants }) {
+function MobileLink({ href, label, onClick }: { href: string; label: string; onClick: () => void }) {
     return (
-        <motion.div variants={variants} className="overflow-hidden">
-            <Link
-                href={href}
-                onClick={onClick}
-                className="text-5xl font-serif text-white hover:text-[#D4AF37] transition-colors duration-300"
-            >
-                {label}
-            </Link>
-        </motion.div>
+        <Link
+            href={href}
+            onClick={onClick}
+            className="text-5xl font-serif text-white hover:text-[#D4AF37] transition-colors duration-300"
+        >
+            {label}
+        </Link>
+    );
+}
+
+function SocialLink({ href, icon, className }: { href: string; icon: React.ReactNode; className: string }) {
+    return (
+        <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${className} hover:text-[#D4AF37] transition-colors duration-300`}
+        >
+            {icon}
+        </a>
+    );
+}
+
+// --- ICONS ---
+
+function FacebookIcon({ size = 20 }: { size?: number }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+        </svg>
+    );
+}
+
+function InstagramIcon({ size = 20 }: { size?: number }) {
+    return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
     );
 }

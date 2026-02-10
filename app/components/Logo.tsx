@@ -5,33 +5,22 @@ export default function Logo({ className = "h-12 w-auto" }: { className?: string
             viewBox="0 0 100 100"
             className={className}
             fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
         >
-            {/* Circle/Background hint */}
-            {/* <circle cx="50" cy="50" r="48" stroke="#D4AF37" strokeWidth="1" opacity="0.2" /> */}
+            {/* Circle Border */}
+            <circle cx="50" cy="50" r="45" />
 
-            {/* Stylized T */}
+            {/* T */}
             <path
-                d="M25 35 H 75 M 50 35 V 85"
-                stroke="#D4AF37"
-                strokeWidth="4"
+                d="M30 35 H 55 M 42.5 35 V 70"
                 strokeLinecap="round"
-                className="drop-shadow-md"
             />
 
-            {/* Stylized C - intertwined */}
+            {/* C */}
             <path
-                d="M65 35 C 40 35, 30 50, 30 65 C 30 80, 45 85, 65 85"
-                stroke="white"
-                strokeWidth="4"
+                d="M75 45 C 75 35, 68 35, 60 35 C 52 35, 50 50, 50 52.5 C 50 65, 55 70, 65 70 C 72 70, 75 62, 75 62"
                 strokeLinecap="round"
-                fill="none"
-                className="drop-shadow-sm opacity-90"
-            />
-
-            {/* Minimalist Leaf Icon */}
-            <path
-                d="M60 20 Q 75 10, 80 25 Q 70 35, 60 20 Z"
-                fill="#D4AF37"
             />
         </svg>
     );
