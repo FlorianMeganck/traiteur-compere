@@ -6,6 +6,13 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "./Logo";
 
+const NAV_LINKS = [
+    { href: "/", label: "Accueil" },
+    { href: "/about", label: "À Propos" },
+    { href: "/services", label: "Services" },
+    { href: "/contact", label: "Contact" },
+];
+
 export default function Navbar() {
     const pathname = usePathname();
     const [scrolled, setScrolled] = useState(false);
@@ -60,9 +67,10 @@ export default function Navbar() {
                 {/* DESKTOP MENU (Hidden on Mobile) */}
                 <div className="hidden md:flex items-center gap-12">
                     <div className="flex items-center gap-8">
-                        <NavLink href="/" label="Accueil" textColor={textColor} />
-                        <NavLink href="/services" label="Services" textColor={textColor} />
-                        <NavLink href="/contact" label="Contact" textColor={textColor} />
+
+                        {NAV_LINKS.map((link) => (
+                            <NavLink key={link.href} href={link.href} label={link.label} textColor={textColor} />
+                        ))}
                     </div>
 
                     <div className={`w-[1px] h-6 ${isTransparent ? "bg-white/30" : "bg-black/10"}`}></div>
@@ -117,9 +125,14 @@ export default function Navbar() {
                             className="fixed inset-0 bg-black/95 backdrop-blur-md z-40 flex flex-col items-center justify-center text-center"
                         >
                             <div className="flex flex-col gap-8 mb-12">
-                                <MobileLink href="/" label="Accueil" onClick={() => setIsMenuOpen(false)} />
-                                <MobileLink href="/services" label="Services" onClick={() => setIsMenuOpen(false)} />
-                                <MobileLink href="/contact" label="Contact" onClick={() => setIsMenuOpen(false)} />
+                                {NAV_LINKS.map((link) => (
+                                    <MobileLink
+                                        key={link.href}
+                                        href={link.href}
+                                        label={link.label}
+                                        onClick={() => setIsMenuOpen(false)}
+                                    />
+                                ))}
                             </div>
 
                             <div className="w-16 h-[1px] bg-white/20 mb-8"></div>
