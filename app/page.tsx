@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
+import { motion, useScroll, useTransform, useInView, animate } from "framer-motion";
 
 export default function Home() {
   // Parallax Setup for Hero
@@ -60,6 +60,9 @@ export default function Home() {
 
       {/* --- 2. STORY SECTION (Storytelling) --- */}
       <HistorySection />
+
+      {/* --- 2b. KEY FIGURES (Animated Stats) --- */}
+      <KeyFiguresSection />
 
       {/* --- 3. SERVICES SECTION (Interactive Grid) --- */}
       <ServicesSection />
@@ -299,6 +302,62 @@ function AmbienceSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+function KeyFiguresSection() {
+  return (
+    <section className="py-24 bg-[#F9F7F1]">
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Intro */}
+        <div className="text-center mb-16 max-w-2xl mx-auto">
+          <h2 className="text-sm font-sans font-bold uppercase tracking-[0.2em] text-[#D4AF37] mb-4">
+            NOTRE PARCOURS EN CHIFFRES
+          </h2>
+          <p className="font-serif text-xl md:text-2xl text-gray-800 italic leading-relaxed">
+            &ldquo;Derrière chaque chiffre se cache une histoire, une rencontre et une passion intacte pour la gastronomie. Voici un aperçu de notre aventure à vos côtés.&rdquo;
+          </p>
+        </div>
+
+        {/* Counters */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center relative">
+          <div className="hidden md:block absolute left-1/3 top-0 bottom-0 w-[1px] bg-gray-200"></div>
+          <div className="hidden md:block absolute right-1/3 top-0 bottom-0 w-[1px] bg-gray-200"></div>
+
+          <Counter end={60} label="Réalisations Culinaires" />
+          <Counter end={430} suffix="+" label="Convives Régalés" />
+          <Counter end={6} label="Événements Publics d'Exception" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Counter({ end, suffix = "", label }: { end: number, suffix?: string, label: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-20%" });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (isInView) {
+      const controls = animate(0, end, {
+        duration: 2.5,
+        ease: "circOut",
+        onUpdate: (latest) => setCount(Math.floor(latest))
+      });
+      return controls.stop;
+    }
+  }, [isInView, end]);
+
+  return (
+    <div ref={ref} className="text-center p-4">
+      <p className="text-6xl md:text-7xl font-serif text-black mb-2">
+        {count}{suffix}
+      </p>
+      <p className="text-gray-500 uppercase tracking-widest text-xs md:text-sm">
+        {label}
+      </p>
+    </div>
   );
 }
 
