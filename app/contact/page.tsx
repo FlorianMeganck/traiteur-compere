@@ -51,10 +51,59 @@ export default function Contact() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+
+        if (name === "Tel") {
+            // Keep only numbers
+            let cleanVal = value.replace(/\D/g, "");
+
+            // Determine Max Length
+            let maxLength = 9; // Default (Fixed)
+            if (/^(046|047|048|049)/.test(cleanVal)) {
+                maxLength = 10; // Mobile
+            }
+
+            // Hard Stop at Max Length
+            if (cleanVal.length > maxLength) {
+                cleanVal = cleanVal.slice(0, maxLength);
+            }
+
+            // Formatting
+            let formattedVal = cleanVal;
+            if (maxLength === 10) {
+                // Mobile: 0470 12 34 56
+                if (cleanVal.length > 4) {
+                    formattedVal = cleanVal.slice(0, 4) + " " + cleanVal.slice(4);
+                }
+                if (cleanVal.length > 6) {
+                    formattedVal = formattedVal.slice(0, 7) + " " + cleanVal.slice(6);
+                }
+                if (cleanVal.length > 8) {
+                    formattedVal = formattedVal.slice(0, 10) + " " + cleanVal.slice(8);
+                }
+            } else {
+                // Fixed (9 digits). Pattern "02 123 45 67" (2-3-2-2) or "04 123 45 67".
+                if (cleanVal.length > 2) {
+                    formattedVal = cleanVal.slice(0, 2) + " " + cleanVal.slice(2);
+                }
+                if (cleanVal.length > 5) {
+                    formattedVal = formattedVal.slice(0, 6) + " " + cleanVal.slice(5);
+                }
+                if (cleanVal.length > 7) {
+                    formattedVal = formattedVal.slice(0, 9) + " " + cleanVal.slice(7);
+                }
+            }
+
+            setFormData(prev => ({ ...prev, [name]: formattedVal }));
+
+            // Clear error if valid (or at least changed)
+            setErrors(prev => ({ ...prev, [name]: "" }));
+            return;
+        }
+
         setFormData(prev => ({ ...prev, [name]: value }));
 
         // Clear error when user types
-        if (name === "Mail" || name === "Tel") {
+        if (name === "Mail") {
             setErrors(prev => ({ ...prev, [name]: "" }));
         }
     };
