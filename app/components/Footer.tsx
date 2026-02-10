@@ -29,10 +29,10 @@ export default function Footer() {
                                 <MailIcon className="w-5 h-5 text-[#D4AF37]" />
                                 <span className="group-hover:translate-x-1 transition-transform duration-300">comperejeanpaul@gmail.com</span>
                             </a>
-                            <div className="flex items-center gap-3">
+                            <a href="https://www.google.com/maps?q=Saint-Georges-sur-Meuse" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
                                 <MapPinIcon className="w-5 h-5 text-[#D4AF37]" />
-                                <span>Région de Liège & Seraing</span>
-                            </div>
+                                <span className="group-hover:translate-x-1 transition-transform duration-300">Saint-Georges-sur-Meuse</span>
+                            </a>
                         </div>
                     </div>
 
