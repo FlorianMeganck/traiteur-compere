@@ -10,7 +10,8 @@ export default function Contact() {
         Mail: "",
         Tel: "",
         Type_Evenement: "Mariage",
-        Date: ""
+        Date: "",
+        Souhaite_etre_recontacte: "Non" // Default to Non (unchecked, but we'll use checked state for UI, value for submit)
     });
 
     const [errors, setErrors] = useState({
@@ -50,7 +51,13 @@ export default function Contact() {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+        const { name, value, type } = e.target;
+        const checked = (e.target as HTMLInputElement).checked;
+
+        if (type === "checkbox") {
+            setFormData(prev => ({ ...prev, [name]: checked ? "Oui" : "Non" }));
+            return;
+        }
 
         if (name === "Tel") {
             // Keep only numbers
@@ -255,6 +262,21 @@ export default function Contact() {
                             </div>
                         </div>
 
+                        <div className="flex items-center gap-3">
+                            <input
+                                type="checkbox"
+                                name="Souhaite_etre_recontacte"
+                                id="Souhaite_etre_recontacte"
+                                value="Oui"
+                                checked={formData.Souhaite_etre_recontacte === "Oui"}
+                                onChange={handleChange}
+                                className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                            />
+                            <label htmlFor="Souhaite_etre_recontacte" className="text-gray-900 font-medium cursor-pointer select-none">
+                                Je souhaite être recontacté pour discuter de mon devis.
+                            </label>
+                        </div>
+
                         <button
                             type="submit"
                             className="w-full bg-black text-white py-4 uppercase tracking-widest text-sm font-bold hover:bg-primary transition-colors duration-300 mt-8"
@@ -262,8 +284,8 @@ export default function Contact() {
                             Envoyer la demande
                         </button>
                     </form>
-                </div>
-            </div>
-        </main>
+                </div >
+            </div >
+        </main >
     );
 }
