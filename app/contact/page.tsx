@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Contact() {
+    const router = useRouter();
+    const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
     const [formData, setFormData] = useState({
         Nom: "",
         Prenom: "",
@@ -115,7 +118,7 @@ export default function Contact() {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const newErrors = { Mail: "", Tel: "" };
         let isValid = true;
@@ -134,7 +137,40 @@ export default function Contact() {
         setErrors(newErrors);
 
         if (isValid) {
-            e.currentTarget.submit();
+            setStatus("submitting");
+
+            try {
+                const response = await fetch("https://formspree.io/f/xvzbpbjd", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json"
+                    },
+                    body: new FormData(e.currentTarget)
+                });
+
+                if (response.ok) {
+                    setStatus("success");
+                    setFormData({
+                        Nom: "",
+                        Prenom: "",
+                        Societe: "Non",
+                        Mail: "",
+                        Tel: "",
+                        Type_Evenement: "Mariage",
+                        Date: "",
+                        Souhaite_etre_recontacte: "Non"
+                    });
+
+                    // Redirect after 3 seconds
+                    setTimeout(() => {
+                        router.push("/");
+                    }, 3000);
+                } else {
+                    setStatus("error");
+                }
+            } catch (error) {
+                setStatus("error");
+            }
         }
     };
 
@@ -149,143 +185,167 @@ export default function Contact() {
                         </p>
                     </header>
 
-                    <form action="https://formspree.io/f/xvzbpbjd" method="POST" className="space-y-6" onSubmit={handleSubmit} noValidate>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Nom</label>
-                                <input
-                                    type="text"
-                                    name="Nom"
-                                    required
-                                    value={formData.Nom}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
-                                    placeholder="Votre nom"
-                                />
+                    {status === "success" ? (
+                        <div className="text-center py-12 space-y-6 animate-fade-in">
+                            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Prénom</label>
-                                <input
-                                    type="text"
-                                    name="Prenom"
-                                    required
-                                    value={formData.Prenom}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
-                                    placeholder="Votre prénom"
-                                />
-                            </div>
+                            <h2 className="text-2xl font-serif text-gray-900">Merci !</h2>
+                            <p className="text-gray-600 text-lg max-w-md mx-auto">
+                                Votre demande a bien été envoyée. Nous vous recontacterons très vite.
+                            </p>
+                            <p className="text-sm text-gray-400 mt-8">
+                                Redirection vers l'accueil dans quelques instants...
+                            </p>
                         </div>
+                    ) : (
+                        <form onSubmit={handleSubmit} noValidate className="space-y-6">
+                            {status === "error" && (
+                                <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded text-center">
+                                    Une erreur est survenue lors de l'envoi. Veuillez réessayer.
+                                </div>
+                            )}
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Société ?</label>
-                            <div className="flex gap-6 pt-1">
-                                <label className="flex items-center gap-2 cursor-pointer">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Nom</label>
                                     <input
-                                        type="radio"
-                                        name="Societe"
-                                        value="Oui"
-                                        checked={formData.Societe === "Oui"}
+                                        type="text"
+                                        name="Nom"
+                                        required
+                                        value={formData.Nom}
                                         onChange={handleChange}
-                                        className="text-primary focus:ring-primary"
+                                        className="w-full p-3 border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                                        placeholder="Votre nom"
                                     />
-                                    <span className="text-gray-600">Oui</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Prénom</label>
                                     <input
-                                        type="radio"
-                                        name="Societe"
-                                        value="Non"
-                                        checked={formData.Societe === "Non"}
+                                        type="text"
+                                        name="Prenom"
+                                        required
+                                        value={formData.Prenom}
                                         onChange={handleChange}
-                                        className="text-primary focus:ring-primary"
+                                        className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                                        placeholder="Votre prénom"
                                     />
-                                    <span className="text-gray-600">Non</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Société ?</label>
+                                <div className="flex gap-6 pt-1">
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="Societe"
+                                            value="Oui"
+                                            checked={formData.Societe === "Oui"}
+                                            onChange={handleChange}
+                                            className="text-primary focus:ring-primary"
+                                        />
+                                        <span className="text-gray-600">Oui</span>
+                                    </label>
+                                    <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="Societe"
+                                            value="Non"
+                                            checked={formData.Societe === "Non"}
+                                            onChange={handleChange}
+                                            className="text-primary focus:ring-primary"
+                                        />
+                                        <span className="text-gray-600">Non</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Email</label>
+                                    <input
+                                        type="email"
+                                        name="Mail"
+                                        required
+                                        value={formData.Mail}
+                                        onChange={handleChange}
+                                        className={`w-full p-3 border ${errors.Mail ? "border-red-500" : "border-gray-300"} focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors`}
+                                        placeholder="exemple@email.com"
+                                    />
+                                    {errors.Mail && <p className="text-red-500 text-sm">{errors.Mail}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Téléphone</label>
+                                    <input
+                                        type="tel"
+                                        name="Tel"
+                                        required
+                                        value={formData.Tel}
+                                        onChange={handleChange}
+                                        className={`w-full p-3 border ${errors.Tel ? "border-red-500" : "border-gray-300"} focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors`}
+                                        placeholder="0470 12 34 56"
+                                    />
+                                    {errors.Tel && <p className="text-red-500 text-sm">{errors.Tel}</p>}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Type d'événement</label>
+                                    <select
+                                        name="Type_Evenement"
+                                        value={formData.Type_Evenement}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 bg-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                                    >
+                                        <option value="Mariage">Mariage</option>
+                                        <option value="Banquet">Banquet</option>
+                                        <option value="Entreprise">Entreprise</option>
+                                        <option value="Autre">Autre</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Date</label>
+                                    <input
+                                        type="date"
+                                        name="Date"
+                                        required
+                                        value={formData.Date}
+                                        onChange={handleChange}
+                                        className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    name="Souhaite_etre_recontacte"
+                                    id="Souhaite_etre_recontacte"
+                                    value="Oui"
+                                    checked={formData.Souhaite_etre_recontacte === "Oui"}
+                                    onChange={handleChange}
+                                    className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+                                />
+                                <label htmlFor="Souhaite_etre_recontacte" className="text-gray-900 font-medium cursor-pointer select-none">
+                                    Je souhaite être recontacté pour discuter de mon devis.
                                 </label>
                             </div>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Email</label>
-                                <input
-                                    type="email"
-                                    name="Mail"
-                                    required
-                                    value={formData.Mail}
-                                    onChange={handleChange}
-                                    className={`w-full p-3 border ${errors.Mail ? "border-red-500" : "border-gray-300"} focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors`}
-                                    placeholder="exemple@email.com"
-                                />
-                                {errors.Mail && <p className="text-red-500 text-sm">{errors.Mail}</p>}
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Téléphone</label>
-                                <input
-                                    type="tel"
-                                    name="Tel"
-                                    required
-                                    value={formData.Tel}
-                                    onChange={handleChange}
-                                    className={`w-full p-3 border ${errors.Tel ? "border-red-500" : "border-gray-300"} focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors`}
-                                    placeholder="0470 12 34 56"
-                                />
-                                {errors.Tel && <p className="text-red-500 text-sm">{errors.Tel}</p>}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Type d'événement</label>
-                                <select
-                                    name="Type_Evenement"
-                                    value={formData.Type_Evenement}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border border-gray-300 bg-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
-                                >
-                                    <option value="Mariage">Mariage</option>
-                                    <option value="Banquet">Banquet</option>
-                                    <option value="Entreprise">Entreprise</option>
-                                    <option value="Autre">Autre</option>
-                                </select>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Date</label>
-                                <input
-                                    type="date"
-                                    name="Date"
-                                    required
-                                    value={formData.Date}
-                                    onChange={handleChange}
-                                    className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="checkbox"
-                                name="Souhaite_etre_recontacte"
-                                id="Souhaite_etre_recontacte"
-                                value="Oui"
-                                checked={formData.Souhaite_etre_recontacte === "Oui"}
-                                onChange={handleChange}
-                                className="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
-                            />
-                            <label htmlFor="Souhaite_etre_recontacte" className="text-gray-900 font-medium cursor-pointer select-none">
-                                Je souhaite être recontacté pour discuter de mon devis.
-                            </label>
-                        </div>
-
-                        <button
-                            type="submit"
-                            className="w-full bg-black text-white py-4 uppercase tracking-widest text-sm font-bold hover:bg-primary transition-colors duration-300 mt-8"
-                        >
-                            Envoyer la demande
-                        </button>
-                    </form>
-                </div >
-            </div >
-        </main >
+                            <button
+                                type="submit"
+                                disabled={status === "submitting"}
+                                className={`w-full bg-black text-white py-4 uppercase tracking-widest text-sm font-bold hover:bg-primary transition-colors duration-300 mt-8 ${status === "submitting" ? "opacity-75 cursor-not-allowed" : ""}`}
+                            >
+                                {status === "submitting" ? "Envoi en cours..." : "Envoyer la demande"}
+                            </button>
+                        </form>
+                    )}
+                </div>
+            </div>
+        </main>
     );
 }
