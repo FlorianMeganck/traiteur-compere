@@ -175,7 +175,7 @@ export default function Contact() {
     };
 
     return (
-        <main className="min-h-screen pt-24 pb-12 bg-gray-50">
+        <main className="min-h-screen pt-32 pb-12 bg-gray-50">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="bg-white shadow-xl p-8 md:p-12 rounded-sm border-t-4 border-primary">
                     <header className="text-center mb-12">

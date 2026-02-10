@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function About() {
     return (
-        <main className="min-h-screen pt-24 pb-12">
+        <main className="min-h-screen pt-32 pb-12">
             <div className="max-w-7xl mx-auto px-6">
                 <header className="text-center mb-16">
                     <h1 className="text-5xl font-serif text-black mb-4">À Propos</h1>

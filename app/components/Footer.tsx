@@ -41,9 +41,8 @@ export default function Footer() {
                         <h3 className="font-serif text-white text-lg tracking-widest uppercase">Navigation</h3>
                         <div className="flex flex-col gap-3 text-sm">
                             <FooterLink href="/" label="Accueil" />
+                            <FooterLink href="/about" label="À Propos" />
                             <FooterLink href="/services" label="Services" />
-                            {/* Assuming Realizations is part of services or a future page, keeping link active or generic for now */}
-                            <FooterLink href="/services" label="Réalisations" />
                             <FooterLink href="/contact" label="Contact" />
                         </div>
                     </div>
@@ -63,7 +62,7 @@ export default function Footer() {
                 {/* Bottom Bar */}
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-xs font-light">
-                        &copy; 2024 Traiteur Compère. Tous droits réservés.
+                        &copy; 2026 Traiteur Compère. Tous droits réservés.
                     </p>
                     <div className="flex gap-6">
                         <SocialLink

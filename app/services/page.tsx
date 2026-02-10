@@ -5,7 +5,7 @@ import { motion, Variants } from "framer-motion";
 
 export default function Services() {
     return (
-        <main className="min-h-screen pt-24 pb-12">
+        <main className="min-h-screen pt-32 pb-12">
             <div className="max-w-7xl mx-auto px-6">
                 <motion.header
                     className="text-center mb-16"
