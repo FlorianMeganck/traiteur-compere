@@ -18,19 +18,23 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Chameleon Logic
-    // If Home ("/") AND Scroll < 50 => Transparent
-    // Else => White
+    // --- LOGIC ---
+    // 1. Desktop / Base Logic
     const isHome = pathname === "/";
     const isTransparent = isHome && !scrolled;
 
-    // Derived Colors
-    // If Transparent => White Elements
-    // Else => Black Elements
-    // EXCEPT: When Mobile Menu is OPEN, Toggle Button must be WHITE (on black overlay)
-    const textColor = isTransparent ? "text-white" : "text-black";
-    const burgerColor = isMenuOpen || isTransparent ? "bg-white" : "bg-black";
-    const logoClass = isTransparent ? "text-white" : "text-black"; // SVG uses currentColor
+    // 2. Element Colors
+    // If Transparent => White
+    // Else => Black
+    const desktopTextColor = isTransparent ? "text-white" : "text-black";
+    const desktopLogoColor = isTransparent ? "text-white" : "text-black";
+    const hamburgerColor = isTransparent ? "bg-white" : "bg-black";
+
+    // 3. Mobile Overlay Logic (Override)
+    // When Menu is OPEN, everything visible on top of black overlay MUST be WHITE.
+    // This includes Logo and Hamburger Button.
+    const finalLogoColor = isMenuOpen ? "text-white" : desktopLogoColor;
+    const finalHamburgerColor = isMenuOpen ? "bg-white" : hamburgerColor;
 
     useEffect(() => {
         const handleScroll = () => {
@@ -54,22 +58,31 @@ export default function Navbar() {
 
     return (
         <nav
-            className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
+            className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
                 }`}
         >
+            {/* 
+               background logic: 
+               - transparent => transparent
+               - NOT transparent => white
+               - BUT if Menu is Open => transparent (because overlay is black/95, we don't want white bar on top)
+               Actually, usually the overlay is fixed inset-0 z-40, and navbar is z-50.
+               If navbar is white z-50, it covers the top of the black overlay.
+               Let's make navbar transparent if menu is open, so black overlay shines through.
+            */}
+
             <div className="w-full max-w-7xl mx-auto px-6 flex justify-between items-center">
 
                 {/* LOGO */}
-                <Link href="/" className={`relative z-50 transition-colors duration-500 ${logoClass}`}>
+                <Link href="/" className={`relative z-50 transition-colors duration-500 ${finalLogoColor}`}>
                     <Logo className="h-16 w-auto" />
                 </Link>
 
                 {/* DESKTOP MENU (Hidden on Mobile) */}
                 <div className="hidden md:flex items-center gap-12">
                     <div className="flex items-center gap-8">
-
                         {NAV_LINKS.map((link) => (
-                            <NavLink key={link.href} href={link.href} label={link.label} textColor={textColor} />
+                            <NavLink key={link.href} href={link.href} label={link.label} textColor={desktopTextColor} />
                         ))}
                     </div>
 
@@ -80,12 +93,12 @@ export default function Navbar() {
                         <SocialLink
                             href="https://www.facebook.com/profile.php?id=61582940090708"
                             icon={<FacebookIcon />}
-                            className={textColor}
+                            className={desktopTextColor}
                         />
                         <SocialLink
                             href="https://www.instagram.com/traiteurcompere8/"
                             icon={<InstagramIcon />}
-                            className={textColor}
+                            className={desktopTextColor}
                         />
                     </div>
                 </div>
@@ -99,17 +112,17 @@ export default function Navbar() {
                         {/* Top Line */}
                         <motion.span
                             animate={isMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${burgerColor}`}
+                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
                         />
                         {/* Middle Line */}
                         <motion.span
                             animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${burgerColor}`}
+                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
                         />
                         {/* Bottom Line */}
                         <motion.span
                             animate={isMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${burgerColor}`}
+                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
                         />
                     </button>
                 </div>
@@ -140,12 +153,12 @@ export default function Navbar() {
                             {/* Mobile Socials */}
                             <div className="flex items-center gap-8">
                                 <SocialLink
-                                    href="https://www.facebook.com/profile.php?id=100057328099329"
+                                    href="https://www.facebook.com/profile.php?id=61582940090708"
                                     icon={<FacebookIcon size={32} />}
                                     className="text-white"
                                 />
                                 <SocialLink
-                                    href="https://www.instagram.com"
+                                    href="https://www.instagram.com/traiteurcompere8/"
                                     icon={<InstagramIcon size={32} />}
                                     className="text-white"
                                 />
