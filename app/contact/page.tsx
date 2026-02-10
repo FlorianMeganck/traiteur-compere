@@ -22,12 +22,31 @@ export default function Contact() {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     };
 
-    const validatePhone = (phone: string) => {
+    const getPhoneError = (phone: string) => {
         // Remove spaces, dots, slashes for checking
         const cleanPhone = phone.replace(/[\s./]/g, "");
-        // Check if it looks like a Belgian number (starts with 0, 9 or 10 digits)
-        // 04xx (GSM) is 10 digits. 02, 03, 09 (Landlines) are 9 digits.
-        return /^(0[0-9]{8,9})$/.test(cleanPhone);
+
+        // Empty check (although required attribute handles this, good to be safe)
+        if (!cleanPhone) return "Le numéro de téléphone est requis.";
+
+        // Check if starts with 0
+        if (!cleanPhone.startsWith("0")) return "Le numéro doit commencer par 0.";
+
+        // Check for Mobile (starts with 046, 047, 048, 049)
+        if (/^(046|047|048|049)/.test(cleanPhone)) {
+            if (cleanPhone.length !== 10) {
+                return "Un GSM doit contenir 10 chiffres (ex: 0470...).";
+            }
+            return ""; // Valid Mobile
+        }
+
+        // Check for Fixed (everything else likely, including 04x where x != 6,7,8,9)
+        // Standard BE fixed lines are 9 digits.
+        if (cleanPhone.length !== 9) {
+            return "Un numéro fixe doit contenir 9 chiffres (ex: 04 336... ou 02...).";
+        }
+
+        return ""; // Valid Fixed
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -50,8 +69,9 @@ export default function Contact() {
             isValid = false;
         }
 
-        if (!validatePhone(formData.Tel)) {
-            newErrors.Tel = "Veuillez entrer un numéro belge valide (ex: 0470 12 34 56).";
+        const phoneError = getPhoneError(formData.Tel);
+        if (phoneError) {
+            newErrors.Tel = phoneError;
             isValid = false;
         }
 
