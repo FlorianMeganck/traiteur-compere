@@ -7,62 +7,49 @@ import { motion, useScroll, useTransform, useInView } from "framer-motion";
 
 export default function Services() {
     return (
-        <main className="bg-white text-gray-800 font-sans pt-32 selection:bg-[#D4AF37] selection:text-white">
-            {/* Header */}
-            <header className="text-center mb-24 px-6">
+        <main className="bg-white text-gray-900 font-sans selection:bg-[#D4AF37] selection:text-white">
+
+            {/* Header: Serif, Very Large, Centered, Pt-40 */}
+            <header className="pt-40 pb-20 text-center px-6">
                 <motion.h1
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8 }}
-                    className="text-4xl md:text-5xl font-serif text-black tracking-wide"
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="text-5xl md:text-7xl font-serif text-black tracking-wide"
                 >
-                    Nos Prestations
+                    NOS SERVICES
                 </motion.h1>
-                <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: 60 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
-                    className="w-[1px] bg-gray-300 mx-auto my-8"
-                />
-                <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
-                    className="text-gray-500 font-light text-lg md:text-xl max-w-2xl mx-auto italic"
-                >
-                    &ldquo;De l&apos;intimité d&apos;un dîner à la grandeur d&apos;une réception, nous créons l&apos;événement qui vous ressemble.&rdquo;
-                </motion.p>
             </header>
 
-            {/* Main Service Grid */}
-            <section className="px-6 mb-32 max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 min-h-[60vh]">
-                    <ServiceColumn
+            {/* Main Service Grid: Gallery Style */}
+            <section className="px-6 pb-40 max-w-7xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
+                    <GalleryCard
                         title="Mariage"
                         image="/images/wedding.png"
-                        desc="L'art de célébrer l'amour avec élégance."
-                        delay={0}
+                        subtitle="L'émotion du grand jour"
                         anchor="mariage"
+                        delay={0.1}
                     />
-                    <ServiceColumn
+                    <GalleryCard
                         title="Entreprise"
                         image="/images/corporate.png"
-                        desc="Des événements professionnels qui marquent les esprits."
-                        delay={0.2}
+                        subtitle="L'excellence professionnelle"
                         anchor="entreprise"
+                        delay={0.2}
                     />
-                    <ServiceColumn
+                    <GalleryCard
                         title="Particulier"
-                        image="/images/banquet.png"
-                        desc="Sublimez vos fêtes de famille et anniversaires."
-                        delay={0.4}
+                        image="/images/banquet.png" // using banquet for particulier
+                        subtitle="L'art de recevoir"
                         anchor="particulier"
+                        delay={0.3}
                     />
                 </div>
             </section>
 
-            {/* Detailed Sections */}
-            <div className="flex flex-col gap-0">
+            {/* Detailed Sections (Retained from previous version) */}
+            <div className="flex flex-col gap-0 pb-32">
                 <DetailSection
                     id="mariage"
                     title="Mariages d'Exception"
@@ -105,7 +92,7 @@ export default function Services() {
             </div>
 
             {/* Call to Action */}
-            <section className="bg-neutral-50 py-32 text-center px-6 mt-12">
+            <section className="bg-neutral-50 py-32 text-center px-6">
                 <div className="max-w-2xl mx-auto space-y-8">
                     <h2 className="text-3xl font-serif text-black">Un projet particulier ?</h2>
                     <p className="text-gray-500 font-light">
@@ -120,40 +107,44 @@ export default function Services() {
     );
 }
 
-function ServiceColumn({ title, image, desc, delay, anchor }: { title: string, image: string, desc: string, delay: number, anchor: string }) {
+function GalleryCard({ title, image, subtitle, anchor, delay }: { title: string, image: string, subtitle: string, anchor: string, delay: number }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay }}
+            transition={{ duration: 0.8, delay, ease: "easeOut" }}
             viewport={{ once: true }}
-            className="group cursor-pointer flex flex-col items-center h-full"
+            className="group cursor-pointer flex flex-col items-center"
         >
-            <Link href={`#${anchor}`} className="flex flex-col items-center w-full h-full">
-                {/* Image Container */}
-                <div className="w-full aspect-[2/3] relative overflow-hidden mb-8">
-                    <motion.div
-                        className="w-full h-full relative"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.7, ease: "easeOut" }}
-                    >
-                        <Image
-                            src={image}
-                            alt={title}
-                            fill
-                            className="object-cover"
-                        />
-                    </motion.div>
+            <Link href={`#${anchor}`} className="w-full flex flex-col items-center">
+                {/* Image: Aspect 4/5, Shadow, Hover Translate Y -5px */}
+                <motion.div
+                    className="w-full aspect-[4/5] relative mb-[20px] shadow-sm"
+                    whileHover={{ y: -5 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                    <Image
+                        src={image}
+                        alt={title}
+                        fill
+                        className="object-cover"
+                    />
+                </motion.div>
+
+                {/* Title: Sans-serif, small, wide tracking */}
+                <h2 className="font-sans text-sm uppercase tracking-[0.3em] text-black mb-[20px]">
+                    {title}
+                </h2>
+
+                {/* Vertical Line: 1px wide, h-10 -> h-20, Grey -> Gold */}
+                <div className="w-[1px] h-10 bg-gray-200 group-hover:h-20 group-hover:bg-[#D4AF37] transition-all duration-500 ease-in-out"></div>
+
+                {/* Subtitle / Description: Fade In */}
+                <div className="h-6 mt-4 overflow-hidden flex items-center justify-center">
+                    <p className="text-gray-500 text-xs font-light italic opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
+                        {subtitle}
+                    </p>
                 </div>
-
-                {/* Title */}
-                <h2 className="text-xl md:text-2xl font-serif tracking-widest uppercase mb-4 group-hover:text-[#D4AF37] transition-colors">{title}</h2>
-
-                {/* Vertical Line Interaction */}
-                <div className="w-[1px] h-12 bg-gray-200 group-hover:h-24 group-hover:bg-[#D4AF37] transition-all duration-500 ease-in-out mb-6"></div>
-
-                {/* Description */}
-                <p className="text-center text-gray-500 font-light text-sm max-w-xs">{desc}</p>
             </Link>
         </motion.div>
     );
@@ -177,7 +168,7 @@ function DetailSection({ id, title, image, desc, list, reverse }: { id: string, 
                             src={image}
                             alt={title}
                             fill
-                            className="object-cover"
+                            className="object-cover shadow-md"
                         />
                     </motion.div>
 
