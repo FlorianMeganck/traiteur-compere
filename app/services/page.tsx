@@ -135,16 +135,11 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
     const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
 
     // Parallax Effects
-    const yBg = useTransform(scrollYProgress, [0, 1], [0, 100]); // Background moves slower (down)
-    const yDecor = useTransform(scrollYProgress, [0, 1], [0, -150]); // Decor floats upwards
+    const yBg = useTransform(scrollYProgress, [0, 1], [0, 80]);
+    const yDecor = useTransform(scrollYProgress, [0, 1], [0, -80]);
 
     // Organic Shapes Configuration
-    // Using arbitrary values for deep, organic curves
-    const bgShapeClass = reverse
-        ? "rounded-l-[120px] rounded-bg-organic-left" // Custom class concept
-        : "rounded-r-[120px] rounded-bg-organic-right";
-
-    // Asymmetric organic radii inline for simplicity and control
+    // Slightly darker beige #F2EFE9 for better visibility
     const borderRadiusStyle = reverse
         ? { borderTopLeftRadius: '200px', borderBottomLeftRadius: '80px', borderTopRightRadius: '0', borderBottomRightRadius: '0' }
         : { borderTopRightRadius: '200px', borderBottomRightRadius: '80px', borderTopLeftRadius: '0', borderBottomLeftRadius: '0' };
@@ -153,25 +148,36 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
     let decorSrc = "";
     let decorClass = "";
 
+    // Positioning logic:
+    // If reverse (Text Right), decor usually looks good on Top Right or Bottom Left of text.
+    // If normal (Text Left), decor on Top Left or Bottom Right of text.
+
     if (decorType === 'flower') {
-        decorSrc = "https://images.unsplash.com/photo-1490750967868-58cb9bdda31c?q=80&w=600&auto=format&fit=crop"; // Flower/Peony
-        decorClass = "w-64 -bottom-20 -right-20 opacity-80 blur-[1px]";
+        // Mariage: Pres de l'intitulé (Near title). Title is top.
+        // Flower (Peony)
+        decorSrc = "https://images.unsplash.com/photo-1563241527-961f74f67d26?q=80&w=600&auto=format&fit=crop";
+        // Position: Top Right of text container, slightly floating over.
+        decorClass = "w-48 md:w-64 -top-20 -right-10 md:-right-20 opacity-90 rotate-12";
     } else if (decorType === 'herb') {
-        decorSrc = "https://images.unsplash.com/photo-1515276427842-f85802d514a2?q=80&w=600&auto=format&fit=crop"; // Rosemary/Herb
-        decorClass = "w-56 -top-20 -left-10 opacity-70";
+        // Particulier: Herb (Eucalyptus/Rosemary)
+        decorSrc = "https://images.unsplash.com/photo-1515276427842-f85802d514a2?q=80&w=600&auto=format&fit=crop";
+        // Position: Bottom Left of text container
+        decorClass = "w-40 md:w-56 -bottom-16 -left-10 md:-left-16 opacity-80 -rotate-12";
     } else {
-        // Geometric/Plant Structure
-        decorSrc = "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=600&auto=format&fit=crop"; // Monstera/Green
-        decorClass = "w-72 -top-12 -right-12 opacity-40 mix-blend-multiply";
+        // Entreprise: Geometric/Plant
+        decorSrc = "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?q=80&w=600&auto=format&fit=crop";
+        // Position: Top Left
+        decorClass = "w-48 md:w-64 -top-16 -left-10 md:-left-20 opacity-50 mix-blend-multiply";
     }
 
     return (
         <section ref={ref} className="relative py-32 w-full overflow-hidden">
 
             {/* A. TEXTURE LAYER (Organic Background) */}
+            {/* Added mix-blend-multiply to ensure it's visible on white, and darkened color slightly to #F2EFE9 */}
             <motion.div
                 style={{ y: yBg, ...borderRadiusStyle }}
-                className={`absolute top-0 bottom-0 bg-[#F9F7F1] w-[85%] md:w-[70%] -z-20 
+                className={`absolute top-0 bottom-0 bg-[#F2EFE9] w-[85%] md:w-[70%] -z-20 
                 ${reverse ? 'left-0' : 'right-0'}
                 transition-all duration-700 ease-out`}
             />
@@ -181,14 +187,15 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
 
                     {/* B. CONTENT EDITORIAL */}
                     <div className="w-full md:w-5/12 space-y-8 relative">
-                        {/* Floating Decor Element (Parallax) */}
+
+                        {/* Floating Decor Element (Parallax) - Now INSIDE the text column for relative positioning */}
                         <motion.div
                             style={{ y: yDecor }}
                             className={`absolute pointer-events-none z-0 ${decorClass} hidden md:block`}
                         >
                             <Image
                                 src={decorSrc}
-                                alt="Decor"
+                                alt="Decor Nature"
                                 width={400}
                                 height={400}
                                 className="object-contain"
@@ -200,9 +207,9 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8 }}
-                            className="relative z-10 bg-white/50 backdrop-blur-sm p-6 rounded-2xl md:bg-transparent md:backdrop-blur-none md:p-0"
+                            className="relative z-10"
                         >
-                            <h2 className="text-4xl md:text-5xl font-serif uppercase tracking-widest text-black">
+                            <h2 className="text-4xl md:text-5xl font-serif uppercase tracking-widest text-black relative inline-block">
                                 {title}
                             </h2>
 
@@ -217,7 +224,7 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                                 )}
                             </div>
 
-                            <p className="text-gray-600 font-sans font-light leading-relaxed text-lg mt-8">
+                            <p className="text-gray-600 font-sans font-light leading-relaxed text-lg mt-8 bg-white/60 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none rounded-lg p-2 md:p-0">
                                 {desc}
                             </p>
 
