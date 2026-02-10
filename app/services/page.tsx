@@ -32,11 +32,26 @@ export default function Services() {
                     &ldquo;Parce que chaque événement est unique, nous mettons notre savoir-faire au service de vos envies. Une cuisine généreuse, locale et faite maison.&rdquo;
                 </motion.p>
 
-                {/* Key Figures - Reused logic from Homepage but cleaner for this context */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center justify-center max-w-5xl mx-auto">
-                    <Counter end={60} label="Événements réussis" />
-                    <Counter end={430} suffix="+" label="Invités régalés" />
-                    <Counter end={6} label="Années de passion" />
+                {/* Values Section - Replacing Key Figures */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 justify-center max-w-6xl mx-auto mt-24">
+                    <ValueItem
+                        title="Fait Maison & Local"
+                        path="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+                        desc="Pas de secret : pour que ce soit bon, il faut de bons produits. Nous privilégions les producteurs de la région et la cuisine faite minute."
+                        delay={0.1}
+                    />
+                    <ValueItem
+                        title="Sur Mesure & Écoute"
+                        path="M9 11.75c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zm6 0c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86 2.36-1.05 4.23-2.98 5.21-5.37C11.07 8.33 14.05 10 17.42 10c.78 0 1.53-.09 2.25-.26.21 1.01.33 2.05.33 3.1 0 5.5-4.5 10-10 10z"
+                        desc="Un régime spécial ? Une envie particulière ? Nous ne vous imposons rien. Nous construisons le menu avec vous pour qu'il vous ressemble."
+                        delay={0.2}
+                    />
+                    <ValueItem
+                        title="Transparence Totale"
+                        path="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"
+                        desc="Pas de mauvaise surprise sur la facture. Nos devis sont clairs, détaillés et respectés. La confiance, c'est la base de notre métier."
+                        delay={0.3}
+                    />
                 </div>
             </section>
 
@@ -225,30 +240,24 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
     );
 }
 
-function Counter({ end, suffix = "", label }: { end: number, suffix?: string, label: string }) {
-    const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, margin: "-20%" });
-    const [count, setCount] = useState(0);
-
-    useEffect(() => {
-        if (isInView) {
-            const controls = animate(0, end, {
-                duration: 2.5,
-                ease: "circOut",
-                onUpdate: (latest) => setCount(Math.floor(latest))
-            });
-            return controls.stop;
-        }
-    }, [isInView, end]);
-
+function ValueItem({ title, desc, path, delay }: { title: string, desc: string, path: string, delay: number }) {
     return (
-        <div ref={ref} className="text-center p-4">
-            <p className="text-6xl md:text-7xl font-serif text-black mb-2">
-                {count}{suffix}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay }}
+            className="flex flex-col items-center px-4"
+        >
+            <div className="w-12 h-12 mb-6 text-[#D4AF37]">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
+                    <path d={path} />
+                </svg>
+            </div>
+            <h3 className="font-serif text-xl text-black mb-4 uppercase tracking-widest">{title}</h3>
+            <p className="text-gray-500 font-light text-sm leading-relaxed">
+                {desc}
             </p>
-            <p className="text-gray-400 uppercase tracking-widest text-xs md:text-sm">
-                {label}
-            </p>
-        </div>
+        </motion.div>
     );
 }
