@@ -78,12 +78,12 @@ export default function Navbar() {
                     {/* Desktop Socials */}
                     <div className="flex items-center gap-4">
                         <SocialLink
-                            href="https://www.facebook.com/profile.php?id=100057328099329"
+                            href="https://www.facebook.com/profile.php?id=61582940090708"
                             icon={<FacebookIcon />}
                             className={textColor}
                         />
                         <SocialLink
-                            href="https://www.instagram.com"
+                            href="https://www.instagram.com/traiteurcompere8/"
                             icon={<InstagramIcon />}
                             className={textColor}
                         />
