@@ -11,30 +11,43 @@ export default function Services() {
         <main className="bg-white text-gray-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-32 pb-20 overflow-hidden">
 
             {/* 1. INTRO & CHIFFRES */}
+            {/* 1. INTRO & CHIFFRES */}
             <section className="px-6 mb-32 max-w-7xl mx-auto text-center">
                 <motion.h1
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8 }}
-                    className="text-5xl md:text-7xl font-serif text-black uppercase tracking-widest mb-16"
+                    className="text-5xl md:text-7xl font-serif text-black uppercase tracking-widest mb-8"
                 >
-                    L&apos;Art de Recevoir
+                    CUISINER POUR VOUS
                 </motion.h1>
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                    className="text-gray-600 font-sans font-light text-lg max-w-2xl mx-auto mb-16 italic"
+                >
+                    &ldquo;Parce que chaque événement est unique, nous mettons notre savoir-faire au service de vos envies. Une cuisine généreuse, locale et faite maison.&rdquo;
+                </motion.p>
 
                 {/* Key Figures - Reused logic from Homepage but cleaner for this context */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center justify-center max-w-5xl mx-auto">
-                    <Counter end={60} label="Réalisations Culinaires" />
-                    <Counter end={430} suffix="+" label="Convives Régalés" />
-                    <Counter end={6} label="Événements d'Exception" />
+                    <Counter end={60} label="Événements réussis" />
+                    <Counter end={430} suffix="+" label="Invités régalés" />
+                    <Counter end={6} label="Années de passion" />
                 </div>
             </section>
 
             {/* 2. PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
+            {/* 2. PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
             <SectionService
-                title="Nos Particuliers"
-                quote="Du dîner entre amis au baptême, tout était parfait."
-                desc="Célébrez les moments qui comptent. Nous créons pour vous une atmosphère chaleureuse et gourmande, où chaque convive se sent privilégié."
+                title="VOS FÊTES DE FAMILLE"
+                quote="On a enfin pu profiter de notre fête sans passer la soirée en cuisine. Tout le monde s'est régalé !"
+                quoteAuthor="— Sophie & Marc"
+                desc="Un anniversaire, un baptême ou simplement un repas entre amis ? Nous nous occupons de tout pour que vous puissiez profiter de vos invités. Buffet froid, échoppes chaudes ou service à table : on s'adapte à l'ambiance que vous voulez donner."
+                ctaLabel="Voir les formules"
                 images={[
                     "https://images.unsplash.com/photo-1542332213-31f87348057f?q=80&w=800&auto=format&fit=crop", // Friendly dinner
                     "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=800&auto=format&fit=crop", // Buffet
@@ -46,10 +59,13 @@ export default function Services() {
             />
 
             {/* 3. ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
+            {/* 3. ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
             <SectionService
-                title="Nos Entreprises"
-                quote="L'image de notre société sublimée par votre service."
-                desc="Séminaires, lancements de produits ou galas : offrez une expérience culinaire à la hauteur de vos ambitions. Précision, élégance et efficacité."
+                title="VOS ÉVÉNEMENTS PRO"
+                quote="Ponctuel, discret et surtout très bon. Nos collaborateurs nous en parlent encore."
+                quoteAuthor="— Société Technifutur"
+                desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
+                ctaLabel="Demander un devis"
                 images={[
                     "https://images.unsplash.com/photo-1519671482538-518b78af94ea?q=80&w=800&auto=format&fit=crop", // Corporate vibe
                     "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop", // Serving
@@ -61,10 +77,13 @@ export default function Services() {
             />
 
             {/* 4. MARIAGES (Texte Gauche / Mosaïque Droite) */}
+            {/* 4. MARIAGES (Texte Gauche / Mosaïque Droite) */}
             <SectionService
-                title="Nos Mariages"
-                quote="Le plus beau jour de notre vie, orchestré avec magie."
-                desc="Nous écrivons avec vous le chapitre gourmand de votre union. De la pièce montée au vin d'honneur, vivez un conte de fées gustatif."
+                title="VOTRE MARIAGE"
+                quote="Jean-Paul a été à l'écoute de nos demandes du début à la fin. Le jour J, tout était parfait et délicieux."
+                quoteAuthor="— Julie & Thomas"
+                desc="Le repas est au cœur de cette journée spéciale. Nous prenons le temps de vous rencontrer pour construire un menu qui vous ressemble, en respectant votre budget et vos goûts. Pas de stress, on gère."
+                ctaLabel="En discuter ensemble"
                 images={[
                     "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop", // Wedding table
                     "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=800&auto=format&fit=crop", // Wedding detail
@@ -94,8 +113,8 @@ export default function Services() {
 
 // --- REUSABLE COMPONENTS ---
 
-function SectionService({ title, quote, desc, images, decorType, reverse }: {
-    title: string, quote: string, desc: string, images: string[], decorType: 'flower' | 'herb' | 'geometric', reverse: boolean
+function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir plus", images, decorType, reverse }: {
+    title: string, quote: string, quoteAuthor?: string, desc: string, ctaLabel?: string, images: string[], decorType: 'flower' | 'herb' | 'geometric', reverse: boolean
 }) {
     const ref = useRef(null);
     const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
@@ -137,6 +156,11 @@ function SectionService({ title, quote, desc, images, decorType, reverse }: {
                             <p className="font-serif italic text-gray-400 text-lg">
                                 &ldquo;{quote}&rdquo;
                             </p>
+                            {quoteAuthor && (
+                                <p className="font-sans text-xs uppercase tracking-widest text-gray-500 mt-2">
+                                    {quoteAuthor}
+                                </p>
+                            )}
                         </div>
 
                         <p className="text-gray-600 font-sans font-light leading-relaxed text-lg">
@@ -145,7 +169,7 @@ function SectionService({ title, quote, desc, images, decorType, reverse }: {
 
                         <div className="pt-4">
                             <Link href="/contact" className="group inline-flex items-center text-sm font-bold uppercase tracking-widest text-black">
-                                En savoir plus
+                                {ctaLabel}
                                 <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-[#D4AF37] w-full absolute bottom-0"></span>
                                 <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </Link>
