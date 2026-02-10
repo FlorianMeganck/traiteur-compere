@@ -2,97 +2,81 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef } from "react";
-import { motion, useScroll, useTransform, useInView } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
+import { motion, useScroll, useTransform, useInView, animate } from "framer-motion";
 
+// --- MAIN COMPONENT ---
 export default function Services() {
     return (
-        <main className="bg-white text-gray-900 font-sans selection:bg-[#D4AF37] selection:text-white">
+        <main className="bg-white text-gray-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-32 pb-20 overflow-hidden">
 
-            {/* Header: Serif, Very Large, Centered, Pt-40 */}
-            <header className="pt-40 pb-20 text-center px-6">
+            {/* 1. INTRO & CHIFFRES */}
+            <section className="px-6 mb-32 max-w-7xl mx-auto text-center">
                 <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, ease: "easeOut" }}
-                    className="text-5xl md:text-7xl font-serif text-black tracking-wide"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    className="text-5xl md:text-7xl font-serif text-black uppercase tracking-widest mb-16"
                 >
-                    NOS SERVICES
+                    L&apos;Art de Recevoir
                 </motion.h1>
-            </header>
 
-            {/* Main Service Grid: Gallery Style */}
-            <section className="px-6 pb-40 max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16">
-                    <GalleryCard
-                        title="Mariage"
-                        image="/images/wedding.png"
-                        subtitle="L'émotion du grand jour"
-                        anchor="mariage"
-                        delay={0.1}
-                    />
-                    <GalleryCard
-                        title="Entreprise"
-                        image="/images/corporate.png"
-                        subtitle="L'excellence professionnelle"
-                        anchor="entreprise"
-                        delay={0.2}
-                    />
-                    <GalleryCard
-                        title="Particulier"
-                        image="/images/banquet.png" // using banquet for particulier
-                        subtitle="L'art de recevoir"
-                        anchor="particulier"
-                        delay={0.3}
-                    />
+                {/* Key Figures - Reused logic from Homepage but cleaner for this context */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center justify-center max-w-5xl mx-auto">
+                    <Counter end={60} label="Réalisations Culinaires" />
+                    <Counter end={430} suffix="+" label="Convives Régalés" />
+                    <Counter end={6} label="Événements d'Exception" />
                 </div>
             </section>
 
-            {/* Detailed Sections (Retained from previous version) */}
-            <div className="flex flex-col gap-0 pb-32">
-                <DetailSection
-                    id="mariage"
-                    title="Mariages d'Exception"
-                    image="/images/wedding.png"
-                    desc="Parce que ce jour est unique, nous mettons tout en œuvre pour qu'il soit inoubliable. Du vin d'honneur au gâteau, chaque détail est pensé pour ravir vos convives et vous laisser profiter pleinement de l'instant."
-                    list={[
-                        "Vin d'honneur personnalisé",
-                        "Menus gastronomiques sur mesure",
-                        "Service en salle impeccable",
-                        "Ateliers culinaires live"
-                    ]}
-                    reverse={false}
-                />
-                <DetailSection
-                    id="entreprise"
-                    title="Événements Corporate"
-                    image="/images/corporate.png"
-                    desc="Impressionnez vos collaborateurs et clients avec une cuisine raffinée. Séminaires, lancements de produits ou fêtes de fin d'année, nous apportons une touche d'excellence à votre image de marque."
-                    list={[
-                        "Petits-déjeuners d'affaires",
-                        "Plateaux repas haut de gamme",
-                        "Cocktails dînatoires",
-                        "Gala de charité"
-                    ]}
-                    reverse={true}
-                />
-                <DetailSection
-                    id="particulier"
-                    title="Réceptions Privées"
-                    image="/images/banquet.png"
-                    desc="Anniversaires, communions, repas de famille... Nous transformons vos réunions en moments de partage gourmand et convivial, sans que vous ayez à vous soucier de l'organisation."
-                    list={[
-                        "Buffets froids et chauds",
-                        "Service à l'assiette",
-                        "Décoration de table soignée",
-                        "Adaptation aux régimes alimentaires"
-                    ]}
-                    reverse={false}
-                />
-            </div>
+            {/* 2. PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
+            <SectionService
+                title="Nos Particuliers"
+                quote="Du dîner entre amis au baptême, tout était parfait."
+                desc="Célébrez les moments qui comptent. Nous créons pour vous une atmosphère chaleureuse et gourmande, où chaque convive se sent privilégié."
+                images={[
+                    "https://images.unsplash.com/photo-1542332213-31f87348057f?q=80&w=800&auto=format&fit=crop", // Friendly dinner
+                    "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=800&auto=format&fit=crop", // Buffet
+                    "https://images.unsplash.com/photo-1570560258879-af7f8e1447ac?q=80&w=800&auto=format&fit=crop", // Cheers
+                    "https://images.unsplash.com/photo-1565538810643-b5bdb714032a?q=80&w=800&auto=format&fit=crop"  // Food detail
+                ]}
+                decorType="herb"
+                reverse={false}
+            />
 
-            {/* Call to Action */}
-            <section className="bg-neutral-50 py-32 text-center px-6">
+            {/* 3. ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
+            <SectionService
+                title="Nos Entreprises"
+                quote="L'image de notre société sublimée par votre service."
+                desc="Séminaires, lancements de produits ou galas : offrez une expérience culinaire à la hauteur de vos ambitions. Précision, élégance et efficacité."
+                images={[
+                    "https://images.unsplash.com/photo-1519671482538-518b78af94ea?q=80&w=800&auto=format&fit=crop", // Corporate vibe
+                    "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop", // Serving
+                    "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop", // Fine food
+                    "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop"  // Event hall
+                ]}
+                decorType="geometric"
+                reverse={true}
+            />
+
+            {/* 4. MARIAGES (Texte Gauche / Mosaïque Droite) */}
+            <SectionService
+                title="Nos Mariages"
+                quote="Le plus beau jour de notre vie, orchestré avec magie."
+                desc="Nous écrivons avec vous le chapitre gourmand de votre union. De la pièce montée au vin d'honneur, vivez un conte de fées gustatif."
+                images={[
+                    "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop", // Wedding table
+                    "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=800&auto=format&fit=crop", // Wedding detail
+                    "https://images.unsplash.com/photo-1520854221256-17451cc330e7?q=80&w=800&auto=format&fit=crop", // Cake/Dessert
+                    "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=800&auto=format&fit=crop"  // Bride/Couple
+                ]}
+                decorType="flower"
+                reverse={false}
+            />
+
+            {/* Call to Action Footer */}
+            <section className="bg-neutral-50 py-32 text-center px-6 mt-32">
                 <div className="max-w-2xl mx-auto space-y-8">
                     <h2 className="text-3xl font-serif text-black">Un projet particulier ?</h2>
                     <p className="text-gray-500 font-light">
@@ -103,100 +87,144 @@ export default function Services() {
                     </Link>
                 </div>
             </section>
+
         </main>
     );
 }
 
-function GalleryCard({ title, image, subtitle, anchor, delay }: { title: string, image: string, subtitle: string, anchor: string, delay: number }) {
+// --- REUSABLE COMPONENTS ---
+
+function SectionService({ title, quote, desc, images, decorType, reverse }: {
+    title: string, quote: string, desc: string, images: string[], decorType: 'flower' | 'herb' | 'geometric', reverse: boolean
+}) {
+    const ref = useRef(null);
+    const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+    const y = useTransform(scrollYProgress, [0, 1], [0, -50]); // Floating parallax for decor
+
+    // Decor Image Selection (Using Unsplash placeholders that look like decor or abstract shapes)
+    // In a real project, these would be local transparent PNGs.
+    const decorSrc =
+        decorType === 'flower' ? "https://images.unsplash.com/photo-1490750967868-58cb9bdda31c?q=80&w=400&auto=format&fit=crop" : // Flower
+            decorType === 'herb' ? "https://images.unsplash.com/photo-1515276427842-f85802d514a2?q=80&w=400&auto=format&fit=crop" : // Rosemary/Greenery
+                "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=400&auto=format&fit=crop"; // Abstract lines
+
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay, ease: "easeOut" }}
-            viewport={{ once: true }}
-            className="group cursor-pointer flex flex-col items-center"
-        >
-            <Link href={`#${anchor}`} className="w-full flex flex-col items-center">
-                {/* Image: Aspect 4/5, Shadow, Hover Translate Y -5px */}
-                <motion.div
-                    className="w-full aspect-[4/5] relative mb-[20px] shadow-sm"
-                    whileHover={{ y: -5 }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                >
-                    <Image
-                        src={image}
-                        alt={title}
-                        fill
-                        className="object-cover"
-                    />
-                </motion.div>
+        <section ref={ref} className="relative py-32 w-full overflow-hidden">
 
-                {/* Title: Sans-serif, small, wide tracking */}
-                <h2 className="font-sans text-sm uppercase tracking-[0.3em] text-black mb-[20px]">
-                    {title}
-                </h2>
+            {/* A. TEXTURE LAYER (Background Beige Block) */}
+            <div
+                className={`absolute top-0 bottom-0 bg-[#F9F7F1] w-[80%] md:w-[65%] -z-10 
+                ${reverse ? 'left-0 rounded-r-3xl' : 'right-0 rounded-l-3xl'}
+                transition-all duration-700 ease-out`}
+            />
 
-                {/* Vertical Line: 1px wide, h-10 -> h-20, Grey -> Gold */}
-                <div className="w-[1px] h-10 bg-gray-200 group-hover:h-20 group-hover:bg-[#D4AF37] transition-all duration-500 ease-in-out"></div>
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
+                <div className={`flex flex-col md:flex-row items-center gap-16 md:gap-24 ${reverse ? 'md:flex-row-reverse' : ''}`}>
 
-                {/* Subtitle / Description: Fade In */}
-                <div className="h-6 mt-4 overflow-hidden flex items-center justify-center">
-                    <p className="text-gray-500 text-xs font-light italic opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 ease-out">
-                        {subtitle}
-                    </p>
-                </div>
-            </Link>
-        </motion.div>
-    );
-}
-
-function DetailSection({ id, title, image, desc, list, reverse }: { id: string, title: string, image: string, desc: string, list: string[], reverse: boolean }) {
-    return (
-        <section id={id} className={`py-24 md:py-32 scroll-mt-24 ${reverse ? 'bg-neutral-50' : 'bg-white'}`}>
-            <div className="max-w-7xl mx-auto px-6">
-                <div className={`flex flex-col ${reverse ? 'md:flex-row-reverse' : 'md:flex-row'} gap-12 md:gap-24 items-center`}>
-
-                    {/* Image Side */}
+                    {/* B. CONTENT EDITORIAL */}
                     <motion.div
                         initial={{ opacity: 0, x: reverse ? 50 : -50 }}
                         whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
-                        viewport={{ once: true }}
-                        className="w-full md:w-1/2 aspect-[4/5] relative"
+                        className="w-full md:w-5/12 space-y-8"
                     >
-                        <Image
-                            src={image}
-                            alt={title}
-                            fill
-                            className="object-cover shadow-md"
-                        />
-                    </motion.div>
+                        <h2 className="text-4xl md:text-5xl font-serif uppercase tracking-widest text-black">
+                            {title}
+                        </h2>
 
-                    {/* Text Side */}
-                    <motion.div
-                        initial={{ opacity: 0, x: reverse ? -50 : 50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        viewport={{ once: true }}
-                        className="w-full md:w-1/2 space-y-8"
-                    >
-                        <h3 className="text-3xl md:text-4xl font-serif text-black">{title}</h3>
-                        <div className="w-16 h-[1px] bg-[#D4AF37]"></div>
-                        <p className="text-gray-600 leading-relaxed font-light text-lg">
+                        <div className="border-l border-gray-300 pl-6 py-2">
+                            <p className="font-serif italic text-gray-400 text-lg">
+                                &ldquo;{quote}&rdquo;
+                            </p>
+                        </div>
+
+                        <p className="text-gray-600 font-sans font-light leading-relaxed text-lg">
                             {desc}
                         </p>
-                        <ul className="space-y-4 pt-4">
-                            {list.map((item, idx) => (
-                                <li key={idx} className="flex items-center gap-4 text-gray-700 font-light">
-                                    <span className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full flex-shrink-0" />
-                                    {item}
-                                </li>
-                            ))}
-                        </ul>
+
+                        <div className="pt-4">
+                            <Link href="/contact" className="group inline-flex items-center text-sm font-bold uppercase tracking-widest text-black">
+                                En savoir plus
+                                <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-[#D4AF37] w-full absolute bottom-0"></span>
+                                <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                            </Link>
+                        </div>
                     </motion.div>
+
+                    {/* C. MOSAIC GRID (2x2) */}
+                    <div className="w-full md:w-7/12 relative">
+                        <div className="grid grid-cols-2 gap-4 md:gap-6">
+                            {images.map((img, idx) => (
+                                <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.6, delay: 0.2 + (idx * 0.1) }}
+                                    className={`relative aspect-[3/4] overflow-hidden shadow-2xl shadow-neutral-200
+                                        ${idx === 1 ? 'mt-8 md:mt-12' : ''} 
+                                        ${idx === 2 ? '-mt-8 md:-mt-12' : ''}
+                                    `}
+                                >
+                                    <Image
+                                        src={img}
+                                        alt={`${title} ${idx + 1}`}
+                                        fill
+                                        className="object-cover hover:scale-105 transition-transform duration-700"
+                                    />
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        {/* D. FLOATING DECOR */}
+                        <motion.div
+                            style={{ y }}
+                            className={`absolute -z-10 w-48 md:w-64 opacity-20 pointer-events-none grayscale mix-blend-multiply
+                                ${reverse ? '-right-12 -bottom-12' : '-left-12 -top-12'}
+                            `}
+                        >
+                            <Image
+                                src={decorSrc}
+                                alt="Decor"
+                                width={300}
+                                height={300}
+                                className="mask-image-gradient" // Concept class, would need CSS or rounded-full
+                                style={{ borderRadius: '50%' }}
+                            />
+                        </motion.div>
+                    </div>
 
                 </div>
             </div>
         </section>
+    );
+}
+
+function Counter({ end, suffix = "", label }: { end: number, suffix?: string, label: string }) {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true, margin: "-20%" });
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        if (isInView) {
+            const controls = animate(0, end, {
+                duration: 2.5,
+                ease: "circOut",
+                onUpdate: (latest) => setCount(Math.floor(latest))
+            });
+            return controls.stop;
+        }
+    }, [isInView, end]);
+
+    return (
+        <div ref={ref} className="text-center p-4">
+            <p className="text-6xl md:text-7xl font-serif text-black mb-2">
+                {count}{suffix}
+            </p>
+            <p className="text-gray-400 uppercase tracking-widest text-xs md:text-sm">
+                {label}
+            </p>
+        </div>
     );
 }
