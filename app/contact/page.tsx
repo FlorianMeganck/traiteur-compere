@@ -1,4 +1,67 @@
+"use client";
+
+import { useState } from "react";
+
 export default function Contact() {
+    const [formData, setFormData] = useState({
+        Nom: "",
+        Prenom: "",
+        Societe: "Non",
+        Mail: "",
+        Tel: "",
+        Type_Evenement: "Mariage",
+        Date: ""
+    });
+
+    const [errors, setErrors] = useState({
+        Mail: "",
+        Tel: ""
+    });
+
+    const validateEmail = (email: string) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
+
+    const validatePhone = (phone: string) => {
+        // Remove spaces, dots, slashes for checking
+        const cleanPhone = phone.replace(/[\s./]/g, "");
+        // Check if it looks like a Belgian number (starts with 0, 9 or 10 digits)
+        // 04xx (GSM) is 10 digits. 02, 03, 09 (Landlines) are 9 digits.
+        return /^(0[0-9]{8,9})$/.test(cleanPhone);
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Clear error when user types
+        if (name === "Mail" || name === "Tel") {
+            setErrors(prev => ({ ...prev, [name]: "" }));
+        }
+    };
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const newErrors = { Mail: "", Tel: "" };
+        let isValid = true;
+
+        if (!validateEmail(formData.Mail)) {
+            newErrors.Mail = "Veuillez entrer une adresse email valide.";
+            isValid = false;
+        }
+
+        if (!validatePhone(formData.Tel)) {
+            newErrors.Tel = "Veuillez entrer un numéro belge valide (ex: 0470 12 34 56).";
+            isValid = false;
+        }
+
+        setErrors(newErrors);
+
+        if (isValid) {
+            e.currentTarget.submit();
+        }
+    };
+
     return (
         <main className="min-h-screen pt-24 pb-12 bg-gray-50">
             <div className="max-w-4xl mx-auto px-6">
@@ -10,7 +73,7 @@ export default function Contact() {
                         </p>
                     </header>
 
-                    <form action="https://formspree.io/f/xvzbpbjd" method="POST" className="space-y-6">
+                    <form action="https://formspree.io/f/xvzbpbjd" method="POST" className="space-y-6" onSubmit={handleSubmit} noValidate>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Nom</label>
@@ -18,6 +81,8 @@ export default function Contact() {
                                     type="text"
                                     name="Nom"
                                     required
+                                    value={formData.Nom}
+                                    onChange={handleChange}
                                     className="w-full p-3 border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
                                     placeholder="Votre nom"
                                 />
@@ -28,6 +93,8 @@ export default function Contact() {
                                     type="text"
                                     name="Prenom"
                                     required
+                                    value={formData.Prenom}
+                                    onChange={handleChange}
                                     className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
                                     placeholder="Votre prénom"
                                 />
@@ -38,11 +105,25 @@ export default function Contact() {
                             <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Société ?</label>
                             <div className="flex gap-6 pt-1">
                                 <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="Societe" value="Oui" className="text-primary focus:ring-primary" />
+                                    <input
+                                        type="radio"
+                                        name="Societe"
+                                        value="Oui"
+                                        checked={formData.Societe === "Oui"}
+                                        onChange={handleChange}
+                                        className="text-primary focus:ring-primary"
+                                    />
                                     <span className="text-gray-600">Oui</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="Societe" value="Non" defaultChecked className="text-primary focus:ring-primary" />
+                                    <input
+                                        type="radio"
+                                        name="Societe"
+                                        value="Non"
+                                        checked={formData.Societe === "Non"}
+                                        onChange={handleChange}
+                                        className="text-primary focus:ring-primary"
+                                    />
                                     <span className="text-gray-600">Non</span>
                                 </label>
                             </div>
@@ -55,9 +136,12 @@ export default function Contact() {
                                     type="email"
                                     name="Mail"
                                     required
-                                    className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                                    value={formData.Mail}
+                                    onChange={handleChange}
+                                    className={`w-full p-3 border ${errors.Mail ? "border-red-500" : "border-gray-300"} focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors`}
                                     placeholder="exemple@email.com"
                                 />
+                                {errors.Mail && <p className="text-red-500 text-sm">{errors.Mail}</p>}
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Téléphone</label>
@@ -65,9 +149,12 @@ export default function Contact() {
                                     type="tel"
                                     name="Tel"
                                     required
-                                    className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                                    value={formData.Tel}
+                                    onChange={handleChange}
+                                    className={`w-full p-3 border ${errors.Tel ? "border-red-500" : "border-gray-300"} focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors`}
                                     placeholder="0470 12 34 56"
                                 />
+                                {errors.Tel && <p className="text-red-500 text-sm">{errors.Tel}</p>}
                             </div>
                         </div>
 
@@ -76,6 +163,8 @@ export default function Contact() {
                                 <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Type d'événement</label>
                                 <select
                                     name="Type_Evenement"
+                                    value={formData.Type_Evenement}
+                                    onChange={handleChange}
                                     className="w-full p-3 border border-gray-300 bg-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
                                 >
                                     <option value="Mariage">Mariage</option>
@@ -90,6 +179,8 @@ export default function Contact() {
                                     type="date"
                                     name="Date"
                                     required
+                                    value={formData.Date}
+                                    onChange={handleChange}
                                     className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
                                 />
                             </div>
