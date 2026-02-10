@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import Logo from "./Logo";
 
 export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
@@ -21,12 +22,13 @@ export default function Navbar() {
 
     return (
         <nav
-            className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-4" : "bg-transparent py-6"
+            className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-2" : "bg-transparent py-4"
                 }`}
         >
             <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-                <Link href="/" className="text-2xl font-bold font-serif tracking-widest uppercase text-red-600">
-                    Traiteur Compère
+                <Link href="/" className="flex items-center gap-2 group">
+                    <Logo className="h-12 w-auto transition-transform duration-300 group-hover:scale-105" />
+                    <span className="sr-only">Traiteur Compère</span>
                 </Link>
 
                 {/* Menu Container: Wrals Button & Dropdown for shared hover state */}

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 export default function Services() {
     return (
@@ -11,7 +11,7 @@ export default function Services() {
                     className="text-center mb-16"
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    transition={{ duration: 0.8, ease: "easeOut" }} // this is valid in props, but Variants check is strict
                 >
                     <h1 className="text-5xl font-serif text-black mb-4">Nos Services</h1>
                     <div className="w-24 h-1 bg-primary mx-auto" />
