@@ -180,7 +180,7 @@ export default function Contact() {
                 <div className="bg-white shadow-2xl p-8 md:p-14 rounded-[2rem] border-t-4 border-[#D4AF37]">
 
                     <header className="text-center mb-14">
-                        <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Contactez-nous</h1>
+                        <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Contactez-nous&nbsp;!</h1>
                         <p className="text-gray-500 font-light text-lg">
                             Parlons de votre prochain événement. Remplissez le formulaire ci-dessous.
                         </p>
@@ -266,7 +266,7 @@ export default function Contact() {
                                                 type="text"
                                                 name="Nom_Societe"
                                                 className={inputStyle}
-                                                placeholder="Raison sociale"
+                                                placeholder="Ex : Colruyt Group"
                                                 value={formData.Nom_Societe}
                                                 onChange={handleChange}
                                             />
