@@ -64,10 +64,10 @@ export default function Services() {
                 desc="Un anniversaire, un baptême ou simplement un repas entre amis ? Nous nous occupons de tout pour que vous puissiez profiter de vos invités. Buffet froid, échoppes chaudes ou service à table : on s'adapte à l'ambiance que vous voulez donner."
                 ctaLabel="Voir les formules"
                 images={[
-                    "https://images.unsplash.com/photo-1542332213-31f87348057f?q=80&w=800&auto=format&fit=crop", // Friendly dinner
-                    "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=800&auto=format&fit=crop", // Buffet
-                    "https://images.unsplash.com/photo-1570560258879-af7f8e1447ac?q=80&w=800&auto=format&fit=crop", // Cheers
-                    "https://images.unsplash.com/photo-1565538810643-b5bdb714032a?q=80&w=800&auto=format&fit=crop"  // Food detail
+                    "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1000&auto=format&fit=crop", // Friendly dinner
+                    "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?q=80&w=1000&auto=format&fit=crop", // Buffet
+                    "https://images.unsplash.com/photo-1511690656952-34342d5c2895?q=80&w=1000&auto=format&fit=crop", // Cheers
+                    "https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=1000&auto=format&fit=crop"  // Food detail
                 ]}
                 decorType="herb"
                 reverse={false}
@@ -82,10 +82,10 @@ export default function Services() {
                 desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
                 ctaLabel="Demander un devis"
                 images={[
-                    "https://images.unsplash.com/photo-1519671482538-518b78af94ea?q=80&w=800&auto=format&fit=crop", // Corporate vibe
-                    "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop", // Serving
-                    "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=800&auto=format&fit=crop", // Fine food
-                    "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800&auto=format&fit=crop"  // Event hall
+                    "https://images.unsplash.com/photo-1511795409834-432f5748acdd?q=80&w=1000&auto=format&fit=crop", // Corporate vibe
+                    "https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=1000&auto=format&fit=crop", // Serving
+                    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1000&auto=format&fit=crop", // Fine food
+                    "https://images.unsplash.com/photo-1561489413-985b06da5bee?q=80&w=1000&auto=format&fit=crop"  // Event hall
                 ]}
                 decorType="geometric"
                 reverse={true}
@@ -100,10 +100,10 @@ export default function Services() {
                 desc="Le repas est au cœur de cette journée spéciale. Nous prenons le temps de vous rencontrer pour construire un menu qui vous ressemble, en respectant votre budget et vos goûts. Pas de stress, on gère."
                 ctaLabel="En discuter ensemble"
                 images={[
-                    "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop", // Wedding table
-                    "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=800&auto=format&fit=crop", // Wedding detail
-                    "https://images.unsplash.com/photo-1520854221256-17451cc330e7?q=80&w=800&auto=format&fit=crop", // Cake/Dessert
-                    "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=800&auto=format&fit=crop"  // Bride/Couple
+                    "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?q=80&w=1000&auto=format&fit=crop", // Wedding table
+                    "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1000&auto=format&fit=crop", // Wedding detail
+                    "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1000&auto=format&fit=crop", // Cake/Dessert
+                    "https://images.unsplash.com/photo-1535254973040-607b474cb50d?q=80&w=1000&auto=format&fit=crop"  // Bride/Couple
                 ]}
                 decorType="flower"
                 reverse={false}
