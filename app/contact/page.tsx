@@ -44,6 +44,25 @@ export default function Contact() {
         return "";
     };
 
+    // Date Logic
+    const getMinDate = () => {
+        const date = new Date();
+        date.setDate(date.getDate() + 7);
+        return date.toISOString().split('T')[0];
+    };
+
+    const handleDateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        if (!val) return;
+
+        const selectedDate = new Date(val);
+        const minDate = new Date(getMinDate());
+
+        if (selectedDate < minDate) {
+            setFormData(prev => ({ ...prev, Date: getMinDate() }));
+        }
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
 
@@ -140,15 +159,21 @@ export default function Contact() {
             {/* --- DECORATIVE BACKGROUND ELEMENTS --- */}
 
             {/* Blurred Blobs */}
-            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" />
-            <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#D4AF37]/5 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 z-0 pointer-events-none" />
+            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#D4AF37]/5 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3 z-0 pointer-events-none" />
 
             {/* Subtle Leaf Icons */}
-            <div className="absolute top-1/4 right-10 opacity-[0.03] z-0 rotate-12 pointer-events-none hidden lg:block">
+            <div className="absolute top-20 right-10 opacity-[0.03] z-0 rotate-12 pointer-events-none hidden lg:block">
                 <Leaf size={300} strokeWidth={1} />
             </div>
-            <div className="absolute bottom-1/4 left-10 opacity-[0.03] z-0 -rotate-45 pointer-events-none hidden lg:block">
-                <Leaf size={200} strokeWidth={1} />
+            <div className="absolute bottom-40 left-10 opacity-[0.03] z-0 -rotate-45 pointer-events-none hidden lg:block">
+                <Leaf size={250} strokeWidth={1} />
+            </div>
+            <div className="absolute top-1/2 left-20 opacity-[0.02] z-0 rotate-90 pointer-events-none hidden lg:block">
+                <Leaf size={150} strokeWidth={1} />
+            </div>
+            <div className="absolute top-1/3 right-1/4 opacity-[0.02] z-0 -rotate-12 pointer-events-none hidden lg:block">
+                <Leaf size={100} strokeWidth={1} />
             </div>
 
             <div className="max-w-4xl mx-auto px-6 relative z-10">
@@ -328,13 +353,10 @@ export default function Contact() {
                                         type="date"
                                         name="Date"
                                         required
-                                        min={(() => {
-                                            const date = new Date();
-                                            date.setDate(date.getDate() + 7);
-                                            return date.toISOString().split('T')[0];
-                                        })()}
+                                        min={getMinDate()}
                                         value={formData.Date}
                                         onChange={handleChange}
+                                        onBlur={handleDateBlur}
                                         className={`${inputStyle} accent-[#D4AF37] cursor-pointer`}
                                         style={{ colorScheme: 'light' }}
                                     />
