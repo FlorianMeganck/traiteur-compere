@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users } from "lucide-react";
+import { Users, Leaf } from "lucide-react";
 
 export default function Contact() {
     const router = useRouter();
@@ -136,8 +136,22 @@ export default function Contact() {
     const labelStyle = `block text-sm font-medium text-neutral-500 uppercase tracking-wide mb-2 ml-1`;
 
     return (
-        <main className="min-h-screen pt-32 pb-20 bg-gray-50">
-            <div className="max-w-4xl mx-auto px-6">
+        <main className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
+            {/* --- DECORATIVE BACKGROUND ELEMENTS --- */}
+
+            {/* Blurred Blobs */}
+            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#D4AF37]/5 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 z-0 pointer-events-none" />
+
+            {/* Subtle Leaf Icons */}
+            <div className="absolute top-1/4 right-10 opacity-[0.03] z-0 rotate-12 pointer-events-none hidden lg:block">
+                <Leaf size={300} strokeWidth={1} />
+            </div>
+            <div className="absolute bottom-1/4 left-10 opacity-[0.03] z-0 -rotate-45 pointer-events-none hidden lg:block">
+                <Leaf size={200} strokeWidth={1} />
+            </div>
+
+            <div className="max-w-4xl mx-auto px-6 relative z-10">
                 <div className="bg-white shadow-2xl p-8 md:p-14 rounded-[2rem] border-t-4 border-[#D4AF37]">
 
                     <header className="text-center mb-14">
