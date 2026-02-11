@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Wheat, Milk, Egg, Nut, Fish, Bean, Salad, Info, Zap, Sprout, Sparkles, Drumstick, FlaskConical, Citrus } from "lucide-react";
+import { Wheat, Milk, Egg, Nut, Fish, Bean, Salad, Info, Zap, Sprout, Sparkles, Drumstick, Wine, Citrus } from "lucide-react";
 
 // --- DATA ---
 const FORMULES = [
@@ -90,7 +90,7 @@ const ALLERGEN_ICONS = {
     lupin: { icon: Sprout, label: "Lupin" }, // Sprout
     sesame: { icon: Sparkles, label: "Sésame" },
     arachide: { icon: Drumstick, label: "Arachides" }, // Drumstick
-    sulfite: { icon: FlaskConical, label: "Sulfites" }, // FlaskConical
+    sulfite: { icon: Wine, label: "Sulfites" }, // Wine
 };
 
 export default function Formules() {
@@ -108,12 +108,12 @@ export default function Formules() {
 
                     {/* ALLERGEN LEGEND */}
                     {/* ALLERGEN LEGEND */}
-                    <div className="mt-12 p-6 bg-[#FAF9F6] rounded-xl shadow-sm border border-neutral-200">
-                        <h3 className="text-center text-sm font-bold uppercase tracking-widest text-neutral-500 mb-6">Allergènes</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                    <div className="mt-10 mb-8 text-center">
+                        <p className="text-sm font-serif italic text-neutral-500 mb-4">Légende des allergènes :</p>
+                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-3">
                             {Object.entries(ALLERGEN_ICONS).map(([key, { icon: Icon, label }]) => (
-                                <div key={key} className="flex items-center gap-2 justify-center md:justify-start text-neutral-600 text-xs font-medium bg-white px-3 py-2 rounded-lg border border-neutral-100 shadow-sm">
-                                    <Icon size={16} className="text-neutral-600" strokeWidth={1.5} />
+                                <div key={key} className="flex items-center gap-2 text-neutral-700 text-sm font-medium">
+                                    <Icon size={16} strokeWidth={1.5} />
                                     <span>{label}</span>
                                 </div>
                             ))}
