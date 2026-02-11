@@ -308,15 +308,23 @@ export default function Contact() {
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Date</label>
+                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Date de l'événement</label>
                                     <input
                                         type="date"
                                         name="Date"
                                         required
+                                        min={(() => {
+                                            const date = new Date();
+                                            date.setDate(date.getDate() + 7);
+                                            return date.toISOString().split('T')[0];
+                                        })()}
                                         value={formData.Date}
                                         onChange={handleChange}
                                         className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
                                     />
+                                    <p className="text-xs text-gray-400 italic">
+                                        Veuillez prévoir un délai minimum de 7 jours pour l'organisation.
+                                    </p>
                                 </div>
                             </div>
 
