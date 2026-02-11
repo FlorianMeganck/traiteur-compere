@@ -83,7 +83,7 @@ export default function Services() {
                 ctaLabel="Demander un devis"
                 images={[
                     "https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1000&auto=format&fit=crop", // Networking Setup (REPLACED)
-                    "https://images.unsplash.com/photo-1621303837174-89787a7d4729?q=80&w=1000&auto=format&fit=crop", // Precise Appetizers (REPLACED)
+                    "https://fr.vecteezy.com/photo/2254765-restauration-food-for-parties-corporate-parties-conferences-forums-banquets-selective-focus", // Precise Appetizers (REPLACED)
                     "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1000&auto=format&fit=crop", // Chef Plating (KEPT)
                     "https://images.unsplash.com/photo-1574966735447-375dfd6f8356?q=80&w=1000&auto=format&fit=crop"  // Corporate Buffet (REPLACED)
                 ]}
