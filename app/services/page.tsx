@@ -110,17 +110,8 @@ export default function Services() {
             />
 
             {/* Call to Action Footer */}
-            <section className="bg-neutral-50 py-32 text-center px-6 mt-32">
-                <div className="max-w-2xl mx-auto space-y-8">
-                    <h2 className="text-3xl font-serif text-black">Un projet particulier ?</h2>
-                    <p className="text-gray-500 font-light">
-                        Discutons de vos envies et créons ensemble un menu sur mesure.
-                    </p>
-                    <Link href="/contact" className="inline-block border border-black px-12 py-4 uppercase tracking-widest text-sm font-bold hover:bg-black hover:text-white transition-all duration-300">
-                        Demander un devis
-                    </Link>
-                </div>
-            </section>
+            {/* Call to Action Footer (Parallax) */}
+            <ParallaxCta />
 
         </main>
     );
@@ -281,6 +272,50 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
     );
 }
 
+function ParallaxCta() {
+    const ref = useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: ref,
+        offset: ["start end", "end start"]
+    });
+
+    // Parallax effect: moves background at different speed
+    const y = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
+
+    return (
+        <section ref={ref} className="relative w-full h-[70vh] flex items-center justify-center overflow-hidden mt-32">
+            {/* Parallax Background */}
+            <motion.div style={{ y }} className="absolute inset-0 w-full h-[140%] -top-[20%] z-0">
+                <Image
+                    src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop"
+                    alt="Ambiance tamisée"
+                    fill
+                    className="object-cover"
+                />
+            </motion.div>
+
+            {/* Dark Overlay */}
+            <div className="absolute inset-0 bg-black/60 z-10" />
+
+            {/* Content */}
+            <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-8">
+                <h2 className="text-4xl md:text-5xl font-serif text-white">
+                    Prêt à sublimer votre événement ?
+                </h2>
+                <p className="text-white/90 font-sans text-xl">
+                    Discutons de vos envies et créons ensemble un menu sur mesure.
+                </p>
+                <Link
+                    href="/contact"
+                    className="inline-block bg-white text-black px-8 py-4 uppercase tracking-widest text-sm font-bold hover:bg-[#D4AF37] hover:text-white transition-all duration-300"
+                >
+                    DEMANDER UN DEVIS
+                </Link>
+            </div>
+        </section>
+    );
+}
+
 function ValueItem({ title, desc, path, delay }: { title: string, desc: string, path: string, delay: number }) {
     return (
         <motion.div
@@ -296,7 +331,7 @@ function ValueItem({ title, desc, path, delay }: { title: string, desc: string, 
                 </svg>
             </div>
             <h3 className="font-serif text-xl text-black mb-4 uppercase tracking-widest">{title}</h3>
-            <p className="text-gray-500 font-light text-sm leading-relaxed">
+            <p className="text-lg text-neutral-700 leading-relaxed">
                 {desc}
             </p>
         </motion.div>
