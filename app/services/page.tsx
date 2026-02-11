@@ -66,7 +66,7 @@ export default function Services() {
                 images={[
                     "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1000&auto=format&fit=crop", // Friendly dinner
                     "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?q=80&w=1000&auto=format&fit=crop", // Buffet
-                    "https://images.unsplash.com/photo-1511690656952-34342d5c2895?q=80&w=1000&auto=format&fit=crop", // Cheers
+                    "https://images.unsplash.com/photo-1576867757603-05b134ebc379?q=80&w=1000&auto=format&fit=crop", // Hands/Cheers (REPLACED)
                     "https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=1000&auto=format&fit=crop"  // Food detail
                 ]}
                 decorType="herb"
@@ -82,10 +82,10 @@ export default function Services() {
                 desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
                 ctaLabel="Demander un devis"
                 images={[
-                    "https://images.unsplash.com/photo-1511795409834-432f5748acdd?q=80&w=1000&auto=format&fit=crop", // Corporate vibe
-                    "https://images.unsplash.com/photo-1556910103-1c02745a30bf?q=80&w=1000&auto=format&fit=crop", // Serving
-                    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1000&auto=format&fit=crop", // Fine food
-                    "https://images.unsplash.com/photo-1561489413-985b06da5bee?q=80&w=1000&auto=format&fit=crop"  // Event hall
+                    "https://images.unsplash.com/photo-1561489401-fc2876ced162?q=80&w=1000&auto=format&fit=crop", // Networking Blur
+                    "https://images.unsplash.com/photo-1608835291693-1c488b951f90?q=80&w=1000&auto=format&fit=crop", // Precise Appetizers
+                    "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1000&auto=format&fit=crop", // Chef Plating
+                    "https://images.unsplash.com/photo-1587271407850-8d4389308895?q=80&w=1000&auto=format&fit=crop"  // Corporate Buffet
                 ]}
                 decorType="geometric"
                 reverse={true}
