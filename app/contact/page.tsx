@@ -1,12 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Leaf } from "lucide-react";
 
 export default function Contact() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-white" />}>
+            <ContactForm />
+        </Suspense>
+    );
+}
+
+function ContactForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
     const [formData, setFormData] = useState({
         Prenom: "",
@@ -22,6 +31,19 @@ export default function Contact() {
         details_projet: "",
         Souhaite_etre_recontacte: "Non"
     });
+
+    // EFFECT: Check for URL params (e.g. ?convives=Plus de 100)
+    useEffect(() => {
+        const convivesParam = searchParams.get("convives");
+        if (convivesParam) {
+            // Verify it's a valid option to avoid unwanted strings
+            const validOptions = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
+
+            if (validOptions.includes(convivesParam)) {
+                setFormData(prev => ({ ...prev, Nombre_Convives: convivesParam }));
+            }
+        }
+    }, [searchParams]);
 
     const [errors, setErrors] = useState({
         Mail: "",

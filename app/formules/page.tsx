@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Sprout, Shell, Flower2, FlaskConical, LucideIcon } from "lucide-react";
+import Link from "next/link";
 
 // --- DATA ---
 const FORMULES = [
@@ -250,25 +251,34 @@ function PricingBlock({ price }: { price: string }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             {/* < 20 */}
-            <div className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center">
+            <Link
+                href="/contact?convives=Moins de 20"
+                className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+            >
                 <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 20 pers.</span>
                 <span className="text-sm font-medium text-gray-900">Sur devis</span>
                 <span className="text-[10px] text-gray-400">(Nous contacter)</span>
-            </div>
+            </Link>
 
             {/* 20 - 100 */}
-            <div className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden">
+            <Link
+                href="/contact"
+                className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
+            >
                 <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
                 <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">20 à 100 pers.</span>
                 <span className="text-lg font-bold font-serif">{hasPrice ? price : "Sur devis"}</span>
-            </div>
+            </Link>
 
             {/* > 100 */}
-            <div className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center">
+            <Link
+                href="/contact?convives=Plus de 100"
+                className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+            >
                 <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 100 pers.</span>
                 <span className="text-sm font-medium text-gray-900">Sur devis</span>
                 <span className="text-[10px] text-gray-400">(Tarifs dégressifs)</span>
-            </div>
+            </Link>
         </div>
     );
 }
