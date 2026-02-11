@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Wheat, Milk, Egg, Nut, Fish, Bean, Salad, Info, Zap, Sprout, Sparkles, Drumstick, Wine, Citrus } from "lucide-react";
+import { Sprout, Shell, Flower2, FlaskConical, LucideIcon } from "lucide-react";
 
 // --- DATA ---
 const FORMULES = [
@@ -65,7 +65,31 @@ const FORMULES = [
     }
 ];
 
-type AllergenKey = keyof typeof ALLERGEN_ICONS;
+type AllergenData = {
+    label: string;
+    image?: string;
+    icon?: LucideIcon;
+};
+
+const ALLERGEN_ICONS: Record<string, AllergenData> = {
+    // 10 Images
+    nut: { image: "/amande.png", label: "Amande (Fruits à coque)" },
+    arachide: { image: "/arachide.png", label: "Arachide" },
+    celeri: { image: "/celeri.png", label: "Céleri" },
+    fish: { image: "/poisson.png", label: "Poisson" },
+    sesame: { image: "/sesame.png", label: "Sésame" },
+    gluten: { image: "/ble.png", label: "Blé (Gluten)" },
+    lait: { image: "/lait.png", label: "Lait" },
+    moutarde: { image: "/moutarde.png", label: "Moutarde" },
+    egg: { image: "/oeuf.png", label: "Œufs" },
+    crustace: { image: "/crustace.png", label: "Crustacés" },
+
+    // 4 Icônes Lucide
+    soja: { icon: Sprout, label: "Soja" },
+    mollusque: { icon: Shell, label: "Mollusques" },
+    lupin: { icon: Flower2, label: "Lupin" },
+    sulfite: { icon: FlaskConical, label: "Sulfites" },
+};
 
 interface FormuleType {
     title: string;
@@ -75,23 +99,6 @@ interface FormuleType {
     items: string[];
     allergens: string[];
 }
-
-const ALLERGEN_ICONS = {
-    gluten: { icon: Wheat, label: "Gluten" },
-    lait: { icon: Milk, label: "Lait" },
-    egg: { icon: Egg, label: "Oeufs" },
-    nut: { icon: Nut, label: "Fruits à coque" },
-    fish: { icon: Fish, label: "Poisson" },
-    crustace: { icon: Info, label: "Crustacés" }, // Fallback for Shrimp
-    mollusque: { icon: Citrus, label: "Mollusques" }, // Shellfish -> Citrus
-    soja: { icon: Bean, label: "Soja" }, // Bean
-    celeri: { icon: Salad, label: "Céleri" }, // Salad
-    moutarde: { icon: Zap, label: "Moutarde" }, // Zap
-    lupin: { icon: Sprout, label: "Lupin" }, // Sprout
-    sesame: { icon: Sparkles, label: "Sésame" },
-    arachide: { icon: Drumstick, label: "Arachides" }, // Drumstick
-    sulfite: { icon: Wine, label: "Sulfites" }, // Wine
-};
 
 export default function Formules() {
     return (
@@ -107,14 +114,27 @@ export default function Formules() {
                     </p>
 
                     {/* ALLERGEN LEGEND */}
-                    {/* ALLERGEN LEGEND */}
                     <div className="mt-10 mb-8 text-center">
-                        <p className="text-sm font-serif italic text-neutral-500 mb-4">Légende des allergènes :</p>
-                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-3">
-                            {Object.entries(ALLERGEN_ICONS).map(([key, { icon: Icon, label }]) => (
-                                <div key={key} className="flex items-center gap-2 text-neutral-700 text-sm font-medium">
-                                    <Icon size={16} strokeWidth={1.5} />
-                                    <span>{label}</span>
+                        <p className="text-sm font-serif italic text-neutral-500 mb-6">Légende des allergènes :</p>
+                        <div className="flex flex-wrap justify-center gap-8">
+                            {Object.entries(ALLERGEN_ICONS).map(([key, data]) => (
+                                <div key={key} className="flex flex-col items-center gap-2">
+                                    {/* Image ou Icone fixée à 24px de haut */}
+                                    <div className="h-6 flex items-center justify-center">
+                                        {data.image ? (
+                                            <div className="relative w-6 h-6">
+                                                <Image
+                                                    src={data.image}
+                                                    alt={data.label}
+                                                    fill
+                                                    className="object-contain"
+                                                />
+                                            </div>
+                                        ) : (
+                                            data.icon && <data.icon size={24} className="text-neutral-700" strokeWidth={1.5} />
+                                        )}
+                                    </div>
+                                    <span className="text-neutral-700 text-xs font-medium">{data.label}</span>
                                 </div>
                             ))}
                         </div>
@@ -182,12 +202,22 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                     <span className="uppercase tracking-widest text-xs font-bold">Contient :</span>
                     <div className="flex gap-3">
                         {formule.allergens.map((alg) => {
-                            const iconData = ALLERGEN_ICONS[alg as AllergenKey];
-                            if (!iconData) return null;
-                            const Icon = iconData.icon;
+                            const data = ALLERGEN_ICONS[alg];
+                            if (!data) return null;
+
                             return (
-                                <div key={alg} className="flex items-center gap-1.5" title={iconData.label}>
-                                    <Icon size={16} />
+                                <div key={alg} className="flex items-center gap-1.5" title={data.label}>
+                                    {data.image ? (
+                                        <Image
+                                            src={data.image}
+                                            alt={data.label}
+                                            width={20}
+                                            height={20}
+                                            className="object-contain"
+                                        />
+                                    ) : (
+                                        data.icon && <data.icon size={20} strokeWidth={1.5} className="text-neutral-500" />
+                                    )}
                                 </div>
                             );
                         })}
