@@ -326,7 +326,8 @@ export default function Contact() {
                                             })()}
                                             value={formData.Date}
                                             onChange={handleChange}
-                                            className="w-full p-3 border border-neutral-200 bg-white text-gray-700 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none transition-all h-[50px]"
+                                            style={{ colorScheme: 'light' }}
+                                            className="w-full p-3 border border-neutral-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300 h-[50px] accent-[#D4AF37]"
                                         />
                                         <p className="text-xs text-gray-400 italic">
                                             Veuillez prévoir un délai minimum de 7 jours pour l'organisation.
@@ -349,7 +350,7 @@ export default function Contact() {
                                                 required={formData.Type_Evenement === "Autre"}
                                                 value={formData.type_autre}
                                                 onChange={handleChange}
-                                                className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                                                className="w-full p-3 border border-neutral-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300"
                                                 placeholder="Ex: Anniversaire de mariage, Baptême..."
                                             />
                                         </motion.div>
@@ -363,7 +364,7 @@ export default function Contact() {
                                     name="details_projet"
                                     value={formData.details_projet}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors h-32 resize-y"
+                                    className="w-full p-3 border border-neutral-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300 h-32 resize-y"
                                     placeholder="Décrivez votre projet : ambiance, allergies, régimes spéciaux, déroulement souhaité..."
                                 />
                             </div>
