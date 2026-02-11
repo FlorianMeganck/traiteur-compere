@@ -157,7 +157,9 @@ export default function Contact() {
                     if (typeof window !== 'undefined' && (window as any).gtag) {
                         (window as any).gtag('event', 'generate_lead', {
                             'event_category': 'form',
-                            'event_label': 'contact_form'
+                            'event_label': 'contact_form_success',
+                            'transport_type': 'beacon', // Force l'envoi en arrière-plan
+                            'debug_mode': true // Force l'affichage dans GA4 DebugView
                         });
                     }
 
