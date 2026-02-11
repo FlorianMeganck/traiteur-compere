@@ -222,7 +222,7 @@ export default function Contact() {
                                         required
                                         value={formData.Nom}
                                         onChange={handleChange}
-                                        className="w-full p-3 border border-gray-300 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                                        className="w-full bg-white border border-neutral-200 rounded-lg px-4 py-3 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300"
                                         placeholder="Votre nom"
                                     />
                                 </div>
@@ -234,7 +234,7 @@ export default function Contact() {
                                         required
                                         value={formData.Prenom}
                                         onChange={handleChange}
-                                        className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                                        className="w-full bg-white border border-neutral-200 rounded-lg px-4 py-3 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300"
                                         placeholder="Votre prénom"
                                     />
                                 </div>
@@ -277,7 +277,7 @@ export default function Contact() {
                                         required
                                         value={formData.Mail}
                                         onChange={handleChange}
-                                        className={`w-full p-3 border ${errors.Mail ? "border-red-500" : "border-gray-300"} focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors`}
+                                        className={`w-full bg-white border ${errors.Mail ? "border-red-500" : "border-neutral-200"} rounded-lg px-4 py-3 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300`}
                                         placeholder="exemple@email.com"
                                     />
                                     {errors.Mail && <p className="text-red-500 text-sm">{errors.Mail}</p>}
@@ -290,7 +290,7 @@ export default function Contact() {
                                         required
                                         value={formData.Tel}
                                         onChange={handleChange}
-                                        className={`w-full p-3 border ${errors.Tel ? "border-red-500" : "border-gray-300"} focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors`}
+                                        className={`w-full bg-white border ${errors.Tel ? "border-red-500" : "border-neutral-200"} rounded-lg px-4 py-3 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300`}
                                         placeholder="0470 12 34 56"
                                     />
                                     {errors.Tel && <p className="text-red-500 text-sm">{errors.Tel}</p>}
@@ -305,7 +305,7 @@ export default function Contact() {
                                             name="Type_Evenement"
                                             value={formData.Type_Evenement}
                                             onChange={handleChange}
-                                            className="w-full p-3 border border-gray-300 bg-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors h-[50px]"
+                                            className="w-full bg-white border border-neutral-200 rounded-lg px-4 py-3 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300 h-[50px]"
                                         >
                                             <option value="Mariage">Mariage</option>
                                             <option value="Banquet">Banquet</option>
@@ -327,7 +327,7 @@ export default function Contact() {
                                             value={formData.Date}
                                             onChange={handleChange}
                                             style={{ colorScheme: 'light' }}
-                                            className="w-full p-3 border border-neutral-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300 h-[50px] accent-[#D4AF37]"
+                                            className="w-full bg-white border border-neutral-200 rounded-lg px-4 py-3 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300 h-[50px] accent-[#D4AF37]"
                                         />
                                         <p className="text-xs text-gray-400 italic">
                                             Veuillez prévoir un délai minimum de 7 jours pour l'organisation.
@@ -350,7 +350,7 @@ export default function Contact() {
                                                 required={formData.Type_Evenement === "Autre"}
                                                 value={formData.type_autre}
                                                 onChange={handleChange}
-                                                className="w-full p-3 border border-neutral-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300"
+                                                className="w-full bg-white border border-neutral-200 rounded-lg px-4 py-3 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300"
                                                 placeholder="Ex: Anniversaire de mariage, Baptême..."
                                             />
                                         </motion.div>
@@ -364,7 +364,7 @@ export default function Contact() {
                                     name="details_projet"
                                     value={formData.details_projet}
                                     onChange={handleChange}
-                                    className="w-full p-3 border border-neutral-200 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300 h-32 resize-y"
+                                    className="w-full bg-white border border-neutral-200 rounded-lg px-4 py-3 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37] focus:border-transparent transition-all duration-300 h-32 resize-y"
                                     placeholder="Décrivez votre projet : ambiance, allergies, régimes spéciaux, déroulement souhaité..."
                                 />
                             </div>
