@@ -64,6 +64,9 @@ export default function Footer() {
                     <p className="text-xs font-light">
                         &copy; 2026 Traiteur Compère. Tous droits réservés.
                     </p>
+                    <p className="text-[11px] text-neutral-500 mt-2">
+                        Un souci de navigation ? Contactez-<a href="mailto:meganckflorian@gmail.com" className="underline hover:text-[#D4AF37] transition-colors duration-300">moi</a>
+                    </p>
                     <div className="flex gap-6">
                         <SocialLink
                             href="https://www.facebook.com/profile.php?id=61582940090708"
