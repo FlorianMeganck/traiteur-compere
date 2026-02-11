@@ -9,6 +9,8 @@ import Logo from "./Logo";
 const NAV_LINKS = [
     { href: "/", label: "Accueil" },
     { href: "/about", label: "À Propos" },
+    { href: "/about", label: "À Propos" },
+    { href: "/formules", label: "Formules" },
     { href: "/services", label: "Services" },
     { href: "/contact", label: "Contact" },
 ];
