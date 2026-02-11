@@ -113,13 +113,27 @@ export default function Formules() {
                         Du simple buffet aux plats mijotés, nous avons la formule qu&apos;il vous faut.
                     </p>
 
-                    {/* ALLERGEN LEGEND */}
-                    <div className="mt-10 mb-8 text-center">
+
+                </header>
+
+                {/* FORMULES LIST */}
+                <div className="space-y-24">
+                    {FORMULES.map((formule, index) => (
+                        <FormuleSection key={index} formule={formule} index={index} />
+                    ))}
+                </div>
+
+                {/* BOTTOM LEGEND */}
+                <div className="mt-20 border-t border-neutral-200 pt-16">
+                    <p className="text-center text-neutral-600 italic mb-8">
+                        Tous nos plats peuvent contenir des traces d'autres allergènes. Reportez-vous à la légende ci-dessous :
+                    </p>
+
+                    <div className="text-center">
                         <p className="text-sm font-serif italic text-neutral-500 mb-6">Légende des allergènes :</p>
                         <div className="flex flex-wrap justify-center gap-8">
                             {Object.entries(ALLERGEN_ICONS).map(([key, data]) => (
                                 <div key={key} className="flex flex-col items-center gap-2">
-                                    {/* Image ou Icone fixée à 24px de haut */}
                                     <div className="h-6 flex items-center justify-center">
                                         {data.image ? (
                                             <div className="relative w-6 h-6">
@@ -139,13 +153,6 @@ export default function Formules() {
                             ))}
                         </div>
                     </div>
-                </header>
-
-                {/* FORMULES LIST */}
-                <div className="space-y-24">
-                    {FORMULES.map((formule, index) => (
-                        <FormuleSection key={index} formule={formule} index={index} />
-                    ))}
                 </div>
 
             </div>
