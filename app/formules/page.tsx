@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Wheat, Milk, Egg, Nut, Info } from "lucide-react";
+import { Wheat, Milk, Egg, Nut, Fish, Bean, Salad, Info, Zap, Sprout, Sparkles, Drumstick, FlaskConical, Citrus } from "lucide-react";
 
 // --- DATA ---
 const FORMULES = [
@@ -18,7 +18,7 @@ const FORMULES = [
             "Buffet de crudités de saison",
             "Sauces : Mayonnaise maison, Tartare, Andalouse"
         ],
-        allergens: ["gluten", "egg", "lait"]
+        allergens: ["gluten", "egg", "lait", "moutarde"] // Updated to include new keys if applicable
     },
     {
         title: "Buffets Froids",
@@ -33,7 +33,7 @@ const FORMULES = [
             "Salade de pâtes à l'italienne",
             "Pain & Beurre"
         ],
-        allergens: ["gluten", "egg", "lait", "fish"]
+        allergens: ["gluten", "egg", "lait", "fish", "crustace"]
     },
     {
         title: "Buffets Chauds",
@@ -47,7 +47,7 @@ const FORMULES = [
             "Gratin dauphinois crémeux",
             "Légumes chauds de saison"
         ],
-        allergens: ["gluten", "lait", "egg"]
+        allergens: ["gluten", "lait", "egg", "celeri"]
     },
     {
         title: "Zakouskis & Verrines",
@@ -61,16 +61,36 @@ const FORMULES = [
             "Toast chèvre miel & noix",
             "Mini-quiche lorraine"
         ],
-        allergens: ["gluten", "lait", "egg", "nut", "fish"]
+        allergens: ["gluten", "lait", "egg", "nut", "fish", "crustace", "sesame"]
     }
 ];
 
+type AllergenKey = keyof typeof ALLERGEN_ICONS;
+
+interface FormuleType {
+    title: string;
+    description: string;
+    price: string;
+    image: string;
+    items: string[];
+    allergens: string[];
+}
+
 const ALLERGEN_ICONS = {
-    lait: { icon: Milk, label: "Lait/Lactose" },
     gluten: { icon: Wheat, label: "Gluten" },
+    lait: { icon: Milk, label: "Lait" },
     egg: { icon: Egg, label: "Oeufs" },
     nut: { icon: Nut, label: "Fruits à coque" },
-    fish: { icon: Info, label: "Poisson/Crustacés" }, // Fallback/Extra
+    fish: { icon: Fish, label: "Poisson" },
+    crustace: { icon: Info, label: "Crustacés" }, // Fallback for Shrimp
+    mollusque: { icon: Citrus, label: "Mollusques" }, // Shellfish -> Citrus
+    soja: { icon: Bean, label: "Soja" }, // Bean
+    celeri: { icon: Salad, label: "Céleri" }, // Salad
+    moutarde: { icon: Zap, label: "Moutarde" }, // Zap
+    lupin: { icon: Sprout, label: "Lupin" }, // Sprout
+    sesame: { icon: Sparkles, label: "Sésame" },
+    arachide: { icon: Drumstick, label: "Arachides" }, // Drumstick
+    sulfite: { icon: FlaskConical, label: "Sulfites" }, // FlaskConical
 };
 
 export default function Formules() {
@@ -83,18 +103,21 @@ export default function Formules() {
                     <h1 className="text-5xl md:text-6xl font-serif text-black">Nos Formules Gourmandes</h1>
                     <p className="text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
                         Découvrez nos compositions pensées pour tous vos événements.
-                        Du simple buffet aux plats mijotés, nous avons la formule qu'il vous faut.
+                        Du simple buffet aux plats mijotés, nous avons la formule qu&apos;il vous faut.
                     </p>
 
                     {/* ALLERGEN LEGEND */}
-                    <div className="flex flex-wrap justify-center gap-6 mt-8 p-4 bg-white rounded-xl shadow-sm border border-neutral-100 inline-flex">
-                        <span className="text-sm font-bold uppercase tracking-widest text-[#D4AF37] self-center mr-4">Allergènes :</span>
-                        {Object.entries(ALLERGEN_ICONS).filter(([key]) => ["lait", "gluten", "egg", "nut"].includes(key)).map(([key, { icon: Icon, label }]) => (
-                            <div key={key} className="flex items-center gap-2 text-gray-500 text-sm">
-                                <Icon size={18} />
-                                <span>{label}</span>
-                            </div>
-                        ))}
+                    {/* ALLERGEN LEGEND */}
+                    <div className="mt-12 p-6 bg-[#FAF9F6] rounded-xl shadow-sm border border-neutral-200">
+                        <h3 className="text-center text-sm font-bold uppercase tracking-widest text-neutral-500 mb-6">Allergènes</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                            {Object.entries(ALLERGEN_ICONS).map(([key, { icon: Icon, label }]) => (
+                                <div key={key} className="flex items-center gap-2 justify-center md:justify-start text-neutral-600 text-xs font-medium bg-white px-3 py-2 rounded-lg border border-neutral-100 shadow-sm">
+                                    <Icon size={16} className="text-neutral-600" strokeWidth={1.5} />
+                                    <span>{label}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </header>
 
@@ -110,7 +133,7 @@ export default function Formules() {
     );
 }
 
-function FormuleSection({ formule, index }: { formule: any, index: number }) {
+function FormuleSection({ formule, index }: { formule: FormuleType, index: number }) {
     const isEven = index % 2 === 0;
 
     return (
@@ -135,19 +158,19 @@ function FormuleSection({ formule, index }: { formule: any, index: number }) {
             {/* CONTENT SIDE */}
             <div className="w-full md:w-1/2 space-y-6">
                 <h2 className="text-3xl md:text-4xl font-serif text-black">{formule.title}</h2>
-                <div className="w-20 h-1 bg-[#D4AF37]" />
+                <div className="w-20 h-1 bg-neutral-300" />
 
                 <p className="text-gray-600 leading-relaxed text-lg">
                     {formule.description}
                 </p>
 
                 {/* COMPOSITION */}
-                <div className="bg-white p-6 md:p-8 rounded-sm shadow-sm border-l-4 border-[#D4AF37]">
+                <div className="bg-white p-6 md:p-8 rounded-sm shadow-sm border-l-4 border-neutral-300">
                     <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wide text-sm">Composition</h3>
                     <ul className="grid grid-cols-1 gap-2">
                         {formule.items.map((item: string, i: number) => (
                             <li key={i} className="flex items-start gap-2 text-gray-700">
-                                <span className="text-[#D4AF37] mt-1.5">•</span>
+                                <span className="text-neutral-400 mt-1.5">•</span>
                                 {item}
                             </li>
                         ))}
@@ -158,8 +181,8 @@ function FormuleSection({ formule, index }: { formule: any, index: number }) {
                 <div className="flex items-center gap-4 text-sm text-gray-400">
                     <span className="uppercase tracking-widest text-xs font-bold">Contient :</span>
                     <div className="flex gap-3">
-                        {formule.allergens.map((alg: string) => {
-                            const iconData = (ALLERGEN_ICONS as any)[alg];
+                        {formule.allergens.map((alg) => {
+                            const iconData = ALLERGEN_ICONS[alg as AllergenKey];
                             if (!iconData) return null;
                             const Icon = iconData.icon;
                             return (
