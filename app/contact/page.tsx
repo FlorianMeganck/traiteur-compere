@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Contact() {
     const router = useRouter();
@@ -13,7 +14,9 @@ export default function Contact() {
         Mail: "",
         Tel: "",
         Type_Evenement: "Mariage",
+        type_autre: "",
         Date: "",
+        details_projet: "",
         Souhaite_etre_recontacte: "Non" // Default to Non (unchecked, but we'll use checked state for UI, value for submit)
     });
 
@@ -53,7 +56,7 @@ export default function Contact() {
         return ""; // Valid Fixed
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
         const checked = (e.target as HTMLInputElement).checked;
 
@@ -157,7 +160,9 @@ export default function Contact() {
                         Mail: "",
                         Tel: "",
                         Type_Evenement: "Mariage",
+                        type_autre: "",
                         Date: "",
+                        details_projet: "",
                         Souhaite_etre_recontacte: "Non"
                     });
 
@@ -292,40 +297,75 @@ export default function Contact() {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Type d'événement</label>
-                                    <select
-                                        name="Type_Evenement"
-                                        value={formData.Type_Evenement}
-                                        onChange={handleChange}
-                                        className="w-full p-3 border border-gray-300 bg-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
-                                    >
-                                        <option value="Mariage">Mariage</option>
-                                        <option value="Banquet">Banquet</option>
-                                        <option value="Entreprise">Entreprise</option>
-                                        <option value="Autre">Autre</option>
-                                    </select>
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Type d'événement</label>
+                                        <select
+                                            name="Type_Evenement"
+                                            value={formData.Type_Evenement}
+                                            onChange={handleChange}
+                                            className="w-full p-3 border border-gray-300 bg-white focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors h-[50px]"
+                                        >
+                                            <option value="Mariage">Mariage</option>
+                                            <option value="Banquet">Banquet</option>
+                                            <option value="Entreprise">Entreprise</option>
+                                            <option value="Autre">Autre</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Date de l'événement</label>
+                                        <input
+                                            type="date"
+                                            name="Date"
+                                            required
+                                            min={(() => {
+                                                const date = new Date();
+                                                date.setDate(date.getDate() + 7);
+                                                return date.toISOString().split('T')[0];
+                                            })()}
+                                            value={formData.Date}
+                                            onChange={handleChange}
+                                            className="w-full p-3 border border-neutral-200 bg-white text-gray-700 focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none transition-all h-[50px]"
+                                        />
+                                        <p className="text-xs text-gray-400 italic">
+                                            Veuillez prévoir un délai minimum de 7 jours pour l'organisation.
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Date de l'événement</label>
-                                    <input
-                                        type="date"
-                                        name="Date"
-                                        required
-                                        min={(() => {
-                                            const date = new Date();
-                                            date.setDate(date.getDate() + 7);
-                                            return date.toISOString().split('T')[0];
-                                        })()}
-                                        value={formData.Date}
-                                        onChange={handleChange}
-                                        className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
-                                    />
-                                    <p className="text-xs text-gray-400 italic">
-                                        Veuillez prévoir un délai minimum de 7 jours pour l'organisation.
-                                    </p>
-                                </div>
+
+                                <AnimatePresence>
+                                    {formData.Type_Evenement === "Autre" && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: "auto" }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="space-y-2"
+                                        >
+                                            <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Précisez le type d'événement</label>
+                                            <input
+                                                type="text"
+                                                name="type_autre"
+                                                required={formData.Type_Evenement === "Autre"}
+                                                value={formData.type_autre}
+                                                onChange={handleChange}
+                                                className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors"
+                                                placeholder="Ex: Anniversaire de mariage, Baptême..."
+                                            />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700 uppercase tracking-wide">Dites-nous en plus !</label>
+                                <textarea
+                                    name="details_projet"
+                                    value={formData.details_projet}
+                                    onChange={handleChange}
+                                    className="w-full p-3 border border-gray-300 focus:border-gold focus:ring-1 focus:ring-gold outline-none transition-colors h-32 resize-y"
+                                    placeholder="Décrivez votre projet : ambiance, allergies, régimes spéciaux, déroulement souhaité..."
+                                />
                             </div>
 
                             <div className="flex items-center gap-3">
