@@ -60,14 +60,14 @@ export default function Footer() {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-xs font-light">
+                <div className="border-t border-white/10 pt-8 grid grid-cols-1 md:grid-cols-3 items-center gap-4">
+                    <p className="text-xs font-light text-center md:text-left">
                         &copy; 2026 Traiteur Compère. Tous droits réservés.
                     </p>
-                    <p className="text-[11px] text-neutral-500 mt-2">
+                    <p className="text-[11px] text-neutral-500 text-center">
                         Un souci de navigation ? Contactez-<a href="mailto:meganckflorian@gmail.com" className="underline hover:text-[#D4AF37] transition-colors duration-300">moi</a>
                     </p>
-                    <div className="flex gap-6">
+                    <div className="flex gap-6 justify-center md:justify-end">
                         <SocialLink
                             href="https://www.facebook.com/profile.php?id=61582940090708"
                             icon={<FacebookIcon />}
