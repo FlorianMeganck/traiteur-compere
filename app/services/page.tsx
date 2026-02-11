@@ -29,7 +29,7 @@ export default function Services() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="text-gray-600 font-sans font-light text-lg max-w-2xl mx-auto mb-16 italic"
                 >
-                    &ldquo;Parce que chaque événement est unique, nous mettons notre savoir-faire au service de vos envies. Une cuisine généreuse, locale et faite maison.&rdquo;
+                    &ldquo;Je cuisine pour vous comme je le ferais pour ma propre famille : avec cœur et générosité. Pour moi, un événement réussi, c'est avant tout des assiettes vides et des invités heureux.&rdquo;
                 </motion.p>
 
                 {/* Values Section - Replacing Key Figures */}
