@@ -38,7 +38,7 @@ export default function RootLayout({
         {children}
         <CookieBanner />
         <Suspense fallback={null}>
-          <GoogleAnalytics GA_MEASUREMENT_ID='G-XXXXXXXXXX' />
+          <GoogleAnalytics GA_MEASUREMENT_ID='G-DM739YH09F' />
         </Suspense>
         <Footer />
       </body>
