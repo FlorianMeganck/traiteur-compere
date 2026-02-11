@@ -153,6 +153,14 @@ export default function Contact() {
 
                 if (response.ok) {
                     setStatus("success");
+
+                    if (typeof window !== 'undefined' && (window as any).gtag) {
+                        (window as any).gtag('event', 'generate_lead', {
+                            'event_category': 'form',
+                            'event_label': 'contact_form'
+                        });
+                    }
+
                     setFormData({
                         Nom: "",
                         Prenom: "",
