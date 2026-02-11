@@ -246,7 +246,7 @@ function AmbienceSection() {
         >
           <span className="text-6xl text-[#D4AF37] font-serif leading-none block mb-6">&ldquo;</span>
           <p className="text-2xl md:text-3xl font-serif text-gray-800 italic leading-relaxed">
-            La cuisine est un langage universel qui parle de générosité et de partage. Mon but est de créer l&apos;émotion à chaque bouchée.
+            Je cuisine pour vous comme je le ferais pour ma propre famille : avec cœur et générosité. Pour moi, un événement réussi ne se joue pas dans les grands discours, mais dans des assiettes vides et des invités heureux.
           </p>
           <p className="mt-8 text-sm uppercase tracking-widest text-[#D4AF37] font-bold">
             — Jean-Paul Compère
