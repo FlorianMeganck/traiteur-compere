@@ -82,10 +82,10 @@ export default function Services() {
                 desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
                 ctaLabel="Demander un devis"
                 images={[
-                    "https://images.unsplash.com/photo-1561489401-fc2876ced162?q=80&w=1000&auto=format&fit=crop", // Networking Blur
-                    "https://images.unsplash.com/photo-1608835291693-1c488b951f90?q=80&w=1000&auto=format&fit=crop", // Precise Appetizers
-                    "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1000&auto=format&fit=crop", // Chef Plating
-                    "https://images.unsplash.com/photo-1587271407850-8d4389308895?q=80&w=1000&auto=format&fit=crop"  // Corporate Buffet
+                    "https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1000&auto=format&fit=crop", // Networking Setup (REPLACED)
+                    "https://images.unsplash.com/photo-1621303837174-89787a7d4729?q=80&w=1000&auto=format&fit=crop", // Precise Appetizers (REPLACED)
+                    "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1000&auto=format&fit=crop", // Chef Plating (KEPT)
+                    "https://images.unsplash.com/photo-1574966735447-375dfd6f8356?q=80&w=1000&auto=format&fit=crop"  // Corporate Buffet (REPLACED)
                 ]}
                 decorType="geometric"
                 reverse={true}
