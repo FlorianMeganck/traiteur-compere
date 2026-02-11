@@ -20,6 +20,8 @@ export const metadata: Metadata = {
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import GoogleAnalytics from "./components/GoogleAnalytics";
+import CookieBanner from "./components/CookieBanner";
 
 export default function RootLayout({
   children,
@@ -33,6 +35,8 @@ export default function RootLayout({
       >
         <Navbar />
         {children}
+        <CookieBanner />
+        <GoogleAnalytics GA_MEASUREMENT_ID='G-XXXXXXXXXX' />
         <Footer />
       </body>
     </html>
