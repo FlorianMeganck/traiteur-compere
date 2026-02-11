@@ -24,6 +24,8 @@ import Footer from "./components/Footer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import CookieBanner from "./components/CookieBanner";
 
+import ScrollToTop from "./components/ScrollToTop";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -41,6 +43,7 @@ export default function RootLayout({
           <GoogleAnalytics GA_MEASUREMENT_ID='G-DM739YH09F' />
         </Suspense>
         <Footer />
+        <ScrollToTop />
       </body>
     </html>
   );

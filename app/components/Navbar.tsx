@@ -78,8 +78,8 @@ export default function Navbar() {
 
                     {/* LEFT ZONE: Accueil & À Propos (Aligned Right -> Center) */}
                     <div className="flex justify-end items-center gap-12 pr-12">
-                        <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} />
-                        <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} />
+                        <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
+                        <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
                     </div>
 
                     {/* CENTER ZONE: Logo */}
@@ -91,8 +91,8 @@ export default function Navbar() {
 
                     {/* RIGHT ZONE: Services & Contact (Aligned Left -> Center) */}
                     <div className="flex justify-start items-center gap-12 pl-12">
-                        <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} />
-                        <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} />
+                        <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
+                        <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
                     </div>
 
                     {/* SOCIALS (Absolute Right) */}
@@ -158,6 +158,7 @@ export default function Navbar() {
                                         key={link.href}
                                         href={link.href}
                                         label={link.label}
+                                        isActive={pathname === link.href}
                                         onClick={() => setIsMenuOpen(false)}
                                     />
                                 ))}
@@ -188,26 +189,31 @@ export default function Navbar() {
 
 // --- SUB-COMPONENTS ---
 
-function NavLink({ href, label, textColor }: { href: string; label: string; textColor: string }) {
+function NavLink({ href, label, textColor, isActive }: { href: string; label: string; textColor: string; isActive: boolean }) {
     return (
         <Link
             href={href}
-            className={`relative py-1 text-sm font-bold tracking-widest uppercase transition-colors duration-300 group ${textColor} hover:text-[#D4AF37]`}
+            className={`relative py-1 text-sm font-bold tracking-widest uppercase transition-all duration-300 group ${textColor} ${isActive ? "opacity-70 border-b-2 border-[#D4AF37]" : "opacity-100 hover:text-[#D4AF37]"
+                }`}
         >
             {label}
-            {/* Golden Underline Animation */}
-            <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-[#D4AF37] transition-all duration-300 group-hover:w-full"></span>
+            {/* Golden Underline Animation (Only for inactive state hover) */}
+            {!isActive && (
+                <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-[#D4AF37] transition-all duration-300 group-hover:w-full opacity-50"></span>
+            )}
         </Link>
     );
 }
 
-function MobileLink({ href, label, onClick }: { href: string; label: string; onClick: () => void }) {
+function MobileLink({ href, label, onClick, isActive }: { href: string; label: string; onClick: () => void; isActive: boolean }) {
     return (
         <Link
             href={href}
             onClick={onClick}
-            className="text-5xl font-serif text-white hover:text-[#D4AF37] transition-colors duration-300"
+            className={`text-5xl font-serif transition-colors duration-300 relative ${isActive ? "text-[#D4AF37] opacity-80" : "text-white hover:text-[#D4AF37]"
+                }`}
         >
+            {isActive && <span className="absolute -left-6 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#D4AF37] rounded-full" />}
             {label}
         </Link>
     );
