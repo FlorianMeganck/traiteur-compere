@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Shield, BarChart3, Megaphone } from "lucide-react";
 
@@ -11,7 +11,7 @@ interface CookiePreferences {
     marketing: boolean;
 }
 
-export default function GestionCookies() {
+function GestionCookiesContent() {
     const [preferences, setPreferences] = useState<CookiePreferences>({
         essential: true, // Always true
         analytical: false,
@@ -19,6 +19,8 @@ export default function GestionCookies() {
     });
     const [showToast, setShowToast] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const returnTo = searchParams.get('returnTo') || '/';
 
     useEffect(() => {
         const storedPreferences = localStorage.getItem("cookie_preferences");
@@ -41,7 +43,7 @@ export default function GestionCookies() {
         setShowToast(true);
         setTimeout(() => {
             setShowToast(false);
-            router.back();
+            router.push(returnTo);
         }, 1000);
     };
 
@@ -135,6 +137,14 @@ export default function GestionCookies() {
                 )}
             </AnimatePresence>
         </main>
+    );
+}
+
+export default function GestionCookies() {
+    return (
+        <Suspense fallback={<div>Chargement...</div>}>
+            <GestionCookiesContent />
+        </Suspense>
     );
 }
 

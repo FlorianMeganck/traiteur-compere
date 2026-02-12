@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 
 export default function Footer() {
+    const pathname = usePathname();
+
     return (
         <footer className="bg-[#0a0a0a] text-neutral-400 pt-16 pb-8">
             <div className="max-w-7xl mx-auto px-6">
@@ -54,7 +59,7 @@ export default function Footer() {
                             <FooterLink href="#" label="Mentions Légales" />
                             <FooterLink href="/legal/confidentialite" label="Politique de Confidentialité" />
                             <FooterLink href="/legal/cgv" label="CGV" />
-                            <FooterLink href="/gestion-cookies" label="Gestion des Cookies" />
+                            <FooterLink href={`/gestion-cookies?returnTo=${pathname}`} label="Gestion des Cookies" />
                         </div>
                     </div>
                 </div>
