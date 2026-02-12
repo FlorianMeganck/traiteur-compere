@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Shield, BarChart3, Megaphone } from "lucide-react";
 
@@ -17,6 +18,7 @@ export default function GestionCookies() {
         marketing: false,
     });
     const [showToast, setShowToast] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         const storedPreferences = localStorage.getItem("cookie_preferences");
@@ -37,7 +39,10 @@ export default function GestionCookies() {
     const handleSave = () => {
         localStorage.setItem("cookie_preferences", JSON.stringify(preferences));
         setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
+        setTimeout(() => {
+            setShowToast(false);
+            router.back();
+        }, 1000);
     };
 
     return (
@@ -190,10 +195,10 @@ function Switch({
             onClick={onChange}
             disabled={disabled}
             className={`relative w-14 h-8 rounded-full transition-colors duration-300 focus:outline-none ${disabled
-                    ? "bg-gray-200 cursor-not-allowed opacity-50"
-                    : checked
-                        ? "bg-[#D4AF37]"
-                        : "bg-gray-300 hover:bg-gray-400"
+                ? "bg-gray-200 cursor-not-allowed opacity-50"
+                : checked
+                    ? "bg-[#D4AF37]"
+                    : "bg-gray-300 hover:bg-gray-400"
                 }`}
         >
             <motion.div
