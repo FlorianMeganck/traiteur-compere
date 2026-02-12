@@ -54,7 +54,7 @@ export default function Footer() {
                             <FooterLink href="#" label="Mentions Légales" />
                             <FooterLink href="/legal/confidentialite" label="Politique de Confidentialité" />
                             <FooterLink href="/legal/cgv" label="CGV" />
-                            <FooterLink href="#" label="Gestion des Cookies" />
+                            <FooterLink href="/gestion-cookies" label="Gestion des Cookies" />
                         </div>
                     </div>
                 </div>
