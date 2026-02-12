@@ -6,63 +6,67 @@ import { Sprout, Shell, Flower2, FlaskConical, LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 // --- DATA ---
+// --- DATA ---
 const FORMULES = [
     {
-        title: "Cochon à la broche & BBQ",
-        description: "Une cuisson lente pour une viande tendre et savoureuse, accompagnée de nos salades fraîches et sauces maison.",
-        price: "Sur devis (variable selon marché)", // Specific override
-        image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=2070&auto=format&fit=crop",
-        items: [
-            "Cochon de lait mariné 24h",
-            "Assortiment de saucisses artisanales",
-            "Pommes de terre grenailles au romarin",
-            "Buffet de crudités de saison",
-            "Sauces : Mayonnaise maison, Tartare, Andalouse"
-        ],
-        allergens: ["gluten", "egg", "lait", "moutarde"] // Updated to include new keys if applicable
-    },
-    {
-        title: "Buffets Froids",
-        description: "Un assortiment de mets raffinés pour satisfaire tous les palais. Idéal pour les réceptions estivales.",
-        price: "32€ / personne", // Example price
+        tag: "Terroir",
+        title: "Le Buffet Ardennais",
+        description: "Une sélection authentique de charcuteries et préparations locales, mettant à l'honneur les saveurs de notre région.",
+        price: "15€ / pers",
         image: "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop",
         items: [
-            "Saumon Bellevue & Tomates crevettes",
-            "Plateau de charcuteries fines",
-            "Rôti de bœuf & Rôti de porc",
-            "Pêches au thon & Œufs mimosa",
-            "Salade de pâtes à l'italienne",
-            "Pain & Beurre"
+            "Croûte de pâté de chevreuil",
+            "Boudin blanc de Liège & Boudin noir",
+            "Duo de jambons sur griffes",
+            "Pêche au thon",
+            "Rosbif et Rôti de porc braisés",
+            "Hure de veau",
+            "Féculents et Crudités de saison"
         ],
-        allergens: ["gluten", "egg", "lait", "fish", "crustace"]
+        allergens: ["gluten", "egg", "lait", "fish", "moutarde", "celeri"]
     },
     {
-        title: "Buffets Chauds",
-        description: "Des plats mijotés avec amour, servis chauds pour réconforter vos convives.",
-        price: "14€ / personne", // THE REQUESTED EXAMPLE
+        tag: "Plats Chauds",
+        title: "Le Dinatoire du Monde",
+        description: "Un voyage culinaire à travers des plats réconfortants et variés, idéal pour satisfaire toutes les envies.",
+        price: "24,50€ / pers",
         image: "https://images.unsplash.com/photo-1547924475-f9e5b2931a26?q=80&w=2070&auto=format&fit=crop",
         items: [
-            "Boulets à la Liégeoise",
-            "Vol au vent de volaille fermière",
-            "Carbonnades à la bière brune",
-            "Gratin dauphinois crémeux",
-            "Légumes chauds de saison"
+            "Premier service : Lasagne maison, Chili con Carne, Tortellini et Paëlla royale",
+            "Suivi d'un service grillades : Brochettes de scampi",
+            "Côte d'agneau, Bœuf et Merguez",
+            "Accompagnés de féculents variés"
         ],
-        allergens: ["gluten", "lait", "egg", "celeri"]
+        allergens: ["gluten", "egg", "lait", "crustace", "celeri"]
     },
     {
-        title: "Zakouskis & Verrines",
-        description: "Des bouchées apéritives élégantes pour lancer vos événements avec style.",
-        price: "1.50€ / pièce",
+        tag: "BBQ & Feu de bois",
+        title: "Le Barbecue Mixte",
+        description: "L'incontournable de l'été. Des grillades savoureuses préparées avec soin pour une ambiance conviviale.",
+        price: "20€ / pers",
+        image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=2070&auto=format&fit=crop",
+        items: [
+            "Entrée au choix : Brochette de Scampi ou Pavé de Saumon à l'aneth",
+            "Plat : Côte d'agneau, Contrefilet",
+            "Merguez, Chipolata et Brochette de bœuf",
+            "Assortiment complet de salades et féculents"
+        ],
+        allergens: ["fish", "crustace", "moutarde"]
+    },
+    {
+        tag: "Banquet & Mariage",
+        title: "Le Buffet de Gala",
+        description: "Notre offre prestige pour vos événements d'exception. Des mets délicats et raffinés pour éblouir vos convives.",
+        price: "22€ / pers",
         image: "https://images.unsplash.com/photo-1546241072-48010ad2862c?q=80&w=1974&auto=format&fit=crop",
         items: [
-            "Verrine mousse de saumon & aneth",
-            "Mini-burger foie gras & confit d'oignons",
-            "Cuillère scampis curry-coco",
-            "Toast chèvre miel & noix",
-            "Mini-quiche lorraine"
+            "Mousse de foie de canard au Sauternes",
+            "Farandole de langoustines",
+            "Saumon aux deux saveurs",
+            "Terrine de Sandre au basilic & Tomates crevettes grises",
+            "Viandes braisées et accompagnements raffinés"
         ],
-        allergens: ["gluten", "lait", "egg", "nut", "fish", "crustace", "sesame"]
+        allergens: ["crustace", "fish", "gluten", "egg", "lait", "sulfite"]
     }
 ];
 
@@ -93,6 +97,7 @@ const ALLERGEN_ICONS: Record<string, AllergenData> = {
 };
 
 interface FormuleType {
+    tag: string;
     title: string;
     description: string;
     price: string;
@@ -181,11 +186,18 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
+                {/* Image Tag Overlay */}
+                <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-2 shadow-sm border-l-4 border-[#D4AF37]">
+                    <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">{formule.tag}</span>
+                </div>
             </div>
 
             {/* CONTENT SIDE */}
             <div className="w-full md:w-1/2 space-y-6">
-                <h2 className="text-3xl md:text-4xl font-serif text-black">{formule.title}</h2>
+                <div className="flex flex-col gap-2">
+                    <span className="text-[#D4AF37] font-sans text-sm font-bold uppercase tracking-widest md:hidden">{formule.tag}</span>
+                    <h2 className="text-3xl md:text-4xl font-serif text-black">{formule.title}</h2>
+                </div>
                 <div className="w-20 h-1 bg-neutral-300" />
 
                 <p className="text-gray-600 leading-relaxed text-lg">
