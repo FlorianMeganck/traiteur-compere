@@ -17,6 +17,10 @@ const viandes = ["Saucisse de Campagne", "Merguez", "Chipolata", "Brochette de B
 const chauds = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Riz aux légumes"];
 const froids = ["Salade de Pâtes au Pesto", "Salade Grecque (Feta/Olives)", "Taboulé Oriental", "Tomate Mozzarella", "Salade de Pomme de Terre"];
 
+const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau"];
+const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée"];
+const SALADES_FROIDES = ["Salade de Pâtes", "Taboulé", "Salade de Riz", "Carottes Râpées", "Céleri Râpé", "Tomate Mozzarella", "Concombre"];
+
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
 const OPTIONS_BBQ = ["Moins de 30", "30 à 80", "Plus de 80"];
 
@@ -423,10 +427,10 @@ function ContactForm() {
                                         name="Nombre_Convives"
                                         value={formData.Nombre_Convives}
                                         onChange={handleChange}
-                                        disabled={isBBQ}
-                                        className={`${inputStyle} appearance-none ${isBBQ ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
+                                        disabled={isCustomMode}
+                                        className={`${inputStyle} appearance-none ${isCustomMode ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
                                     >
-                                        {(isBBQ ? OPTIONS_BBQ : OPTIONS_STANDARD).map((opt) => (
+                                        {(isCustomMode ? OPTIONS_BBQ : OPTIONS_STANDARD).map((opt) => (
                                             <option key={opt} value={opt}>{opt}</option>
                                         ))}
                                     </select>
@@ -449,133 +453,114 @@ function ContactForm() {
                                             {/* Golden accent line */}
                                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
 
-                                            <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
-                                                Votre Composition Barbecue
-                                            </h3>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                                {Array.from({ length: meatCount }).map((_, i) => {
-                                                    const num = i + 1;
-                                                    const currentKey = `viande_${num}`;
-                                                    const currentValue = (formData as any)[currentKey];
-
-                                                    // Get all selected meats *except* the one for this specific dropdown
-                                                    // This allows us to re-select the current value, but hides values selected elsewhere
-                                                    const otherSelectedMeats = Array.from({ length: meatCount })
-                                                        .map((_, j) => (formData as any)[`viande_${j + 1}`])
-                                                        .filter((val, j) => j !== i && Boolean(val));
-
-                                                    const availableViandes = viandes.filter(v => !otherSelectedMeats.includes(v));
-
-                                                    return (
-                                                        <div key={currentKey} className="group">
-                                                            <label className={labelStyle}>Viande {num}</label>
-                                                            <div className="relative">
-                                                                <select
-                                                                    name={currentKey}
-                                                                    value={currentValue}
-                                                                    onChange={handleChange}
-                                                                    className={`${inputStyle} appearance-none cursor-pointer`}
-                                                                >
-                                                                    <option value="">Choisir une viande...</option>
-                                                                    {availableViandes.map((v) => (
-                                                                        <option key={v} value={v}>{v}</option>
-                                                                    ))}
-                                                                </select>
-                                                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-dashed border-neutral-200">
-                                                <div className="group">
-                                                    <label className={labelStyle}>Accompagnement Chaud</label>
-                                                    <div className="relative">
-                                                        <select
-                                                            name="accomp_chaud"
-                                                            value={formData.accomp_chaud}
-                                                            onChange={handleChange}
-                                                            className={`${inputStyle} appearance-none cursor-pointer`}
-                                                        >
-                                                            <option value="">Choisir...</option>
-                                                            {chauds.map((c) => (
-                                                                <option key={c} value={c}>{c}</option>
-                                                            ))}
-                                                        </select>
-                                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                                        </div>
+                                            <div key={currentKey} className="group">
+                                                <label className={labelStyle}>Viande {num}</label>
+                                                <div className="relative">
+                                                    <select
+                                                        name={currentKey}
+                                                        value={currentValue}
+                                                        onChange={handleChange}
+                                                        className={`${inputStyle} appearance-none cursor-pointer`}
+                                                    >
+                                                        <option value="">Choisir une viande...</option>
+                                                        {availableViandes.map((v) => (
+                                                            <option key={v} value={v}>{v}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                                     </div>
                                                 </div>
+                                            </div>
+                                            );
+                                                })}
+                                        </div>
 
-                                                <div className="group">
-                                                    <label className={labelStyle}>Accompagnement Froid</label>
-                                                    <div className="relative">
-                                                        <select
-                                                            name="accomp_froid"
-                                                            value={formData.accomp_froid}
-                                                            onChange={handleChange}
-                                                            className={`${inputStyle} appearance-none cursor-pointer`}
-                                                        >
-                                                            <option value="">Choisir...</option>
-                                                            {froids.map((f) => (
-                                                                <option key={f} value={f}>{f}</option>
-                                                            ))}
-                                                        </select>
-                                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-dashed border-neutral-200">
+                                            <div className="group">
+                                                <label className={labelStyle}>Accompagnement Chaud</label>
+                                                <div className="relative">
+                                                    <select
+                                                        name="accomp_chaud"
+                                                        value={formData.accomp_chaud}
+                                                        onChange={handleChange}
+                                                        className={`${inputStyle} appearance-none cursor-pointer`}
+                                                    >
+                                                        <option value="">Choisir...</option>
+                                                        {chauds.map((c) => (
+                                                            <option key={c} value={c}>{c}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="group">
+                                                <label className={labelStyle}>Accompagnement Froid</label>
+                                                <div className="relative">
+                                                    <select
+                                                        name="accomp_froid"
+                                                        value={formData.accomp_froid}
+                                                        onChange={handleChange}
+                                                        className={`${inputStyle} appearance-none cursor-pointer`}
+                                                    >
+                                                        <option value="">Choisir...</option>
+                                                        {froids.map((f) => (
+                                                            <option key={f} value={f}>{f}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
                                     </motion.div>
                                 )}
-                            </AnimatePresence>
+                        </AnimatePresence>
 
                             {/* DETAILS PROJET */}
-                            <div className="group">
-                                <label className={labelStyle}>Dites-nous en plus !</label>
-                                <textarea
-                                    name="details_projet"
-                                    value={formData.details_projet}
-                                    onChange={handleChange}
-                                    className={`${inputStyle} h-40 resize-y`}
-                                    placeholder="Décrivez votre projet : ambiance, allergies, régimes spéciaux, déroulement souhaité..."
-                                />
-                            </div>
+                    <div className="group">
+                        <label className={labelStyle}>Dites-nous en plus !</label>
+                        <textarea
+                            name="details_projet"
+                            value={formData.details_projet}
+                            onChange={handleChange}
+                            className={`${inputStyle} h-40 resize-y`}
+                            placeholder="Décrivez votre projet : ambiance, allergies, régimes spéciaux, déroulement souhaité..."
+                        />
+                    </div>
 
-                            {/* RECONTACT */}
-                            <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 flex items-center gap-3">
-                                <input
-                                    type="checkbox"
-                                    name="Souhaite_etre_recontacte"
-                                    id="Souhaite_etre_recontacte"
-                                    className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                                    checked={formData.Souhaite_etre_recontacte === "Oui"}
-                                    onChange={handleChange}
-                                />
-                                <label htmlFor="Souhaite_etre_recontacte" className="text-neutral-700 font-medium cursor-pointer select-none">
-                                    Je souhaite être recontacté pour discuter de mon devis.
-                                </label>
-                            </div>
+                    {/* RECONTACT */}
+                    <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100 flex items-center gap-3">
+                        <input
+                            type="checkbox"
+                            name="Souhaite_etre_recontacte"
+                            id="Souhaite_etre_recontacte"
+                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                            checked={formData.Souhaite_etre_recontacte === "Oui"}
+                            onChange={handleChange}
+                        />
+                        <label htmlFor="Souhaite_etre_recontacte" className="text-neutral-700 font-medium cursor-pointer select-none">
+                            Je souhaite être recontacté pour discuter de mon devis.
+                        </label>
+                    </div>
 
-                            {/* SUBMIT BUTTON */}
-                            <button
-                                type="submit"
-                                disabled={status === "submitting"}
-                                className={`w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:shadow-2xl hover:bg-[#D4AF37] hover:-translate-y-1 transition-all duration-300 transform active:scale-95 ${status === "submitting" ? "opacity-75 cursor-not-allowed" : ""}`}
-                            >
-                                {status === "submitting" ? "Envoi en cours..." : "Envoyer la demande"}
-                            </button>
-                        </form>
+                    {/* SUBMIT BUTTON */}
+                    <button
+                        type="submit"
+                        disabled={status === "submitting"}
+                        className={`w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:shadow-2xl hover:bg-[#D4AF37] hover:-translate-y-1 transition-all duration-300 transform active:scale-95 ${status === "submitting" ? "opacity-75 cursor-not-allowed" : ""}`}
+                    >
+                        {status === "submitting" ? "Envoi en cours..." : "Envoyer la demande"}
+                    </button>
+                </form>
                     )}
-                </div>
             </div>
-        </main>
+        </div>
+        </main >
     );
 }
