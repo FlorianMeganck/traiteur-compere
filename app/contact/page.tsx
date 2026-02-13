@@ -38,18 +38,25 @@ function ContactForm() {
         viande_1: "",
         viande_2: "",
         viande_3: "",
+        viande_4: "",
+        viande_5: "",
         accomp_chaud: "",
         accomp_froid: ""
     });
 
-    const isBBQ = searchParams.get('menu') === 'bbq_sur_mesure';
+    const menuParam = searchParams.get('menu');
+    const isBBQ = menuParam === 'bbq' || menuParam === 'bbq_sur_mesure';
+    const meatCount = parseInt(searchParams.get('count') || '3');
 
     // EFFECT: Check for URL params (e.g. ?convives=Plus de 100)
     useEffect(() => {
         const convivesParam = searchParams.get("convives");
         if (convivesParam) {
             // Verify it's a valid option to avoid unwanted strings
-            const validOptions = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
+            const validOptions = [
+                "Moins de 20", "20 à 50", "50 à 100", "Plus de 100",
+                "Moins de 30", "30 à 80", "Plus de 80" // New BBQ ranges
+            ];
 
             if (validOptions.includes(convivesParam)) {
                 setFormData(prev => ({ ...prev, Nombre_Convives: convivesParam }));
@@ -417,6 +424,11 @@ function ContactForm() {
                                         <option value="20 à 50">20 à 50</option>
                                         <option value="50 à 100">50 à 100</option>
                                         <option value="Plus de 100">Plus de 100</option>
+                                        {/* Hidden options dynamically selected via URL but available if needed */}
+                                        <option disabled>--- Options BBQ ---</option>
+                                        <option value="Moins de 30">Moins de 30</option>
+                                        <option value="30 à 80">30 à 80</option>
+                                        <option value="Plus de 80">Plus de 80</option>
                                     </select>
                                     <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -442,27 +454,30 @@ function ContactForm() {
                                             </h3>
 
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                                {[1, 2, 3].map((num) => (
-                                                    <div key={`viande_${num}`} className="group">
-                                                        <label className={labelStyle}>Viande {num}</label>
-                                                        <div className="relative">
-                                                            <select
-                                                                name={`viande_${num}`}
-                                                                value={(formData as any)[`viande_${num}`]}
-                                                                onChange={handleChange}
-                                                                className={`${inputStyle} appearance-none cursor-pointer`}
-                                                            >
-                                                                <option value="">Choisir une viande...</option>
-                                                                {viandes.map((v) => (
-                                                                    <option key={v} value={v}>{v}</option>
-                                                                ))}
-                                                            </select>
-                                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                {Array.from({ length: meatCount }).map((_, i) => {
+                                                    const num = i + 1;
+                                                    return (
+                                                        <div key={`viande_${num}`} className="group">
+                                                            <label className={labelStyle}>Viande {num}</label>
+                                                            <div className="relative">
+                                                                <select
+                                                                    name={`viande_${num}`}
+                                                                    value={(formData as any)[`viande_${num}`]}
+                                                                    onChange={handleChange}
+                                                                    className={`${inputStyle} appearance-none cursor-pointer`}
+                                                                >
+                                                                    <option value="">Choisir une viande...</option>
+                                                                    {viandes.map((v) => (
+                                                                        <option key={v} value={v}>{v}</option>
+                                                                    ))}
+                                                                </select>
+                                                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                ))}
+                                                    );
+                                                })}
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-dashed border-neutral-200">

@@ -254,15 +254,38 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
 }
 
 function PricingBlock({ price, tag }: { price: string, tag: string }) {
-    // If it's the BBQ menu, show a single distinct button
+    // If it's the BBQ menu, show the 3 specific options
     if (tag === "BBQ & Feu de bois") {
         return (
-            <div className="flex justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                {/* Option 1: < 30 */}
                 <Link
-                    href="/contact?menu=bbq_sur_mesure"
-                    className="bg-[#D4AF37] text-white px-8 py-4 rounded-full font-serif font-bold text-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 transform"
+                    href="/contact?menu=bbq&count=3&convives=Moins de 30"
+                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
                 >
-                    Composez votre BBQ !
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 30 pers.</span>
+                    <span className="text-sm font-medium text-gray-900">3 Viandes au choix</span>
+                    <span className="text-[10px] text-gray-400">(Formule Standard)</span>
+                </Link>
+
+                {/* Option 2: 30 - 80 (Highlighted) */}
+                <Link
+                    href="/contact?menu=bbq&count=4&convives=30 à 80"
+                    className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
+                >
+                    <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
+                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">30 à 80 pers.</span>
+                    <span className="text-lg font-bold font-serif">4 Viandes au choix</span>
+                </Link>
+
+                {/* Option 3: > 80 */}
+                <Link
+                    href="/contact?menu=bbq&count=5&convives=Plus de 80"
+                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                >
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 80 pers.</span>
+                    <span className="text-sm font-medium text-gray-900">5 Viandes au choix</span>
+                    <span className="text-[10px] text-gray-400">(Grand Groupe)</span>
                 </Link>
             </div>
         );
