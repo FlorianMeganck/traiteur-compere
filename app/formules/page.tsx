@@ -11,7 +11,7 @@ const FORMULES = [
     {
         tag: "Terroir",
         title: "Le Buffet Ardennais",
-        description: "Une sélection authentique de charcuteries et préparations locales, mettant à l'honneur les saveurs de notre région.",
+        description: "Une véritable immersion dans le terroir : un assortiment généreux de charcuteries artisanales, spécialités de Liège et viandes mijotées pour une convivialité absolue.",
         price: "15€ / pers",
         image: "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop",
         items: [

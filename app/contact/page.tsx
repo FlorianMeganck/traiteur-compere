@@ -511,7 +511,7 @@ function ContactForm() {
                                             </h3>
 
                                             <p className="text-sm text-neutral-400 italic mb-6 text-center">
-                                                💡 Exemple de composition : Saucisse, Merguez, Brochette de Bœuf.
+                                                💡 Exemple de composition ({meatCount} choix) : {viandes.slice(0, meatCount).join(', ')}.
                                             </p>
 
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -615,10 +615,10 @@ function ContactForm() {
                                             </h3>
 
                                             <p className="text-sm text-neutral-400 italic mb-6 text-center">
-                                                {isArdennais
-                                                    ? "💡 Exemple de composition : Croûte de pâté, Boudin blanc, Jambon d'Ardenne, Pêche au thon."
-                                                    : "💡 Exemple de composition : Foie gras, Saumon belle-vue, Langoustines, Terrine de Sandre."
-                                                }
+                                                💡 Exemple de composition ({countParam} choix) : {isArdennais
+                                                    ? ITEMS_ARDENNAIS.slice(0, countParam).join(', ')
+                                                    : ITEMS_GALA.slice(0, countParam).join(', ')
+                                                }.
                                             </p>
 
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
