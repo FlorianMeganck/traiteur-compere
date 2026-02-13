@@ -13,6 +13,10 @@ export default function Contact() {
     );
 }
 
+const viandes = ["Saucisse de Campagne", "Merguez", "Chipolata", "Brochette de Bœuf marinée", "Brochette de Poulet", "Lard mariné", "Spare Ribs au Miel", "Côte d'Agneau (+suppl)"];
+const chauds = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Riz aux légumes"];
+const froids = ["Salade de Pâtes au Pesto", "Salade Grecque (Feta/Olives)", "Taboulé Oriental", "Tomate Mozzarella", "Salade de Pomme de Terre"];
+
 function ContactForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -29,8 +33,16 @@ function ContactForm() {
         Date: "",
         Nombre_Convives: "Moins de 20", // New Field
         details_projet: "",
-        Souhaite_etre_recontacte: "Non"
+        Souhaite_etre_recontacte: "Non",
+        // BBQ Fields
+        viande_1: "",
+        viande_2: "",
+        viande_3: "",
+        accomp_chaud: "",
+        accomp_froid: ""
     });
+
+    const isBBQ = searchParams.get('menu') === 'bbq_sur_mesure';
 
     // EFFECT: Check for URL params (e.g. ?convives=Plus de 100)
     useEffect(() => {
@@ -411,6 +423,93 @@ function ContactForm() {
                                     </div>
                                 </div>
                             </div>
+
+                            {/* BBQ COMPOSITION SECTION */}
+                            <AnimatePresence>
+                                {isBBQ && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="bg-neutral-50/50 border border-[#D4AF37]/30 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm relative">
+                                            {/* Golden accent line */}
+                                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
+
+                                            <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
+                                                Votre Composition Barbecue
+                                            </h3>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                {[1, 2, 3].map((num) => (
+                                                    <div key={`viande_${num}`} className="group">
+                                                        <label className={labelStyle}>Viande {num}</label>
+                                                        <div className="relative">
+                                                            <select
+                                                                name={`viande_${num}`}
+                                                                value={(formData as any)[`viande_${num}`]}
+                                                                onChange={handleChange}
+                                                                className={`${inputStyle} appearance-none cursor-pointer`}
+                                                            >
+                                                                <option value="">Choisir une viande...</option>
+                                                                {viandes.map((v) => (
+                                                                    <option key={v} value={v}>{v}</option>
+                                                                ))}
+                                                            </select>
+                                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-dashed border-neutral-200">
+                                                <div className="group">
+                                                    <label className={labelStyle}>Accompagnement Chaud</label>
+                                                    <div className="relative">
+                                                        <select
+                                                            name="accomp_chaud"
+                                                            value={formData.accomp_chaud}
+                                                            onChange={handleChange}
+                                                            className={`${inputStyle} appearance-none cursor-pointer`}
+                                                        >
+                                                            <option value="">Choisir...</option>
+                                                            {chauds.map((c) => (
+                                                                <option key={c} value={c}>{c}</option>
+                                                            ))}
+                                                        </select>
+                                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="group">
+                                                    <label className={labelStyle}>Accompagnement Froid</label>
+                                                    <div className="relative">
+                                                        <select
+                                                            name="accomp_froid"
+                                                            value={formData.accomp_froid}
+                                                            onChange={handleChange}
+                                                            className={`${inputStyle} appearance-none cursor-pointer`}
+                                                        >
+                                                            <option value="">Choisir...</option>
+                                                            {froids.map((f) => (
+                                                                <option key={f} value={f}>{f}</option>
+                                                            ))}
+                                                        </select>
+                                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
 
                             {/* DETAILS PROJET */}
                             <div className="group">

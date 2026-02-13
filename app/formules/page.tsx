@@ -246,16 +246,27 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
 
                 {/* PRICING LOGIC */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
-                    <PricingBlock price={formule.price} />
+                    <PricingBlock price={formule.price} tag={formule.tag} />
                 </div>
             </div>
         </motion.section>
     );
 }
 
-function PricingBlock({ price }: { price: string }) {
-    // If exact price provided (e.g. "14€ / personne"), we show strict tiered logic
-    // Otherwise (e.g. "Sur devis"), we adapt slightly or just show it.
+function PricingBlock({ price, tag }: { price: string, tag: string }) {
+    // If it's the BBQ menu, show a single distinct button
+    if (tag === "BBQ & Feu de bois") {
+        return (
+            <div className="flex justify-center">
+                <Link
+                    href="/contact?menu=bbq_sur_mesure"
+                    className="bg-[#D4AF37] text-white px-8 py-4 rounded-full font-serif font-bold text-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 transform"
+                >
+                    Composez votre BBQ !
+                </Link>
+            </div>
+        );
+    }
 
     // Check if price contains a number
     const hasPrice = /\d/.test(price);
