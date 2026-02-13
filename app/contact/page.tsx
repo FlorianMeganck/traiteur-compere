@@ -413,12 +413,13 @@ function ContactForm() {
                                     <Users size={16} className="text-neutral-400" />
                                     Nombre de convives
                                 </label>
-                                <div className="relative">
+                                <div className="relative" title={isBBQ ? "Pour changer le nombre de convives, veuillez retourner à la page Formules" : ""}>
                                     <select
                                         name="Nombre_Convives"
                                         value={formData.Nombre_Convives}
                                         onChange={handleChange}
-                                        className={`${inputStyle} appearance-none cursor-pointer`}
+                                        disabled={isBBQ}
+                                        className={`${inputStyle} appearance-none ${isBBQ ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
                                     >
                                         <option value="Moins de 20">Moins de 20</option>
                                         <option value="20 à 50">20 à 50</option>
