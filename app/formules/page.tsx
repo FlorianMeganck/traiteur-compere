@@ -6,7 +6,6 @@ import { Sprout, Shell, Flower2, FlaskConical, LucideIcon, Check } from "lucide-
 import Link from "next/link";
 
 // --- DATA ---
-// --- DATA ---
 const FORMULES = [
     {
         tag: "Terroir",

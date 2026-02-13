@@ -32,14 +32,14 @@ function ContactForm() {
     const [formData, setFormData] = useState({
         Prenom: "",
         Nom: "",
-        Societe: "Non", // Checkbox state ("Oui" or "Non")
-        Nom_Societe: "", // Dynamic field if Societe "Oui"
+        Societe: "Non",
+        Nom_Societe: "",
         Mail: "",
         Tel: "",
         Type_Evenement: "Mariage",
         type_autre: "",
         Date: "",
-        Nombre_Convives: "Moins de 20", // New Field
+        Nombre_Convives: "Moins de 20",
         details_projet: "",
         Souhaite_etre_recontacte: "Non",
         // BBQ Fields
@@ -69,19 +69,13 @@ function ContactForm() {
     const isCustomMode = isBBQ || isBuffet;
 
     const countParam = parseInt(searchParams.get('count') || '3');
-    // Keep meatCount for backward compatibility if needed, or replace usages. 
-    // The previous code used meatCount for BBQ. I will align everything to use countParam or specific logic.
-    const meatCount = countParam;
+
 
     // EFFECT: Check for URL params (e.g. ?convives=Plus de 100)
     useEffect(() => {
         const convivesParam = searchParams.get("convives");
         if (convivesParam) {
             // Verify it's a valid option to avoid unwanted strings
-            // Determine which list to validate against based on the URL context.
-            // Note: We might be switching contexts, so we check if the param exists in EITHER list to be safe,
-            // or we could be strict. Given the user might navigate back and forth, strict validation against the *current* mode is better.
-            // But `isBBQ` is derived from `searchParams` which we have.
 
             let currentOptions = OPTIONS_STANDARD;
             if (isBBQ) currentOptions = OPTIONS_BBQ;
@@ -205,7 +199,7 @@ function ContactForm() {
 
                     if (isBBQ) {
                         message += "Viandes choisies :\n";
-                        for (let i = 1; i <= meatCount; i++) {
+                        for (let i = 1; i <= countParam; i++) {
                             const val = (formData as any)[`viande_${i}`];
                             if (val) message += `- Viande ${i}: ${val}\n`;
                         }
@@ -511,13 +505,13 @@ function ContactForm() {
                                             </h3>
 
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                                {Array.from({ length: meatCount }).map((_, i) => {
+                                                {Array.from({ length: countParam }).map((_, i) => {
                                                     const num = i + 1;
                                                     const currentKey = `viande_${num}`;
                                                     const currentValue = (formData as any)[currentKey];
 
                                                     // Get all selected meats *except* the one for this specific dropdown
-                                                    const otherSelectedMeats = Array.from({ length: meatCount })
+                                                    const otherSelectedMeats = Array.from({ length: countParam })
                                                         .map((_, j) => (formData as any)[`viande_${j + 1}`])
                                                         .filter((val, j) => j !== i && Boolean(val));
 
