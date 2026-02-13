@@ -17,6 +17,9 @@ const viandes = ["Saucisse de Campagne", "Merguez", "Chipolata", "Brochette de B
 const chauds = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Riz aux légumes"];
 const froids = ["Salade de Pâtes au Pesto", "Salade Grecque (Feta/Olives)", "Taboulé Oriental", "Tomate Mozzarella", "Salade de Pomme de Terre"];
 
+const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
+const OPTIONS_BBQ = ["Moins de 30", "30 à 80", "Plus de 80"];
+
 function ContactForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -53,16 +56,18 @@ function ContactForm() {
         const convivesParam = searchParams.get("convives");
         if (convivesParam) {
             // Verify it's a valid option to avoid unwanted strings
-            const validOptions = [
-                "Moins de 20", "20 à 50", "50 à 100", "Plus de 100",
-                "Moins de 30", "30 à 80", "Plus de 80" // New BBQ ranges
-            ];
+            // Determine which list to validate against based on the URL context.
+            // Note: We might be switching contexts, so we check if the param exists in EITHER list to be safe,
+            // or we could be strict. Given the user might navigate back and forth, strict validation against the *current* mode is better.
+            // But `isBBQ` is derived from `searchParams` which we have.
 
-            if (validOptions.includes(convivesParam)) {
+            const currentOptions = isBBQ ? OPTIONS_BBQ : OPTIONS_STANDARD;
+
+            if (currentOptions.includes(convivesParam)) {
                 setFormData(prev => ({ ...prev, Nombre_Convives: convivesParam }));
             }
         }
-    }, [searchParams]);
+    }, [searchParams, isBBQ]);
 
     const [errors, setErrors] = useState({
         Mail: "",
@@ -421,15 +426,9 @@ function ContactForm() {
                                         disabled={isBBQ}
                                         className={`${inputStyle} appearance-none ${isBBQ ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
                                     >
-                                        <option value="Moins de 20">Moins de 20</option>
-                                        <option value="20 à 50">20 à 50</option>
-                                        <option value="50 à 100">50 à 100</option>
-                                        <option value="Plus de 100">Plus de 100</option>
-                                        {/* Hidden options dynamically selected via URL but available if needed */}
-                                        <option disabled>--- Options BBQ ---</option>
-                                        <option value="Moins de 30">Moins de 30</option>
-                                        <option value="30 à 80">30 à 80</option>
-                                        <option value="Plus de 80">Plus de 80</option>
+                                        {(isBBQ ? OPTIONS_BBQ : OPTIONS_STANDARD).map((opt) => (
+                                            <option key={opt} value={opt}>{opt}</option>
+                                        ))}
                                     </select>
                                     <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
