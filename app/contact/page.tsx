@@ -456,18 +456,29 @@ function ContactForm() {
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 {Array.from({ length: meatCount }).map((_, i) => {
                                                     const num = i + 1;
+                                                    const currentKey = `viande_${num}`;
+                                                    const currentValue = (formData as any)[currentKey];
+
+                                                    // Get all selected meats *except* the one for this specific dropdown
+                                                    // This allows us to re-select the current value, but hides values selected elsewhere
+                                                    const otherSelectedMeats = Array.from({ length: meatCount })
+                                                        .map((_, j) => (formData as any)[`viande_${j + 1}`])
+                                                        .filter((val, j) => j !== i && Boolean(val));
+
+                                                    const availableViandes = viandes.filter(v => !otherSelectedMeats.includes(v));
+
                                                     return (
-                                                        <div key={`viande_${num}`} className="group">
+                                                        <div key={currentKey} className="group">
                                                             <label className={labelStyle}>Viande {num}</label>
                                                             <div className="relative">
                                                                 <select
-                                                                    name={`viande_${num}`}
-                                                                    value={(formData as any)[`viande_${num}`]}
+                                                                    name={currentKey}
+                                                                    value={currentValue}
                                                                     onChange={handleChange}
                                                                     className={`${inputStyle} appearance-none cursor-pointer`}
                                                                 >
                                                                     <option value="">Choisir une viande...</option>
-                                                                    {viandes.map((v) => (
+                                                                    {availableViandes.map((v) => (
                                                                         <option key={v} value={v}>{v}</option>
                                                                     ))}
                                                                 </select>
