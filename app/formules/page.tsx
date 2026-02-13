@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Sprout, Shell, Flower2, FlaskConical, LucideIcon } from "lucide-react";
+import { Sprout, Shell, Flower2, FlaskConical, LucideIcon, Check } from "lucide-react";
 import Link from "next/link";
 
 // --- DATA ---
@@ -207,11 +207,11 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 {/* COMPOSITION */}
                 <div className="bg-white p-6 md:p-8 rounded-sm shadow-sm border-l-4 border-neutral-300">
                     <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wide text-sm">Composition</h3>
-                    <ul className="grid grid-cols-1 gap-2">
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
                         {formule.items.map((item: string, i: number) => (
-                            <li key={i} className="flex items-start gap-2 text-gray-700">
-                                <span className="text-neutral-400 mt-1.5">•</span>
-                                {item}
+                            <li key={i} className="flex items-start gap-2 text-neutral-700">
+                                <Check size={16} className="text-[#D4AF37] flex-shrink-0 mt-1" strokeWidth={3} />
+                                <span className="text-sm leading-relaxed">{item}</span>
                             </li>
                         ))}
                     </ul>

@@ -510,10 +510,6 @@ function ContactForm() {
                                                 Votre Composition Barbecue
                                             </h3>
 
-                                            <p className="text-sm text-neutral-400 italic mb-6 text-center">
-                                                💡 Exemple de composition ({meatCount} choix) : {viandes.slice(0, meatCount).join(', ')}.
-                                            </p>
-
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 {Array.from({ length: meatCount }).map((_, i) => {
                                                     const num = i + 1;
@@ -613,13 +609,6 @@ function ContactForm() {
                                             <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
                                                 Composition de votre Buffet {isArdennais ? "Ardennais" : "de Gala"}
                                             </h3>
-
-                                            <p className="text-sm text-neutral-400 italic mb-6 text-center">
-                                                💡 Exemple de composition ({countParam} choix) : {isArdennais
-                                                    ? ITEMS_ARDENNAIS.slice(0, countParam).join(', ')
-                                                    : ITEMS_GALA.slice(0, countParam).join(', ')
-                                                }.
-                                            </p>
 
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 {Array.from({ length: countParam }).map((_, i) => {
