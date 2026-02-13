@@ -294,30 +294,22 @@ function PricingBlock({ price, tag }: { price: string, tag: string }) {
     // Logic for Ardennais (Terroir)
     if (tag === "Terroir") {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
                 <Link
-                    href="/contact?menu=ardennais&count=4&convives=Moins de 30"
+                    href="/contact?menu=ardennais&count=4&convives=Moins de 40"
                     className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
                 >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 30 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">4 Spécialités au choix</span>
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 40 pers.</span>
+                    <span className="text-sm font-medium text-gray-900">4 Choix à composer</span>
                 </Link>
 
                 <Link
-                    href="/contact?menu=ardennais&count=5&convives=30 à 80"
+                    href="/contact?menu=ardennais&count=5&convives=40 et plus"
                     className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">30 à 80 pers.</span>
-                    <span className="text-lg font-bold font-serif">5 Spécialités au choix</span>
-                </Link>
-
-                <Link
-                    href="/contact?menu=ardennais&count=6&convives=Plus de 80"
-                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
-                >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 80 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">6 Spécialités au choix</span>
+                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">40 pers. et plus</span>
+                    <span className="text-lg font-bold font-serif">5 Choix à composer</span>
                 </Link>
             </div>
         );
@@ -326,30 +318,22 @@ function PricingBlock({ price, tag }: { price: string, tag: string }) {
     // Logic for Gala (Banquet & Mariage)
     if (tag === "Banquet & Mariage") {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
                 <Link
-                    href="/contact?menu=gala&count=4&convives=Moins de 30"
+                    href="/contact?menu=gala&count=4&convives=Moins de 40"
                     className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
                 >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 30 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">4 Spécialités au choix</span>
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 40 pers.</span>
+                    <span className="text-sm font-medium text-gray-900">4 Choix à composer</span>
                 </Link>
 
                 <Link
-                    href="/contact?menu=gala&count=5&convives=30 à 80"
+                    href="/contact?menu=gala&count=5&convives=40 et plus"
                     className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">30 à 80 pers.</span>
-                    <span className="text-lg font-bold font-serif">5 Spécialités au choix</span>
-                </Link>
-
-                <Link
-                    href="/contact?menu=gala&count=6&convives=Plus de 80"
-                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
-                >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 80 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">6 Spécialités au choix</span>
+                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">40 pers. et plus</span>
+                    <span className="text-lg font-bold font-serif">5 Choix à composer</span>
                 </Link>
             </div>
         );

@@ -23,6 +23,7 @@ const SALADES_FROIDES = ["Salade de Pâtes", "Taboulé", "Salade de Riz", "Carot
 
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
 const OPTIONS_BBQ = ["Moins de 30", "30 à 80", "Plus de 80"];
+const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
 
 function ContactForm() {
     const router = useRouter();
@@ -82,13 +83,15 @@ function ContactForm() {
             // or we could be strict. Given the user might navigate back and forth, strict validation against the *current* mode is better.
             // But `isBBQ` is derived from `searchParams` which we have.
 
-            const currentOptions = isBBQ ? OPTIONS_BBQ : OPTIONS_STANDARD;
+            let currentOptions = OPTIONS_STANDARD;
+            if (isBBQ) currentOptions = OPTIONS_BBQ;
+            if (isBuffet) currentOptions = OPTIONS_BUFFET;
 
             if (currentOptions.includes(convivesParam)) {
                 setFormData(prev => ({ ...prev, Nombre_Convives: convivesParam }));
             }
         }
-    }, [searchParams, isBBQ]);
+    }, [searchParams, isBBQ, isBuffet]);
 
     const [errors, setErrors] = useState({
         Mail: "",
@@ -480,7 +483,7 @@ function ContactForm() {
                                         disabled={isCustomMode}
                                         className={`${inputStyle} appearance-none ${isCustomMode ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
                                     >
-                                        {(isCustomMode ? OPTIONS_BBQ : OPTIONS_STANDARD).map((opt) => (
+                                        {(isBBQ ? OPTIONS_BBQ : (isBuffet ? OPTIONS_BUFFET : OPTIONS_STANDARD)).map((opt) => (
                                             <option key={opt} value={opt}>{opt}</option>
                                         ))}
                                     </select>
@@ -506,6 +509,10 @@ function ContactForm() {
                                             <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
                                                 Votre Composition Barbecue
                                             </h3>
+
+                                            <p className="text-sm text-neutral-400 italic mb-6 text-center">
+                                                💡 Exemple de composition : Saucisse, Merguez, Brochette de Bœuf.
+                                            </p>
 
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 {Array.from({ length: meatCount }).map((_, i) => {
@@ -606,6 +613,13 @@ function ContactForm() {
                                             <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
                                                 Composition de votre Buffet {isArdennais ? "Ardennais" : "de Gala"}
                                             </h3>
+
+                                            <p className="text-sm text-neutral-400 italic mb-6 text-center">
+                                                {isArdennais
+                                                    ? "💡 Exemple de composition : Croûte de pâté, Boudin blanc, Jambon d'Ardenne, Pêche au thon."
+                                                    : "💡 Exemple de composition : Foie gras, Saumon belle-vue, Langoustines, Terrine de Sandre."
+                                                }
+                                            </p>
 
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 {Array.from({ length: countParam }).map((_, i) => {
