@@ -13,13 +13,13 @@ export default function Contact() {
     );
 }
 
-const viandes = ["Saucisse de Campagne", "Merguez", "Chipolata", "Brochette de Bœuf marinée", "Brochette de Poulet", "Lard mariné", "Spare Ribs au Miel", "Côte d'Agneau (+suppl)"];
-const chauds = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Riz aux légumes"];
-const froids = ["Salade de Pâtes au Pesto", "Salade Grecque (Feta/Olives)", "Taboulé Oriental", "Tomate Mozzarella", "Salade de Pomme de Terre"];
+const viandes = ["Saucisse de Campagne", "Merguez", "Chipolata", "Brochette de Bœuf marinée", "Brochette de Poulet", "Lard mariné", "Spare Ribs au Miel", "Côte d'Agneau", "Brochette de légumes 🌿", "Halloumi grillé 🌿"];
+const chauds = ["Pomme de terre en chemise 🌿", "Gratin Dauphinois 🌿", "Grenailles au Romarin 🌿", "Riz aux légumes 🌿"];
+const froids = ["Salade de Pâtes au Pesto 🌿", "Salade Grecque (Feta/Olives) 🌿", "Taboulé Oriental 🌿", "Tomate Mozza 🌿", "Salade de Pomme de Terre 🌿"];
 
-const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿"];
-const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿"];
-const SALADES_FROIDES = ["Salade de Pâtes 🌿", "Taboulé 🌿", "Salade de Riz 🌿", "Carottes Râpées 🌿", "Céleri Râpé 🌿", "Tomate Mozzarella 🌿", "Concombre 🌿"];
+const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿", "Quiche aux légumes 🌿"];
+const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
+const SALADES_FROIDES = ["Salade de Pâtes 🌿", "Taboulé 🌿", "Salade de Riz 🌿", "Carottes Râpées 🌿", "Céleri Râpé 🌿", "Tomate Mozza 🌿", "Concombre 🌿"];
 
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
 const OPTIONS_BBQ = ["Moins de 30", "30 à 80", "Plus de 80"];
@@ -478,7 +478,7 @@ function ContactForm() {
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
 
                             <p className="text-sm text-neutral-500 italic mb-4 text-center px-4">
-                                Une envie particulière ou un régime spécifique ? Si nos propositions ne vous conviennent pas totalement, n'hésitez pas à nous le préciser dans le champ libre en bas de formulaire !
+                                Si nos propositions ne vous conviennent pas totalement (régime spécifique, allergie...), précisez-le nous dans le champ libre !
                             </p>
 
                             <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
@@ -582,7 +582,7 @@ function ContactForm() {
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
 
                             <p className="text-sm text-neutral-500 italic mb-4 text-center px-4">
-                                Une envie particulière ou un régime spécifique ? Si nos propositions ne vous conviennent pas totalement, n'hésitez pas à nous le préciser dans le champ libre en bas de formulaire !
+                                Si nos propositions ne vous conviennent pas totalement (régime spécifique, allergie...), précisez-le nous dans le champ libre !
                             </p>
 
                             <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
