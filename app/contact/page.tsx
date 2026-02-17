@@ -21,9 +21,12 @@ const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liè
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
 const SALADES_FROIDES = ["Salade de Pâtes 🌿", "Taboulé 🌿", "Salade de Riz 🌿", "Carottes Râpées 🌿", "Céleri Râpé 🌿", "Tomate Mozza 🌿", "Concombre 🌿"];
 
+const ITEMS_ASSOCIATIONS = ["Boulets Liégeois (Sauce Lapin)", "Boulets Liégeois (Sauce Tomate)", "Vol-au-vent artisanal", "Pâtes Bolognaise", "Pâtes Carbonara", "Burger Classique", "Burger Compère", "Grande Salade & Quiche 🌿"];
+
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
 const OPTIONS_BBQ = ["Moins de 30", "30 à 80", "Plus de 80"];
 const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
+const OPTIONS_ASSOCIATIONS = ["Moins de 50", "50 à 100", "Plus de 100"];
 
 // Helper function for dynamic dish count
 const getRequiredPlatCount = (menu: string | null, convives: string) => {
@@ -38,6 +41,12 @@ const getRequiredPlatCount = (menu: string | null, convives: string) => {
         if (convives === "40 et plus") return 5;
         return 4; // Default fallback
     }
+    if (menu === 'associations') {
+        if (convives === "Moins de 50") return 1;
+        if (convives === "50 à 100") return 2;
+        if (convives === "Plus de 100") return 3;
+        return 1;
+    }
     return 0; // Not a custom menu
 };
 
@@ -51,6 +60,7 @@ function ContactForm() {
     const isBBQ = menuParam === 'bbq' || menuParam === 'bbq_sur_mesure';
     const isArdennais = menuParam === 'ardennais';
     const isGala = menuParam === 'gala';
+    const isAssociations = menuParam === 'associations';
     const isBuffet = isArdennais || isGala;
 
     const [formData, setFormData] = useState({
@@ -63,7 +73,7 @@ function ContactForm() {
         Type_Evenement: "Mariage",
         type_autre: "",
         Date: "",
-        Nombre_Convives: isBBQ ? OPTIONS_BBQ[0] : (isBuffet ? OPTIONS_BUFFET[0] : OPTIONS_STANDARD[0]),
+        Nombre_Convives: isBBQ ? OPTIONS_BBQ[0] : (isBuffet ? OPTIONS_BUFFET[0] : (isAssociations ? OPTIONS_ASSOCIATIONS[0] : OPTIONS_STANDARD[0])),
         details_projet: "",
         Souhaite_etre_recontacte: "Non",
         // BBQ Fields
@@ -85,7 +95,7 @@ function ContactForm() {
         salade_2: ""
     });
 
-    const isCustomMode = isBBQ || isBuffet;
+    const isCustomMode = isBBQ || isBuffet || isAssociations;
 
     // Calculate dynamic plat count based on current state
     const platCount = isCustomMode ? getRequiredPlatCount(menuParam, formData.Nombre_Convives) : 0;
@@ -97,6 +107,7 @@ function ContactForm() {
             let currentOptions = OPTIONS_STANDARD;
             if (isBBQ) currentOptions = OPTIONS_BBQ;
             if (isBuffet) currentOptions = OPTIONS_BUFFET;
+            if (isAssociations) currentOptions = OPTIONS_ASSOCIATIONS;
 
             // Only update if it's a valid option for the current mode
             if (currentOptions.includes(convivesParam)) {
@@ -108,9 +119,11 @@ function ContactForm() {
                 setFormData(prev => ({ ...prev, Nombre_Convives: OPTIONS_BBQ[0] }));
             } else if (isBuffet && !OPTIONS_BUFFET.includes(formData.Nombre_Convives)) {
                 setFormData(prev => ({ ...prev, Nombre_Convives: OPTIONS_BUFFET[0] }));
+            } else if (isAssociations && !OPTIONS_ASSOCIATIONS.includes(formData.Nombre_Convives)) {
+                setFormData(prev => ({ ...prev, Nombre_Convives: OPTIONS_ASSOCIATIONS[0] }));
             }
         }
-    }, [searchParams, isBBQ, isBuffet]); // Removed formData.Nombre_Convives dependency to avoid loops
+    }, [searchParams, isBBQ, isBuffet, isAssociations]); // Removed formData.Nombre_Convives dependency to avoid loops
 
     const [errors, setErrors] = useState({
         Mail: "",
@@ -217,9 +230,9 @@ function ContactForm() {
                 const formDataToSend = new FormData(form);
 
                 // --- CUSTOM MESSAGE FORMATTING ---
-                if (isBBQ || isBuffet) {
+                if (isBBQ || isBuffet || isAssociations) {
                     let message = "";
-                    const title = isBBQ ? "--- COMMANDE BARBECUE ---" : `--- COMMANDE BUFFET ${isArdennais ? "ARDENNAIS" : "GALA"} ---`;
+                    const title = isBBQ ? "--- COMMANDE BARBECUE ---" : (isAssociations ? "--- COMMANDE ASSOCIATIONS ---" : `--- COMMANDE BUFFET ${isArdennais ? "ARDENNAIS" : "GALA"} ---`);
                     message += `${title}\n\n`;
 
                     if (isBBQ) {
@@ -229,6 +242,12 @@ function ContactForm() {
                             if (val) message += `- Viande ${i}: ${val}\n`;
                         }
                         message += `\nAccompagnements :\n- Chaud: ${formData.accomp_chaud}\n- Froid: ${formData.accomp_froid}\n`;
+                    } else if (isAssociations) {
+                        message += "Plats principaux choisis (Note: Livraison seule) :\n";
+                        for (let i = 1; i <= platCount; i++) {
+                            const val = (formData as any)[`plat_${i}`];
+                            if (val) message += `- Choix ${i}: ${val}\n`;
+                        }
                     } else {
                         message += "Plats choisis :\n";
                         for (let i = 1; i <= platCount; i++) {
@@ -276,7 +295,7 @@ function ContactForm() {
     const inputStyle = `w-full bg-white border border-neutral-200 rounded-xl px-5 py-4 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] hover:border-[#D4AF37]/50 transition-all duration-300 shadow-inner text-base`;
     const labelStyle = `block text-sm font-medium text-neutral-500 uppercase tracking-wide mb-2 ml-1`;
 
-    const showMenuFirst = isBBQ || isBuffet;
+    const showMenuFirst = isBBQ || isBuffet || isAssociations;
 
     const renderContactFields = () => (
         <>
@@ -450,7 +469,7 @@ function ContactForm() {
                         onChange={handleChange}
                         className={`${inputStyle} appearance-none cursor-pointer`}
                     >
-                        {(isBBQ ? OPTIONS_BBQ : (isBuffet ? OPTIONS_BUFFET : OPTIONS_STANDARD)).map((opt) => (
+                        {(isBBQ ? OPTIONS_BBQ : (isBuffet ? OPTIONS_BUFFET : (isAssociations ? OPTIONS_ASSOCIATIONS : OPTIONS_STANDARD))).map((opt) => (
                             <option key={opt} value={opt}>{opt}</option>
                         ))}
                     </select>
@@ -568,55 +587,152 @@ function ContactForm() {
                 )}
             </AnimatePresence>
 
+            {/* ASSOCIATIONS COMPOSITION SECTION */}
+            <AnimatePresence>
+                {
+                    isAssociations && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="bg-neutral-50/50 border border-[#D4AF37]/30 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm relative">
+                                {/* Golden accent line */}
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
+
+                                {/* DELIVERY NOTE */}
+                                <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg text-sm text-center mb-6">
+                                    <strong>Note :</strong> Pour cette formule, seule la livraison est incluse. Le service et le matériel ne sont pas fournis.
+                                </div>
+
+                                <p className="text-sm text-neutral-500 italic mb-4 text-center px-4">
+                                    Si nos propositions ne vous conviennent pas totalement (régime spécifique, allergie...), précisez-le nous dans le champ libre !
+                                </p>
+
+                                <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
+                                    Formule Évènements & Associations
+                                </h3>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {Array.from({ length: platCount }).map((_, i) => {
+                                        const num = i + 1;
+                                        const currentKey = `plat_${num}`;
+                                        const currentValue = (formData as any)[currentKey];
+
+                                        // Filter available items
+                                        const availableItems = ITEMS_ASSOCIATIONS.filter(item => {
+                                            // Get all selected items EXCLUDING current
+                                            const otherSelected = Array.from({ length: platCount })
+                                                .map((_, j) => (formData as any)[`plat_${j + 1}`])
+                                                .filter((val, j) => j !== i && Boolean(val));
+                                            return !otherSelected.includes(item);
+                                        });
+
+                                        return (
+                                            <div key={currentKey} className="group">
+                                                <label className={labelStyle}>CHOIX DU PLAT PRINCIPAL {num}</label>
+                                                <div className="relative">
+                                                    <select
+                                                        name={currentKey}
+                                                        value={currentValue}
+                                                        onChange={handleChange}
+                                                        className={`${inputStyle} appearance-none cursor-pointer`}
+                                                    >
+                                                        <option value="">Choisir un plat...</option>
+                                                        {availableItems.map((v) => (
+                                                            <option key={v} value={v}>{v}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </motion.div>
+                    )
+                }
+            </AnimatePresence >
+
             {/* BUFFET COMPOSITION SECTION (Ardennais / Gala) */}
             <AnimatePresence>
-                {isBuffet && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="overflow-hidden"
-                    >
-                        <div className="bg-neutral-50/50 border border-[#D4AF37]/30 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm relative">
-                            {/* Golden accent line */}
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
+                {
+                    isBuffet && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="bg-neutral-50/50 border border-[#D4AF37]/30 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm relative">
+                                {/* Golden accent line */}
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
 
-                            <p className="text-sm text-neutral-500 italic mb-4 text-center px-4">
-                                Si nos propositions ne vous conviennent pas totalement (régime spécifique, allergie...), précisez-le nous dans le champ libre !
-                            </p>
+                                <p className="text-sm text-neutral-500 italic mb-4 text-center px-4">
+                                    Si nos propositions ne vous conviennent pas totalement (régime spécifique, allergie...), précisez-le nous dans le champ libre !
+                                </p>
 
-                            <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
-                                Composition de votre Buffet {isArdennais ? "Ardennais" : "de Gala"}
-                            </h3>
+                                <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
+                                    Composition de votre Buffet {isArdennais ? "Ardennais" : "de Gala"}
+                                </h3>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {Array.from({ length: platCount }).map((_, i) => {
-                                    const num = i + 1;
-                                    const currentKey = `plat_${num}`;
-                                    const currentValue = (formData as any)[currentKey];
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {Array.from({ length: platCount }).map((_, i) => {
+                                        const num = i + 1;
+                                        const currentKey = `plat_${num}`;
+                                        const currentValue = (formData as any)[currentKey];
 
-                                    // Filter available items
-                                    const availableItems = (isArdennais ? ITEMS_ARDENNAIS : ITEMS_GALA).filter(item => {
-                                        // Get all selected items EXCLUDING current
-                                        const otherSelected = Array.from({ length: platCount })
-                                            .map((_, j) => (formData as any)[`plat_${j + 1}`])
-                                            .filter((val, j) => j !== i && Boolean(val));
-                                        return !otherSelected.includes(item);
-                                    });
+                                        // Filter available items
+                                        const availableItems = (isArdennais ? ITEMS_ARDENNAIS : ITEMS_GALA).filter(item => {
+                                            // Get all selected items EXCLUDING current
+                                            const otherSelected = Array.from({ length: platCount })
+                                                .map((_, j) => (formData as any)[`plat_${j + 1}`])
+                                                .filter((val, j) => j !== i && Boolean(val));
+                                            return !otherSelected.includes(item);
+                                        });
 
-                                    return (
-                                        <div key={currentKey} className="group">
-                                            <label className={labelStyle}>Plat {num}</label>
+                                        return (
+                                            <div key={currentKey} className="group">
+                                                <label className={labelStyle}>Plat {num}</label>
+                                                <div className="relative">
+                                                    <select
+                                                        name={currentKey}
+                                                        value={currentValue}
+                                                        onChange={handleChange}
+                                                        className={`${inputStyle} appearance-none cursor-pointer`}
+                                                    >
+                                                        <option value="">Choisir un plat...</option>
+                                                        {availableItems.map((v) => (
+                                                            <option key={v} value={v}>{v}</option>
+                                                        ))}
+                                                    </select>
+                                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-dashed border-neutral-200">
+                                    {[1, 2].map(num => (
+                                        <div key={`salade_${num}`} className="group">
+                                            <label className={labelStyle}>Accompagnement {num}</label>
                                             <div className="relative">
                                                 <select
-                                                    name={currentKey}
-                                                    value={currentValue}
+                                                    name={`salade_${num}`}
+                                                    value={(formData as any)[`salade_${num}`]}
                                                     onChange={handleChange}
                                                     className={`${inputStyle} appearance-none cursor-pointer`}
                                                 >
-                                                    <option value="">Choisir un plat...</option>
-                                                    {availableItems.map((v) => (
-                                                        <option key={v} value={v}>{v}</option>
+                                                    <option value="">Choisir...</option>
+                                                    {SALADES_FROIDES.map((c) => (
+                                                        <option key={c} value={c}>{c}</option>
                                                     ))}
                                                 </select>
                                                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
@@ -624,37 +740,13 @@ function ContactForm() {
                                                 </div>
                                             </div>
                                         </div>
-                                    );
-                                })}
+                                    ))}
+                                </div>
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-dashed border-neutral-200">
-                                {[1, 2].map(num => (
-                                    <div key={`salade_${num}`} className="group">
-                                        <label className={labelStyle}>Accompagnement {num}</label>
-                                        <div className="relative">
-                                            <select
-                                                name={`salade_${num}`}
-                                                value={(formData as any)[`salade_${num}`]}
-                                                onChange={handleChange}
-                                                className={`${inputStyle} appearance-none cursor-pointer`}
-                                            >
-                                                <option value="">Choisir...</option>
-                                                {SALADES_FROIDES.map((c) => (
-                                                    <option key={c} value={c}>{c}</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        </motion.div>
+                    )
+                }
+            </AnimatePresence >
         </>
     );
 

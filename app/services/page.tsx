@@ -97,6 +97,32 @@ export default function Services() {
                         reverse={false}
                     />
                 </div>
+
+                {/* 5. CTA ASSOCIATIONS */}
+                <ParallaxCta
+                    text="Vous organisez un événement associatif ou professionnel de grande envergure ?"
+                    subText="Découvrez nos solutions adaptées pour les grands groupes."
+                    link="/contact?menu=associations"
+                    buttonText="Demander un devis"
+                    image="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"
+                />
+
+                {/* 6. LIVRAISON SEULE & ASSOCIATIONS (Texte Droite / Mosaïque Gauche) */}
+                <div id="associations" className="scroll-mt-24 relative z-10 pt-20"> {/* PT-20 to separate from CTA */}
+                    <SectionService
+                        title="Livraison Seule & Associations"
+                        quote="Convivialité et générosité pour vos grands rassemblements."
+                        desc="Idéal pour vos soupers d'école, clubs sportifs ou fêtes de quartier. Nous livrons des plats généreux et conviviaux, prêts à être servis par vos soins. Une solution économique et pratique sans personnel ni vaisselle, qui ne sacrifie rien à la qualité."
+                        ctaLink="/contact?menu=associations"
+                        images={[
+                            "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1981&auto=format&fit=crop", // Pizza/Pasta vibes
+                            "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1974&auto=format&fit=crop", // BBQ/Food
+                            "https://images.unsplash.com/photo-1600891964092-4316c288032e?q=80&w=2070&auto=format&fit=crop"  // Steak/Food
+                        ]}
+                        decorType="geometric" // Reusing geometric or maybe herb
+                        reverse={true} // Alternate from Particuliers (false) -> True is good.
+                    />
+                </div>
             </div>
 
             {/* 5. VALUES / REASSURANCE (Moved to bottom) */}
@@ -355,7 +381,13 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
     );
 }
 
-function ParallaxCta() {
+function ParallaxCta({
+    text = "Prêt à sublimer votre événement ?",
+    subText = "Discutons de vos envies et créons ensemble un menu sur mesure.",
+    link = "/contact",
+    buttonText = "DEMANDER UN DEVIS",
+    image = "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop"
+}: { text?: string, subText?: string, link?: string, buttonText?: string, image?: string }) {
     const ref = useRef(null);
     const { scrollYProgress } = useScroll({
         target: ref,
@@ -366,12 +398,12 @@ function ParallaxCta() {
     const y = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
 
     return (
-        <section ref={ref} className="relative w-full h-[70vh] flex items-center justify-center overflow-hidden mt-32">
+        <section ref={ref} className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden mt-32">
             {/* Parallax Background */}
             <motion.div style={{ y }} className="absolute inset-0 w-full h-[140%] -top-[20%] z-0">
                 <Image
-                    src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop"
-                    alt="Ambiance tamisée"
+                    src={image}
+                    alt="Ambiance"
                     fill
                     className="object-cover"
                 />
@@ -382,17 +414,17 @@ function ParallaxCta() {
 
             {/* Content */}
             <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-8">
-                <h2 className="text-4xl md:text-5xl font-serif text-white">
-                    Prêt à sublimer votre événement ?
+                <h2 className="text-3xl md:text-5xl font-serif text-white leading-tight">
+                    {text}
                 </h2>
-                <p className="text-white/90 font-sans text-xl">
-                    Discutons de vos envies et créons ensemble un menu sur mesure.
+                <p className="text-white/90 font-sans text-lg md:text-xl">
+                    {subText}
                 </p>
                 <Link
-                    href="/contact"
+                    href={link}
                     className="inline-block bg-white text-black px-8 py-4 uppercase tracking-widest text-sm font-bold hover:bg-[#D4AF37] hover:text-white transition-all duration-300"
                 >
-                    DEMANDER UN DEVIS
+                    {buttonText}
                 </Link>
             </div>
         </section>

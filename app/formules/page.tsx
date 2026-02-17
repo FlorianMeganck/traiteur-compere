@@ -25,18 +25,19 @@ const FORMULES = [
         allergens: ["gluten", "egg", "lait", "fish", "moutarde", "celeri"]
     },
     {
-        tag: "Plats Chauds",
-        title: "Le Dinatoire du Monde",
-        description: "Un voyage culinaire à travers des plats réconfortants et variés, idéal pour satisfaire toutes les envies.",
-        price: "24,50€ / pers",
+        tag: "Événements & Associations",
+        title: "Le Buffet Associatif",
+        description: "Idéal pour vos soupers d'école, clubs sportifs ou fêtes de quartier. Nous livrons des plats généreux et conviviaux, prêts à être servis par vos soins (sans personnel ni vaisselle).",
+        price: "14,50€ / pers",
         image: "https://images.unsplash.com/photo-1547924475-f9e5b2931a26?q=80&w=2070&auto=format&fit=crop",
         items: [
-            "Premier service : Lasagne maison, Chili con Carne, Tortellini et Paëlla royale",
-            "Suivi d'un service grillades : Brochettes de scampi",
-            "Côte d'agneau, Bœuf et Merguez",
-            "Accompagnés de féculents variés"
+            "Boulets Liégeois (Sauce Lapin ou Tomate) & Frites",
+            "Vol-au-vent artisanal & Frites",
+            "Bar à Pâtes (Bolognaise ou Carbonara)",
+            "Burgers Classiques ou Spécial Compère",
+            "Option Végé : Grande Salade de saison & Quiche aux légumes 🌿"
         ],
-        allergens: ["gluten", "egg", "lait", "crustace", "celeri"]
+        allergens: ["gluten", "egg", "lait", "celeri", "moutarde"]
     },
     {
         tag: "BBQ & Feu de bois",
@@ -285,6 +286,44 @@ function PricingBlock({ price, tag }: { price: string, tag: string }) {
                     <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 80 pers.</span>
                     <span className="text-sm font-medium text-gray-900">5 Viandes au choix</span>
                     <span className="text-[10px] text-gray-400">(Grand Groupe)</span>
+                </Link>
+            </div>
+        );
+    }
+
+    // Logic for Associations
+    if (tag === "Événements & Associations") {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                {/* Option 1: < 50 */}
+                <Link
+                    href="/contact?menu=associations&count=1&convives=Moins de 50"
+                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                >
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 50 pers.</span>
+                    <span className="text-sm font-medium text-gray-900">1 Plat au choix</span>
+                    <span className="text-[10px] text-gray-400">(Sur devis)</span>
+                </Link>
+
+                {/* Option 2: 50 - 100 */}
+                <Link
+                    href="/contact?menu=associations&count=2&convives=50 à 100"
+                    className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
+                >
+                    <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
+                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">50 à 100 pers.</span>
+                    <span className="text-lg font-bold font-serif">2 Plats au choix</span>
+                    <span className="text-[10px] text-gray-300">(14,50€ / pers)</span>
+                </Link>
+
+                {/* Option 3: > 100 */}
+                <Link
+                    href="/contact?menu=associations&count=3&convives=Plus de 100"
+                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                >
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 100 pers.</span>
+                    <span className="text-sm font-medium text-gray-900">3 Plats au choix</span>
+                    <span className="text-[10px] text-gray-400">(Tarifs dégressifs)</span>
                 </Link>
             </div>
         );
