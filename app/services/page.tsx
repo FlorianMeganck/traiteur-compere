@@ -8,11 +8,10 @@ import { motion, useScroll, useTransform, useInView, animate } from "framer-moti
 // --- MAIN COMPONENT ---
 export default function Services() {
     return (
-        <main className="bg-white text-gray-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-32 pb-20 overflow-hidden">
+        <main className="bg-white text-gray-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-32 pb-20 overflow-hidden relative">
 
-            {/* 1. INTRO & CHIFFRES */}
-            {/* 1. INTRO & CHIFFRES */}
-            <section className="px-6 mb-32 max-w-7xl mx-auto text-center">
+            {/* 1. INTRO & TITLE */}
+            <section className="px-6 mb-16 max-w-7xl mx-auto text-center relative z-10">
                 <motion.h1
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -20,20 +19,88 @@ export default function Services() {
                     transition={{ duration: 0.8 }}
                     className="text-5xl md:text-7xl font-serif text-black uppercase tracking-widest mb-8"
                 >
-                    CUISINER POUR VOUS
+                    NOS SERVICES
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, delay: 0.2 }}
-                    className="text-gray-600 font-sans font-light text-lg max-w-2xl mx-auto mb-16 italic"
+                    className="text-gray-600 font-sans font-light text-lg max-w-2xl mx-auto mb-10 italic"
                 >
-                    &ldquo;Je cuisine pour vous comme je le ferais pour ma propre famille : avec cœur et générosité. Pour moi, un événement réussi, c'est avant tout des assiettes vides et des invités heureux.&rdquo;
+                    &ldquo;De la célébration intime au grand banquet, nous créons l'ambiance gourmande qui vous ressemble.&rdquo;
                 </motion.p>
 
-                {/* Values Section - Replacing Key Figures */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 justify-center max-w-6xl mx-auto mt-24">
+                {/* VISUAL SUMMARY */}
+                <VisualSummary />
+            </section>
+
+            {/* CONTAINER FOR SERVICES & THREAD */}
+            <div className="relative w-full max-w-7xl mx-auto">
+                {/* THE GOLDEN THREAD (SVG) */}
+                <ServiceThread />
+
+                {/* 2. MARIAGES (Texte Gauche / Mosaïque Droite) */}
+                <div id="mariages" className="scroll-mt-32 relative z-10">
+                    <SectionService
+                        title="VOTRE MARIAGE"
+                        quote="Jean-Paul a été à l'écoute de nos demandes du début à la fin. Le jour J, tout était parfait et délicieux."
+                        quoteAuthor="— Julie & Thomas"
+                        desc="Le repas est au cœur de cette journée spéciale. Nous prenons le temps de vous rencontrer pour construire un menu qui vous ressemble, en respectant votre budget et vos goûts. Pas de stress, on gère."
+                        ctaLabel="En discuter ensemble"
+                        images={[
+                            "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?q=80&w=1000&auto=format&fit=crop", // Wedding table
+                            "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1000&auto=format&fit=crop", // Wedding detail
+                            "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1000&auto=format&fit=crop", // Cake/Dessert
+                            "https://images.unsplash.com/photo-1535254973040-607b474cb50d?q=80&w=1000&auto=format&fit=crop"  // Bride/Couple
+                        ]}
+                        decorType="flower"
+                        reverse={false}
+                    />
+                </div>
+
+                {/* 3. ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
+                <div id="entreprises" className="scroll-mt-32 relative z-10">
+                    <SectionService
+                        title="VOS ÉVÉNEMENTS PRO"
+                        quote="Ponctuel, discret et surtout très bon. Nos collaborateurs nous en parlent encore."
+                        quoteAuthor="— Société Technifutur"
+                        desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
+                        ctaLabel="Demander un devis"
+                        images={[
+                            "https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1000&auto=format&fit=crop", // Networking Setup
+                            "https://fr.vecteezy.com/photo/2254765-restauration-food-for-parties-corporate-parties-conferences-forums-banquets-selective-focus", // Precise Appetizers
+                            "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1000&auto=format&fit=crop", // Chef Plating
+                            "https://images.unsplash.com/photo-1574966735447-375dfd6f8356?q=80&w=1000&auto=format&fit=crop"  // Corporate Buffet
+                        ]}
+                        decorType="geometric"
+                        reverse={true}
+                    />
+                </div>
+
+                {/* 4. PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
+                <div id="particuliers" className="scroll-mt-32 relative z-10">
+                    <SectionService
+                        title="VOS FÊTES DE FAMILLE"
+                        quote="On a enfin pu profiter de notre fête sans passer la soirée en cuisine. Tout le monde s'est régalé !"
+                        quoteAuthor="— Sophie & Marc"
+                        desc="Un anniversaire, un baptême ou simplement un repas entre amis ? Nous nous occupons de tout pour que vous puissiez profiter de vos invités. Buffet froid, échoppes chaudes ou service à table : on s'adapte à l'ambiance que vous voulez donner."
+                        ctaLabel="Voir les formules"
+                        images={[
+                            "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1000&auto=format&fit=crop", // Friendly dinner
+                            "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?q=80&w=1000&auto=format&fit=crop", // Buffet
+                            "https://images.unsplash.com/photo-1576867757603-05b134ebc379?q=80&w=1000&auto=format&fit=crop", // Hands/Cheers
+                            "https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=1000&auto=format&fit=crop"  // Food detail
+                        ]}
+                        decorType="herb"
+                        reverse={false}
+                    />
+                </div>
+            </div>
+
+            {/* 5. VALUES / REASSURANCE (Moved to bottom) */}
+            <section className="px-6 my-32 max-w-7xl mx-auto text-center relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 justify-center max-w-6xl mx-auto">
                     <ValueItem
                         title="Fait Maison & Local"
                         path="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
@@ -55,71 +122,79 @@ export default function Services() {
                 </div>
             </section>
 
-            {/* 2. PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
-            {/* 2. PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
-            <div id="particuliers" className="scroll-mt-32">
-                <SectionService
-                    title="VOS FÊTES DE FAMILLE"
-                    quote="On a enfin pu profiter de notre fête sans passer la soirée en cuisine. Tout le monde s'est régalé !"
-                    quoteAuthor="— Sophie & Marc"
-                    desc="Un anniversaire, un baptême ou simplement un repas entre amis ? Nous nous occupons de tout pour que vous puissiez profiter de vos invités. Buffet froid, échoppes chaudes ou service à table : on s'adapte à l'ambiance que vous voulez donner."
-                    ctaLabel="Voir les formules"
-                    images={[
-                        "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1000&auto=format&fit=crop", // Friendly dinner
-                        "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?q=80&w=1000&auto=format&fit=crop", // Buffet
-                        "https://images.unsplash.com/photo-1576867757603-05b134ebc379?q=80&w=1000&auto=format&fit=crop", // Hands/Cheers (REPLACED)
-                        "https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=1000&auto=format&fit=crop"  // Food detail
-                    ]}
-                    decorType="herb"
-                    reverse={false}
-                />
-            </div>
-
-            {/* 3. ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
-            {/* 3. ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
-            <div id="entreprises" className="scroll-mt-32">
-                <SectionService
-                    title="VOS ÉVÉNEMENTS PRO"
-                    quote="Ponctuel, discret et surtout très bon. Nos collaborateurs nous en parlent encore."
-                    quoteAuthor="— Société Technifutur"
-                    desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
-                    ctaLabel="Demander un devis"
-                    images={[
-                        "https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1000&auto=format&fit=crop", // Networking Setup (REPLACED)
-                        "https://fr.vecteezy.com/photo/2254765-restauration-food-for-parties-corporate-parties-conferences-forums-banquets-selective-focus", // Precise Appetizers (REPLACED)
-                        "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1000&auto=format&fit=crop", // Chef Plating (KEPT)
-                        "https://images.unsplash.com/photo-1574966735447-375dfd6f8356?q=80&w=1000&auto=format&fit=crop"  // Corporate Buffet (REPLACED)
-                    ]}
-                    decorType="geometric"
-                    reverse={true}
-                />
-            </div>
-
-            {/* 4. MARIAGES (Texte Gauche / Mosaïque Droite) */}
-            {/* 4. MARIAGES (Texte Gauche / Mosaïque Droite) */}
-            <div id="mariages" className="scroll-mt-32">
-                <SectionService
-                    title="VOTRE MARIAGE"
-                    quote="Jean-Paul a été à l'écoute de nos demandes du début à la fin. Le jour J, tout était parfait et délicieux."
-                    quoteAuthor="— Julie & Thomas"
-                    desc="Le repas est au cœur de cette journée spéciale. Nous prenons le temps de vous rencontrer pour construire un menu qui vous ressemble, en respectant votre budget et vos goûts. Pas de stress, on gère."
-                    ctaLabel="En discuter ensemble"
-                    images={[
-                        "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?q=80&w=1000&auto=format&fit=crop", // Wedding table
-                        "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1000&auto=format&fit=crop", // Wedding detail
-                        "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1000&auto=format&fit=crop", // Cake/Dessert
-                        "https://images.unsplash.com/photo-1535254973040-607b474cb50d?q=80&w=1000&auto=format&fit=crop"  // Bride/Couple
-                    ]}
-                    decorType="flower"
-                    reverse={false}
-                />
-            </div>
-
-            {/* Call to Action Footer */}
             {/* Call to Action Footer (Parallax) */}
             <ParallaxCta />
 
         </main>
+    );
+}
+
+// --- VISUAL SUMMARY ---
+function VisualSummary() {
+    return (
+        <nav className="flex flex-wrap justify-center gap-8 md:gap-16 border-t border-b border-neutral-100 py-6 mt-12 bg-white/80 backdrop-blur-sm sticky top-20 z-40 transition-all duration-300">
+            {[
+                { label: "Mariages", href: "#mariages" },
+                { label: "Entreprises", href: "#entreprises" },
+                { label: "Particuliers", href: "#particuliers" }
+            ].map((item) => (
+                <Link
+                    key={item.label}
+                    href={item.href}
+                    className="text-sm md:text-base uppercase tracking-[0.2em] text-neutral-500 hover:text-[#D4AF37] transition-colors duration-300 relative group"
+                >
+                    {item.label}
+                    <span className="absolute -bottom-2 left-1/2 w-0 h-[1px] bg-[#D4AF37] group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
+                </Link>
+            ))}
+        </nav>
+    );
+}
+
+// --- THE GOLDEN THREAD COMPONENT ---
+function ServiceThread() {
+    return (
+        <div className="absolute inset-0 z-0 pointer-events-none hidden md:block" aria-hidden="true">
+            <svg
+                className="w-full h-full"
+                preserveAspectRatio="none"
+                viewBox="0 0 100 300" // Abstract coordinate system for 3 sections
+            >
+                {/* 
+                  Path logic:
+                  - Starts top center (50, 0)
+                  - Mariages (Left text, Right img): Curve towards center-left (40, 50) then back to center
+                  - Entreprises (Left img, Right text): Curve towards center-right (60, 150)
+                  - Particuliers (Left text, Right img): Curve towards center-left (40, 250)
+                  - Ends bottom center (50, 300)
+                */}
+                <motion.path
+                    d="M 50 0 
+                       C 50 20, 30 20, 30 50 
+                       C 30 80, 50 80, 50 100
+                       C 50 120, 70 120, 70 150
+                       C 70 180, 50 180, 50 200
+                       C 50 220, 30 220, 30 250
+                       C 30 280, 50 280, 50 300"
+                    fill="none"
+                    stroke="url(#goldGradient)"
+                    strokeWidth="0.5"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    whileInView={{ pathLength: 1, opacity: 1 }}
+                    viewport={{ once: true, amount: 0.1 }}
+                    transition={{ duration: 2.5, ease: "easeInOut" }}
+                />
+                <defs>
+                    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#D4AF37" stopOpacity="0" />
+                        <stop offset="10%" stopColor="#D4AF37" stopOpacity="0.4" />
+                        <stop offset="50%" stopColor="#D4AF37" stopOpacity="0.8" />
+                        <stop offset="90%" stopColor="#D4AF37" stopOpacity="0.4" />
+                        <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
     );
 }
 
@@ -193,6 +268,7 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                 }}
                 className={`absolute top-0 bottom-0 bg-[#F9F7F1] w-[90%] md:w-[75%] -z-20 
                 ${reverse ? '-left-20' : '-right-20'}
+                ${reverse ? 'origin-left' : 'origin-right'}
                 transition-all duration-700 ease-out`}
             />
 
@@ -256,7 +332,7 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.6, delay: 0.2 + (idx * 0.1) }}
-                                    className={`relative aspect-[3/4] overflow-hidden shadow-2xl shadow-neutral-200 rounded-lg
+                                    className={`relative aspect-[3/4] overflow-hidden shadow-2xl shadow-neutral-200 rounded-2xl
                                         ${idx === 1 ? 'mt-8 md:mt-12' : ''} 
                                         ${idx === 2 ? '-mt-8 md:-mt-12' : ''}
                                     `}
