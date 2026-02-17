@@ -18,7 +18,7 @@ export default function Confidentialite() {
                         <h2 className="text-2xl font-serif text-black mb-3">1. Responsable du Traitement</h2>
                         <p>
                             Le responsable du traitement des données est Traiteur Compère, représenté par Monsieur Jean-Paul Compère. <br />
-                            Pour toute question : <a href="mailto:comperejeanpaul@gmail.com" className="text-[#D4AF37] hover:underline">comperejeanpaul@gmail.com</a> <br />
+                            Pour toute question : <a href="mailto:traiteurcompere@gmail.com" className="text-[#D4AF37] hover:underline">traiteurcompere@gmail.com</a> <br />
                             Adresse administrative : Région de Liège, Belgique.
                         </p>
                     </section>
@@ -59,7 +59,7 @@ export default function Confidentialite() {
                     <section>
                         <h2 className="text-2xl font-serif text-black mb-3">6. Vos Droits</h2>
                         <p>
-                            Vous disposez d&apos;un droit d&apos;accès, de rectification, d&apos;effacement (« droit à l&apos;oubli ») et de portabilité de vos données. Pour exercer ce droit, envoyez simplement un e-mail à <a href="mailto:comperejeanpaul@gmail.com" className="text-[#D4AF37] hover:underline">comperejeanpaul@gmail.com</a>.
+                            Vous disposez d&apos;un droit d&apos;accès, de rectification, d&apos;effacement (« droit à l&apos;oubli ») et de portabilité de vos données. Pour exercer ce droit, envoyez simplement un e-mail à <a href="mailto:traiteurcompere@gmail.com" className="text-[#D4AF37] hover:underline">traiteurcompere@gmail.com</a>.
                         </p>
                     </section>
 

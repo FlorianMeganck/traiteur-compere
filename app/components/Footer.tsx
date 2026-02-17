@@ -30,9 +30,9 @@ export default function Footer() {
                                 <PhoneIcon className="w-5 h-5 text-[#D4AF37]" />
                                 <span className="group-hover:translate-x-1 transition-transform duration-300">+32 476 86 54 07</span>
                             </a>
-                            <a href="mailto:comperejeanpaul@gmail.com" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
+                            <a href="mailto:traiteurcompere@gmail.com" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
                                 <MailIcon className="w-5 h-5 text-[#D4AF37]" />
-                                <span className="group-hover:translate-x-1 transition-transform duration-300">comperejeanpaul@gmail.com</span>
+                                <span className="group-hover:translate-x-1 transition-transform duration-300">traiteurcompere@gmail.com</span>
                             </a>
                             <a href="https://www.google.com/maps?q=Saint-Georges-sur-Meuse" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
                                 <MapPinIcon className="w-5 h-5 text-[#D4AF37]" />
@@ -56,7 +56,7 @@ export default function Footer() {
                     <div className="flex flex-col gap-6">
                         <h3 className="font-serif text-white text-lg tracking-widest uppercase">Informations</h3>
                         <div className="flex flex-col gap-3 text-sm">
-                            <FooterLink href="#" label="Mentions Légales" />
+                            <FooterLink href="/mentions-legales" label="Mentions Légales" />
                             <FooterLink href="/legal/confidentialite" label="Politique de Confidentialité" />
                             <FooterLink href="/legal/cgv" label="CGV" />
                             <FooterLink href={`/gestion-cookies?returnTo=${pathname}`} label="Gestion des Cookies" />
