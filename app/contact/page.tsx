@@ -25,10 +25,34 @@ const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"]
 const OPTIONS_BBQ = ["Moins de 30", "30 à 80", "Plus de 80"];
 const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
 
+// Helper function for dynamic dish count
+const getRequiredPlatCount = (menu: string | null, convives: string) => {
+    if (menu === 'bbq' || menu === 'bbq_sur_mesure') {
+        if (convives === "Moins de 30") return 3;
+        if (convives === "30 à 80") return 4;
+        if (convives === "Plus de 80") return 5;
+        return 3; // Default fallback
+    }
+    if (menu === 'ardennais' || menu === 'gala') {
+        if (convives === "Moins de 40") return 4;
+        if (convives === "40 et plus") return 5;
+        return 4; // Default fallback
+    }
+    return 0; // Not a custom menu
+};
+
 function ContactForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+
+    // Determine menu context
+    const menuParam = searchParams.get('menu');
+    const isBBQ = menuParam === 'bbq' || menuParam === 'bbq_sur_mesure';
+    const isArdennais = menuParam === 'ardennais';
+    const isGala = menuParam === 'gala';
+    const isBuffet = isArdennais || isGala;
+
     const [formData, setFormData] = useState({
         Prenom: "",
         Nom: "",
@@ -39,7 +63,7 @@ function ContactForm() {
         Type_Evenement: "Mariage",
         type_autre: "",
         Date: "",
-        Nombre_Convives: "Moins de 20",
+        Nombre_Convives: isBBQ ? OPTIONS_BBQ[0] : (isBuffet ? OPTIONS_BUFFET[0] : OPTIONS_STANDARD[0]),
         details_projet: "",
         Souhaite_etre_recontacte: "Non",
         // BBQ Fields
@@ -61,30 +85,32 @@ function ContactForm() {
         salade_2: ""
     });
 
-    const menuParam = searchParams.get('menu');
-    const isBBQ = menuParam === 'bbq' || menuParam === 'bbq_sur_mesure';
-    const isArdennais = menuParam === 'ardennais';
-    const isGala = menuParam === 'gala';
-    const isBuffet = isArdennais || isGala;
     const isCustomMode = isBBQ || isBuffet;
 
-    const countParam = parseInt(searchParams.get('count') || '3');
+    // Calculate dynamic plat count based on current state
+    const platCount = isCustomMode ? getRequiredPlatCount(menuParam, formData.Nombre_Convives) : 0;
 
     // EFFECT: Check for URL params (e.g. ?convives=Plus de 100)
     useEffect(() => {
         const convivesParam = searchParams.get("convives");
         if (convivesParam) {
-            // Verify it's a valid option to avoid unwanted strings
-
             let currentOptions = OPTIONS_STANDARD;
             if (isBBQ) currentOptions = OPTIONS_BBQ;
             if (isBuffet) currentOptions = OPTIONS_BUFFET;
 
+            // Only update if it's a valid option for the current mode
             if (currentOptions.includes(convivesParam)) {
                 setFormData(prev => ({ ...prev, Nombre_Convives: convivesParam }));
             }
+        } else {
+            // Initialize with default for the mode if no param
+            if (isBBQ && !OPTIONS_BBQ.includes(formData.Nombre_Convives)) {
+                setFormData(prev => ({ ...prev, Nombre_Convives: OPTIONS_BBQ[0] }));
+            } else if (isBuffet && !OPTIONS_BUFFET.includes(formData.Nombre_Convives)) {
+                setFormData(prev => ({ ...prev, Nombre_Convives: OPTIONS_BUFFET[0] }));
+            }
         }
-    }, [searchParams, isBBQ, isBuffet]);
+    }, [searchParams, isBBQ, isBuffet]); // Removed formData.Nombre_Convives dependency to avoid loops
 
     const [errors, setErrors] = useState({
         Mail: "",
@@ -198,14 +224,14 @@ function ContactForm() {
 
                     if (isBBQ) {
                         message += "Viandes choisies :\n";
-                        for (let i = 1; i <= countParam; i++) {
+                        for (let i = 1; i <= platCount; i++) {
                             const val = (formData as any)[`viande_${i}`];
                             if (val) message += `- Viande ${i}: ${val}\n`;
                         }
                         message += `\nAccompagnements :\n- Chaud: ${formData.accomp_chaud}\n- Froid: ${formData.accomp_froid}\n`;
                     } else {
                         message += "Plats choisis :\n";
-                        for (let i = 1; i <= countParam; i++) {
+                        for (let i = 1; i <= platCount; i++) {
                             const val = (formData as any)[`plat_${i}`];
                             if (val) message += `- Mets ${i}: ${val}\n`;
                         }
@@ -417,13 +443,12 @@ function ContactForm() {
                     <Users size={16} className="text-neutral-400" />
                     Nombre de convives
                 </label>
-                <div className="relative" title={isBBQ ? "Pour changer le nombre de convives, veuillez retourner à la page Formules" : ""}>
+                <div className="relative">
                     <select
                         name="Nombre_Convives"
                         value={formData.Nombre_Convives}
                         onChange={handleChange}
-                        disabled={isCustomMode}
-                        className={`${inputStyle} appearance-none ${isCustomMode ? 'bg-neutral-200 text-neutral-500 cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
+                        className={`${inputStyle} appearance-none cursor-pointer`}
                     >
                         {(isBBQ ? OPTIONS_BBQ : (isBuffet ? OPTIONS_BUFFET : OPTIONS_STANDARD)).map((opt) => (
                             <option key={opt} value={opt}>{opt}</option>
@@ -457,13 +482,13 @@ function ContactForm() {
                             </h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {Array.from({ length: countParam }).map((_, i) => {
+                                {Array.from({ length: platCount }).map((_, i) => {
                                     const num = i + 1;
                                     const currentKey = `viande_${num}`;
                                     const currentValue = (formData as any)[currentKey];
 
                                     // Get all selected meats *except* the one for this specific dropdown
-                                    const otherSelectedMeats = Array.from({ length: countParam })
+                                    const otherSelectedMeats = Array.from({ length: platCount })
                                         .map((_, j) => (formData as any)[`viande_${j + 1}`])
                                         .filter((val, j) => j !== i && Boolean(val));
 
@@ -557,7 +582,7 @@ function ContactForm() {
                             </h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {Array.from({ length: countParam }).map((_, i) => {
+                                {Array.from({ length: platCount }).map((_, i) => {
                                     const num = i + 1;
                                     const currentKey = `plat_${num}`;
                                     const currentValue = (formData as any)[currentKey];
@@ -565,7 +590,7 @@ function ContactForm() {
                                     // Filter available items
                                     const availableItems = (isArdennais ? ITEMS_ARDENNAIS : ITEMS_GALA).filter(item => {
                                         // Get all selected items EXCLUDING current
-                                        const otherSelected = Array.from({ length: countParam })
+                                        const otherSelected = Array.from({ length: platCount })
                                             .map((_, j) => (formData as any)[`plat_${j + 1}`])
                                             .filter((val, j) => j !== i && Boolean(val));
                                         return !otherSelected.includes(item);
@@ -743,4 +768,3 @@ function ContactForm() {
         </main >
     );
 }
-
