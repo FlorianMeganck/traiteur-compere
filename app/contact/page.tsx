@@ -573,7 +573,7 @@ function ContactForm() {
 
                                     return (
                                         <div key={currentKey} className="group">
-                                            <label className={labelStyle}>Mets {num}</label>
+                                            <label className={labelStyle}>Plat {num}</label>
                                             <div className="relative">
                                                 <select
                                                     name={currentKey}
@@ -598,7 +598,7 @@ function ContactForm() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-dashed border-neutral-200">
                                 {[1, 2].map(num => (
                                     <div key={`salade_${num}`} className="group">
-                                        <label className={labelStyle}>Salade / Féculent {num}</label>
+                                        <label className={labelStyle}>Accompagnement {num}</label>
                                         <div className="relative">
                                             <select
                                                 name={`salade_${num}`}
