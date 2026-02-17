@@ -17,9 +17,9 @@ const viandes = ["Saucisse de Campagne", "Merguez", "Chipolata", "Brochette de B
 const chauds = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Riz aux légumes"];
 const froids = ["Salade de Pâtes au Pesto", "Salade Grecque (Feta/Olives)", "Taboulé Oriental", "Tomate Mozzarella", "Salade de Pomme de Terre"];
 
-const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau"];
-const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée"];
-const SALADES_FROIDES = ["Salade de Pâtes", "Taboulé", "Salade de Riz", "Carottes Râpées", "Céleri Râpé", "Tomate Mozzarella", "Concombre"];
+const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿"];
+const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿"];
+const SALADES_FROIDES = ["Salade de Pâtes 🌿", "Taboulé 🌿", "Salade de Riz 🌿", "Carottes Râpées 🌿", "Céleri Râpé 🌿", "Tomate Mozzarella 🌿", "Concombre 🌿"];
 
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
 const OPTIONS_BBQ = ["Moins de 30", "30 à 80", "Plus de 80"];
@@ -283,7 +283,7 @@ function ContactForm() {
             {/* PRENOM & NOM (Inverted) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
-                    <label className={labelStyle}>Prénom</label>
+                    <label className={labelStyle}>Prénom <span className="text-red-500 ml-1">*</span></label>
                     <input
                         type="text"
                         name="Prenom"
@@ -295,7 +295,7 @@ function ContactForm() {
                     />
                 </div>
                 <div className="group">
-                    <label className={labelStyle}>Nom</label>
+                    <label className={labelStyle}>Nom <span className="text-red-500 ml-1">*</span></label>
                     <input
                         type="text"
                         name="Nom"
@@ -349,7 +349,7 @@ function ContactForm() {
             {/* MAIL & TEL */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
-                    <label className={labelStyle}>Email</label>
+                    <label className={labelStyle}>Email <span className="text-red-500 ml-1">*</span></label>
                     <input
                         type="email"
                         name="Mail"
@@ -362,7 +362,7 @@ function ContactForm() {
                     {errors.Mail && <p className="text-red-500 text-sm mt-1 ml-1">{errors.Mail}</p>}
                 </div>
                 <div className="group">
-                    <label className={labelStyle}>Téléphone</label>
+                    <label className={labelStyle}>Téléphone <span className="text-red-500 ml-1">*</span></label>
                     <input
                         type="tel"
                         name="Tel"
@@ -379,7 +379,7 @@ function ContactForm() {
             {/* TYPE EVENT & DATE */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
-                    <label className={labelStyle}>Type d'événement</label>
+                    <label className={labelStyle}>Type d'événement <span className="text-red-500 ml-1">*</span></label>
                     <div className="relative">
                         <select
                             name="Type_Evenement"
@@ -419,7 +419,7 @@ function ContactForm() {
                 </div>
 
                 <div className="group">
-                    <label className={labelStyle}>Date de l'événement</label>
+                    <label className={labelStyle}>Date de l'événement <span className="text-red-500 ml-1">*</span></label>
                     <input
                         type="date"
                         name="Date"
@@ -441,7 +441,7 @@ function ContactForm() {
             <div className="group">
                 <label className={`${labelStyle} flex items-center gap-2`}>
                     <Users size={16} className="text-neutral-400" />
-                    Nombre de convives
+                    Nombre de convives <span className="text-red-500 ml-1">*</span>
                 </label>
                 <div className="relative">
                     <select
@@ -476,6 +476,10 @@ function ContactForm() {
                         <div className="bg-neutral-50/50 border border-[#D4AF37]/30 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm relative">
                             {/* Golden accent line */}
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
+
+                            <p className="text-sm text-neutral-500 italic mb-4 text-center px-4">
+                                Une envie particulière ou un régime spécifique ? Si nos propositions ne vous conviennent pas totalement, n'hésitez pas à nous le préciser dans le champ libre en bas de formulaire !
+                            </p>
 
                             <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
                                 Votre Composition Barbecue
@@ -576,6 +580,10 @@ function ContactForm() {
                         <div className="bg-neutral-50/50 border border-[#D4AF37]/30 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm relative">
                             {/* Golden accent line */}
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
+
+                            <p className="text-sm text-neutral-500 italic mb-4 text-center px-4">
+                                Une envie particulière ou un régime spécifique ? Si nos propositions ne vous conviennent pas totalement, n'hésitez pas à nous le préciser dans le champ libre en bas de formulaire !
+                            </p>
 
                             <h3 className="text-xl font-serif text-center text-neutral-800 mb-6 font-bold">
                                 Composition de votre Buffet {isArdennais ? "Ardennais" : "de Gala"}
