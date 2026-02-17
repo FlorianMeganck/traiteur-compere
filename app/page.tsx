@@ -74,11 +74,11 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* --- 2. SPECIALTIES SECTION (New) --- */}
-      <SpecialtiesSection />
-
-      {/* --- 3. SERVICES SECTION (Was "Nos Univers") --- */}
+      {/* --- 2. SERVICES SECTION (Moved Up) --- */}
       <ServicesSection />
+
+      {/* --- 3. NARRATIVE TEXT (New) --- */}
+      <NarrativeTextSection />
 
       {/* --- 4. KEY FIGURES (Stats) --- */}
       <KeyFiguresSection />
@@ -92,51 +92,20 @@ export default function Home() {
 
 // --- SUB-SECTIONS ---
 
-function SpecialtiesSection() {
-  const specialties = [
-    {
-      title: "Buffets Froids",
-      image: "/images/banquet.png", // Using banquet for cold buffet
-      link: "/formules"
-    },
-    {
-      title: "Barbecue & Grillades",
-      image: "/images/chef.png", // Placeholder for Grill - maybe chef working on something?
-      link: "/formules"
-    },
-    {
-      title: "Buffets Chauds & Gala",
-      image: "/images/wedding.png", // Using wedding for hot/gala
-      link: "/formules"
-    }
-  ];
-
+function NarrativeTextSection() {
   return (
-    <section className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-serif text-black">Nos Spécialités</h2>
-          <div className="w-[1px] h-12 bg-[#D4AF37] mx-auto mt-6"></div>
-        </div>
+    <section className="py-24 bg-white text-center px-6">
+      <div className="max-w-2xl mx-auto flex flex-col items-center">
+        {/* Decorative Separator */}
+        <div className="w-[1px] h-16 bg-[#D4AF37] mb-8"></div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {specialties.map((item, index) => (
-            <Link href={item.link} key={index} className="group cursor-pointer">
-              <div className="relative overflow-hidden aspect-[4/5] mb-6 rounded-sm">
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10" />
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-              </div>
-              <h3 className="text-2xl font-serif text-center text-black group-hover:text-[#D4AF37] transition-colors">
-                {item.title}
-              </h3>
-            </Link>
-          ))}
-        </div>
+        <h3 className="text-2xl font-serif text-gray-900 mb-8 italic">
+          Une Cuisine de Cœur & de Caractère
+        </h3>
+
+        <p className="text-lg text-gray-600 leading-relaxed font-light">
+          Chez Traiteur Compère, nous ne faisons pas que cuisiner, nous créons des souvenirs. Chaque plat est préparé avec des produits locaux sélectionnés rigoureusement, pour vous offrir une expérience authentique, généreuse et sans fausse note.
+        </p>
       </div>
     </section>
   );
@@ -290,5 +259,3 @@ function Counter({ end, suffix = "", label }: { end: number, suffix?: string, la
     </div>
   );
 }
-
-
