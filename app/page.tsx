@@ -18,57 +18,73 @@ export default function Home() {
   return (
     <main className="bg-white text-gray-800 font-sans selection:bg-[#D4AF37] selection:text-white overflow-hidden">
 
-      {/* --- 1. HERO SECTION (Parallax) --- */}
-      <section ref={heroRef} className="relative h-screen flex items-center justify-center overflow-hidden">
+      {/* --- 1. HERO SECTION (Modified) --- */}
+      <section ref={heroRef} className="relative h-[80vh] flex items-center justify-center overflow-hidden">
         {/* Background Image with Parallax */}
         <motion.div
           style={{ y: heroY }}
           className="absolute inset-0 z-0"
         >
           <Image
-            src="/images/hero_v3.png" // Using v3 purely based on likelihood of being newest
+            src="/images/hero_v3.png"
             alt="Traiteur Compère Hero"
             fill
-            className="object-cover brightness-75" // Darkened for text legibility despite white navbar request - user said "Garde l'image sombre ou mets un overlay"
+            className="object-cover" // Removed brightness-75 to let overlay handle darkening
             priority
           />
-          {/* Overlay to ensure Navbar visibility if needed, but brightness-75 might be enough. Adding subtle gradient. */}
-          <div className="absolute inset-0 bg-black/30" />
+          {/* Overlay - Darker as requested */}
+          <div className="absolute inset-0 bg-black/50" />
         </motion.div>
 
         {/* Hero Content */}
         <motion.div
           style={{ y: textY }}
-          className="relative z-10 text-center px-6"
+          className="relative z-10 text-center px-6 max-w-5xl mx-auto"
         >
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="text-5xl md:text-7xl lg:text-8xl font-serif text-white tracking-wide drop-shadow-lg"
+            className="text-4xl md:text-6xl lg:text-7xl font-serif text-white tracking-wide drop-shadow-lg font-bold mb-6"
           >
-            L&apos;Excellence du Goût
+            Votre Traiteur d&apos;Excellence à Saint-Georges
           </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 1 }}
+            className="text-lg md:text-2xl text-white/90 font-light mb-10 max-w-3xl mx-auto"
+          >
+            Mariages, Entreprises & Événements privés : Une cuisine authentique et généreuse.
+          </motion.p>
+
           <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: 100 }}
-            transition={{ delay: 0.5, duration: 1 }}
-            className="w-[1px] bg-white/50 mx-auto mt-12"
-          />
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
+            <Link
+              href="/formules"
+              className="inline-block bg-[#D4AF37] text-white text-lg md:text-xl font-semibold py-4 px-10 rounded-full hover:bg-white hover:text-[#D4AF37] transition-all duration-300 transform hover:scale-105 shadow-lg"
+            >
+              Découvrez nos Formules
+            </Link>
+          </motion.div>
         </motion.div>
       </section>
 
-      {/* --- 2. STORY SECTION (Storytelling) --- */}
-      <HistorySection />
+      {/* --- 2. SPECIALTIES SECTION (New) --- */}
+      <SpecialtiesSection />
 
-      {/* --- 2b. KEY FIGURES (Animated Stats) --- */}
-      <KeyFiguresSection />
-
-      {/* --- 3. SERVICES SECTION (Interactive Grid) --- */}
+      {/* --- 3. SERVICES SECTION (Was "Nos Univers") --- */}
       <ServicesSection />
 
-      {/* --- 4. AMBIENCE & PROOFS (Mosaic) --- */}
-      <AmbienceSection />
+      {/* --- 4. KEY FIGURES (Stats) --- */}
+      <KeyFiguresSection />
+
+      {/* --- 5. CONTACT CTA (New/Extracted) --- */}
+      <ContactCTA />
 
     </main>
   );
@@ -76,67 +92,52 @@ export default function Home() {
 
 // --- SUB-SECTIONS ---
 
-function HistorySection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-10%" });
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const floatY = useTransform(scrollYProgress, [0, 1], [50, -50]); // Floating effect
+function SpecialtiesSection() {
+  const specialties = [
+    {
+      title: "Buffets Froids",
+      image: "/images/banquet.png", // Using banquet for cold buffet
+      link: "/formules"
+    },
+    {
+      title: "Barbecue & Grillades",
+      image: "/images/chef.png", // Placeholder for Grill - maybe chef working on something?
+      link: "/formules"
+    },
+    {
+      title: "Buffets Chauds & Gala",
+      image: "/images/wedding.png", // Using wedding for hot/gala
+      link: "/formules"
+    }
+  ];
 
   return (
-    <section ref={ref} className="relative py-32 px-6 bg-white overflow-hidden">
-      {/* Guidelines */}
-      <div className="absolute left-12 top-0 bottom-0 w-[1px] bg-gray-100 hidden md:block" />
-      <div className="absolute right-12 top-0 bottom-0 w-[1px] bg-gray-100 hidden md:block" />
+    <section className="py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-serif text-black">Nos Spécialités</h2>
+          <div className="w-[1px] h-12 bg-[#D4AF37] mx-auto mt-6"></div>
+        </div>
 
-      <div className="max-w-4xl mx-auto text-center relative z-10">
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 1 }}
-          className="text-[#D4AF37] text-sm uppercase tracking-[0.3em] mb-6 block"
-        >
-          Notre Histoire
-        </motion.span>
-
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-4xl md:text-5xl font-serif text-black mb-12 leading-tight"
-        >
-          Une cuisine de passion, <br />
-          un héritage de saveurs.
-        </motion.h2>
-
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="text-lg text-gray-500 font-light leading-relaxed max-w-2xl mx-auto"
-        >
-          Depuis nos débuts à Saint-Georges-sur-Meuse, nous cultivons l&apos;art de recevoir.
-          Chaque plat est une invitation au voyage, composé avec des produits locaux
-          et sublimé par une touche de modernité.
-        </motion.p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {specialties.map((item, index) => (
+            <Link href={item.link} key={index} className="group cursor-pointer">
+              <div className="relative overflow-hidden aspect-[4/5] mb-6 rounded-sm">
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors z-10" />
+                <Image
+                  src={item.image}
+                  alt={item.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </div>
+              <h3 className="text-2xl font-serif text-center text-black group-hover:text-[#D4AF37] transition-colors">
+                {item.title}
+              </h3>
+            </Link>
+          ))}
+        </div>
       </div>
-
-      {/* Floating Decorative Element (Parallax) */}
-      <motion.div
-        style={{ y: floatY }}
-        className="absolute top-1/2 right-[5%] md:right-[15%] w-32 md:w-48 opacity-20 pointer-events-none z-0 grayscale"
-      >
-        {/* Placeholder for "Branch/Plate" - reusing chef image cropped circle or similar? 
-                    Actually user suggested standard image. Let's use a subtle chef detail if possible,
-                    or just the logo mark. Let's use the 'leaf' from the logo conceptually or just a div
-                */}
-        <Image
-          src="/images/chef.png"
-          alt="Decorative"
-          width={200}
-          height={200}
-          className="rounded-full blur-[2px]"
-        />
-      </motion.div>
     </section>
   );
 }
@@ -157,22 +158,22 @@ function ServicesSection() {
     },
     {
       title: "Particuliers",
-      image: "/images/banquet.png", // Using banquet for particulary
+      image: "/images/banquet.png",
       desc: "Fêtez vos moments précieux.",
       link: "/services#particulier"
     }
   ];
 
   return (
-    <section className="py-32 bg-white">
+    <section className="py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
-        <div className="text-center mb-24">
-          <h2 className="text-4xl font-serif text-black">Nos Univers</h2>
-          <div className="w-[1px] h-16 bg-gray-200 mx-auto mt-6"></div>
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-serif text-black">Pour tous vos événements</h2>
+          <div className="w-[1px] h-12 bg-gray-300 mx-auto mt-6"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-16">
           {services.map((service, index) => (
             <ServiceCard key={index} {...service} />
           ))}
@@ -187,7 +188,7 @@ function ServiceCard({ title, image, desc, link }: { title: string, image: strin
     <Link href={link} className="group block cursor-pointer">
       <div className="flex flex-col items-center">
         {/* Image Container */}
-        <div className="w-full aspect-[3/4] overflow-hidden relative mb-8">
+        <div className="w-full aspect-[3/4] overflow-hidden relative mb-8 shadow-md">
           <motion.div
             className="w-full h-full relative"
             whileHover={{ scale: 1.05 }}
@@ -199,107 +200,36 @@ function ServiceCard({ title, image, desc, link }: { title: string, image: strin
               fill
               className="object-cover"
             />
-            {/* Overlay on hover for better text contrast if we had text over image, but here we don't. 
-                            Maybe subtle gold washer? 
-                        */}
           </motion.div>
         </div>
 
-        {/* Vertical Line Interaction */}
-        <div className="h-12 w-[1px] bg-gray-200 group-hover:bg-[#D4AF37] group-hover:h-20 transition-all duration-500 ease-in-out mb-6"></div>
-
         {/* Title */}
-        <h3 className="text-2xl font-serif text-black tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300">
+        <h3 className="text-2xl font-serif text-black tracking-wide group-hover:text-[#D4AF37] transition-colors duration-300 mb-2">
           {title}
         </h3>
 
-        {/* Description Fade In */}
-        <div className="h-8 mt-2 overflow-hidden">
-          <p className="text-sm text-gray-500 font-light translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out opacity-0 group-hover:opacity-100">
-            {desc}
-          </p>
-        </div>
+        <p className="text-gray-500 font-light text-center">
+          {desc}
+        </p>
       </div>
     </Link>
   );
 }
 
-function AmbienceSection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-10%" });
-
-  const photos = [
-    { src: "/images/wedding.png", aspect: "aspect-square" },
-    { src: "/images/chef.png", aspect: "aspect-[3/4]" },
-    { src: "/images/banquet.png", aspect: "aspect-video md:col-span-2" },
-  ];
-
+function ContactCTA() {
   return (
-    <section ref={ref} className="py-32 bg-neutral-50 px-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Quote */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={isInView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-24 max-w-2xl mx-auto"
+    <section className="py-24 bg-white text-center px-6">
+      <div className="max-w-3xl mx-auto">
+        <h2 className="text-3xl md:text-5xl font-serif text-black mb-6">Prêt à réserver ?</h2>
+        <p className="text-lg text-gray-500 mb-10 font-light">
+          Discutons de votre projet et créons ensemble un événement inoubliable.
+        </p>
+        <Link
+          href="/contact"
+          className="inline-block border-b-2 border-[#D4AF37] text-[#D4AF37] text-xl font-bold tracking-widest uppercase pb-2 hover:text-black hover:border-black transition-all"
         >
-          <span className="text-6xl text-[#D4AF37] font-serif leading-none block mb-6">&ldquo;</span>
-          <p className="text-2xl md:text-3xl font-serif text-gray-800 italic leading-relaxed">
-            Je cuisine pour vous comme je le ferais pour ma propre famille : avec cœur et générosité. Pour moi, un événement réussi ne se joue pas dans les grands discours, mais dans des assiettes vides et des invités heureux.
-          </p>
-          <p className="mt-8 text-sm uppercase tracking-widest text-[#D4AF37] font-bold">
-            — Jean-Paul Compère
-          </p>
-        </motion.div>
-
-        {/* Mosaic */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8 auto-rows-[200px] md:auto-rows-[300px]">
-          {/* Photo 1 */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="relative overflow-hidden md:col-span-2 md:row-span-2 group"
-          >
-            <Image src="/images/banquet.png" alt="Ambiance Banquet" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
-          </motion.div>
-
-          {/* Photo 2 */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative overflow-hidden md:col-span-1 md:row-span-1 group"
-          >
-            <Image src="/images/chef.png" alt="Notre Chef" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
-          </motion.div>
-
-          {/* Photo 3 */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="relative overflow-hidden md:col-span-1 md:row-span-1 group"
-          >
-            <Image src="/images/wedding.png" alt="Ambiance Mariage" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
-          </motion.div>
-
-          {/* Photo 4 - Placeholder or re-use corporate */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="relative overflow-hidden md:col-span-2 md:row-span-1 bg-white flex items-center justify-center p-8 text-center group"
-          >
-            <div>
-              <p className="font-serif text-xl italic text-gray-400 mb-2">Prêt à sublimer votre événement ?</p>
-              <Link href="/contact" className="text-[#D4AF37] uppercase tracking-widest text-sm font-bold border-b border-[#D4AF37] pb-1 hover:text-black hover:border-black transition-all">
-                Contactez-nous
-              </Link>
-            </div>
-          </motion.div>
-        </div>
+          Contactez-nous
+        </Link>
       </div>
     </section>
   );
