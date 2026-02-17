@@ -120,19 +120,19 @@ function ServicesSection() {
       title: "Mariages",
       image: "/images/wedding.png",
       desc: "Pour le plus beau jour de votre vie.",
-      link: "/services#mariage"
+      link: "/services#mariages"
     },
     {
       title: "Entreprises",
       image: "/images/corporate.png",
       desc: "Impressionnez vos collaborateurs.",
-      link: "/services#entreprise"
+      link: "/services#entreprises"
     },
     {
       title: "Particuliers",
       image: "/images/banquet.png",
       desc: "Fêtez vos moments précieux.",
-      link: "/services#particulier"
+      link: "/services#particuliers"
     }
   ];
 
@@ -159,8 +159,8 @@ function ServiceCard({ title, image, desc, link }: { title: string, image: strin
   return (
     <Link href={link} className="group block cursor-pointer">
       <div className="flex flex-col items-center">
-        {/* Image Container */}
-        <div className="w-full aspect-[3/4] overflow-hidden relative mb-8 shadow-md">
+        {/* Image Container - Added rounded-2xl and overflow-hidden */}
+        <div className="w-full aspect-[3/4] overflow-hidden relative mb-8 shadow-md rounded-2xl">
           <motion.div
             className="w-full h-full relative"
             whileHover={{ scale: 1.05 }}

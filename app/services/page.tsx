@@ -57,57 +57,63 @@ export default function Services() {
 
             {/* 2. PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
             {/* 2. PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
-            <SectionService
-                title="VOS FÊTES DE FAMILLE"
-                quote="On a enfin pu profiter de notre fête sans passer la soirée en cuisine. Tout le monde s'est régalé !"
-                quoteAuthor="— Sophie & Marc"
-                desc="Un anniversaire, un baptême ou simplement un repas entre amis ? Nous nous occupons de tout pour que vous puissiez profiter de vos invités. Buffet froid, échoppes chaudes ou service à table : on s'adapte à l'ambiance que vous voulez donner."
-                ctaLabel="Voir les formules"
-                images={[
-                    "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1000&auto=format&fit=crop", // Friendly dinner
-                    "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?q=80&w=1000&auto=format&fit=crop", // Buffet
-                    "https://images.unsplash.com/photo-1576867757603-05b134ebc379?q=80&w=1000&auto=format&fit=crop", // Hands/Cheers (REPLACED)
-                    "https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=1000&auto=format&fit=crop"  // Food detail
-                ]}
-                decorType="herb"
-                reverse={false}
-            />
+            <div id="particuliers" className="scroll-mt-32">
+                <SectionService
+                    title="VOS FÊTES DE FAMILLE"
+                    quote="On a enfin pu profiter de notre fête sans passer la soirée en cuisine. Tout le monde s'est régalé !"
+                    quoteAuthor="— Sophie & Marc"
+                    desc="Un anniversaire, un baptême ou simplement un repas entre amis ? Nous nous occupons de tout pour que vous puissiez profiter de vos invités. Buffet froid, échoppes chaudes ou service à table : on s'adapte à l'ambiance que vous voulez donner."
+                    ctaLabel="Voir les formules"
+                    images={[
+                        "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1000&auto=format&fit=crop", // Friendly dinner
+                        "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?q=80&w=1000&auto=format&fit=crop", // Buffet
+                        "https://images.unsplash.com/photo-1576867757603-05b134ebc379?q=80&w=1000&auto=format&fit=crop", // Hands/Cheers (REPLACED)
+                        "https://images.unsplash.com/photo-1484723091739-30a097e8f929?q=80&w=1000&auto=format&fit=crop"  // Food detail
+                    ]}
+                    decorType="herb"
+                    reverse={false}
+                />
+            </div>
 
             {/* 3. ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
             {/* 3. ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
-            <SectionService
-                title="VOS ÉVÉNEMENTS PRO"
-                quote="Ponctuel, discret et surtout très bon. Nos collaborateurs nous en parlent encore."
-                quoteAuthor="— Société Technifutur"
-                desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
-                ctaLabel="Demander un devis"
-                images={[
-                    "https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1000&auto=format&fit=crop", // Networking Setup (REPLACED)
-                    "https://fr.vecteezy.com/photo/2254765-restauration-food-for-parties-corporate-parties-conferences-forums-banquets-selective-focus", // Precise Appetizers (REPLACED)
-                    "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1000&auto=format&fit=crop", // Chef Plating (KEPT)
-                    "https://images.unsplash.com/photo-1574966735447-375dfd6f8356?q=80&w=1000&auto=format&fit=crop"  // Corporate Buffet (REPLACED)
-                ]}
-                decorType="geometric"
-                reverse={true}
-            />
+            <div id="entreprises" className="scroll-mt-32">
+                <SectionService
+                    title="VOS ÉVÉNEMENTS PRO"
+                    quote="Ponctuel, discret et surtout très bon. Nos collaborateurs nous en parlent encore."
+                    quoteAuthor="— Société Technifutur"
+                    desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
+                    ctaLabel="Demander un devis"
+                    images={[
+                        "https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1000&auto=format&fit=crop", // Networking Setup (REPLACED)
+                        "https://fr.vecteezy.com/photo/2254765-restauration-food-for-parties-corporate-parties-conferences-forums-banquets-selective-focus", // Precise Appetizers (REPLACED)
+                        "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1000&auto=format&fit=crop", // Chef Plating (KEPT)
+                        "https://images.unsplash.com/photo-1574966735447-375dfd6f8356?q=80&w=1000&auto=format&fit=crop"  // Corporate Buffet (REPLACED)
+                    ]}
+                    decorType="geometric"
+                    reverse={true}
+                />
+            </div>
 
             {/* 4. MARIAGES (Texte Gauche / Mosaïque Droite) */}
             {/* 4. MARIAGES (Texte Gauche / Mosaïque Droite) */}
-            <SectionService
-                title="VOTRE MARIAGE"
-                quote="Jean-Paul a été à l'écoute de nos demandes du début à la fin. Le jour J, tout était parfait et délicieux."
-                quoteAuthor="— Julie & Thomas"
-                desc="Le repas est au cœur de cette journée spéciale. Nous prenons le temps de vous rencontrer pour construire un menu qui vous ressemble, en respectant votre budget et vos goûts. Pas de stress, on gère."
-                ctaLabel="En discuter ensemble"
-                images={[
-                    "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?q=80&w=1000&auto=format&fit=crop", // Wedding table
-                    "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1000&auto=format&fit=crop", // Wedding detail
-                    "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1000&auto=format&fit=crop", // Cake/Dessert
-                    "https://images.unsplash.com/photo-1535254973040-607b474cb50d?q=80&w=1000&auto=format&fit=crop"  // Bride/Couple
-                ]}
-                decorType="flower"
-                reverse={false}
-            />
+            <div id="mariages" className="scroll-mt-32">
+                <SectionService
+                    title="VOTRE MARIAGE"
+                    quote="Jean-Paul a été à l'écoute de nos demandes du début à la fin. Le jour J, tout était parfait et délicieux."
+                    quoteAuthor="— Julie & Thomas"
+                    desc="Le repas est au cœur de cette journée spéciale. Nous prenons le temps de vous rencontrer pour construire un menu qui vous ressemble, en respectant votre budget et vos goûts. Pas de stress, on gère."
+                    ctaLabel="En discuter ensemble"
+                    images={[
+                        "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?q=80&w=1000&auto=format&fit=crop", // Wedding table
+                        "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1000&auto=format&fit=crop", // Wedding detail
+                        "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=1000&auto=format&fit=crop", // Cake/Dessert
+                        "https://images.unsplash.com/photo-1535254973040-607b474cb50d?q=80&w=1000&auto=format&fit=crop"  // Bride/Couple
+                    ]}
+                    decorType="flower"
+                    reverse={false}
+                />
+            </div>
 
             {/* Call to Action Footer */}
             {/* Call to Action Footer (Parallax) */}
