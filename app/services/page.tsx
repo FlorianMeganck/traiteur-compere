@@ -41,7 +41,7 @@ export default function Services() {
                 <ServiceThread />
 
                 {/* 2. MARIAGES (Texte Gauche / Mosaïque Droite) */}
-                <div id="mariages" className="scroll-mt-32 relative z-10">
+                <div id="mariages" className="scroll-mt-24 relative z-10">
                     <SectionService
                         title="VOTRE MARIAGE"
                         quote="Jean-Paul a été à l'écoute de nos demandes du début à la fin. Le jour J, tout était parfait et délicieux."
@@ -60,7 +60,7 @@ export default function Services() {
                 </div>
 
                 {/* 3. ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
-                <div id="entreprises" className="scroll-mt-32 relative z-10">
+                <div id="entreprises" className="scroll-mt-24 relative z-10">
                     <SectionService
                         title="VOS ÉVÉNEMENTS PRO"
                         quote="Ponctuel, discret et surtout très bon. Nos collaborateurs nous en parlent encore."
@@ -79,13 +79,14 @@ export default function Services() {
                 </div>
 
                 {/* 4. PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
-                <div id="particuliers" className="scroll-mt-32 relative z-10">
+                <div id="particuliers" className="scroll-mt-24 relative z-10">
                     <SectionService
                         title="VOS FÊTES DE FAMILLE"
                         quote="On a enfin pu profiter de notre fête sans passer la soirée en cuisine. Tout le monde s'est régalé !"
                         quoteAuthor="— Sophie & Marc"
                         desc="Un anniversaire, un baptême ou simplement un repas entre amis ? Nous nous occupons de tout pour que vous puissiez profiter de vos invités. Buffet froid, échoppes chaudes ou service à table : on s'adapte à l'ambiance que vous voulez donner."
                         ctaLabel="Voir les formules"
+                        ctaLink="/formules"
                         images={[
                             "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1000&auto=format&fit=crop", // Friendly dinner
                             "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?q=80&w=1000&auto=format&fit=crop", // Buffet
@@ -200,8 +201,8 @@ function ServiceThread() {
 
 // --- REUSABLE COMPONENTS ---
 
-function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir plus", images, decorType, reverse }: {
-    title: string, quote: string, quoteAuthor?: string, desc: string, ctaLabel?: string, images: string[], decorType: 'flower' | 'herb' | 'geometric', reverse: boolean
+function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir plus", ctaLink = "/contact", images, decorType, reverse }: {
+    title: string, quote: string, quoteAuthor?: string, desc: string, ctaLabel?: string, ctaLink?: string, images: string[], decorType: 'flower' | 'herb' | 'geometric', reverse: boolean
 }) {
     const ref = useRef(null);
     const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
@@ -313,7 +314,7 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                             </p>
 
                             <div className="pt-8">
-                                <Link href="/contact" className="group inline-flex items-center text-sm font-bold uppercase tracking-widest text-black">
+                                <Link href={ctaLink} className="group inline-flex items-center text-sm font-bold uppercase tracking-widest text-black">
                                     {ctaLabel}
                                     <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-[#D4AF37] w-full absolute bottom-0"></span>
                                     <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
