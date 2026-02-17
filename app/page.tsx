@@ -19,7 +19,7 @@ export default function Home() {
     <main className="bg-white text-gray-800 font-sans selection:bg-[#D4AF37] selection:text-white overflow-hidden">
 
       {/* --- 1. HERO SECTION (Modified) --- */}
-      <section ref={heroRef} className="relative h-[80vh] flex items-center justify-center overflow-hidden">
+      <section ref={heroRef} className="relative h-[110vh] flex items-center justify-center overflow-hidden">
         {/* Background Image with Parallax */}
         <motion.div
           style={{ y: heroY }}
@@ -33,13 +33,16 @@ export default function Home() {
             priority
           />
           {/* Overlay - Darker as requested */}
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/40" />
         </motion.div>
+
+        {/* Subtle Gradient at the bottom for text readability if needed */}
+        <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-b from-transparent to-white/10 z-20 pointer-events-none"></div>
 
         {/* Hero Content */}
         <motion.div
           style={{ y: textY }}
-          className="relative z-10 text-center px-6 max-w-5xl mx-auto"
+          className="relative z-20 text-center px-6 max-w-5xl mx-auto pb-32"
         >
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
@@ -74,7 +77,7 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* --- 2. SERVICES SECTION (Moved Up) --- */}
+      {/* --- 2. SERVICES SECTION (Moved Up & Overlap) --- */}
       <ServicesSection />
 
       {/* --- 3. NARRATIVE TEXT (New) --- */}
@@ -134,7 +137,7 @@ function ServicesSection() {
   ];
 
   return (
-    <section className="py-24 bg-gray-50">
+    <section className="relative z-30 -mt-32 pt-16 pb-24 bg-white rounded-t-[3rem] shadow-2xl mx-4 md:mx-12 lg:mx-24">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
