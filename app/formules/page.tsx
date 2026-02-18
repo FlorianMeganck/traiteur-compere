@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Sprout, Shell, Flower2, FlaskConical, LucideIcon, Check } from "lucide-react";
+import { Sprout, Shell, Flower2, FlaskConical, LucideIcon, Check, Package } from "lucide-react";
 import Link from "next/link";
 
 // --- DATA ---
@@ -124,9 +124,24 @@ export default function Formules() {
 
                 {/* FORMULES LIST */}
                 <div className="space-y-24">
-                    {FORMULES.map((formule, index) => (
-                        <FormuleSection key={index} formule={formule} index={index} />
-                    ))}
+                    {FORMULES.map((formule, index) => {
+                        const isAssociatif = formule.tag === "Événements & Associations";
+                        return (
+                            <div key={index}>
+                                {isAssociatif && (
+                                    <div className="py-12 flex items-center justify-center gap-6 mb-12">
+                                        <div className="h-px bg-neutral-200 w-24 md:w-64"></div>
+                                        <div className="flex flex-col items-center gap-2 text-neutral-400">
+                                            <Package size={24} strokeWidth={1} />
+                                            <span className="text-xs font-serif italic tracking-widest uppercase">Offre Livraison Seule</span>
+                                        </div>
+                                        <div className="h-px bg-neutral-200 w-24 md:w-64"></div>
+                                    </div>
+                                )}
+                                <FormuleSection formule={formule} index={index} />
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* BOTTOM LEGEND */}
@@ -177,7 +192,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center 
+            className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center scroll-mt-32
                 ${isAssociatif ? 'py-12 px-6 md:px-12 bg-blue-50/30 border border-blue-100 rounded-3xl' : ''}`}
         >
             {/* IMAGE SIDE */}

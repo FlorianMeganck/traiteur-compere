@@ -98,14 +98,7 @@ export default function Services() {
                     />
                 </div>
 
-                {/* 5. CTA ASSOCIATIONS */}
-                <ParallaxCta
-                    text="Vous organisez un événement associatif ou professionnel de grande envergure ?"
-                    subText="Découvrez nos solutions adaptées pour les grands groupes."
-                    link="/contact?menu=associations"
-                    buttonText="Demander un devis"
-                    image="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"
-                />
+
 
                 {/* 6. LIVRAISON SEULE & ASSOCIATIONS (Texte Droite / Mosaïque Gauche) */}
                 <div id="associations" className="scroll-mt-24 relative z-10 pt-20"> {/* PT-20 to separate from CTA */}
