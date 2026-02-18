@@ -15,7 +15,7 @@ export default function Contact() {
 
 // --- DATA CONSTANTS ---
 
-const VIANDES_STD = [
+const VIANDES_BASE = [
     "Saucisse de Campagne", "Saucisse BBQ", "Saucisse Italienne", "Saucisse au Fromage",
     "Chipolata aux Herbes", "Chipolata au Poivre", "Chipolata Nature",
     "Merguez", "Boudin blanc grillé",
@@ -24,14 +24,24 @@ const VIANDES_STD = [
     "Filet de poulet mariné", "Lard mariné", "Pilon de poulet"
 ];
 
-const VIANDES_SUPPL = [
-    ...VIANDES_STD,
+const VIANDES_SUPPL_ONLY = [
     "Magret de Canard (+2€)",
     "Spare Ribs (+1€)",
     "Côte d'Agneau (+1€)",
     "Gigot d'agneau (+2€)",
     "Viande Extra (Bœuf/Veau...) (+3€)"
 ];
+
+const BBQ_PRICES: Record<string, { low: number; mid: number; high: number }> = {
+    classique: { low: 17, mid: 15, high: 0 },
+    compose: { low: 22, mid: 20, high: 0 },
+    dinatoire: { low: 26.50, mid: 24, high: 0 },
+    mer: { low: 33, mid: 30, high: 0 },
+    vege: { low: 13, mid: 11, high: 0 },
+    cochon: { low: 36, mid: 33, high: 0 },
+    porchetta: { low: 26.50, mid: 24, high: 0 },
+    nobles: { low: 49.50, mid: 45, high: 0 },
+};
 
 const ENTREES_COMPOSE = ["Coquille St-Jacques", "Brochette de Scampi", "Pavé de Saumon", "Salade Melon/Feta 🌿", "Burrata & Tomates Cerises 🌿", "Gaspacho Andalou 🌿", "Mini-brochettes Tomate/Mozza 🌿", "Tartare de Bœuf", "Tartare de Saumon"];
 const PLATS_COMPOSE = ["Côte d'agneau", "Contrefilet", "Merguez", "Chipolata", "Brochette de bœuf", "Pavé de Saumon grillé"];
@@ -117,7 +127,7 @@ function ContactForm() {
 
         // Dinatoire (1 Service + BBQ selection)
         dinatoire_service_1: "",
-        dinatoire_service_2: "", // Usually 2 choices for service 1? Or 1 choice? Plan said "2 listes 1er service"
+        dinatoire_service_2: "",
         // dinatoire bbq choices reuse bbq_choix_1 & 2
 
         // Supplements Cascade
@@ -144,14 +154,59 @@ function ContactForm() {
         salade_2: ""
     });
 
+    // --- PRICING ENGINE ---
+
+    // Derived State for Price
+    const getPriceTier = (countStr: string): 'low' | 'mid' | 'high' => {
+        if (!countStr) return 'high'; // Default if empty
+        if (countStr.includes("Moins de 25")) return 'low'; // < 25 -> Higher Base Price
+        if (countStr.includes("Moins de 20")) return 'high'; // Standard ? NO, usually "on quote"
+        if (countStr.includes("Plus de")) return 'high'; // > 250 -> Devis (0)
+        return 'mid'; // 25 - 250 -> Standard Price
+    };
+
+    const calculateTotal = () => {
+        if (!isAnyBBQ) return 0;
+
+        // 1. Base Price
+        const bbqType = menuParam?.replace('bbq_', '') || 'classique';
+        const priceData = BBQ_PRICES[bbqType];
+        if (!priceData) return 0;
+
+        const tier = getPriceTier(formData.Nombre_Convives);
+        let base = priceData[tier];
+
+        // If base is 0, it means "Sur Devis"
+        if (base === 0) return 0;
+
+        // 2. Supplements
+        let supplements = 0;
+        const suppFields = [formData.supp_viande_1, formData.supp_viande_2, formData.supp_viande_3];
+        suppFields.forEach(field => {
+            if (field) {
+                const match = field.match(/\+(\d+)€/);
+                if (match) supplements += parseInt(match[1], 10);
+            }
+        });
+
+        // 3. Extra Hot Side
+        if (formData.accomp_chaud_supp_check === "Oui" && formData.accomp_chaud_supp) {
+            supplements += 1;
+        }
+
+        return base + supplements;
+    };
+
+    const totalPrice = calculateTotal();
+
     // Helper to get needed list based on menu
     const getBBQList = () => {
-        if (isBBQClassique) return VIANDES_STD;
+        if (isBBQClassique) return VIANDES_BASE;
         if (isBBQMer) return FRUITS_MER;
         if (isBBQVege) return VEGE;
         if (isBBQNobles) return NOBLES;
-        if (isBBQDinatoire) return VIANDES_STD; // BBQ part of Dinatoire
-        return VIANDES_STD;
+        if (isBBQDinatoire) return VIANDES_BASE; // BBQ part of Dinatoire
+        return VIANDES_BASE;
     };
 
     const getInitialConvivesOptions = () => {
@@ -263,7 +318,15 @@ function ContactForm() {
             // Add logic here ideally, keeping it simple for now
         }
 
-        formDataToSend.append("Resume_Commande", resume);
+        // Create explicit resume of what was ordered to be safe
+        let priceResume = "";
+        if (totalPrice > 0) {
+            priceResume = `\n\n--- ESTIMATION PRIX ---\nPrix unitaire : ${totalPrice}€ / personne\n(Hors frais de déplacement/service si non inclus)\n`;
+        } else {
+            priceResume = `\n\n--- ESTIMATION PRIX ---\nSur Devis\n`;
+        }
+
+        formDataToSend.append("Resume_Commande", resume + priceResume);
 
         try {
             const response = await fetch("https://formspree.io/f/xvzbpbjd", {
@@ -288,135 +351,163 @@ function ContactForm() {
 
     // --- RENDERERS ---
 
-    const renderDropdown = (label: string, name: string, options: string[], req = false) => (
-        <div className="group">
-            <label className={labelStyle}>{label} {req && <span className="text-red-500">*</span>}</label>
-            <div className="relative">
-                <select
-                    name={name}
-                    value={(formData as any)[name]}
-                    onChange={handleChange}
-                    className={`${inputStyle} appearance-none cursor-pointer`}
-                >
-                    <option value="">Faites votre choix...</option>
-                    {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
-                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+    const renderDropdown = (label: string, name: string, options: string[], excludeValues: string[] = [], req = false) => {
+        // Filter options: remove if in excludeValues AND not the current value
+        const currentVal = (formData as any)[name];
+        const filteredOptions = options.filter(opt => !excludeValues.includes(opt) || opt === currentVal);
+
+        return (
+            <div className="group">
+                <label className={labelStyle}>{label} {req && <span className="text-red-500">*</span>}</label>
+                <div className="relative">
+                    <select
+                        name={name}
+                        value={currentVal}
+                        onChange={handleChange}
+                        className={`${inputStyle} appearance-none cursor-pointer`}
+                    >
+                        <option value="">Faites votre choix...</option>
+                        {filteredOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                    </select>
+                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 
-    const renderBBQComposition = () => (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-neutral-50/50 border border-[#D4AF37]/30 rounded-2xl p-6 md:p-8 space-y-8 shadow-sm relative">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
+    const renderBBQComposition = () => {
+        // Prepare exclusion lists
+        const bbqChoices = [formData.bbq_choix_1, formData.bbq_choix_2, formData.bbq_choix_3].filter(Boolean);
+        const suppChoices = [formData.supp_viande_1, formData.supp_viande_2, formData.supp_viande_3].filter(Boolean);
+        const composeEntreeChoices = [formData.compose_entree_1, formData.compose_entree_2].filter(Boolean);
+        const composePlatChoices = [formData.compose_plat_1, formData.compose_plat_2].filter(Boolean);
+        const dinatoireServiceChoices = [formData.dinatoire_service_1, formData.dinatoire_service_2].filter(Boolean);
+        const froidChoices = [formData.accomp_froid_1, formData.accomp_froid_2, formData.accomp_froid_3].filter(Boolean);
 
-            <div className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-lg text-sm text-center font-medium">
-                Note : 100g de viande par personne pour chaque choix (base ou supplément).
-            </div>
+        const bbqName = menuParam ? menuParam.replace('bbq_', '').charAt(0).toUpperCase() + menuParam.replace('bbq_', '').slice(1) : "Sur Mesure";
 
-            {/* MAIN CHOICES */}
-            <div className="space-y-6">
-                <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Votre Sélection Principale</h3>
+        return (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-neutral-50/50 border border-[#D4AF37]/30 rounded-2xl p-6 md:p-8 space-y-8 shadow-sm relative">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
 
-                {isCochonOrPorchetta && (
-                    <div className="text-center py-4 bg-white rounded-xl border border-neutral-200">
-                        <p className="text-xl font-serif text-neutral-800">
-                            {isBBQCochon ? "Cochon de Lait à la Broche" : "Porchetta Rôtie aux Herbes"}
-                        </p>
-                        <p className="text-sm text-neutral-500 mt-1">300g / personne</p>
+                {/* HEADER Configuration */}
+                <div className="text-center mb-6">
+                    <h2 className="text-2xl font-serif text-neutral-800 font-bold mb-2">Configuration : BBQ {bbqName}</h2>
+                    <div className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-lg text-sm font-medium inline-block">
+                        Note : 100g de viande par personne/choix. Si vous ne trouvez pas votre bonheur, précisez-le en bas !
                     </div>
-                )}
-
-                {isBBQCompose && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {renderDropdown("Entrée 1", "compose_entree_1", ENTREES_COMPOSE)}
-                        {renderDropdown("Entrée 2", "compose_entree_2", ENTREES_COMPOSE)}
-                        {renderDropdown("Plat 1", "compose_plat_1", PLATS_COMPOSE)}
-                        {renderDropdown("Plat 2", "compose_plat_2", PLATS_COMPOSE)}
-                    </div>
-                )}
-
-                {isBBQDinatoire && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {renderDropdown("1er Service (Plat 1)", "dinatoire_service_1", SERVICES_DINATOIRE)}
-                        {renderDropdown("1er Service (Plat 2)", "dinatoire_service_2", SERVICES_DINATOIRE)}
-                        {renderDropdown("2ème Service (BBQ Choix 1)", "bbq_choix_1", getBBQList())}
-                        {renderDropdown("2ème Service (BBQ Choix 2)", "bbq_choix_2", getBBQList())}
-                    </div>
-                )}
-
-                {!isCochonOrPorchetta && !isBBQCompose && !isBBQDinatoire && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {renderDropdown("Choix 1", "bbq_choix_1", getBBQList())}
-                        {renderDropdown("Choix 2", "bbq_choix_2", getBBQList())}
-                        {renderDropdown("Choix 3", "bbq_choix_3", getBBQList())}
-                    </div>
-                )}
-            </div>
-
-            {/* SUPPLEMENTS CASCADE */}
-            <div className="space-y-6">
-                <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Suppléments Viandes</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {renderDropdown("Supplément Viande 1", "supp_viande_1", VIANDES_SUPPL)}
-                    {(formData.supp_viande_1 !== "") && renderDropdown("Supplément Viande 2", "supp_viande_2", VIANDES_SUPPL)}
-                    {(formData.supp_viande_2 !== "") && renderDropdown("Supplément Viande 3", "supp_viande_3", VIANDES_SUPPL)}
                 </div>
-            </div>
 
-            {/* ACCOMPAGNEMENTS */}
-            <div className="space-y-6">
-                <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Accompagnements</h3>
+                {/* PRICE DISPLAY */}
+                <div className={`sticky top-24 z-20 transition-all duration-300 ${totalPrice > 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"}`}>
+                    <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-xl flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
+                        <span className="text-sm font-bold uppercase tracking-widest">Prix Estimatif</span>
+                        <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "Sur Devis"}</span>
+                    </div>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="md:col-span-3">
-                        <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Froids (3 Choix)</label>
+                {/* MAIN CHOICES */}
+                <div className="space-y-6">
+                    <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Votre Sélection Principale (Inclus)</h3>
+
+                    {isCochonOrPorchetta && (
+                        <div className="text-center py-4 bg-white rounded-xl border border-neutral-200">
+                            <p className="text-xl font-serif text-neutral-800">
+                                {isBBQCochon ? "Cochon de Lait à la Broche" : "Porchetta Rôtie aux Herbes"}
+                            </p>
+                            <p className="text-sm text-neutral-500 mt-1">300g / personne</p>
+                        </div>
+                    )}
+
+                    {isBBQCompose && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {renderDropdown("Entrée 1", "compose_entree_1", ENTREES_COMPOSE, composeEntreeChoices)}
+                            {renderDropdown("Entrée 2", "compose_entree_2", ENTREES_COMPOSE, composeEntreeChoices)}
+                            {renderDropdown("Plat 1", "compose_plat_1", PLATS_COMPOSE, composePlatChoices)}
+                            {renderDropdown("Plat 2", "compose_plat_2", PLATS_COMPOSE, composePlatChoices)}
+                        </div>
+                    )}
+
+                    {isBBQDinatoire && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {renderDropdown("1er Service (Plat 1)", "dinatoire_service_1", SERVICES_DINATOIRE, dinatoireServiceChoices)}
+                            {renderDropdown("1er Service (Plat 2)", "dinatoire_service_2", SERVICES_DINATOIRE, dinatoireServiceChoices)}
+                            {renderDropdown("2ème Service (BBQ Choix 1)", "bbq_choix_1", getBBQList(), bbqChoices)}
+                            {renderDropdown("2ème Service (BBQ Choix 2)", "bbq_choix_2", getBBQList(), bbqChoices)}
+                        </div>
+                    )}
+
+                    {!isCochonOrPorchetta && !isBBQCompose && !isBBQDinatoire && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {renderDropdown("Salade Froide 1", "accomp_froid_1", SIDES_COLD)}
-                            {renderDropdown("Salade Froide 2", "accomp_froid_2", SIDES_COLD)}
-                            {renderDropdown("Salade Froide 3", "accomp_froid_3", SIDES_COLD)}
+                            {renderDropdown("Choix 1", "bbq_choix_1", getBBQList(), bbqChoices)}
+                            {renderDropdown("Choix 2", "bbq_choix_2", getBBQList(), bbqChoices)}
+                            {renderDropdown("Choix 3", "bbq_choix_3", getBBQList(), bbqChoices)}
                         </div>
+                    )}
+                </div>
+
+                {/* SUPPLEMENTS CASCADE */}
+                <div className="space-y-6">
+                    <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Suppléments Viandes (Payants)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {renderDropdown("Supplément Viande 1", "supp_viande_1", VIANDES_SUPPL_ONLY, suppChoices)}
+                        {(formData.supp_viande_1 !== "") && renderDropdown("Supplément Viande 2", "supp_viande_2", VIANDES_SUPPL_ONLY, suppChoices)}
+                        {(formData.supp_viande_2 !== "") && renderDropdown("Supplément Viande 3", "supp_viande_3", VIANDES_SUPPL_ONLY, suppChoices)}
                     </div>
+                </div>
 
-                    <div className="md:col-span-3 border-t border-dashed border-neutral-200 pt-6"></div>
+                {/* ACCOMPAGNEMENTS */}
+                <div className="space-y-6">
+                    <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Accompagnements</h3>
 
-                    <div className="md:col-span-1">
-                        <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Chauds</label>
-                        {renderDropdown("Accomp. Chaud Inclus", "accomp_chaud", SIDES_HOT)}
-                    </div>
-
-                    <div className="md:col-span-2 flex flex-col justify-end">
-                        <div className="bg-white p-4 rounded-xl border border-neutral-200">
-                            <div className="flex items-center gap-3 mb-3">
-                                <input
-                                    type="checkbox"
-                                    name="accomp_chaud_supp_check"
-                                    id="accomp_chaud_supp_check"
-                                    className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                                    checked={formData.accomp_chaud_supp_check === "Oui"}
-                                    onChange={handleChange}
-                                />
-                                <label htmlFor="accomp_chaud_supp_check" className="text-neutral-700 font-medium cursor-pointer select-none">
-                                    Ajouter un accompagnement chaud supplémentaire (+1€ / pers)
-                                </label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="md:col-span-3">
+                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Froids (3 Choix)</label>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                {renderDropdown("Salade Froide 1", "accomp_froid_1", SIDES_COLD, froidChoices)}
+                                {renderDropdown("Salade Froide 2", "accomp_froid_2", SIDES_COLD, froidChoices)}
+                                {renderDropdown("Salade Froide 3", "accomp_froid_3", SIDES_COLD, froidChoices)}
                             </div>
-                            <AnimatePresence>
-                                {formData.accomp_chaud_supp_check === "Oui" && (
-                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
-                                        {renderDropdown("Choix Supplémentaire", "accomp_chaud_supp", SIDES_HOT)}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                        </div>
+
+                        <div className="md:col-span-3 border-t border-dashed border-neutral-200 pt-6"></div>
+
+                        <div className="md:col-span-1">
+                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Chauds</label>
+                            {renderDropdown("Accomp. Chaud Inclus", "accomp_chaud", SIDES_HOT)}
+                        </div>
+
+                        <div className="md:col-span-2 flex flex-col justify-end">
+                            <div className="bg-white p-4 rounded-xl border border-neutral-200">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <input
+                                        type="checkbox"
+                                        name="accomp_chaud_supp_check"
+                                        id="accomp_chaud_supp_check"
+                                        className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                                        checked={formData.accomp_chaud_supp_check === "Oui"}
+                                        onChange={handleChange}
+                                    />
+                                    <label htmlFor="accomp_chaud_supp_check" className="text-neutral-700 font-medium cursor-pointer select-none">
+                                        Ajouter un accompagnement chaud supplémentaire (+1€ / pers)
+                                    </label>
+                                </div>
+                                <AnimatePresence>
+                                    {formData.accomp_chaud_supp_check === "Oui" && (
+                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+                                            {renderDropdown("Choix Supplémentaire", "accomp_chaud_supp", SIDES_HOT)}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </motion.div>
-    );
-
-    // Legacy renderers for Associations / Buffet can be simplified or kept similar...
+            </motion.div>
+        );
+    };     // Legacy renderers for Associations / Buffet can be simplified or kept similar...
     // ideally I would refactor them to use renderDropdown too but keeping logic distinct is fine.
     // For brevity in this rewrite, I'll use a simplified version for them.
 
