@@ -1,11 +1,120 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
-import { Sprout, Shell, Flower2, FlaskConical, LucideIcon, Check, Package } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sprout, Shell, Flower2, FlaskConical, LucideIcon, Check, Package, Flame } from "lucide-react";
 import Link from "next/link";
 
 // --- DATA ---
+
+type BBQType = 'classique' | 'compose' | 'dinatoire' | 'mer' | 'vege' | 'cochon' | 'porchetta' | 'nobles';
+
+const BBQ_OPTIONS: Record<BBQType, {
+    label: string;
+    composition: string[];
+    description: string;
+    prices: { small: string; medium: string; large: string }; // small: <25, medium: 25-250 (or similar), large: >250
+    counts: { small: string; medium: string; large: string }; // thresholds text
+    priceDetails?: { small?: string; medium?: string; large?: string }; // subtitle price details
+    isFlatRate?: boolean; // For Cochon/Porchetta fixed price logic if needed, though structure handles it
+}> = {
+    classique: {
+        label: "Le Classique",
+        description: "L'incontournable de l'été. Des grillades savoureuses préparées avec soin.",
+        composition: [
+            "3 Viandes au choix (Saucisses, Merguez, Brochettes...)",
+            "Assortiment de salades fraîches",
+            "Pommes de terre grenailles & Pâtes",
+            "Sauces maison & Pain artisanal"
+        ],
+        prices: { small: "17€", medium: "15€", large: "Sur devis" },
+        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
+    },
+    compose: {
+        label: "Le Composé",
+        description: "Un menu complet avec entrées et plats pour un repas équilibré.",
+        composition: [
+            "2 Entrées au choix (Scampi, Saumon, Tartare...)",
+            "2 Plats au choix (Côte d'agneau, Contrefilet...)",
+            "Accompagnements chauds & froids à volonté"
+        ],
+        prices: { small: "22€", medium: "20€", large: "Sur devis" },
+        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
+    },
+    dinatoire: {
+        label: "Le Dînatoire",
+        description: "Une formule élégante en deux services pour prendre le temps de déguster.",
+        composition: [
+            "1er Service à table (Lasagne, Chili, Paëlla...)",
+            "2ème Service : Barbecue varié à volonté",
+            "Buffet de salades & féculents"
+        ],
+        prices: { small: "26,50€", medium: "24€", large: "Sur devis" },
+        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
+    },
+    mer: {
+        label: "Fruits de Mer",
+        description: "La fraîcheur de l'océan sur votre grill. Une sélection premium.",
+        composition: [
+            "Gambas géantes & Homard grillé",
+            "Brochettes de St-Jacques & Scampis",
+            "Pavé de Saumon papilloté",
+            "Salades fraîcheur & Sauces citronnées"
+        ],
+        prices: { small: "33€", medium: "30€", large: "Sur devis" },
+        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
+    },
+    vege: {
+        label: "Végétarien",
+        description: "Une alternative gourmande et créative 100% végétarienne.",
+        composition: [
+            "Halloumi grillé & Brochettes de légumes",
+            "Portobellos farcis & Maïs grillé",
+            "Grand buffet de salades composées",
+            "Pommes de terre & Sauces végétales"
+        ],
+        prices: { small: "13€", medium: "11€", large: "Sur devis" },
+        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
+    },
+    cochon: {
+        label: "Cochon de Lait",
+        description: "La pièce maîtresse de votre événement, cuite à la broche sous vos yeux.",
+        composition: [
+            "Cochon de lait entier rôti à la broche (300g/pers)",
+            "Laqué au miel et aux épices douces",
+            "Buffet complet de crudités et féculents",
+            "Sauces maison"
+        ],
+        prices: { small: "36€", medium: "33€", large: "Sur devis" },
+        counts: { small: "Moins de 25 pers.", medium: "25 à 180 pers.", large: "Plus de 180 pers." }
+    },
+    porchetta: {
+        label: "Porchetta",
+        description: "Une spécialité italienne rôtie aux herbes, juteuse et parfumée.",
+        composition: [
+            "Porchetta artisanale rôtie (300g/pers)",
+            "Marinade aux herbes fraîches et ail",
+            "Accompagnements chauds (Gratin, Grenailles...)",
+            "Salades variées"
+        ],
+        prices: { small: "26,50€", medium: "24€", large: "Sur devis" },
+        counts: { small: "Moins de 25 pers.", medium: "25 à 180 pers.", large: "Plus de 180 pers." }
+    },
+    nobles: {
+        label: "Viandes Nobles",
+        description: "L'excellence pour les amateurs de viandes d'exception.",
+        composition: [
+            "Tomahawk, Côte à l'os maturée",
+            "Entrecôte Irlandaise & Black Angus",
+            "Filet pur et viandes d'exception",
+            "Accompagnements premium & Sauces truffées"
+        ],
+        prices: { small: "49,50€", medium: "45€", large: "Sur devis" },
+        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
+    }
+};
+
 const FORMULES = [
     {
         tag: "Terroir",
@@ -27,16 +136,11 @@ const FORMULES = [
     },
     {
         tag: "BBQ & Feu de bois",
-        title: "Le Barbecue Mixte",
-        description: "L'incontournable de l'été. Des grillades savoureuses préparées avec soin pour une ambiance conviviale.",
-        price: "20€ / pers",
+        title: "Le Barbecue sur Mesure",
+        description: "Configurez votre barbecue idéal parmi nos 8 formules exclusives.",
+        price: "Dès 11€ / pers", // Dynamic
         image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=2070&auto=format&fit=crop",
-        items: [
-            "Entrée au choix : Brochette de Scampi ou Pavé de Saumon à l'aneth",
-            "Plat : Côte d'agneau, Contrefilet",
-            "Merguez, Chipolata et Brochette de bœuf",
-            "Assortiment complet de salades et féculents"
-        ],
+        items: [], // Dynamic
         allergens: ["fish", "crustace", "moutarde"],
         imageStyle: "rounded-t-2xl"
     },
@@ -122,8 +226,6 @@ export default function Formules() {
                         Découvrez nos compositions pensées pour tous vos événements.
                         Du simple buffet aux plats mijotés, nous avons la formule qu&apos;il vous faut.
                     </p>
-
-
                 </header>
 
                 {/* FORMULES LIST */}
@@ -188,6 +290,11 @@ export default function Formules() {
 function FormuleSection({ formule, index }: { formule: FormuleType, index: number }) {
     const isEven = index % 2 === 0;
     const isAssociatif = formule.tag === "Événements & Associations";
+    const isBBQ = formule.tag === "BBQ & Feu de bois";
+
+    // BBQ State
+    const [selectedBBQ, setSelectedBBQ] = useState<BBQType>('classique');
+    const currentBBQ = BBQ_OPTIONS[selectedBBQ];
 
     return (
         <motion.section
@@ -196,11 +303,11 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center scroll-mt-32
+            className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-start scroll-mt-32
                 ${isAssociatif ? 'py-12 px-6 md:px-12 bg-neutral-50 border border-[#D4AF37]/20 rounded-2xl' : ''}`}
         >
             {/* IMAGE SIDE */}
-            <div className="w-full md:w-1/2 relative h-[400px] md:h-[500px] overflow-hidden rounded-2xl shadow-xl group">
+            <div className="w-full md:w-1/2 relative h-[450px] md:h-[600px] overflow-hidden rounded-2xl shadow-xl group sticky top-32">
                 <Image
                     src={formule.image}
                     alt={formule.title}
@@ -218,7 +325,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             <div className="w-full md:w-1/2 space-y-6">
                 <div className="flex flex-col gap-2">
                     <span className="text-[#D4AF37] font-sans text-sm font-bold uppercase tracking-widest md:hidden">{formule.tag}</span>
-                    <h2 className="text-3xl md:text-4xl font-serif text-black">{formule.title}</h2>
+                    <h2 className="text-3xl md:text-4xl font-serif text-black">{isBBQ ? currentBBQ.label : formule.title}</h2>
                     {isAssociatif && (
                         <div className="inline-block bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider w-fit">
                             Livraison Seule
@@ -228,8 +335,34 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 <div className="w-20 h-1 bg-neutral-300" />
 
                 <p className="text-gray-600 leading-relaxed text-lg">
-                    {formule.description}
+                    {isBBQ ? currentBBQ.description : formule.description}
                 </p>
+
+                {/* --- DYNAMIC BBQ SELECTOR --- */}
+                {isBBQ && (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                        {Object.entries(BBQ_OPTIONS).map(([key, data]) => {
+                            const isSelected = selectedBBQ === key;
+                            return (
+                                <button
+                                    key={key}
+                                    onClick={() => setSelectedBBQ(key as BBQType)}
+                                    className={`
+                                        px-2 py-3 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-300
+                                        flex flex-col items-center justify-center gap-1 text-center border
+                                        ${isSelected
+                                            ? 'bg-black text-[#D4AF37] border-black shadow-lg scale-105'
+                                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        }
+                                    `}
+                                >
+                                    <Flame size={16} className={isSelected ? 'text-[#D4AF37]' : 'text-gray-300'} />
+                                    {data.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
 
                 {/* COMPOSITION */}
                 <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border-l-4 border-neutral-300">
@@ -237,7 +370,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                         {isAssociatif ? "Choix du Plat Unique" : "Composition"}
                     </h3>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
-                        {formule.items.map((item: string, i: number) => (
+                        {(isBBQ ? currentBBQ.composition : formule.items).map((item: string, i: number) => (
                             <li key={i} className="flex items-start gap-2 text-neutral-700">
                                 <Check size={16} className="text-[#D4AF37] flex-shrink-0 mt-1" strokeWidth={3} />
                                 <span className="text-sm leading-relaxed">{item}</span>
@@ -275,46 +408,54 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
 
                 {/* PRICING LOGIC */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
-                    <PricingBlock price={formule.price} tag={formule.tag} />
+                    <PricingBlock
+                        price={formule.price}
+                        tag={formule.tag}
+                        selectedBBQ={selectedBBQ}
+                    />
                 </div>
             </div>
         </motion.section>
     );
 }
 
-function PricingBlock({ price, tag }: { price: string, tag: string }) {
-    // If it's the BBQ menu, show the 3 specific options
-    if (tag === "BBQ & Feu de bois") {
+function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string, selectedBBQ?: BBQType }) {
+    // If it's the BBQ menu, show the 3 specific options with dynamic prices
+    if (tag === "BBQ & Feu de bois" && selectedBBQ) {
+        const data = BBQ_OPTIONS[selectedBBQ];
+        const menuParam = `bbq_${selectedBBQ}`;
+
         return (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                {/* Option 1: < 30 */}
+                {/* Option 1: Small Group */}
                 <Link
-                    href="/contact?menu=bbq&count=3&convives=Moins de 30"
+                    href={`/contact?menu=${menuParam}&count=3&convives=${data.counts.small}`}
                     className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
                 >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 30 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">3 Viandes au choix</span>
-                    <span className="text-[10px] text-gray-400">(Formule Standard)</span>
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">{data.counts.small}</span>
+                    <span className="text-lg font-bold font-serif text-gray-900">{data.prices.small}</span>
+                    <span className="text-[10px] text-gray-400">/ pers</span>
                 </Link>
 
-                {/* Option 2: 30 - 80 (Highlighted) */}
+                {/* Option 2: Medium Group (Highlighted) */}
                 <Link
-                    href="/contact?menu=bbq&count=4&convives=30 à 80"
+                    href={`/contact?menu=${menuParam}&count=4&convives=${data.counts.medium}`}
                     className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">30 à 80 pers.</span>
-                    <span className="text-lg font-bold font-serif">4 Viandes au choix</span>
+                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">{data.counts.medium}</span>
+                    <span className="text-2xl font-bold font-serif">{data.prices.medium}</span>
+                    <span className="text-[10px] text-gray-300">/ pers</span>
                 </Link>
 
-                {/* Option 3: > 80 */}
+                {/* Option 3: Large Group */}
                 <Link
-                    href="/contact?menu=bbq&count=5&convives=Plus de 80"
+                    href={`/contact?menu=${menuParam}&count=5&convives=${data.counts.large}`}
                     className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
                 >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 80 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">5 Viandes au choix</span>
-                    <span className="text-[10px] text-gray-400">(Grand Groupe)</span>
+                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">{data.counts.large}</span>
+                    <span className="text-sm font-medium text-gray-900">{data.prices.large}</span>
+                    <span className="text-[10px] text-gray-400">(Tarifs dégressifs)</span>
                 </Link>
             </div>
         );
