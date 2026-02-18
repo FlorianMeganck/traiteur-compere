@@ -69,6 +69,23 @@ const OPTIONS_COCHON = ["Moins de 25", "25 à 180", "Plus de 180"]; // Specific 
 const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
 const OPTIONS_ASSOCIATIONS = ["Moins de 50", "50 à 100", "Plus de 100"];
 
+// --- VALIDATION HELPERS ---
+
+const getMinDate = () => {
+    const date = new Date();
+    date.setDate(date.getDate() + 7);
+    return date.toISOString().split('T')[0];
+};
+
+const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
+
+const isValidPhone = (phone: string) => {
+    const clean = phone.replace(/\D/g, '');
+    return (clean.startsWith('0') && (clean.length === 9 || clean.length === 10));
+};
+
 function ContactForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -243,24 +260,65 @@ function ContactForm() {
             return;
         }
 
-        // Phone formatting logic remains...
+        // Strict Phone Formatting
         if (name === "Tel") {
-            // ... strict phone formatting ...
             let cleanVal = value.replace(/\D/g, "");
-            let maxLength = 9;
-            if (/^(046|047|048|049)/.test(cleanVal)) maxLength = 10;
+            let formatted = cleanVal;
+
+            // Determine max length based on prefix (04XX -> Mobile -> 10 digits, else 9)
+            const isMobile = /^(045|046|047|048|049)/.test(cleanVal);
+            const maxLength = isMobile ? 10 : 9;
+
             if (cleanVal.length > maxLength) cleanVal = cleanVal.slice(0, maxLength);
-            // Basic formatting for simplicity in this rewrite block
-            setFormData(prev => ({ ...prev, [name]: cleanVal }));
+
+            if (cleanVal.length > 0) {
+                if (isMobile) {
+                    // 0470 12 34 56
+                    if (cleanVal.length > 4) {
+                        formatted = cleanVal.slice(0, 4) + ' ' + cleanVal.slice(4).match(/.{1,2}/g)?.join(' ');
+                    }
+                } else {
+                    // 02 123 45 67
+                    if (cleanVal.length > 2) {
+                        formatted = cleanVal.slice(0, 2) + ' ' + cleanVal.slice(2).match(/.{1,3}/g)?.join(' ')?.replace(/(.{3}) (.{2})$/, "$1 $2");
+                        // The above regex replace is a simplified attempt, let's stick to simple grouping for stability or just standard 2 groups
+                        // Let's use a simpler approach used in previous reliable versions if possible.
+                        // Actually, standard Belgium fixed is 0Z XXX XX XX or 0ZZ XX XX XX. 
+                        // Let's split 2 / 3 / 2 / 2 for fixed (9 digits total: 02 123 45 67)
+                        formatted = cleanVal.slice(0, 2) + (cleanVal.length > 2 ? ' ' + cleanVal.slice(2, 5) : '') + (cleanVal.length > 5 ? ' ' + cleanVal.slice(5, 7) : '') + (cleanVal.length > 7 ? ' ' + cleanVal.slice(7, 9) : '');
+                    }
+                }
+            }
+
+            setFormData(prev => ({ ...prev, [name]: formatted.trim() }));
             return;
         }
 
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const handleDateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        if (!val) return;
+        if (new Date(val) < new Date(getMinDate())) {
+            alert("La date sélectionnée est trop proche. Veuillez sélectionner une date à au moins 7 jours.");
+            setFormData(prev => ({ ...prev, Date: getMinDate() }));
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Validation logic ...
+
+        // VALIDATION
+        if (!validateEmail(formData.Mail)) {
+            alert("Merci de saisir une adresse email valide.");
+            return;
+        }
+        if (!isValidPhone(formData.Tel)) {
+            alert("Merci de saisir un numéro de téléphone valide (ex: 0470 12 34 56).");
+            return;
+        }
+
         setStatus("submitting");
 
         // FORMULATE MESSAGE
@@ -539,14 +597,23 @@ function ContactForm() {
                 </div>
                 <div className="group">
                     <label className={labelStyle}>Téléphone <span className="text-red-500">*</span></label>
-                    <input type="tel" name="Tel" required value={formData.Tel} onChange={handleChange} className={inputStyle} />
+                    <input type="tel" name="Tel" required value={formData.Tel} onChange={handleChange} placeholder="0470 12 34 56" className={inputStyle} />
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
                     <label className={labelStyle}>Date <span className="text-red-500">*</span></label>
-                    <input type="date" name="Date" required value={formData.Date} onChange={handleChange} className={inputStyle} />
+                    <input
+                        type="date"
+                        name="Date"
+                        required
+                        min={getMinDate()}
+                        value={formData.Date}
+                        onChange={handleChange}
+                        onBlur={handleDateBlur}
+                        className={inputStyle}
+                    />
                 </div>
                 <div className="group">
                     <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
