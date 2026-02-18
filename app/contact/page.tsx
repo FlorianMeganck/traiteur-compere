@@ -3,7 +3,7 @@
 import { useState, useLayoutEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Leaf } from "lucide-react";
+import { Users, Leaf, Check } from "lucide-react";
 
 export default function Contact() {
     return (
@@ -460,6 +460,16 @@ function ContactForm() {
                 body: formDataToSend
             });
             if (response.ok) {
+                // Tracking GA4 : Victoire !
+                if (typeof window !== 'undefined' && (window as any).gtag) {
+                    (window as any).gtag('event', 'generate_lead', {
+                        'event_category': 'Contact',
+                        'event_label': 'Formulaire_Envoye',
+                        'value': typeof totalPrice !== 'undefined' ? totalPrice : 0, // Envoie le montant estimé si dispo
+                        'currency': 'EUR'
+                    });
+                }
+
                 setStatus("success");
                 setTimeout(() => router.push("/"), 3000);
             } else {
@@ -779,9 +789,26 @@ function ContactForm() {
                     </header>
 
                     {status === "success" ? (
-                        <div className="text-center py-12 animate-fade-in">
-                            <h2 className="text-3xl font-serif text-gray-900 mb-4">Merci !</h2>
-                            <p className="text-gray-600">Votre demande a bien été envoyée.</p>
+                        <div className="text-center py-20 space-y-6 animate-fade-in flex flex-col items-center justify-center min-h-[400px]">
+                            {/* Cercle avec le V Vert */}
+                            <div className="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mb-4 shadow-sm border-4 border-green-100 scale-110">
+                                <Check className="w-12 h-12 text-green-600" strokeWidth={4} />
+                            </div>
+
+                            <h2 className="text-4xl font-serif text-neutral-900">C'est envoyé !</h2>
+
+                            <p className="text-neutral-600 text-lg max-w-lg mx-auto leading-relaxed">
+                                Merci de votre confiance. Nous avons bien reçu votre demande et reviendrons vers vous très rapidement.
+                            </p>
+
+                            <div className="pt-8">
+                                <div className="inline-block bg-neutral-100 px-6 py-3 rounded-full border border-neutral-200">
+                                    <p className="text-sm text-neutral-500 font-medium animate-pulse flex items-center gap-2">
+                                        <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></span>
+                                        Redirection vers l'accueil dans 3 secondes...
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-8">
