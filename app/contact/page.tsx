@@ -90,6 +90,7 @@ function ContactForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+    const [errors, setErrors] = useState<{ Mail?: string, Tel?: string }>({});
 
     // --- MENU CONTEXT ---
     const menuParam = searchParams.get('menu');
@@ -132,9 +133,9 @@ function ContactForm() {
 
         // Dynamic Fields
         // BBQ Standard / Nobles / Vege / Mer (3 choices usually)
-        bbq_choix_1: "",
-        bbq_choix_2: "",
-        bbq_choix_3: "",
+        Viande_1: "",
+        Viande_2: "",
+        Viande_3: "",
 
         // Compose (2 Entrées + 2 Plats)
         compose_entree_1: "",
@@ -145,20 +146,20 @@ function ContactForm() {
         // Dinatoire (1 Service + BBQ selection)
         dinatoire_service_1: "",
         dinatoire_service_2: "",
-        // dinatoire bbq choices reuse bbq_choix_1 & 2
+        // dinatoire bbq choices reuse Viande_1 & 2
 
         // Supplements Cascade
-        supp_viande_1: "",
-        supp_viande_2: "",
-        supp_viande_3: "",
+        Supplement_Viande_1: "",
+        Supplement_Viande_2: "",
+        Supplement_Viande_3: "",
 
         // Accompaniments
-        accomp_froid_1: "",
-        accomp_froid_2: "",
-        accomp_froid_3: "",
-        accomp_chaud: "",
-        accomp_chaud_supp: "",
-        accomp_chaud_supp_check: "Non",
+        Accompagnement_Froid_1: "",
+        Accompagnement_Froid_2: "",
+        Accompagnement_Froid_3: "",
+        Accompagnement_Chaud: "",
+        Accompagnement_Chaud_Supplement: "",
+        Accompagnement_Chaud_Supplement_Check: "Non",
 
         // Buffet / Assoc Legacy
         plat_1: "",
@@ -193,12 +194,12 @@ function ContactForm() {
         const tier = getPriceTier(formData.Nombre_Convives);
         let base = priceData[tier];
 
-        // If base is 0, it means "Sur Devis"
-        if (base === 0) return 0;
+        // If base is 0, it means "Sur Devis" (High tier / > 250)
+        if (base === 0) return -1; // -1 signals "Sur Devis" specifically
 
         // 2. Supplements
         let supplements = 0;
-        const suppFields = [formData.supp_viande_1, formData.supp_viande_2, formData.supp_viande_3];
+        const suppFields = [formData.Supplement_Viande_1, formData.Supplement_Viande_2, formData.Supplement_Viande_3];
         suppFields.forEach(field => {
             if (field) {
                 const match = field.match(/\+(\d+)€/);
@@ -207,7 +208,7 @@ function ContactForm() {
         });
 
         // 3. Extra Hot Side
-        if (formData.accomp_chaud_supp_check === "Oui" && formData.accomp_chaud_supp) {
+        if (formData.Accompagnement_Chaud_Supplement_Check === "Oui" && formData.Accompagnement_Chaud_Supplement) {
             supplements += 1;
         }
 
@@ -310,12 +311,20 @@ function ContactForm() {
         e.preventDefault();
 
         // VALIDATION
+        const newErrors: { Mail?: string, Tel?: string } = {};
+        let hasError = false;
+
         if (!validateEmail(formData.Mail)) {
-            alert("Merci de saisir une adresse email valide.");
-            return;
+            newErrors.Mail = "Format invalide";
+            hasError = true;
         }
         if (!isValidPhone(formData.Tel)) {
-            alert("Merci de saisir un numéro de téléphone valide (ex: 0470 12 34 56).");
+            newErrors.Tel = "Format invalide";
+            hasError = true;
+        }
+
+        if (hasError) {
+            setErrors(newErrors);
             return;
         }
 
@@ -339,34 +348,34 @@ function ContactForm() {
                 resume += "1ER SERVICE :\n";
                 resume += `- ${formData.dinatoire_service_1}\n- ${formData.dinatoire_service_2}\n`;
                 resume += "2ÈME SERVICE (BBQ) :\n";
-                resume += `- ${formData.bbq_choix_1}\n- ${formData.bbq_choix_2}\n`;
+                resume += `- ${formData.Viande_1}\n- ${formData.Viande_2}\n`;
             } else {
                 // Classique, Mer, Vege, Nobles
                 resume += "CHOIX PRINCIPAUX :\n";
-                if (formData.bbq_choix_1) resume += `- ${formData.bbq_choix_1}\n`;
-                if (formData.bbq_choix_2) resume += `- ${formData.bbq_choix_2}\n`;
-                if (formData.bbq_choix_3) resume += `- ${formData.bbq_choix_3}\n`;
+                if (formData.Viande_1) resume += `- ${formData.Viande_1}\n`;
+                if (formData.Viande_2) resume += `- ${formData.Viande_2}\n`;
+                if (formData.Viande_3) resume += `- ${formData.Viande_3}\n`;
             }
 
             // SUPPLEMENTS
-            if (formData.supp_viande_1 || formData.supp_viande_2 || formData.supp_viande_3) {
+            if (formData.Supplement_Viande_1 || formData.Supplement_Viande_2 || formData.Supplement_Viande_3) {
                 resume += "\nSUPPLÉMENTS VIANDES :\n";
-                if (formData.supp_viande_1) resume += `- ${formData.supp_viande_1}\n`;
-                if (formData.supp_viande_2) resume += `- ${formData.supp_viande_2}\n`;
-                if (formData.supp_viande_3) resume += `- ${formData.supp_viande_3}\n`;
+                if (formData.Supplement_Viande_1) resume += `- ${formData.Supplement_Viande_1}\n`;
+                if (formData.Supplement_Viande_2) resume += `- ${formData.Supplement_Viande_2}\n`;
+                if (formData.Supplement_Viande_3) resume += `- ${formData.Supplement_Viande_3}\n`;
             }
 
             // ACCOMPAGNEMENTS
             resume += "\nACCOMPAGNEMENTS :\n";
             resume += "Froids :\n";
-            if (formData.accomp_froid_1) resume += `- ${formData.accomp_froid_1}\n`;
-            if (formData.accomp_froid_2) resume += `- ${formData.accomp_froid_2}\n`;
-            if (formData.accomp_froid_3) resume += `- ${formData.accomp_froid_3}\n`;
+            if (formData.Accompagnement_Froid_1) resume += `- ${formData.Accompagnement_Froid_1}\n`;
+            if (formData.Accompagnement_Froid_2) resume += `- ${formData.Accompagnement_Froid_2}\n`;
+            if (formData.Accompagnement_Froid_3) resume += `- ${formData.Accompagnement_Froid_3}\n`;
 
             resume += "Chauds :\n";
-            if (formData.accomp_chaud) resume += `- ${formData.accomp_chaud}\n`;
-            if (formData.accomp_chaud_supp_check === "Oui" && formData.accomp_chaud_supp) {
-                resume += `- SUPPLÉMENT Chaud (+1€) : ${formData.accomp_chaud_supp}\n`;
+            if (formData.Accompagnement_Chaud) resume += `- ${formData.Accompagnement_Chaud}\n`;
+            if (formData.Accompagnement_Chaud_Supplement_Check === "Oui" && formData.Accompagnement_Chaud_Supplement) {
+                resume += `- SUPPLÉMENT Chaud (+1€) : ${formData.Accompagnement_Chaud_Supplement}\n`;
             }
         }
 
@@ -436,13 +445,13 @@ function ContactForm() {
     };
 
     const renderBBQComposition = () => {
-        // Prepare exclusion lists
-        const bbqChoices = [formData.bbq_choix_1, formData.bbq_choix_2, formData.bbq_choix_3].filter(Boolean);
-        const suppChoices = [formData.supp_viande_1, formData.supp_viande_2, formData.supp_viande_3].filter(Boolean);
+        // Prepare exclusion lists with NEW keys
+        const bbqChoices = [formData.Viande_1, formData.Viande_2, formData.Viande_3].filter(Boolean);
+        const suppChoices = [formData.Supplement_Viande_1, formData.Supplement_Viande_2, formData.Supplement_Viande_3].filter(Boolean);
         const composeEntreeChoices = [formData.compose_entree_1, formData.compose_entree_2].filter(Boolean);
         const composePlatChoices = [formData.compose_plat_1, formData.compose_plat_2].filter(Boolean);
         const dinatoireServiceChoices = [formData.dinatoire_service_1, formData.dinatoire_service_2].filter(Boolean);
-        const froidChoices = [formData.accomp_froid_1, formData.accomp_froid_2, formData.accomp_froid_3].filter(Boolean);
+        const froidChoices = [formData.Accompagnement_Froid_1, formData.Accompagnement_Froid_2, formData.Accompagnement_Froid_3].filter(Boolean);
 
         const bbqName = menuParam ? menuParam.replace('bbq_', '').charAt(0).toUpperCase() + menuParam.replace('bbq_', '').slice(1) : "Sur Mesure";
 
@@ -455,14 +464,6 @@ function ContactForm() {
                     <h2 className="text-2xl font-serif text-neutral-800 font-bold mb-2">Configuration : BBQ {bbqName}</h2>
                     <div className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-lg text-sm font-medium inline-block">
                         Note : 100g de viande par personne/choix. Si vous ne trouvez pas votre bonheur, précisez-le en bas !
-                    </div>
-                </div>
-
-                {/* PRICE DISPLAY */}
-                <div className={`sticky top-24 z-20 transition-all duration-300 ${totalPrice > 0 ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4 pointer-events-none"}`}>
-                    <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-xl flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
-                        <span className="text-sm font-bold uppercase tracking-widest">Prix Estimatif</span>
-                        <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "Sur Devis"}</span>
                     </div>
                 </div>
 
@@ -492,16 +493,16 @@ function ContactForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {renderDropdown("1er Service (Plat 1)", "dinatoire_service_1", SERVICES_DINATOIRE, dinatoireServiceChoices)}
                             {renderDropdown("1er Service (Plat 2)", "dinatoire_service_2", SERVICES_DINATOIRE, dinatoireServiceChoices)}
-                            {renderDropdown("2ème Service (BBQ Choix 1)", "bbq_choix_1", getBBQList(), bbqChoices)}
-                            {renderDropdown("2ème Service (BBQ Choix 2)", "bbq_choix_2", getBBQList(), bbqChoices)}
+                            {renderDropdown("2ème Service (BBQ Choix 1)", "Viande_1", getBBQList(), bbqChoices)}
+                            {renderDropdown("2ème Service (BBQ Choix 2)", "Viande_2", getBBQList(), bbqChoices)}
                         </div>
                     )}
 
                     {!isCochonOrPorchetta && !isBBQCompose && !isBBQDinatoire && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {renderDropdown("Choix 1", "bbq_choix_1", getBBQList(), bbqChoices)}
-                            {renderDropdown("Choix 2", "bbq_choix_2", getBBQList(), bbqChoices)}
-                            {renderDropdown("Choix 3", "bbq_choix_3", getBBQList(), bbqChoices)}
+                            {renderDropdown("Choix 1", "Viande_1", getBBQList(), bbqChoices)}
+                            {renderDropdown("Choix 2", "Viande_2", getBBQList(), bbqChoices)}
+                            {renderDropdown("Choix 3", "Viande_3", getBBQList(), bbqChoices)}
                         </div>
                     )}
                 </div>
@@ -510,9 +511,9 @@ function ContactForm() {
                 <div className="space-y-6">
                     <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Suppléments Viandes (Payants)</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {renderDropdown("Supplément Viande 1", "supp_viande_1", VIANDES_SUPPL_ONLY, suppChoices)}
-                        {(formData.supp_viande_1 !== "") && renderDropdown("Supplément Viande 2", "supp_viande_2", VIANDES_SUPPL_ONLY, suppChoices)}
-                        {(formData.supp_viande_2 !== "") && renderDropdown("Supplément Viande 3", "supp_viande_3", VIANDES_SUPPL_ONLY, suppChoices)}
+                        {renderDropdown("Supplément Viande 1", "Supplement_Viande_1", VIANDES_SUPPL_ONLY, suppChoices)}
+                        {(formData.Supplement_Viande_1 !== "") && renderDropdown("Supplément Viande 2", "Supplement_Viande_2", VIANDES_SUPPL_ONLY, suppChoices)}
+                        {(formData.Supplement_Viande_2 !== "") && renderDropdown("Supplément Viande 3", "Supplement_Viande_3", VIANDES_SUPPL_ONLY, suppChoices)}
                     </div>
                 </div>
 
@@ -524,9 +525,9 @@ function ContactForm() {
                         <div className="md:col-span-3">
                             <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Froids (3 Choix)</label>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {renderDropdown("Salade Froide 1", "accomp_froid_1", SIDES_COLD, froidChoices)}
-                                {renderDropdown("Salade Froide 2", "accomp_froid_2", SIDES_COLD, froidChoices)}
-                                {renderDropdown("Salade Froide 3", "accomp_froid_3", SIDES_COLD, froidChoices)}
+                                {renderDropdown("Salade Froide 1", "Accompagnement_Froid_1", SIDES_COLD, froidChoices)}
+                                {renderDropdown("Salade Froide 2", "Accompagnement_Froid_2", SIDES_COLD, froidChoices)}
+                                {renderDropdown("Salade Froide 3", "Accompagnement_Froid_3", SIDES_COLD, froidChoices)}
                             </div>
                         </div>
 
@@ -534,7 +535,7 @@ function ContactForm() {
 
                         <div className="md:col-span-1">
                             <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Chauds</label>
-                            {renderDropdown("Accomp. Chaud Inclus", "accomp_chaud", SIDES_HOT)}
+                            {renderDropdown("Accomp. Chaud Inclus", "Accompagnement_Chaud", SIDES_HOT)}
                         </div>
 
                         <div className="md:col-span-2 flex flex-col justify-end">
@@ -542,24 +543,39 @@ function ContactForm() {
                                 <div className="flex items-center gap-3 mb-3">
                                     <input
                                         type="checkbox"
-                                        name="accomp_chaud_supp_check"
-                                        id="accomp_chaud_supp_check"
+                                        name="Accompagnement_Chaud_Supplement_Check"
+                                        id="Accompagnement_Chaud_Supplement_Check"
                                         className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                                        checked={formData.accomp_chaud_supp_check === "Oui"}
+                                        checked={formData.Accompagnement_Chaud_Supplement_Check === "Oui"}
                                         onChange={handleChange}
                                     />
-                                    <label htmlFor="accomp_chaud_supp_check" className="text-neutral-700 font-medium cursor-pointer select-none">
+                                    <label htmlFor="Accompagnement_Chaud_Supplement_Check" className="text-neutral-700 font-medium cursor-pointer select-none">
                                         Ajouter un accompagnement chaud supplémentaire (+1€ / pers)
                                     </label>
                                 </div>
                                 <AnimatePresence>
-                                    {formData.accomp_chaud_supp_check === "Oui" && (
+                                    {formData.Accompagnement_Chaud_Supplement_Check === "Oui" && (
                                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
-                                            {renderDropdown("Choix Supplémentaire", "accomp_chaud_supp", SIDES_HOT)}
+                                            {renderDropdown("Choix Supplémentaire", "Accompagnement_Chaud_Supplement", SIDES_HOT)}
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* PRICE DISPLAY MOVED TO BOTTOM */}
+                <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-8 mt-8 ${totalPrice !== 0 ? "opacity-100" : "opacity-50"}`}>
+                    <div className="bg-black text-[#D4AF37] p-6 rounded-xl shadow-xl flex items-center justify-between border border-[#D4AF37]/50 max-w-lg mx-auto transform hover:scale-[1.02] transition-transform">
+                        <span className="text-sm font-bold uppercase tracking-widest">Prix Estimatif</span>
+                        <div className="text-right">
+                            {totalPrice === -1 ? (
+                                <span className="bg-[#D4AF37] text-black px-4 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
+                            ) : (
+                                <span className="text-2xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                            )}
+                            {totalPrice > 0 && <p className="text-xs text-[#D4AF37]/70 mt-1 font-light">Hors frais de déplacement & service</p>}
                         </div>
                     </div>
                 </div>
@@ -581,8 +597,7 @@ function ContactForm() {
                     <input type="text" name="Nom" required value={formData.Nom} onChange={handleChange} className={inputStyle} placeholder="Votre nom" />
                 </div>
             </div>
-            {/* ... Societe, Mail, Tel, Date, Convives ... (Standard fields) */}
-            {/* ... Societe, Mail, Tel, Date, Convives ... (Standard fields) */}
+
             <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
                 <div className="flex items-center gap-3 mb-2">
                     <input type="checkbox" name="Societe" id="Societe" className="w-5 h-5 text-[#D4AF37] rounded" checked={formData.Societe === "Oui"} onChange={handleChange} />
@@ -597,7 +612,7 @@ function ContactForm() {
                             transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                             className="overflow-hidden"
                         >
-                            <input type="text" name="Nom_Societe" className={inputStyle} placeholder="Ex : Maison Compère SRL" value={formData.Nom_Societe} onChange={handleChange} />
+                            <input type="text" name="Nom_Societe" className={inputStyle} placeholder="Ex : Colruyt Group" value={formData.Nom_Societe} onChange={handleChange} />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -606,11 +621,29 @@ function ContactForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
                     <label className={labelStyle}>Email <span className="text-red-500">*</span></label>
-                    <input type="email" name="Mail" required value={formData.Mail} onChange={handleChange} className={inputStyle} placeholder="jean.dupont@exemple.com" />
+                    <input
+                        type="email"
+                        name="Mail"
+                        required
+                        value={formData.Mail}
+                        onChange={handleChange}
+                        className={`${inputStyle} ${errors.Mail ? "border-red-500 ring-2 ring-red-100 bg-red-50" : ""}`}
+                        placeholder="jean.dupont@exemple.com"
+                    />
+                    {errors.Mail && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Mail}</p>}
                 </div>
                 <div className="group">
                     <label className={labelStyle}>Téléphone <span className="text-red-500">*</span></label>
-                    <input type="tel" name="Tel" required value={formData.Tel} onChange={handleChange} placeholder="0475 12 34 56" className={inputStyle} />
+                    <input
+                        type="tel"
+                        name="Tel"
+                        required
+                        value={formData.Tel}
+                        onChange={handleChange}
+                        placeholder="0475 12 34 56"
+                        className={`${inputStyle} ${errors.Tel ? "border-red-500 ring-2 ring-red-100 bg-red-50" : ""}`}
+                    />
+                    {errors.Tel && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Tel}</p>}
                 </div>
             </div>
 
