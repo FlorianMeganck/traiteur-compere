@@ -395,7 +395,7 @@ function ContactForm() {
                         value={formData.Mail}
                         onChange={handleChange}
                         className={`${inputStyle} ${errors.Mail ? "border-red-500 ring-2 ring-red-100" : ""}`}
-                        placeholder="exemple@email.com"
+                        placeholder="votre-email@exemple.com"
                     />
                     {errors.Mail && <p className="text-red-500 text-sm mt-1 ml-1">{errors.Mail}</p>}
                 </div>
@@ -408,7 +408,7 @@ function ContactForm() {
                         value={formData.Tel}
                         onChange={handleChange}
                         className={`${inputStyle} ${errors.Tel ? "border-red-500 ring-2 ring-red-100" : ""}`}
-                        placeholder="0470 12 34 56"
+                        placeholder="0475 12 34 56"
                     />
                     {errors.Tel && <p className="text-red-500 text-sm mt-1 ml-1">{errors.Tel}</p>}
                 </div>

@@ -193,10 +193,10 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center scroll-mt-32
-                ${isAssociatif ? 'py-12 px-6 md:px-12 bg-blue-50/30 border border-blue-100 rounded-3xl' : ''}`}
+                ${isAssociatif ? 'py-12 px-6 md:px-12 bg-neutral-50 border border-[#D4AF37]/20 rounded-3xl' : ''}`}
         >
             {/* IMAGE SIDE */}
-            <div className="w-full md:w-1/2 relative h-[400px] md:h-[500px] overflow-hidden rounded-sm shadow-xl group">
+            <div className="w-full md:w-1/2 relative h-[400px] md:h-[500px] overflow-hidden rounded-2xl shadow-xl group">
                 <Image
                     src={formule.image}
                     alt={formule.title}
@@ -216,7 +216,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                     <span className="text-[#D4AF37] font-sans text-sm font-bold uppercase tracking-widest md:hidden">{formule.tag}</span>
                     <h2 className="text-3xl md:text-4xl font-serif text-black">{formule.title}</h2>
                     {isAssociatif && (
-                        <div className="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider w-fit">
+                        <div className="inline-block bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider w-fit">
                             Livraison Seule
                         </div>
                     )}
@@ -228,7 +228,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 </p>
 
                 {/* COMPOSITION */}
-                <div className="bg-white p-6 md:p-8 rounded-sm shadow-sm border-l-4 border-neutral-300">
+                <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border-l-4 border-neutral-300">
                     <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wide text-sm">
                         {isAssociatif ? "Choix du Plat Unique" : "Composition"}
                     </h3>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function About() {
     return (
@@ -15,21 +16,21 @@ export default function About() {
                             src="/images/chef.png"
                             alt="Notre Chef"
                             fill
-                            className="object-cover rounded-sm shadow-xl"
+                            className="object-cover rounded-2xl shadow-xl"
                         />
                     </div>
                     <div className="w-full md:w-1/2 space-y-6">
-                        <h2 className="text-3xl font-serif text-black">Notre Histoire</h2>
-                        <p className="text-gray-600 leading-relaxed font-light">
-                            Fondé sur une passion inébranlable pour la gastronomie, Traiteur Compère est né de l'envie de partager des moments d'exception. Depuis nos débuts à Saint-Georges-sur-Meuse, nous avons su allier tradition culinaire et créativité moderne.
+                        <h2 className="text-3xl font-serif text-black">L'Art de Recevoir par Jean-Paul Compère</h2>
+                        <p className="text-gray-600 leading-relaxed font-light text-lg">
+                            Depuis plus de 20 ans, la Maison Compère incarne l'excellence traiteur en région liégeoise. Notre philosophie ? Une cuisine de cœur, généreuse et authentique, où le produit est roi.
                         </p>
-                        <p className="text-gray-600 leading-relaxed font-light">
-                            Chaque plat que nous servons raconte une histoire : celle de produits locaux sélectionnés avec soin, d'un savoir-faire artisanal et d'une quête perpétuelle de perfection.
+                        <p className="text-gray-600 leading-relaxed font-light text-lg">
+                            Que ce soit pour un mariage fastueux ou un repas d'association, nous mettons la même passion dans chaque assiette. Nous croyons que chaque événement mérite une attention particulière et une saveur inoubliable.
                         </p>
                     </div>
                 </section>
 
-                <section className="bg-gray-50 p-12 rounded-sm mb-24">
+                <section className="bg-neutral-50 p-12 rounded-2xl mb-24 border border-neutral-100">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl font-serif text-black">Nos Valeurs</h2>
                     </div>
@@ -48,6 +49,17 @@ export default function About() {
                         />
                     </div>
                 </section>
+
+                {/* CALL TO ACTION */}
+                <section className="text-center py-16 border-t border-neutral-100">
+                    <h3 className="text-3xl font-serif text-black mb-6">Une idée en tête ? Discutons-en.</h3>
+                    <Link
+                        href="/contact"
+                        className="inline-block bg-[#D4AF37] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-black transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                    >
+                        Contactez-nous
+                    </Link>
+                </section>
             </div>
         </main>
     );
@@ -55,7 +67,7 @@ export default function About() {
 
 function ValueCard({ title, desc }: { title: string; desc: string }) {
     return (
-        <div className="text-center space-y-4 p-6 bg-white shadow-sm border-t-2 border-primary">
+        <div className="text-center space-y-4 p-6 bg-white shadow-sm border-t-2 border-primary rounded-xl">
             <h3 className="text-xl font-serif text-black">{title}</h3>
             <p className="text-gray-600 font-light text-sm">{desc}</p>
         </div>

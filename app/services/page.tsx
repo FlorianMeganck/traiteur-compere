@@ -328,7 +328,7 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                                 )}
                             </div>
 
-                            <p className="text-gray-600 font-sans font-light leading-relaxed text-lg mt-8 bg-white/60 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none rounded-lg p-2 md:p-0">
+                            <p className="text-gray-600 font-sans font-light leading-relaxed text-lg mt-8 bg-white/60 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none rounded-2xl p-2 md:p-0">
                                 {desc}
                             </p>
 
