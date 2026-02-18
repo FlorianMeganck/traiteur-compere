@@ -582,22 +582,35 @@ function ContactForm() {
                 </div>
             </div>
             {/* ... Societe, Mail, Tel, Date, Convives ... (Standard fields) */}
+            {/* ... Societe, Mail, Tel, Date, Convives ... (Standard fields) */}
             <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
                 <div className="flex items-center gap-3 mb-2">
                     <input type="checkbox" name="Societe" id="Societe" className="w-5 h-5 text-[#D4AF37] rounded" checked={formData.Societe === "Oui"} onChange={handleChange} />
                     <label htmlFor="Societe" className="text-neutral-700 font-medium cursor-pointer">Je représente une société</label>
                 </div>
-                {formData.Societe === "Oui" && <input type="text" name="Nom_Societe" className={`mt-3 ${inputStyle}`} placeholder="Nom de la société" value={formData.Nom_Societe} onChange={handleChange} />}
+                <AnimatePresence>
+                    {formData.Societe === "Oui" && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                            animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                            transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                            className="overflow-hidden"
+                        >
+                            <input type="text" name="Nom_Societe" className={inputStyle} placeholder="Ex : Maison Compère SRL" value={formData.Nom_Societe} onChange={handleChange} />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
                     <label className={labelStyle}>Email <span className="text-red-500">*</span></label>
-                    <input type="email" name="Mail" required value={formData.Mail} onChange={handleChange} className={inputStyle} />
+                    <input type="email" name="Mail" required value={formData.Mail} onChange={handleChange} className={inputStyle} placeholder="jean.dupont@exemple.com" />
                 </div>
                 <div className="group">
                     <label className={labelStyle}>Téléphone <span className="text-red-500">*</span></label>
-                    <input type="tel" name="Tel" required value={formData.Tel} onChange={handleChange} placeholder="0470 12 34 56" className={inputStyle} />
+                    <input type="tel" name="Tel" required value={formData.Tel} onChange={handleChange} placeholder="0475 12 34 56" className={inputStyle} />
                 </div>
             </div>
 
