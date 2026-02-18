@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useLayoutEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Leaf } from "lucide-react";
@@ -106,9 +106,11 @@ function ContactForm() {
     const platCount = isCustomMode ? getRequiredPlatCount(menuParam, formData.Nombre_Convives) : 0;
 
     // EFFECT: Check for URL params (e.g. ?convives=Plus de 100)
-    useEffect(() => {
+    useLayoutEffect(() => {
         // Force le retour en haut de la fenêtre immédiatement
-        window.scrollTo(0, 0);
+        if (typeof window !== 'undefined') {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }
 
         // Optionnel : Si un ID est utilisé dans l'URL (ex: #contact-form), 
         // force le scroll vers cet ID précis avec une marge.
