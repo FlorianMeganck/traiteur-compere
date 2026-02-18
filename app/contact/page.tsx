@@ -2,6 +2,7 @@
 
 import { useState, useLayoutEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Leaf, Check } from "lucide-react";
 
@@ -538,8 +539,13 @@ function ContactForm() {
                 {/* HEADER Configuration */}
                 <div className="text-center mb-6">
                     <h2 className="text-2xl font-serif text-neutral-800 font-bold mb-2">Configuration : BBQ {bbqName}</h2>
-                    <div className="bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-lg text-sm font-medium inline-block">
-                        Note : 100g de viande par personne/choix. Si vous ne trouvez pas votre bonheur, précisez-le en bas !
+                    <div className="text-center mb-6">
+                        <p className="text-sm text-neutral-500 italic mb-2">
+                            Note : 100g de viande par personne/choix.
+                        </p>
+                        <Link href="/allergenes" target="_blank" className="inline-flex items-center gap-2 text-xs font-bold text-[#D4AF37] hover:underline uppercase tracking-widest border border-[#D4AF37]/30 px-4 py-2 rounded-full hover:bg-[#D4AF37]/10 transition-colors">
+                            <span>ℹ️ Voir le détail des allergènes par produit</span>
+                        </Link>
                     </div>
                 </div>
 
