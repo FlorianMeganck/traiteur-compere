@@ -78,19 +78,35 @@ const getMinDate = () => {
 };
 
 const validateEmail = (email: string) => {
+    // Must contain @ and .
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
 const isValidPhone = (phone: string) => {
     const clean = phone.replace(/\D/g, '');
-    return (clean.startsWith('0') && (clean.length === 9 || clean.length === 10));
+    // Must start with 0, length 9 or 10.
+    if (!clean.startsWith('0') || (clean.length !== 9 && clean.length !== 10)) return false;
+
+    // Anti-Fake Checks
+    if (/^0([0-9])\1+$/.test(clean)) return false; // Repeated digits like 0444444444
+    if (clean.startsWith('00')) return false;
+
+    // Emergency numbers check (100, 101, 112) - though length check covers them (3 digits), 
+    // but just in case someone enters 0112... (unlikely valid anyway)
+
+    // Common fake/placeholder patterns
+    if (clean === "0400000000" || clean === "0475123456") return false; // 0475123456 is the placeholder!
+
+    return true;
 };
+
+// ... component starts ...
 
 function ContactForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-    const [errors, setErrors] = useState<{ Mail?: string, Tel?: string }>({});
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     // --- MENU CONTEXT ---
     const menuParam = searchParams.get('menu');
@@ -307,24 +323,65 @@ function ContactForm() {
         }
     };
 
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {};
+
+        // Static Required Fields
+        if (!formData.Prenom.trim()) newErrors.Prenom = "Requis";
+        if (!formData.Nom.trim()) newErrors.Nom = "Requis";
+        if (!formData.Mail.trim()) {
+            newErrors.Mail = "Requis";
+        } else if (!validateEmail(formData.Mail)) {
+            newErrors.Mail = "Format invalide (ex: nom@domaine.com)";
+        }
+        if (!formData.Tel.trim()) {
+            newErrors.Tel = "Requis";
+        } else if (!isValidPhone(formData.Tel)) {
+            newErrors.Tel = "Format invalide (ex: 0475 12 34 56)";
+        }
+        if (!formData.Date.trim()) newErrors.Date = "Requis";
+        if (!formData.Nombre_Convives.trim()) newErrors.Nombre_Convives = "Requis";
+
+        // Dynamic BBQ Validation
+        if (isAnyBBQ) {
+            if (isCochonOrPorchetta) {
+                // No specific dynamic fields required for these
+            } else if (isBBQCompose) {
+                if (!formData.compose_entree_1) newErrors.compose_entree_1 = "Requis";
+                if (!formData.compose_entree_2) newErrors.compose_entree_2 = "Requis";
+                if (!formData.compose_plat_1) newErrors.compose_plat_1 = "Requis";
+                if (!formData.compose_plat_2) newErrors.compose_plat_2 = "Requis";
+            } else if (isBBQDinatoire) {
+                if (!formData.dinatoire_service_1) newErrors.dinatoire_service_1 = "Requis";
+                if (!formData.dinatoire_service_2) newErrors.dinatoire_service_2 = "Requis";
+                if (!formData.Viande_1) newErrors.Viande_1 = "Requis";
+                if (!formData.Viande_2) newErrors.Viande_2 = "Requis";
+            } else {
+                // Classique, Mer, Vege, Nobles (Standard 3 choices)
+                if (!formData.Viande_1) newErrors.Viande_1 = "Requis";
+                if (!formData.Viande_2) newErrors.Viande_2 = "Requis";
+                if (!formData.Viande_3) newErrors.Viande_3 = "Requis";
+            }
+        }
+
+        return newErrors;
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         // VALIDATION
-        const newErrors: { Mail?: string, Tel?: string } = {};
-        let hasError = false;
+        const newErrors = validateForm();
 
-        if (!validateEmail(formData.Mail)) {
-            newErrors.Mail = "Format invalide";
-            hasError = true;
-        }
-        if (!isValidPhone(formData.Tel)) {
-            newErrors.Tel = "Format invalide";
-            hasError = true;
-        }
-
-        if (hasError) {
+        if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
+            // Scroll to first error
+            const firstErrorKey = Object.keys(newErrors)[0];
+            const element = document.getElementsByName(firstErrorKey)[0];
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.focus();
+            }
             return;
         }
 
@@ -412,8 +469,16 @@ function ContactForm() {
         }
     };
 
-    // STYLES
-    const inputStyle = `w-full bg-white border border-neutral-200 rounded-xl px-5 py-4 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] hover:border-[#D4AF37]/50 transition-all duration-300 shadow-inner text-base`;
+
+    // --- STYLES HELPER ---
+    const getInputStyle = (fieldName: string) => {
+        const base = `w-full bg-white border rounded-xl px-5 py-4 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 transition-all duration-300 shadow-inner text-base`;
+        if (errors[fieldName]) {
+            return `${base} border-red-500 ring-1 ring-red-500 bg-red-50 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500`;
+        }
+        return `${base} border-neutral-200 focus:ring-[#D4AF37]/50 focus:border-[#D4AF37] hover:border-[#D4AF37]/50`;
+    };
+
     const labelStyle = `block text-sm font-medium text-neutral-500 uppercase tracking-wide mb-2 ml-1`;
 
     // --- RENDERERS ---
@@ -431,7 +496,7 @@ function ContactForm() {
                         name={name}
                         value={currentVal}
                         onChange={handleChange}
-                        className={`${inputStyle} appearance-none cursor-pointer`}
+                        className={`${getInputStyle(name)} appearance-none cursor-pointer`}
                     >
                         <option value="">Faites votre choix...</option>
                         {filteredOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -590,11 +655,13 @@ function ContactForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
                     <label className={labelStyle}>Prénom <span className="text-red-500">*</span></label>
-                    <input type="text" name="Prenom" required value={formData.Prenom} onChange={handleChange} className={inputStyle} placeholder="Votre prénom" />
+                    <input type="text" name="Prenom" required value={formData.Prenom} onChange={handleChange} className={getInputStyle("Prenom")} placeholder="Votre prénom" />
+                    {errors.Prenom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Prenom}</p>}
                 </div>
                 <div className="group">
                     <label className={labelStyle}>Nom <span className="text-red-500">*</span></label>
-                    <input type="text" name="Nom" required value={formData.Nom} onChange={handleChange} className={inputStyle} placeholder="Votre nom" />
+                    <input type="text" name="Nom" required value={formData.Nom} onChange={handleChange} className={getInputStyle("Nom")} placeholder="Votre nom" />
+                    {errors.Nom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Nom}</p>}
                 </div>
             </div>
 
@@ -612,7 +679,7 @@ function ContactForm() {
                             transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                             className="overflow-hidden"
                         >
-                            <input type="text" name="Nom_Societe" className={inputStyle} placeholder="Ex : Colruyt Group" value={formData.Nom_Societe} onChange={handleChange} />
+                            <input type="text" name="Nom_Societe" className={getInputStyle("Nom_Societe")} placeholder="Ex : Colruyt Group" value={formData.Nom_Societe} onChange={handleChange} />
                         </motion.div>
                     )}
                 </AnimatePresence>
@@ -627,7 +694,7 @@ function ContactForm() {
                         required
                         value={formData.Mail}
                         onChange={handleChange}
-                        className={`${inputStyle} ${errors.Mail ? "border-red-500 ring-2 ring-red-100 bg-red-50" : ""}`}
+                        className={getInputStyle("Mail")}
                         placeholder="jean.dupont@exemple.com"
                     />
                     {errors.Mail && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Mail}</p>}
@@ -641,7 +708,7 @@ function ContactForm() {
                         value={formData.Tel}
                         onChange={handleChange}
                         placeholder="0475 12 34 56"
-                        className={`${inputStyle} ${errors.Tel ? "border-red-500 ring-2 ring-red-100 bg-red-50" : ""}`}
+                        className={getInputStyle("Tel")}
                     />
                     {errors.Tel && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Tel}</p>}
                 </div>
@@ -658,13 +725,13 @@ function ContactForm() {
                         value={formData.Date}
                         onChange={handleChange}
                         onBlur={handleDateBlur}
-                        className={inputStyle}
+                        className={getInputStyle("Date")}
                     />
                 </div>
                 <div className="group">
                     <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
                     <div className="relative">
-                        <select name="Nombre_Convives" value={formData.Nombre_Convives} onChange={handleChange} className={`${inputStyle} appearance-none`}>
+                        <select name="Nombre_Convives" value={formData.Nombre_Convives} onChange={handleChange} className={`${getInputStyle("Nombre_Convives")} appearance-none`}>
                             {getInitialConvivesOptions().map(o => <option key={o} value={o}>{o}</option>)}
                         </select>
                         <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
@@ -716,7 +783,7 @@ function ContactForm() {
 
                             <div className="group">
                                 <label className={labelStyle}>Dites-nous en plus !</label>
-                                <textarea name="details_projet" value={formData.details_projet} onChange={handleChange} className={`${inputStyle} h-32 resize-y`} placeholder="Allergies, précisions, déroulement..." />
+                                <textarea name="details_projet" value={formData.details_projet} onChange={handleChange} className={`${getInputStyle("details_projet")} h-32 resize-y`} placeholder="Allergies, précisions, déroulement..." />
                             </div>
 
                             <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 flex items-center gap-3">
