@@ -107,6 +107,9 @@ function ContactForm() {
 
     // EFFECT: Check for URL params (e.g. ?convives=Plus de 100)
     useEffect(() => {
+        // Force scroll to top on mount
+        window.scrollTo(0, 0);
+
         const convivesParam = searchParams.get("convives");
         if (convivesParam) {
             let currentOptions = OPTIONS_STANDARD;
