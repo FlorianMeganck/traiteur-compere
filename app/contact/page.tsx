@@ -272,7 +272,8 @@ function ContactForm() {
             setFormData(prev => ({
                 ...prev,
                 [name]: checked ? "Oui" : "Non",
-                ...(name === "Societe" && !checked ? { Nom_Societe: "" } : {})
+                ...(name === "Societe" && !checked ? { Nom_Societe: "" } : {}),
+                ...(name === "Accompagnement_Chaud_Supplement_Check" && !checked ? { Accompagnement_Chaud_Supplement: "" } : {})
             }));
             return;
         }
@@ -603,9 +604,9 @@ function ContactForm() {
                             {renderDropdown("Accomp. Chaud Inclus", "Accompagnement_Chaud", SIDES_HOT)}
                         </div>
 
-                        <div className="md:col-span-2 flex flex-col justify-end">
-                            <div className="bg-white p-4 rounded-xl border border-neutral-200">
-                                <div className="flex items-center gap-3 mb-3">
+                        <div className="col-span-1 md:col-span-2 flex flex-col justify-end">
+                            <div className="bg-neutral-50/50 p-5 rounded-2xl border border-neutral-200 hover:border-[#D4AF37]/30 transition-colors">
+                                <div className="flex items-center gap-3">
                                     <input
                                         type="checkbox"
                                         name="Accompagnement_Chaud_Supplement_Check"
@@ -620,8 +621,29 @@ function ContactForm() {
                                 </div>
                                 <AnimatePresence>
                                     {formData.Accompagnement_Chaud_Supplement_Check === "Oui" && (
-                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
-                                            {renderDropdown("Choix Supplémentaire", "Accompagnement_Chaud_Supplement", SIDES_HOT)}
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                            animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                            transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="relative">
+                                                <select
+                                                    name="Accompagnement_Chaud_Supplement"
+                                                    value={formData.Accompagnement_Chaud_Supplement}
+                                                    onChange={handleChange}
+                                                    className={getInputStyle("Accompagnement_Chaud_Supplement")}
+                                                >
+                                                    <option value="">Faites votre choix...</option>
+                                                    {SIDES_HOT.map((c) => (
+                                                        <option key={c} value={c}>{c}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                </div>
+                                            </div>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
