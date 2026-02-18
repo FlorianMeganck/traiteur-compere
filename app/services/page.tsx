@@ -113,7 +113,7 @@ export default function Services() {
                         title="Livraison Seule & Associations"
                         quote="Convivialité et générosité pour vos grands rassemblements."
                         desc="Idéal pour vos soupers d'école, clubs sportifs ou fêtes de quartier. Nous livrons des plats généreux et conviviaux, prêts à être servis par vos soins. Une solution économique et pratique sans personnel ni vaisselle, qui ne sacrifie rien à la qualité."
-                        ctaLink="/contact?menu=associations"
+                        ctaLink="/formules#associatif"
                         images={[
                             "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1981&auto=format&fit=crop", // Pizza/Pasta vibes
                             "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1974&auto=format&fit=crop", // BBQ/Food

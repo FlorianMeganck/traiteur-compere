@@ -25,21 +25,6 @@ const FORMULES = [
         allergens: ["gluten", "egg", "lait", "fish", "moutarde", "celeri"]
     },
     {
-        tag: "Événements & Associations",
-        title: "Le Buffet Associatif",
-        description: "Idéal pour vos soupers d'école, clubs sportifs ou fêtes de quartier. Nous livrons des plats généreux et conviviaux, prêts à être servis par vos soins (sans personnel ni vaisselle).",
-        price: "14,50€ / pers",
-        image: "https://images.unsplash.com/photo-1547924475-f9e5b2931a26?q=80&w=2070&auto=format&fit=crop",
-        items: [
-            "Boulets Liégeois (Sauce Lapin ou Tomate) & Frites",
-            "Vol-au-vent artisanal & Frites",
-            "Bar à Pâtes (Bolognaise ou Carbonara)",
-            "Burgers Classiques ou Spécial Compère",
-            "Option Végé : Grande Salade de saison & Quiche aux légumes 🌿"
-        ],
-        allergens: ["gluten", "egg", "lait", "celeri", "moutarde"]
-    },
-    {
         tag: "BBQ & Feu de bois",
         title: "Le Barbecue Mixte",
         description: "L'incontournable de l'été. Des grillades savoureuses préparées avec soin pour une ambiance conviviale.",
@@ -67,6 +52,21 @@ const FORMULES = [
             "Viandes braisées et accompagnements raffinés"
         ],
         allergens: ["crustace", "fish", "gluten", "egg", "lait", "sulfite"]
+    },
+    {
+        tag: "Événements & Associations",
+        title: "Le Buffet Associatif",
+        description: "Formule conviviale en livraison seule. Idéal pour les grands groupes. Matériel et service non inclus.",
+        price: "14,50€ / pers",
+        image: "https://images.unsplash.com/photo-1547924475-f9e5b2931a26?q=80&w=2070&auto=format&fit=crop",
+        items: [
+            "Boulets Liégeois (Sauce Lapin ou Tomate) & Frites",
+            "Vol-au-vent artisanal & Frites",
+            "Bar à Pâtes (Bolognaise ou Carbonara)",
+            "Burgers Spécial Compère",
+            "Option Végé : Grande Salade de saison & Quiche aux légumes 🌿"
+        ],
+        allergens: ["gluten", "egg", "lait", "celeri", "moutarde"]
     }
 ];
 
@@ -168,14 +168,17 @@ export default function Formules() {
 
 function FormuleSection({ formule, index }: { formule: FormuleType, index: number }) {
     const isEven = index % 2 === 0;
+    const isAssociatif = formule.tag === "Événements & Associations";
 
     return (
         <motion.section
+            id={isAssociatif ? "associatif" : undefined}
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center`}
+            className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center 
+                ${isAssociatif ? 'py-12 px-6 md:px-12 bg-blue-50/30 border border-blue-100 rounded-3xl' : ''}`}
         >
             {/* IMAGE SIDE */}
             <div className="w-full md:w-1/2 relative h-[400px] md:h-[500px] overflow-hidden rounded-sm shadow-xl group">
@@ -197,6 +200,11 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 <div className="flex flex-col gap-2">
                     <span className="text-[#D4AF37] font-sans text-sm font-bold uppercase tracking-widest md:hidden">{formule.tag}</span>
                     <h2 className="text-3xl md:text-4xl font-serif text-black">{formule.title}</h2>
+                    {isAssociatif && (
+                        <div className="inline-block bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider w-fit">
+                            Livraison Seule
+                        </div>
+                    )}
                 </div>
                 <div className="w-20 h-1 bg-neutral-300" />
 
@@ -206,7 +214,9 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
 
                 {/* COMPOSITION */}
                 <div className="bg-white p-6 md:p-8 rounded-sm shadow-sm border-l-4 border-neutral-300">
-                    <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wide text-sm">Composition</h3>
+                    <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wide text-sm">
+                        {isAssociatif ? "Choix du Plat Unique" : "Composition"}
+                    </h3>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
                         {formule.items.map((item: string, i: number) => (
                             <li key={i} className="flex items-start gap-2 text-neutral-700">
@@ -301,28 +311,28 @@ function PricingBlock({ price, tag }: { price: string, tag: string }) {
                     className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
                 >
                     <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 50 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">1 Plat au choix</span>
+                    <span className="text-sm font-medium text-gray-900">1 Plat Unique</span>
                     <span className="text-[10px] text-gray-400">(Sur devis)</span>
                 </Link>
 
                 {/* Option 2: 50 - 100 */}
                 <Link
-                    href="/contact?menu=associations&count=2&convives=50 à 100"
+                    href="/contact?menu=associations&count=1&convives=50 à 100"
                     className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
                     <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">50 à 100 pers.</span>
-                    <span className="text-lg font-bold font-serif">2 Plats au choix</span>
+                    <span className="text-lg font-bold font-serif">1 Plat Unique</span>
                     <span className="text-[10px] text-gray-300">(14,50€ / pers)</span>
                 </Link>
 
                 {/* Option 3: > 100 */}
                 <Link
-                    href="/contact?menu=associations&count=3&convives=Plus de 100"
+                    href="/contact?menu=associations&count=1&convives=Plus de 100"
                     className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
                 >
                     <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 100 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">3 Plats au choix</span>
+                    <span className="text-sm font-medium text-gray-900">1 Plat Unique</span>
                     <span className="text-[10px] text-gray-400">(Tarifs dégressifs)</span>
                 </Link>
             </div>

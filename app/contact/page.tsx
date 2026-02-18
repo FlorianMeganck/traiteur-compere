@@ -21,7 +21,15 @@ const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liè
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
 const SALADES_FROIDES = ["Salade de Pâtes 🌿", "Taboulé 🌿", "Salade de Riz 🌿", "Carottes Râpées 🌿", "Céleri Râpé 🌿", "Tomate Mozza 🌿", "Concombre 🌿"];
 
-const ITEMS_ASSOCIATIONS = ["Boulets Liégeois (Sauce Lapin)", "Boulets Liégeois (Sauce Tomate)", "Vol-au-vent artisanal", "Pâtes Bolognaise", "Pâtes Carbonara", "Burger Classique", "Burger Compère", "Grande Salade & Quiche 🌿"];
+const ITEMS_ASSOCIATIONS = [
+    "Boulets Liégeois (Sauce Lapin)",
+    "Boulets Liégeois (Sauce Tomate)",
+    "Vol-au-vent artisanal",
+    "Pâtes Bolognaise",
+    "Pâtes Carbonara",
+    "Burgers Spécial Compère",
+    "Option Végé : Grande Salade & Quiche 🌿"
+];
 
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
 const OPTIONS_BBQ = ["Moins de 30", "30 à 80", "Plus de 80"];
@@ -42,9 +50,6 @@ const getRequiredPlatCount = (menu: string | null, convives: string) => {
         return 4; // Default fallback
     }
     if (menu === 'associations') {
-        if (convives === "Moins de 50") return 1;
-        if (convives === "50 à 100") return 2;
-        if (convives === "Plus de 100") return 3;
         return 1;
     }
     return 0; // Not a custom menu
@@ -631,7 +636,7 @@ function ContactForm() {
 
                                         return (
                                             <div key={currentKey} className="group">
-                                                <label className={labelStyle}>CHOIX DU PLAT PRINCIPAL {num}</label>
+                                                <label className={labelStyle}>CHOIX DU PLAT UNIQUE</label>
                                                 <div className="relative">
                                                     <select
                                                         name={currentKey}
