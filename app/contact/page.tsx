@@ -107,8 +107,17 @@ function ContactForm() {
 
     // EFFECT: Check for URL params (e.g. ?convives=Plus de 100)
     useEffect(() => {
-        // Force scroll to top on mount
+        // Force le retour en haut de la fenêtre immédiatement
         window.scrollTo(0, 0);
+
+        // Optionnel : Si un ID est utilisé dans l'URL (ex: #contact-form), 
+        // force le scroll vers cet ID précis avec une marge.
+        // We use a small timeout to ensure the DOM is fully ready if needed, 
+        // though window.scrollTo(0,0) is usually enough.
+        const element = document.getElementById('contact-form');
+        if (element && window.location.hash === '#contact-form') {
+            element.scrollIntoView({ behavior: 'auto', block: 'start' });
+        }
 
         const convivesParam = searchParams.get("convives");
         if (convivesParam) {
@@ -799,7 +808,7 @@ function ContactForm() {
     );
 
     return (
-        <main className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
+        <main id="contact-form" className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
             {/* --- DECORATIVE BACKGROUND ELEMENTS --- */}
 
             {/* Blurred Blobs */}
