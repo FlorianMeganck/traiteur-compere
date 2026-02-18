@@ -9,7 +9,7 @@ export default function MentionsLegales() {
                     <div className="w-24 h-1 bg-[#D4AF37] mx-auto"></div>
                 </header>
 
-                <div className="space-y-8 text-gray-700 leading-relaxed font-light">
+                <div className="bg-white p-8 md:p-12 shadow-2xl rounded-2xl space-y-8 text-gray-700 leading-relaxed font-light">
 
                     <section className="bg-neutral-50 p-8 rounded-2xl border border-neutral-100">
                         <h2 className="text-2xl font-serif text-black mb-6 border-b border-gray-200 pb-2">1. Éditeur du Site</h2>
@@ -63,6 +63,6 @@ export default function MentionsLegales() {
                     </Link>
                 </div>
             </div>
-        </main>
+        </main >
     );
 }

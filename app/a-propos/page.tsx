@@ -11,12 +11,12 @@ export default function About() {
                 </header>
 
                 <section className="flex flex-col md:flex-row gap-12 items-center mb-24">
-                    <div className="w-full md:w-1/2 relative h-[500px]">
+                    <div className="w-full md:w-1/2 relative h-[500px] rounded-2xl overflow-hidden shadow-xl">
                         <Image
                             src="/images/chef.png"
                             alt="Notre Chef"
                             fill
-                            className="object-cover rounded-2xl shadow-xl"
+                            className="object-cover"
                         />
                     </div>
                     <div className="w-full md:w-1/2 space-y-6">
@@ -67,7 +67,7 @@ export default function About() {
 
 function ValueCard({ title, desc }: { title: string; desc: string }) {
     return (
-        <div className="text-center space-y-4 p-6 bg-white shadow-sm border-t-2 border-primary rounded-xl">
+        <div className="text-center space-y-4 p-6 bg-white shadow-lg border-t-2 border-primary rounded-2xl">
             <h3 className="text-xl font-serif text-black">{title}</h3>
             <p className="text-gray-600 font-light text-sm">{desc}</p>
         </div>

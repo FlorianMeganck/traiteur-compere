@@ -22,7 +22,8 @@ const FORMULES = [
             "Hure de veau",
             "Féculents et Crudités de saison"
         ],
-        allergens: ["gluten", "egg", "lait", "fish", "moutarde", "celeri"]
+        allergens: ["gluten", "egg", "lait", "fish", "moutarde", "celeri"],
+        imageStyle: "rounded-t-2xl"
     },
     {
         tag: "BBQ & Feu de bois",
@@ -36,7 +37,8 @@ const FORMULES = [
             "Merguez, Chipolata et Brochette de bœuf",
             "Assortiment complet de salades et féculents"
         ],
-        allergens: ["fish", "crustace", "moutarde"]
+        allergens: ["fish", "crustace", "moutarde"],
+        imageStyle: "rounded-t-2xl"
     },
     {
         tag: "Banquet & Mariage",
@@ -51,7 +53,8 @@ const FORMULES = [
             "Terrine de Sandre au basilic & Tomates crevettes grises",
             "Viandes braisées et accompagnements raffinés"
         ],
-        allergens: ["crustace", "fish", "gluten", "egg", "lait", "sulfite"]
+        allergens: ["crustace", "fish", "gluten", "egg", "lait", "sulfite"],
+        imageStyle: "rounded-t-2xl"
     },
     {
         tag: "Événements & Associations",
@@ -66,7 +69,8 @@ const FORMULES = [
             "Burgers Spécial Compère",
             "Option Végé : Grande Salade de saison & Quiche aux légumes 🌿"
         ],
-        allergens: ["gluten", "egg", "lait", "celeri", "moutarde"]
+        allergens: ["gluten", "egg", "lait", "celeri", "moutarde"],
+        imageStyle: "rounded-t-2xl"
     }
 ];
 
@@ -193,7 +197,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-center scroll-mt-32
-                ${isAssociatif ? 'py-12 px-6 md:px-12 bg-neutral-50 border border-[#D4AF37]/20 rounded-3xl' : ''}`}
+                ${isAssociatif ? 'py-12 px-6 md:px-12 bg-neutral-50 border border-[#D4AF37]/20 rounded-2xl' : ''}`}
         >
             {/* IMAGE SIDE */}
             <div className="w-full md:w-1/2 relative h-[400px] md:h-[500px] overflow-hidden rounded-2xl shadow-xl group">
