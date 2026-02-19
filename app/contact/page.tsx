@@ -69,6 +69,7 @@ const OPTIONS_BBQ = ["Moins de 25", "25 à 250", "Plus de 250"]; // Matches new 
 const OPTIONS_COCHON = ["Moins de 25", "25 à 180", "Plus de 180"]; // Specific for Cochon/Porchetta
 const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
 const OPTIONS_ASSOCIATIONS = ["Moins de 50", "50 à 100", "Plus de 100"];
+const OPTIONS_PLAT_UNIQUE = ["Moins de 50", "50 à 100", "Plus de 100"];
 
 // --- VALIDATION HELPERS ---
 
@@ -138,8 +139,9 @@ function ContactForm() {
     const isGala = menuParam === 'gala';
     const isAssociations = menuParam === 'associations';
     const isBuffet = isArdennais || isGala;
+    const isPlatUnique = menuParam === 'plat_unique';
 
-    const isCustomMode = isAnyBBQ || isBuffet || isAssociations;
+    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique;
     const showMenuFirst = isCustomMode;
 
     const [formData, setFormData] = useState({
@@ -194,7 +196,11 @@ function ContactForm() {
         plat_5: "",
         plat_6: "",
         salade_1: "",
-        salade_2: ""
+        salade_2: "",
+
+        // Plat Unique / Associatif
+        Plat_Associatif: "",
+        Plat_Associatif_Detail: ""
     });
 
     // --- PRICING ENGINE ---
@@ -209,6 +215,7 @@ function ContactForm() {
     };
 
     const calculateTotal = () => {
+        if (isPlatUnique) return 14.5;
         if (!isAnyBBQ) return 0;
 
         // 1. Base Price
@@ -257,6 +264,7 @@ function ContactForm() {
         if (isAnyBBQ) return OPTIONS_BBQ;
         if (isBuffet) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
+        if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
         return OPTIONS_STANDARD;
     };
 
@@ -281,6 +289,8 @@ function ContactForm() {
                     newData.Type_Evenement = 'Buffet de Gala';
                 } else if (menuParam === 'associations') {
                     newData.Type_Evenement = 'Associations';
+                } else if (menuParam === 'plat_unique') {
+                    newData.Type_Evenement = 'Plat Unique / Associatif';
                 }
             }
 
@@ -311,6 +321,12 @@ function ContactForm() {
                     newData.Nombre_Convives = "50 à 100";
                 } else if (safeParam.includes('20') && safeParam.includes('50')) {
                     newData.Nombre_Convives = "20 à 50";
+                } else if (safeParam.includes('50') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "50 à 100";
+                } else if (safeParam.includes('moins') && safeParam.includes('50')) {
+                    newData.Nombre_Convives = "Moins de 50";
+                } else if (safeParam.includes('plus') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "Plus de 100";
                 } else {
                     const opts = getInitialConvivesOptions();
                     if (opts.includes(convivesParam)) {
@@ -322,7 +338,7 @@ function ContactForm() {
 
             return newData;
         });
-    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations]);
+    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations, isPlatUnique]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -358,11 +374,6 @@ function ContactForm() {
                 } else {
                     // 02 123 45 67
                     if (cleanVal.length > 2) {
-                        formatted = cleanVal.slice(0, 2) + ' ' + cleanVal.slice(2).match(/.{1,3}/g)?.join(' ')?.replace(/(.{3}) (.{2})$/, "$1 $2");
-                        // The above regex replace is a simplified attempt, let's stick to simple grouping for stability or just standard 2 groups
-                        // Let's use a simpler approach used in previous reliable versions if possible.
-                        // Actually, standard Belgium fixed is 0Z XXX XX XX or 0ZZ XX XX XX. 
-                        // Let's split 2 / 3 / 2 / 2 for fixed (9 digits total: 02 123 45 67)
                         formatted = cleanVal.slice(0, 2) + (cleanVal.length > 2 ? ' ' + cleanVal.slice(2, 5) : '') + (cleanVal.length > 5 ? ' ' + cleanVal.slice(5, 7) : '') + (cleanVal.length > 7 ? ' ' + cleanVal.slice(7, 9) : '');
                     }
                 }
@@ -403,8 +414,10 @@ function ContactForm() {
         if (!formData.Date.trim()) newErrors.Date = "Requis";
         if (!formData.Nombre_Convives.trim()) newErrors.Nombre_Convives = "Requis";
 
-        // Dynamic BBQ Validation
-        if (isAnyBBQ) {
+        // Dynamic Validation
+        if (isPlatUnique) {
+            if (!formData.Plat_Associatif) newErrors.Plat_Associatif = "Requis";
+        } else if (isAnyBBQ) {
             if (isCochonOrPorchetta) {
                 // No specific dynamic fields required for these
             } else if (isBBQCompose) {
@@ -447,9 +460,14 @@ function ContactForm() {
         setStatus("submitting");
 
         // 2. Préparation des données spécifiques
-        const isSurDevis = isCochonOrPorchetta
-            ? getConvivesMax(formData.Nombre_Convives) > 180
-            : getConvivesMax(formData.Nombre_Convives) > 250;
+        let isSurDevis = false;
+        if (isPlatUnique) {
+            isSurDevis = formData.Nombre_Convives === 'Moins de 50' || formData.Nombre_Convives === 'Plus de 100';
+        } else if (isCochonOrPorchetta) {
+            isSurDevis = getConvivesMax(formData.Nombre_Convives) > 180;
+        } else {
+            isSurDevis = getConvivesMax(formData.Nombre_Convives) > 250;
+        }
         const finalPriceStr = (isSurDevis || totalPrice === -1) ? "SUR DEVIS" : `${totalPrice}€ / pers`;
 
         // Formatage propre du nom de la formule (ex: "bbq_classique" -> "Barbecue Classique")
@@ -491,6 +509,10 @@ function ContactForm() {
             ...(formData.Viande_4 && { "🥩 Plat / Viande 4": formData.Viande_4 }),
             // @ts-ignore
             ...(formData.Viande_5 && { "🥩 Plat / Viande 5": formData.Viande_5 }),
+
+            // PLAT UNIQUE
+            ...(formData.Plat_Associatif && { "🍽️ Plat Principal": formData.Plat_Associatif }),
+            ...(formData.Plat_Associatif_Detail && { "👨‍🍳 Option du Plat": formData.Plat_Associatif_Detail }),
 
             // SUPPLÉMENTS
             ...(formData.Supplement_Viande_1 && { "⭐ Supplément Viande 1": formData.Supplement_Viande_1 }),
@@ -757,6 +779,92 @@ function ContactForm() {
     // ideally I would refactor them to use renderDropdown too but keeping logic distinct is fine.
     // For brevity in this rewrite, I'll use a simplified version for them.
 
+    // Simplified renderers for Associations / Buffet can be kept minimal
+
+    const renderPlatUniqueFields = () => (
+        <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37]">
+            <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mb-4">Votre Choix de Plat Unique</h3>
+
+            <div className="group">
+                <label className={labelStyle}>Choisissez votre Plat Principal <span className="text-red-500">*</span></label>
+                <div className="relative">
+                    <select name="Plat_Associatif" value={formData.Plat_Associatif} onChange={handleChange} className={getInputStyle("Plat_Associatif")}>
+                        <option value="">Faites votre choix...</option>
+                        <option value="Bar à Pâtes">Bar à Pâtes</option>
+                        <option value="Burgers">Burgers Spécial Compère</option>
+                        <option value="Boulets Liégeois">Boulets Liégeois & Frites</option>
+                        <option value="Vol-au-vent">Vol-au-vent artisanal & Frites</option>
+                        <option value="Option Végétarienne">Option Végé (Salade & Quiche) 🌿</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                </div>
+            </div>
+
+            {/* CASCADE : Apparaît selon le choix principal */}
+            <AnimatePresence>
+                {formData.Plat_Associatif === "Bar à Pâtes" && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
+                        <label className={labelStyle}>Choix de la sauce <span className="text-red-500">*</span></label>
+                        <div className="relative">
+                            <select name="Plat_Associatif_Detail" value={formData.Plat_Associatif_Detail} onChange={handleChange} className={getInputStyle("Plat_Associatif_Detail")}>
+                                <option value="">Sélectionnez la sauce...</option>
+                                <option value="Bolognaise">Bolognaise</option>
+                                <option value="Carbonara">Carbonara</option>
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {formData.Plat_Associatif === "Burgers" && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
+                        <label className={labelStyle}>Type de Burger <span className="text-red-500">*</span></label>
+                        <div className="relative">
+                            <select name="Plat_Associatif_Detail" value={formData.Plat_Associatif_Detail} onChange={handleChange} className={getInputStyle("Plat_Associatif_Detail")}>
+                                <option value="">Sélectionnez le type...</option>
+                                <option value="Normal">Burger Normal</option>
+                                <option value="Spécial Compère">Spécial Compère</option>
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {formData.Plat_Associatif === "Boulets Liégeois" && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
+                        <label className={labelStyle}>Choix de la sauce <span className="text-red-500">*</span></label>
+                        <div className="relative">
+                            <select name="Plat_Associatif_Detail" value={formData.Plat_Associatif_Detail} onChange={handleChange} className={getInputStyle("Plat_Associatif_Detail")}>
+                                <option value="">Sélectionnez la sauce...</option>
+                                <option value="Sauce Lapin">Sauce Lapin</option>
+                                <option value="Sauce Tomate">Sauce Tomate</option>
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* PRICE INDICATION */}
+            {totalPrice > 0 && totalPrice !== -1 && (
+                <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
+                    <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
+                        <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
+                        <span className="text-xl font-serif font-bold">14,50€</span>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+
     const renderContactFields = () => (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -890,6 +998,7 @@ function ContactForm() {
                             {showMenuFirst ? (
                                 <>
                                     {isAnyBBQ && renderBBQComposition()}
+                                    {isPlatUnique && renderPlatUniqueFields()}
                                     {(isBuffet || isAssociations) && (
                                         <div className="bg-neutral-50 p-6 rounded-xl text-center">
                                             <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ "Dites-nous en plus" ci-dessous ou nous vous recontacterons pour affiner le menu.</p>

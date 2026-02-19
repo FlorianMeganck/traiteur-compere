@@ -467,33 +467,33 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 {/* Option 1: < 50 */}
                 <Link
-                    href="/contact?menu=associations&count=1&convives=Moins de 50"
+                    href="/contact?menu=plat_unique&convives=moins_50"
                     className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
                 >
                     <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 50 pers.</span>
                     <span className="text-sm font-medium text-gray-900">1 Plat Unique</span>
-                    <span className="text-[10px] text-gray-400">(Sur devis)</span>
+                    <span className="text-xs text-gray-400 mt-1">(Sur devis)</span>
                 </Link>
 
                 {/* Option 2: 50 - 100 */}
                 <Link
-                    href="/contact?menu=associations&count=1&convives=50 à 100"
+                    href="/contact?menu=plat_unique&convives=50_100"
                     className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
                     <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">50 à 100 pers.</span>
                     <span className="text-lg font-bold font-serif">1 Plat Unique</span>
-                    <span className="text-[10px] text-gray-300">(14,50€ / pers)</span>
+                    <span className="text-xs text-gray-300 mt-1">(14,50€ / pers)</span>
                 </Link>
 
                 {/* Option 3: > 100 */}
                 <Link
-                    href="/contact?menu=associations&count=1&convives=Plus de 100"
+                    href="/contact?menu=plat_unique&convives=plus_100"
                     className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
                 >
                     <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 100 pers.</span>
                     <span className="text-sm font-medium text-gray-900">1 Plat Unique</span>
-                    <span className="text-[10px] text-gray-400">(Tarifs dégressifs)</span>
+                    <span className="text-xs text-gray-400 mt-1">(Tarifs dégressifs)</span>
                 </Link>
             </div>
         );
