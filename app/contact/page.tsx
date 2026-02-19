@@ -264,14 +264,65 @@ function ContactForm() {
     useLayoutEffect(() => {
         if (typeof window !== 'undefined') window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
-        const convivesParam = searchParams.get("convives");
-        if (convivesParam) {
-            const opts = getInitialConvivesOptions();
-            if (opts.includes(convivesParam)) {
-                setFormData(prev => ({ ...prev, Nombre_Convives: convivesParam }));
+        const menuParam = searchParams.get('menu');
+        const convivesParam = searchParams.get('convives');
+
+        setFormData(prev => {
+            const newData = { ...prev };
+
+            // 1. Pré-sélection du type d'événement / Menu
+            if (menuParam) {
+                if (menuParam.startsWith('bbq_')) {
+                    const type = menuParam.replace('bbq_', '');
+                    newData.Type_Evenement = `Barbecue ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                } else if (menuParam === 'ardennais') {
+                    newData.Type_Evenement = 'Buffet Ardennais';
+                } else if (menuParam === 'gala') {
+                    newData.Type_Evenement = 'Buffet de Gala';
+                } else if (menuParam === 'associations') {
+                    newData.Type_Evenement = 'Associations';
+                }
             }
-        }
-    }, [searchParams, isAnyBBQ, isBuffet, isAssociations]);
+
+            // 2. Pré-sélection du Nombre de Convives (NOUVEAU)
+            if (convivesParam) {
+                // Nettoyage de la chaîne (ex: "25 à 250 pers." -> "25 a 250")
+                const safeParam = decodeURIComponent(convivesParam).toLowerCase();
+
+                // Détection intelligente selon les mots-clés
+                if (safeParam.includes('moins') && (safeParam.includes('20') || safeParam.includes('25'))) {
+                    // Check specific menus restrictions first
+                    if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
+                    else if (isAnyBBQ) newData.Nombre_Convives = "Moins de 25";
+                    else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
+                    else if (isBuffet) newData.Nombre_Convives = "Moins de 40";
+                    else newData.Nombre_Convives = "Moins de 20";
+                } else if (safeParam.includes('plus') && safeParam.includes('250')) {
+                    newData.Nombre_Convives = "Plus de 250";
+                } else if (safeParam.includes('plus') && safeParam.includes('180')) {
+                    newData.Nombre_Convives = "Plus de 180";
+                } else if (safeParam.includes('plus') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "Plus de 100";
+                } else if (safeParam.includes('25') && safeParam.includes('180')) {
+                    newData.Nombre_Convives = "25 à 180";
+                } else if (safeParam.includes('25') && safeParam.includes('250')) {
+                    newData.Nombre_Convives = "25 à 250";
+                } else if (safeParam.includes('50') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "50 à 100";
+                } else if (safeParam.includes('20') && safeParam.includes('50')) {
+                    newData.Nombre_Convives = "20 à 50";
+                } else {
+                    const opts = getInitialConvivesOptions();
+                    if (opts.includes(convivesParam)) {
+                        // Direct match fallback
+                        newData.Nombre_Convives = convivesParam;
+                    }
+                }
+            }
+
+            return newData;
+        });
+    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
