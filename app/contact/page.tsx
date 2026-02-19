@@ -408,53 +408,53 @@ function ContactForm() {
             return `Barbecue ${name.charAt(0).toUpperCase() + name.slice(1)}`;
         };
 
-        // 3. Construction du Payload Web3Forms (Ordre strict, pas de séparateurs)
+        // 3. Construction du Payload Web3Forms (Propre pour le Web, Visuel pour le Mail)
         const payload = {
-            access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644", // Ta vraie clé
+            access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
             subject: `Nouvelle demande : ${formData.Nom} ${formData.Prenom}`,
             from_name: "Site Traiteur Compère",
 
-            // --- 1. COORDONNÉES ---
-            "Nom": formData.Nom,
-            "Prénom": formData.Prenom,
-            "Téléphone": formData.Tel,
-            "Email": formData.Mail,
-            "Société": formData.Societe === "Oui" ? formData.Nom_Societe : "Non",
+            // DÉTAILS ÉVÉNEMENT
+            "📋 Formule Choisie": formatFormulaName(menuParam),
+            "💶 Prix Estimé": finalPriceStr,
+            "📅 Date de l'événement": formData.Date,
+            "👥 Nombre de convives": formData.Nombre_Convives,
 
-            // --- 2. ÉVÉNEMENT & CHOIX ---
-            "Date de l'événement": formData.Date,
-            "Nombre de convives": formData.Nombre_Convives,
-            "Formule Choisie": formatFormulaName(menuParam),
-            "Prix Estimé": finalPriceStr,
+            // COORDONNÉES
+            "👤 Nom complet": `${formData.Nom} ${formData.Prenom}`,
+            "✉️ Email": formData.Mail,
+            "📞 Téléphone": formData.Tel,
+            "🏢 Société": formData.Societe === "Oui" ? formData.Nom_Societe : "Non",
 
-            // --- 3. COMPOSITION DU MENU (Apparaît uniquement si rempli) ---
-            // Entrées (pour BBQ Composé)
-            ...(formData.compose_entree_1 && { "Entrée 1": formData.compose_entree_1 }),
-            ...(formData.compose_entree_2 && { "Entrée 2": formData.compose_entree_2 }),
+            // COMPOSITION (Conditionnelle)
+            ...(formData.compose_entree_1 && { "🍤 Entrée 1": formData.compose_entree_1 }),
+            ...(formData.compose_entree_2 && { "🍤 Entrée 2": formData.compose_entree_2 }),
 
-            // 1er Service (pour BBQ Dînatoire)
-            ...(formData.dinatoire_service_1 && { "1er Service 1": formData.dinatoire_service_1 }),
-            ...(formData.dinatoire_service_2 && { "1er Service 2": formData.dinatoire_service_2 }),
+            ...(formData.dinatoire_service_1 && { "🍝 1er Service 1": formData.dinatoire_service_1 }),
+            ...(formData.dinatoire_service_2 && { "🍝 1er Service 2": formData.dinatoire_service_2 }),
 
-            // Viandes / Plats Principaux
-            ...(formData.Viande_1 && { "Plat / Viande 1": formData.Viande_1 }),
-            ...(formData.Viande_2 && { "Plat / Viande 2": formData.Viande_2 }),
-            ...(formData.Viande_3 && { "Plat / Viande 3": formData.Viande_3 }),
+            ...(formData.Viande_1 && { "🥩 Plat / Viande 1": formData.Viande_1 }),
+            ...(formData.Viande_2 && { "🥩 Plat / Viande 2": formData.Viande_2 }),
+            ...(formData.Viande_3 && { "🥩 Plat / Viande 3": formData.Viande_3 }),
+            // @ts-ignore
+            ...(formData.Viande_4 && { "🥩 Plat / Viande 4": formData.Viande_4 }),
+            // @ts-ignore
+            ...(formData.Viande_5 && { "🥩 Plat / Viande 5": formData.Viande_5 }),
 
-            // --- 4. SUPPLÉMENTS ---
-            ...(formData.Supplement_Viande_1 && { "Supplément Viande 1": formData.Supplement_Viande_1 }),
-            ...(formData.Supplement_Viande_2 && { "Supplément Viande 2": formData.Supplement_Viande_2 }),
-            ...(formData.Supplement_Viande_3 && { "Supplément Viande 3": formData.Supplement_Viande_3 }),
+            // SUPPLÉMENTS
+            ...(formData.Supplement_Viande_1 && { "⭐ Supplément Viande 1": formData.Supplement_Viande_1 }),
+            ...(formData.Supplement_Viande_2 && { "⭐ Supplément Viande 2": formData.Supplement_Viande_2 }),
+            ...(formData.Supplement_Viande_3 && { "⭐ Supplément Viande 3": formData.Supplement_Viande_3 }),
 
-            // --- 5. ACCOMPAGNEMENTS ---
-            ...(formData.Accompagnement_Froid_1 && { "Accompagnement Froid 1": formData.Accompagnement_Froid_1 }),
-            ...(formData.Accompagnement_Froid_2 && { "Accompagnement Froid 2": formData.Accompagnement_Froid_2 }),
-            ...(formData.Accompagnement_Froid_3 && { "Accompagnement Froid 3": formData.Accompagnement_Froid_3 }),
-            ...(formData.Accompagnement_Chaud_Supplement && { "Accompagnement Chaud Extra": formData.Accompagnement_Chaud_Supplement }),
+            // ACCOMPAGNEMENTS
+            ...(formData.Accompagnement_Froid_1 && { "🥗 Accompagnement Froid 1": formData.Accompagnement_Froid_1 }),
+            ...(formData.Accompagnement_Froid_2 && { "🥗 Accompagnement Froid 2": formData.Accompagnement_Froid_2 }),
+            ...(formData.Accompagnement_Froid_3 && { "🥗 Accompagnement Froid 3": formData.Accompagnement_Froid_3 }),
+            ...(formData.Accompagnement_Chaud_Supplement && { "🔥 Accompagnement Chaud Extra": formData.Accompagnement_Chaud_Supplement }),
 
-            // --- 6. DIVERS ---
-            "Message et Allergies": formData.details_projet || "Aucun message",
-            "Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
+            // DIVERS
+            "💬 Message / Allergies": formData.details_projet || "Aucun message",
+            "🔄 Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
         };
 
         // 4. Envoi à Web3Forms
