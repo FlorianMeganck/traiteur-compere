@@ -396,58 +396,64 @@ function ContactForm() {
         setStatus("submitting");
 
         // 2. Préparation des données spécifiques
-        const bbqName = menuParam ? menuParam.replace('bbq_', '').charAt(0).toUpperCase() + menuParam.replace('bbq_', '').slice(1) : "Sur Mesure";
         const isSurDevis = isCochonOrPorchetta
             ? getConvivesMax(formData.Nombre_Convives) > 180
             : getConvivesMax(formData.Nombre_Convives) > 250;
+        const finalPriceStr = (isSurDevis || totalPrice === -1) ? "SUR DEVIS" : `${totalPrice}€ / pers`;
 
-        // Fix: If totalPrice is -1 it means Sur Devis too
-        const effectivePriceStr = (isSurDevis || totalPrice === -1) ? "SUR DEVIS" : `${totalPrice}€ / pers`;
+        // Formatage propre du nom de la formule (ex: "bbq_classique" -> "Barbecue Classique")
+        const formatFormulaName = (rawName: string | null) => {
+            if (!rawName) return "Sur mesure / Non spécifié";
+            const name = rawName.replace('bbq_', '').replace(/_/g, ' ');
+            return `Barbecue ${name.charAt(0).toUpperCase() + name.slice(1)}`;
+        };
 
-        // 3. Construction du Payload Web3Forms (Uniquement les champs remplis)
+        // 3. Construction du Payload Web3Forms (Ordre strict, pas de séparateurs)
         const payload = {
-            access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
-            subject: `Nouvelle demande BBQ : ${formData.Nom} ${formData.Prenom}`,
+            access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644", // Ta vraie clé
+            subject: `Nouvelle demande : ${formData.Nom} ${formData.Prenom}`,
             from_name: "Site Traiteur Compère",
 
-            "--- DÉTAILS DE LA DEMANDE ---": "",
-            "Formule Choisie": bbqName || "Non spécifié",
-            "Prix Estimé": effectivePriceStr,
-            "Date de l'événement": formData.Date,
-            "Nombre de convives": formData.Nombre_Convives,
-
-            "--- COORDONNÉES ---": "",
-            "Nom complet": `${formData.Nom} ${formData.Prenom}`,
-            "Email": formData.Mail,
+            // --- 1. COORDONNÉES ---
+            "Nom": formData.Nom,
+            "Prénom": formData.Prenom,
             "Téléphone": formData.Tel,
+            "Email": formData.Mail,
             "Société": formData.Societe === "Oui" ? formData.Nom_Societe : "Non",
 
-            "--- COMPOSITION DU MENU ---": "",
-            ...(formData.Viande_1 && { "Viande 1": formData.Viande_1 }),
-            ...(formData.Viande_2 && { "Viande 2": formData.Viande_2 }),
-            ...(formData.Viande_3 && { "Viande 3": formData.Viande_3 }),
-            // Handle compose/dinatoire fields if needed, or map them to Viande fields if logic allows, 
-            // but sticking to user's requested payload structure for now which focuses on Viandes.
-            // If Compose/Dinatoire use different keys, we should add them:
+            // --- 2. ÉVÉNEMENT & CHOIX ---
+            "Date de l'événement": formData.Date,
+            "Nombre de convives": formData.Nombre_Convives,
+            "Formule Choisie": formatFormulaName(menuParam),
+            "Prix Estimé": finalPriceStr,
+
+            // --- 3. COMPOSITION DU MENU (Apparaît uniquement si rempli) ---
+            // Entrées (pour BBQ Composé)
             ...(formData.compose_entree_1 && { "Entrée 1": formData.compose_entree_1 }),
             ...(formData.compose_entree_2 && { "Entrée 2": formData.compose_entree_2 }),
-            ...(formData.compose_plat_1 && { "Plat 1": formData.compose_plat_1 }),
-            ...(formData.compose_plat_2 && { "Plat 2": formData.compose_plat_2 }),
-            ...(formData.dinatoire_service_1 && { "Service 1 - Plat 1": formData.dinatoire_service_1 }),
-            ...(formData.dinatoire_service_2 && { "Service 1 - Plat 2": formData.dinatoire_service_2 }),
 
+            // 1er Service (pour BBQ Dînatoire)
+            ...(formData.dinatoire_service_1 && { "1er Service 1": formData.dinatoire_service_1 }),
+            ...(formData.dinatoire_service_2 && { "1er Service 2": formData.dinatoire_service_2 }),
+
+            // Viandes / Plats Principaux
+            ...(formData.Viande_1 && { "Plat / Viande 1": formData.Viande_1 }),
+            ...(formData.Viande_2 && { "Plat / Viande 2": formData.Viande_2 }),
+            ...(formData.Viande_3 && { "Plat / Viande 3": formData.Viande_3 }),
+
+            // --- 4. SUPPLÉMENTS ---
             ...(formData.Supplement_Viande_1 && { "Supplément Viande 1": formData.Supplement_Viande_1 }),
             ...(formData.Supplement_Viande_2 && { "Supplément Viande 2": formData.Supplement_Viande_2 }),
             ...(formData.Supplement_Viande_3 && { "Supplément Viande 3": formData.Supplement_Viande_3 }),
 
+            // --- 5. ACCOMPAGNEMENTS ---
             ...(formData.Accompagnement_Froid_1 && { "Accompagnement Froid 1": formData.Accompagnement_Froid_1 }),
             ...(formData.Accompagnement_Froid_2 && { "Accompagnement Froid 2": formData.Accompagnement_Froid_2 }),
             ...(formData.Accompagnement_Froid_3 && { "Accompagnement Froid 3": formData.Accompagnement_Froid_3 }),
+            ...(formData.Accompagnement_Chaud_Supplement && { "Accompagnement Chaud Extra": formData.Accompagnement_Chaud_Supplement }),
 
-            ...(formData.Accompagnement_Chaud_Supplement_Check === "Oui" && formData.Accompagnement_Chaud_Supplement && { "Accompagnement Chaud Extra": formData.Accompagnement_Chaud_Supplement }),
-
-            "--- INFORMATIONS COMPLÉMENTAIRES ---": "",
-            "Message / Allergies": formData.details_projet || "Aucun message",
+            // --- 6. DIVERS ---
+            "Message et Allergies": formData.details_projet || "Aucun message",
             "Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
         };
 
