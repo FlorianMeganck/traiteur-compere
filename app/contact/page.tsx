@@ -72,6 +72,14 @@ const OPTIONS_ASSOCIATIONS = ["Moins de 50", "50 à 100", "Plus de 100"];
 
 // --- VALIDATION HELPERS ---
 
+const getConvivesMax = (str: string): number => {
+    if (!str) return 0;
+    if (str.includes("Plus de")) return 9999;
+    const matches = str.match(/\d+/g);
+    if (!matches) return 0;
+    return Math.max(...matches.map(Number));
+};
+
 const getMinDate = () => {
     const date = new Date();
     date.setDate(date.getDate() + 7);
@@ -369,15 +377,13 @@ function ContactForm() {
         return newErrors;
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // VALIDATION
+        // 1. Validation (Garde ta fonction validateForm existante)
         const newErrors = validateForm();
-
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
-            // Scroll to first error
             const firstErrorKey = Object.keys(newErrors)[0];
             const element = document.getElementsByName(firstErrorKey)[0];
             if (element) {
@@ -389,94 +395,100 @@ function ContactForm() {
 
         setStatus("submitting");
 
-        // FORMULATE MESSAGE
-        const formDataToSend = new FormData(e.currentTarget);
-        let resume = "";
+        // 2. Préparation des données spécifiques
+        const bbqName = menuParam ? menuParam.replace('bbq_', '').charAt(0).toUpperCase() + menuParam.replace('bbq_', '').slice(1) : "Sur Mesure";
+        const isSurDevis = isCochonOrPorchetta
+            ? getConvivesMax(formData.Nombre_Convives) > 180
+            : getConvivesMax(formData.Nombre_Convives) > 250;
 
-        if (isAnyBBQ) {
-            resume += `--- COMMANDE BARBECUE (${menuParam?.replace('bbq_', '').toUpperCase()}) ---\n\n`;
+        // Fix: If totalPrice is -1 it means Sur Devis too
+        const effectivePriceStr = (isSurDevis || totalPrice === -1) ? "SUR DEVIS" : `${totalPrice}€ / pers`;
 
-            if (isCochonOrPorchetta) {
-                resume += `Plat Unique : ${isBBQCochon ? "Cochon de lait à la broche" : "Porchetta Rôtie"} (300g/pers)\n`;
-            } else if (isBBQCompose) {
-                resume += "ENTRÉES :\n";
-                resume += `- ${formData.compose_entree_1}\n- ${formData.compose_entree_2}\n`;
-                resume += "PLATS :\n";
-                resume += `- ${formData.compose_plat_1}\n- ${formData.compose_plat_2}\n`;
-            } else if (isBBQDinatoire) {
-                resume += "1ER SERVICE :\n";
-                resume += `- ${formData.dinatoire_service_1}\n- ${formData.dinatoire_service_2}\n`;
-                resume += "2ÈME SERVICE (BBQ) :\n";
-                resume += `- ${formData.Viande_1}\n- ${formData.Viande_2}\n`;
-            } else {
-                // Classique, Mer, Vege, Nobles
-                resume += "CHOIX PRINCIPAUX :\n";
-                if (formData.Viande_1) resume += `- ${formData.Viande_1}\n`;
-                if (formData.Viande_2) resume += `- ${formData.Viande_2}\n`;
-                if (formData.Viande_3) resume += `- ${formData.Viande_3}\n`;
-            }
+        // 3. Construction du Payload Web3Forms (Uniquement les champs remplis)
+        const payload = {
+            access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
+            subject: `Nouvelle demande BBQ : ${formData.Nom} ${formData.Prenom}`,
+            from_name: "Site Traiteur Compère",
 
-            // SUPPLEMENTS
-            if (formData.Supplement_Viande_1 || formData.Supplement_Viande_2 || formData.Supplement_Viande_3) {
-                resume += "\nSUPPLÉMENTS VIANDES :\n";
-                if (formData.Supplement_Viande_1) resume += `- ${formData.Supplement_Viande_1}\n`;
-                if (formData.Supplement_Viande_2) resume += `- ${formData.Supplement_Viande_2}\n`;
-                if (formData.Supplement_Viande_3) resume += `- ${formData.Supplement_Viande_3}\n`;
-            }
+            "--- DÉTAILS DE LA DEMANDE ---": "",
+            "Formule Choisie": bbqName || "Non spécifié",
+            "Prix Estimé": effectivePriceStr,
+            "Date de l'événement": formData.Date,
+            "Nombre de convives": formData.Nombre_Convives,
 
-            // ACCOMPAGNEMENTS
-            resume += "\nACCOMPAGNEMENTS :\n";
-            resume += "Froids :\n";
-            if (formData.Accompagnement_Froid_1) resume += `- ${formData.Accompagnement_Froid_1}\n`;
-            if (formData.Accompagnement_Froid_2) resume += `- ${formData.Accompagnement_Froid_2}\n`;
-            if (formData.Accompagnement_Froid_3) resume += `- ${formData.Accompagnement_Froid_3}\n`;
+            "--- COORDONNÉES ---": "",
+            "Nom complet": `${formData.Nom} ${formData.Prenom}`,
+            "Email": formData.Mail,
+            "Téléphone": formData.Tel,
+            "Société": formData.Societe === "Oui" ? formData.Nom_Societe : "Non",
 
-            resume += "Chauds :\n";
-            if (formData.Accompagnement_Chaud) resume += `- ${formData.Accompagnement_Chaud}\n`;
-            if (formData.Accompagnement_Chaud_Supplement_Check === "Oui" && formData.Accompagnement_Chaud_Supplement) {
-                resume += `- SUPPLÉMENT Chaud (+1€) : ${formData.Accompagnement_Chaud_Supplement}\n`;
-            }
-        }
+            "--- COMPOSITION DU MENU ---": "",
+            ...(formData.Viande_1 && { "Viande 1": formData.Viande_1 }),
+            ...(formData.Viande_2 && { "Viande 2": formData.Viande_2 }),
+            ...(formData.Viande_3 && { "Viande 3": formData.Viande_3 }),
+            // Handle compose/dinatoire fields if needed, or map them to Viande fields if logic allows, 
+            // but sticking to user's requested payload structure for now which focuses on Viandes.
+            // If Compose/Dinatoire use different keys, we should add them:
+            ...(formData.compose_entree_1 && { "Entrée 1": formData.compose_entree_1 }),
+            ...(formData.compose_entree_2 && { "Entrée 2": formData.compose_entree_2 }),
+            ...(formData.compose_plat_1 && { "Plat 1": formData.compose_plat_1 }),
+            ...(formData.compose_plat_2 && { "Plat 2": formData.compose_plat_2 }),
+            ...(formData.dinatoire_service_1 && { "Service 1 - Plat 1": formData.dinatoire_service_1 }),
+            ...(formData.dinatoire_service_2 && { "Service 1 - Plat 2": formData.dinatoire_service_2 }),
 
-        if (isBuffet || isAssociations) {
-            // ... existing buffer logic ...
-            resume += `--- COMMANDE ${isAssociations ? "ASSOCIATIONS" : (isArdennais ? "ARDENNAIS" : "GALA")} ---\n`;
-            // Add logic here ideally, keeping it simple for now
-        }
+            ...(formData.Supplement_Viande_1 && { "Supplément Viande 1": formData.Supplement_Viande_1 }),
+            ...(formData.Supplement_Viande_2 && { "Supplément Viande 2": formData.Supplement_Viande_2 }),
+            ...(formData.Supplement_Viande_3 && { "Supplément Viande 3": formData.Supplement_Viande_3 }),
 
-        // Create explicit resume of what was ordered to be safe
-        let priceResume = "";
-        if (totalPrice > 0) {
-            priceResume = `\n\n--- ESTIMATION PRIX ---\nPrix unitaire : ${totalPrice}€ / personne\n(Hors frais de déplacement/service si non inclus)\n`;
-        } else {
-            priceResume = `\n\n--- ESTIMATION PRIX ---\nSur Devis\n`;
-        }
+            ...(formData.Accompagnement_Froid_1 && { "Accompagnement Froid 1": formData.Accompagnement_Froid_1 }),
+            ...(formData.Accompagnement_Froid_2 && { "Accompagnement Froid 2": formData.Accompagnement_Froid_2 }),
+            ...(formData.Accompagnement_Froid_3 && { "Accompagnement Froid 3": formData.Accompagnement_Froid_3 }),
 
-        formDataToSend.append("Resume_Commande", resume + priceResume);
+            ...(formData.Accompagnement_Chaud_Supplement_Check === "Oui" && formData.Accompagnement_Chaud_Supplement && { "Accompagnement Chaud Extra": formData.Accompagnement_Chaud_Supplement }),
 
+            "--- INFORMATIONS COMPLÉMENTAIRES ---": "",
+            "Message / Allergies": formData.details_projet || "Aucun message",
+            "Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
+        };
+
+        // 4. Envoi à Web3Forms
         try {
-            const response = await fetch("https://formspree.io/f/xvzbpbjd", {
+            const response = await fetch("https://api.web3forms.com/submit", {
                 method: "POST",
-                headers: { "Accept": "application/json" },
-                body: formDataToSend
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                },
+                body: JSON.stringify(payload)
             });
-            if (response.ok) {
-                // Tracking GA4 : Victoire !
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Tracking GA4
                 if (typeof window !== 'undefined' && (window as any).gtag) {
                     (window as any).gtag('event', 'generate_lead', {
                         'event_category': 'Contact',
-                        'event_label': 'Formulaire_Envoye',
-                        'value': typeof totalPrice !== 'undefined' ? totalPrice : 0, // Envoie le montant estimé si dispo
+                        'event_label': 'Formulaire_Envoye_Web3Forms',
+                        'value': typeof totalPrice !== 'undefined' ? totalPrice : 0,
                         'currency': 'EUR'
                     });
                 }
-
+                // Affichage du V vert
                 setStatus("success");
-                setTimeout(() => router.push("/"), 3000);
+
+                // Redirection après 3s
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 3000);
             } else {
+                console.error("Erreur Web3Forms:", result);
+                alert("Une erreur est survenue lors de l'envoi. Veuillez réessayer.");
                 setStatus("error");
             }
-        } catch {
+        } catch (error) {
+            console.error("Erreur Fetch:", error);
+            alert("Une erreur de connexion est survenue.");
             setStatus("error");
         }
     };
