@@ -42,7 +42,7 @@ export default function Home() {
         {/* Hero Content */}
         <motion.div
           style={{ y: textY }}
-          className="relative z-20 text-center px-6 max-w-5xl mx-auto pb-32"
+          className="relative z-20 text-center px-4 md:px-6 max-w-5xl mx-auto pb-40 md:pb-32"
         >
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
@@ -137,11 +137,11 @@ function ServicesSection() {
   ];
 
   return (
-    <section className="relative z-30 -mt-32 pt-16 pb-24 bg-white rounded-t-[3rem] shadow-2xl mx-4 md:mx-12 lg:mx-24">
+    <section className="relative z-30 -mt-12 md:-mt-32 pt-16 pb-24 bg-white rounded-t-[2rem] md:rounded-t-[3rem] shadow-2xl mx-4 md:mx-12 lg:mx-24">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-serif text-black">Pour tous vos événements</h2>
+          <h2 className="text-3xl md:text-5xl font-serif text-black">Pour tous vos événements</h2>
           <div className="w-[1px] h-12 bg-gray-300 mx-auto mt-6"></div>
         </div>
 

@@ -6,21 +6,21 @@ export default function About() {
         <main className="min-h-screen pt-32 pb-12">
             <div className="max-w-7xl mx-auto px-6">
                 <header className="text-center mb-16">
-                    <h1 className="text-5xl font-serif text-black mb-4">À Propos</h1>
+                    <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">À Propos</h1>
                     <div className="w-24 h-1 bg-primary mx-auto" />
                 </header>
 
                 <section className="flex flex-col md:flex-row gap-12 items-center mb-24">
-                    <div className="w-full md:w-1/2 relative h-[500px] rounded-2xl overflow-hidden shadow-xl">
+                    <div className="w-full md:w-1/2 relative h-[300px] md:h-[500px] flex-shrink-0">
                         <Image
                             src="/images/chef.png"
                             alt="Notre Chef"
                             fill
-                            className="object-cover"
+                            className="object-cover rounded-2xl shadow-xl"
                         />
                     </div>
                     <div className="w-full md:w-1/2 space-y-6">
-                        <h2 className="text-3xl font-serif text-black">L'Art de Recevoir par Jean-Paul Compère</h2>
+                        <h2 className="text-2xl md:text-3xl font-serif text-black">L'Art de Recevoir par Jean-Paul Compère</h2>
                         <p className="text-gray-600 leading-relaxed font-light text-lg">
                             Depuis plus de 20 ans, la Maison Compère incarne l'excellence traiteur en région liégeoise. Notre philosophie ? Une cuisine de cœur, généreuse et authentique, où le produit est roi.
                         </p>
@@ -32,7 +32,7 @@ export default function About() {
 
                 <section className="bg-neutral-50 p-12 rounded-2xl mb-24 border border-neutral-100">
                     <div className="text-center mb-12">
-                        <h2 className="text-3xl font-serif text-black">Nos Valeurs</h2>
+                        <h2 className="text-2xl md:text-3xl font-serif text-black">Nos Valeurs</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <ValueCard

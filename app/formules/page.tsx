@@ -221,7 +221,7 @@ export default function Formules() {
 
                 {/* HEADER */}
                 <header className="text-center mb-16 space-y-6">
-                    <h1 className="text-5xl md:text-6xl font-serif text-black">Nos Formules Gourmandes</h1>
+                    <h1 className="text-4xl md:text-6xl font-serif text-black">Nos Formules Gourmandes</h1>
                     <p className="text-gray-600 max-w-2xl mx-auto text-lg leading-relaxed">
                         Découvrez nos compositions pensées pour tous vos événements.
                         Du simple buffet aux plats mijotés, nous avons la formule qu&apos;il vous faut.
@@ -307,7 +307,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 ${isAssociatif ? 'py-12 px-6 md:px-12 bg-neutral-50 border border-[#D4AF37]/20 rounded-2xl' : ''}`}
         >
             {/* IMAGE SIDE */}
-            <div className="w-full md:w-1/2 relative h-[450px] md:h-[600px] overflow-hidden rounded-2xl shadow-xl group sticky top-32">
+            <div className="w-full md:w-1/2 relative h-[280px] md:h-[500px] flex-shrink-0 overflow-hidden rounded-2xl shadow-xl group">
                 <Image
                     src={formule.image}
                     alt={formule.title}
@@ -322,7 +322,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             </div>
 
             {/* CONTENT SIDE */}
-            <div className="w-full md:w-1/2 space-y-6">
+            <div className="w-full md:w-1/2 flex-1 space-y-6 md:space-y-8 mt-6 md:mt-0 relative z-10">
                 <div className="flex flex-col gap-2">
                     <span className="text-[#D4AF37] font-sans text-sm font-bold uppercase tracking-widest md:hidden">{formule.tag}</span>
                     <h2 className="text-3xl md:text-4xl font-serif text-black">{isBBQ ? currentBBQ.label : formule.title}</h2>
