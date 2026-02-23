@@ -8,7 +8,7 @@ import Link from "next/link";
 
 // --- DATA ---
 
-type BBQType = 'classique' | 'compose' | 'dinatoire' | 'mer' | 'vege' | 'cochon' | 'porchetta' | 'nobles';
+type BBQType = 'classique' | 'compose' | 'dinatoire' | 'mer' | 'vegetarien' | 'cochon' | 'porchetta' | 'nobles';
 
 const BBQ_OPTIONS: Record<BBQType, {
     label: string;
@@ -20,7 +20,7 @@ const BBQ_OPTIONS: Record<BBQType, {
     isFlatRate?: boolean; // For Cochon/Porchetta fixed price logic if needed, though structure handles it
 }> = {
     classique: {
-        label: "Le Classique",
+        label: "Barbecue Classique",
         description: "L'incontournable de l'été. Des grillades savoureuses préparées avec soin.",
         composition: [
             "3 Viandes au choix (Saucisses, Merguez, Brochettes...)",
@@ -32,7 +32,7 @@ const BBQ_OPTIONS: Record<BBQType, {
         counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
     },
     compose: {
-        label: "Le Composé",
+        label: "Barbecue Composé",
         description: "Un menu complet avec entrées et plats pour un repas équilibré.",
         composition: [
             "2 Entrées au choix (Scampi, Saumon, Tartare...)",
@@ -43,18 +43,18 @@ const BBQ_OPTIONS: Record<BBQType, {
         counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
     },
     dinatoire: {
-        label: "Le Dînatoire",
+        label: "Barbecue Dînatoire",
         description: "Une formule élégante en deux services pour prendre le temps de déguster.",
         composition: [
             "1er Service à table (Lasagne, Chili, Paëlla...)",
             "2ème Service : Barbecue varié à volonté",
             "Buffet de salades & féculents"
         ],
-        prices: { small: "26,50€", medium: "24€", large: "Sur devis" },
+        prices: { small: "26,50€", medium: "24,50€", large: "Sur devis" },
         counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
     },
     mer: {
-        label: "Fruits de Mer",
+        label: "Barbecue Fruits de mer",
         description: "La fraîcheur de l'océan sur votre grill. Une sélection premium.",
         composition: [
             "Gambas géantes & Homard grillé",
@@ -65,8 +65,8 @@ const BBQ_OPTIONS: Record<BBQType, {
         prices: { small: "33€", medium: "30€", large: "Sur devis" },
         counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." }
     },
-    vege: {
-        label: "Végétarien",
+    vegetarien: {
+        label: "Barbecue Végétarien",
         description: "Une alternative gourmande et créative 100% végétarienne.",
         composition: [
             "Halloumi grillé & Brochettes de légumes",

@@ -16,44 +16,61 @@ export default function Contact() {
 
 // --- DATA CONSTANTS ---
 
-const VIANDES_BASE = [
-    "Saucisse de Campagne", "Saucisse BBQ", "Saucisse Italienne", "Saucisse au Fromage",
-    "Chipolata aux Herbes", "Chipolata au Poivre", "Chipolata Nature",
-    "Merguez", "Boudin blanc grillé",
-    "Brochette de Bœuf marinée", "Brochette de Porc marinée", "Brochette de Volaille", "Brochette de légumes 🌿",
-    "Braisade de Bœuf", "Braisade de Porc",
-    "Filet de poulet mariné", "Lard mariné", "Pilon de poulet"
+const viandesClassiques = [
+    "Saucisse (nature)", "Saucisse (campagne)", "Saucisse (barbecue)", "Saucisse (italienne)",
+    "Chipolata (nature)", "Chipolata (fines herbes)", "Chipolata (poivre)", "Chipolata (piment d'Espelette)",
+    "Merguez", "Mini boudin blanc", "Saucisse de volaille (nature)", "Saucisse de volaille (fromage)",
+    "Brochette nature aux oignons", "Brochette de bœuf marinée", "Brochette de porc aux oignons",
+    "Brochette de porc marinée", "Brochette de volaille nature aux oignons", "Brochette de volaille marinée",
+    "Brochette de dinde nature aux oignons", "Brochette de dinde marinée", "Brochette de mini boulettes marinées",
+    "Brochette de mini boudins", "Braisade de bœuf marinée", "Braisade de canard aux trois poivres (+2€)",
+    "Braisade de porc marinée", "Filet de poulet mariné", "Lard mariné (ail et fines herbes)",
+    "Lard mariné (paprika)", "Spare ribs marinés au miel (+1€)", "Jambon barbecue en tranche",
+    "Côte d'agneau marinée ail et fines herbes (+1€)", "Tranche de gigot d'agneau marinée (+2€)", "Pilon de poulet mariné"
 ];
 
-const VIANDES_SUPPL_ONLY = [
-    "Magret de Canard (+2€)",
-    "Spare Ribs (+1€)",
-    "Côte d'Agneau (+1€)",
-    "Gigot d'agneau (+2€)",
-    "Viande Extra (Bœuf/Veau...) (+3€)"
+const optionsVegetariennes = [
+    "Halloumi grillé au miel", "Brochettes de légumes méditerranéens",
+    "Maïs au paprika fumé et citron vert", "Steak de chou-fleur rôti au BBQ",
+    "Portobello farci au fromage frais et herbes", "Tofu mariné sauce teriyaki",
+    "Ananas rôti au BBQ, sirop d'érable et romarin"
 ];
+
+const entreesCompose = [
+    "Brochette de scampi marinées au citron et à l'aneth", "Pavé de saumon à l'aneth",
+    "Salade melon, feta et menthe", "Burrata avec tomates cœur de bœuf et pesto",
+    "Gaspacho andalou en verrines", "Mini-brochettes de poulet mariné à la moutarde",
+    "Tartare de bœuf aux herbes fines"
+];
+
+const viandesCompose = ["Côte d'agneau", "Contrefilet de bœuf étranger", "Merguez", "Chipolata", "Brochette de bœuf"];
+const dinatoireServices = ["Lasagnes", "Chili", "Tortellini", "Paëlla"];
+const dinatoireViandes = ["Brochette de scampi", "Côte d'agneau", "Contrefilet de bœuf étranger", "Merguez et saucisse", "Brochette de bœuf"];
+
+const fruitsDeMer = [
+    "Brochette de scampi", "Calamar mariné au cumin", "Brochette de Saint-Jacques",
+    "Pavé de saumon au fenouil", "Pince de crabe", "Moules en papillote",
+    "Poulpe grillé à la méditerranéenne", "Homard grillé façon Maine", "Gambas grillées (citron et thym)"
+];
+
+const dessertsList = [
+    "Tiramisu (classique, fruits, spéculoos)", "Pavlova aux fruits rouges",
+    "Dôme de chocolat noir avec son cœur praliné", "Carpaccio d'ananas rôti, citron vert et menthe",
+    "Panna cotta vanille et coulis framboise", "Financier aux amandes et fruits frais"
+];
+
+const NOBLES = ["Tomahawk", "Côte à l'os", "Entrecôte Irlandaise", "Entrecôte Simmental", "Entrecôte Black Angus", "Filet Pur"];
 
 const BBQ_PRICES: Record<string, { low: number; mid: number; high: number }> = {
     classique: { low: 17, mid: 15, high: 0 },
     compose: { low: 22, mid: 20, high: 0 },
-    dinatoire: { low: 26.50, mid: 24, high: 0 },
+    dinatoire: { low: 26.50, mid: 24.50, high: 0 },
     mer: { low: 33, mid: 30, high: 0 },
-    vege: { low: 13, mid: 11, high: 0 },
+    vegetarien: { low: 13, mid: 11, high: 0 },
     cochon: { low: 36, mid: 33, high: 0 },
     porchetta: { low: 26.50, mid: 24, high: 0 },
     nobles: { low: 49.50, mid: 45, high: 0 },
 };
-
-const ENTREES_COMPOSE = ["Coquille St-Jacques", "Brochette de Scampi", "Pavé de Saumon", "Salade Melon/Feta 🌿", "Burrata & Tomates Cerises 🌿", "Gaspacho Andalou 🌿", "Mini-brochettes Tomate/Mozza 🌿", "Tartare de Bœuf", "Tartare de Saumon"];
-const PLATS_COMPOSE = ["Côte d'agneau", "Contrefilet", "Merguez", "Chipolata", "Brochette de bœuf", "Pavé de Saumon grillé"];
-
-const SERVICES_DINATOIRE = ["Lasagne Maison", "Chili con Carne", "Tortellini Ricotta/Epinards 🌿", "Paëlla Royale", "Hachis Parmentier"];
-
-const FRUITS_MER = ["Brochette de Scampi", "Calamar à la romaine", "Coquille St-Jacques", "Pavé de Saumon", "Pince de Crabe", "Moules gratinées", "Poulpe grillé", "Demi-Homard (+supp)", "Gambas géantes"];
-
-const NOBLES = ["Tomahawk", "Côte à l'os", "Entrecôte Irlandaise", "Entrecôte Simmental", "Entrecôte Black Angus", "Filet Pur"];
-
-const VEGE = ["Halloumi grillé", "Brochette de légumes", "Maïs grillé", "Steak de Chou-fleur", "Portobello farci", "Tofu mariné", "Tranche d'Ananas grillée"];
 
 const SIDES_COLD = ["Salade de Pâtes Pesto 🌿", "Salade de Pâtes Curry 🌿", "Salade Grecque (Feta/Olives) 🌿", "Taboulé Oriental 🌿", "Tomate Mozza Di Bufala 🌿", "Salade de Pomme de Terre (Mayonnaise) 🌿", "Salade de Pomme de Terre (Vinaigrette) 🌿", "Carottes Râpées (Citron) 🌿", "Céleri Râpé & Pommes 🌿", "Concombre à la crème 🌿", "Salade de chou blanc 🌿"];
 const SIDES_HOT = ["Pomme de terre en chemise 🌿", "Gratin Dauphinois 🌿", "Grenailles au Romarin 🌿", "Riz aux petits légumes 🌿", "Pâtes à l'italienne 🌿"];
@@ -126,7 +143,7 @@ function ContactForm() {
     const isBBQCompose = menuParam === 'bbq_compose';
     const isBBQDinatoire = menuParam === 'bbq_dinatoire';
     const isBBQMer = menuParam === 'bbq_mer';
-    const isBBQVege = menuParam === 'bbq_vege';
+    const isBBQVegetarien = menuParam === 'bbq_vegetarien';
     const isBBQCochon = menuParam === 'bbq_cochon';
     const isBBQPorchetta = menuParam === 'bbq_porchetta';
     const isBBQNobles = menuParam === 'bbq_nobles';
@@ -188,6 +205,10 @@ function ContactForm() {
         Accompagnement_Chaud_Supplement: "",
         Accompagnement_Chaud_Supplement_Check: "Non",
 
+        // Desserts
+        Dessert_Check: "Non",
+        Dessert_Choix: "",
+
         // Buffet / Assoc Legacy
         plat_1: "",
         plat_2: "",
@@ -231,17 +252,29 @@ function ContactForm() {
 
         // 2. Supplements
         let supplements = 0;
-        const suppFields = [formData.Supplement_Viande_1, formData.Supplement_Viande_2, formData.Supplement_Viande_3];
-        suppFields.forEach(field => {
+
+        // Loop over selected meats
+        const meatFields = [
+            formData.Viande_1, formData.Viande_2, formData.Viande_3,
+            formData.compose_plat_1, formData.compose_plat_2,
+            formData.dinatoire_service_1, formData.dinatoire_service_2
+        ];
+        meatFields.forEach(field => {
             if (field) {
-                const match = field.match(/\+(\d+)€/);
-                if (match) supplements += parseInt(match[1], 10);
+                if (field.includes("(+1€)")) supplements += 1;
+                if (field.includes("(+2€)")) supplements += 2;
+                if (field.includes("(+3€)")) supplements += 3;
             }
         });
 
         // 3. Extra Hot Side
         if (formData.Accompagnement_Chaud_Supplement_Check === "Oui" && formData.Accompagnement_Chaud_Supplement) {
             supplements += 1;
+        }
+
+        // 4. Dessert
+        if (formData.Dessert_Check === "Oui" && formData.Dessert_Choix) {
+            supplements += 6;
         }
 
         return base + supplements;
@@ -251,12 +284,12 @@ function ContactForm() {
 
     // Helper to get needed list based on menu
     const getBBQList = () => {
-        if (isBBQClassique) return VIANDES_BASE;
-        if (isBBQMer) return FRUITS_MER;
-        if (isBBQVege) return VEGE;
+        if (isBBQClassique) return viandesClassiques;
+        if (isBBQMer) return fruitsDeMer;
+        if (isBBQVegetarien) return optionsVegetariennes;
         if (isBBQNobles) return NOBLES;
-        if (isBBQDinatoire) return VIANDES_BASE; // BBQ part of Dinatoire
-        return VIANDES_BASE;
+        if (isBBQDinatoire) return dinatoireViandes;
+        return viandesClassiques;
     };
 
     const getInitialConvivesOptions = () => {
@@ -349,7 +382,8 @@ function ContactForm() {
                 ...prev,
                 [name]: checked ? "Oui" : "Non",
                 ...(name === "Societe" && !checked ? { Nom_Societe: "" } : {}),
-                ...(name === "Accompagnement_Chaud_Supplement_Check" && !checked ? { Accompagnement_Chaud_Supplement: "" } : {})
+                ...(name === "Accompagnement_Chaud_Supplement_Check" && !checked ? { Accompagnement_Chaud_Supplement: "" } : {}),
+                ...(name === "Dessert_Check" && !checked ? { Dessert_Choix: "" } : {})
             }));
             return;
         }
@@ -525,6 +559,9 @@ function ContactForm() {
             ...(formData.Accompagnement_Froid_3 && { "🥗 Accompagnement Froid 3": formData.Accompagnement_Froid_3 }),
             ...(formData.Accompagnement_Chaud_Supplement && { "🔥 Accompagnement Chaud Extra": formData.Accompagnement_Chaud_Supplement }),
 
+            // DESSERTS
+            ...(formData.Dessert_Check === "Oui" && formData.Dessert_Choix && { "🍰 Dessert choisi (+6€)": formData.Dessert_Choix }),
+
             // DIVERS
             "💬 Message / Allergies": formData.details_projet || "Aucun message",
             "🔄 Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
@@ -615,7 +652,6 @@ function ContactForm() {
     const renderBBQComposition = () => {
         // Prepare exclusion lists with NEW keys
         const bbqChoices = [formData.Viande_1, formData.Viande_2, formData.Viande_3].filter(Boolean);
-        const suppChoices = [formData.Supplement_Viande_1, formData.Supplement_Viande_2, formData.Supplement_Viande_3].filter(Boolean);
         const composeEntreeChoices = [formData.compose_entree_1, formData.compose_entree_2].filter(Boolean);
         const composePlatChoices = [formData.compose_plat_1, formData.compose_plat_2].filter(Boolean);
         const dinatoireServiceChoices = [formData.dinatoire_service_1, formData.dinatoire_service_2].filter(Boolean);
@@ -655,17 +691,17 @@ function ContactForm() {
 
                     {isBBQCompose && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {renderDropdown("Entrée 1", "compose_entree_1", ENTREES_COMPOSE, composeEntreeChoices)}
-                            {renderDropdown("Entrée 2", "compose_entree_2", ENTREES_COMPOSE, composeEntreeChoices)}
-                            {renderDropdown("Plat 1", "compose_plat_1", PLATS_COMPOSE, composePlatChoices)}
-                            {renderDropdown("Plat 2", "compose_plat_2", PLATS_COMPOSE, composePlatChoices)}
+                            {renderDropdown("Entrée 1", "compose_entree_1", entreesCompose, composeEntreeChoices)}
+                            {renderDropdown("Entrée 2", "compose_entree_2", entreesCompose, composeEntreeChoices)}
+                            {renderDropdown("Plat 1", "compose_plat_1", viandesCompose, composePlatChoices)}
+                            {renderDropdown("Plat 2", "compose_plat_2", viandesCompose, composePlatChoices)}
                         </div>
                     )}
 
                     {isBBQDinatoire && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {renderDropdown("1er Service (Plat 1)", "dinatoire_service_1", SERVICES_DINATOIRE, dinatoireServiceChoices)}
-                            {renderDropdown("1er Service (Plat 2)", "dinatoire_service_2", SERVICES_DINATOIRE, dinatoireServiceChoices)}
+                            {renderDropdown("1er Service (Plat 1)", "dinatoire_service_1", dinatoireServices, dinatoireServiceChoices)}
+                            {renderDropdown("1er Service (Plat 2)", "dinatoire_service_2", dinatoireServices, dinatoireServiceChoices)}
                             {renderDropdown("2ème Service (BBQ Choix 1)", "Viande_1", getBBQList(), bbqChoices)}
                             {renderDropdown("2ème Service (BBQ Choix 2)", "Viande_2", getBBQList(), bbqChoices)}
                         </div>
@@ -680,15 +716,6 @@ function ContactForm() {
                     )}
                 </div>
 
-                {/* SUPPLEMENTS CASCADE */}
-                <div className="space-y-6">
-                    <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Suppléments Viandes (Payants)</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {renderDropdown("Supplément Viande 1", "Supplement_Viande_1", VIANDES_SUPPL_ONLY, suppChoices)}
-                        {(formData.Supplement_Viande_1 !== "") && renderDropdown("Supplément Viande 2", "Supplement_Viande_2", VIANDES_SUPPL_ONLY, suppChoices)}
-                        {(formData.Supplement_Viande_2 !== "") && renderDropdown("Supplément Viande 3", "Supplement_Viande_3", VIANDES_SUPPL_ONLY, suppChoices)}
-                    </div>
-                </div>
 
                 {/* ACCOMPAGNEMENTS */}
                 <div className="space-y-6">
@@ -953,6 +980,52 @@ function ContactForm() {
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <div className="mt-8 border-t border-dashed border-neutral-200 pt-8">
+                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 hover:border-[#D4AF37]/30 transition-colors">
+                    <div className="flex items-center gap-3 mb-2">
+                        <input
+                            type="checkbox"
+                            name="Dessert_Check"
+                            id="Dessert_Check"
+                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                            checked={formData.Dessert_Check === "Oui"}
+                            onChange={handleChange}
+                        />
+                        <label htmlFor="Dessert_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
+                            Ajouter un Dessert (+6€ / pers)
+                        </label>
+                    </div>
+                    <AnimatePresence>
+                        {formData.Dessert_Check === "Oui" && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                className="overflow-hidden"
+                            >
+                                <div className="relative">
+                                    <select
+                                        name="Dessert_Choix"
+                                        value={formData.Dessert_Choix}
+                                        onChange={handleChange}
+                                        className={getInputStyle("Dessert_Choix")}
+                                    >
+                                        <option value="">Faites votre choix...</option>
+                                        {dessertsList.map((c) => (
+                                            <option key={c} value={c}>{c}</option>
+                                        ))}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </>
