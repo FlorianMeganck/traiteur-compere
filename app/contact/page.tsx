@@ -61,15 +61,15 @@ const dessertsList = [
 
 const NOBLES = ["Tomahawk", "Côte à l'os", "Entrecôte Irlandaise", "Entrecôte Simmental", "Entrecôte Black Angus", "Filet Pur"];
 
-const BBQ_PRICES: Record<string, { low: number; mid: number; high: number }> = {
-    classique: { low: 17, mid: 15, high: 0 },
-    compose: { low: 22, mid: 20, high: 0 },
-    dinatoire: { low: 26.50, mid: 24.50, high: 0 },
-    mer: { low: 33, mid: 30, high: 0 },
-    vegetarien: { low: 13, mid: 11, high: 0 },
-    cochon: { low: 36, mid: 33, high: 0 },
-    porchetta: { low: 26.50, mid: 24, high: 0 },
-    nobles: { low: 49.50, mid: 45, high: 0 },
+const BBQ_PRICES: Record<string, number> = {
+    classique: 15,
+    compose: 20,
+    dinatoire: 24.50,
+    mer: 30,
+    vegetarien: 11,
+    cochon: 33,
+    porchetta: 24,
+    nobles: 45,
 };
 
 const SIDES_COLD = ["Salade de Pâtes Pesto 🌿", "Salade de Pâtes Curry 🌿", "Salade Grecque (Feta/Olives) 🌿", "Taboulé Oriental 🌿", "Tomate Mozza Di Bufala 🌿", "Salade de Pomme de Terre (Mayonnaise) 🌿", "Salade de Pomme de Terre (Vinaigrette) 🌿", "Carottes Râpées (Citron) 🌿", "Céleri Râpé & Pommes 🌿", "Concombre à la crème 🌿", "Salade de chou blanc 🌿"];
@@ -184,8 +184,6 @@ function ContactForm() {
         // Compose (2 Entrées + 2 Plats)
         compose_entree_1: "",
         compose_entree_2: "",
-        compose_plat_1: "",
-        compose_plat_2: "",
 
         // Dinatoire (1 Service + BBQ selection)
         dinatoire_service_1: "",
@@ -241,14 +239,13 @@ function ContactForm() {
 
         // 1. Base Price
         const bbqType = menuParam?.replace('bbq_', '') || 'classique';
-        const priceData = BBQ_PRICES[bbqType];
-        if (!priceData) return 0;
+        const basePrice = BBQ_PRICES[bbqType];
+        if (basePrice === undefined) return 0;
 
         const tier = getPriceTier(formData.Nombre_Convives);
-        let base = priceData[tier];
+        if (tier === 'high') return -1; // -1 signals "Sur Devis" specifically
 
-        // If base is 0, it means "Sur Devis" (High tier / > 250)
-        if (base === 0) return -1; // -1 signals "Sur Devis" specifically
+        const base = basePrice;
 
         // 2. Supplements
         let supplements = 0;
@@ -256,7 +253,6 @@ function ContactForm() {
         // Loop over selected meats
         const meatFields = [
             formData.Viande_1, formData.Viande_2, formData.Viande_3,
-            formData.compose_plat_1, formData.compose_plat_2,
             formData.dinatoire_service_1, formData.dinatoire_service_2
         ];
         meatFields.forEach(field => {
@@ -457,15 +453,18 @@ function ContactForm() {
             } else if (isBBQCompose) {
                 if (!formData.compose_entree_1) newErrors.compose_entree_1 = "Requis";
                 if (!formData.compose_entree_2) newErrors.compose_entree_2 = "Requis";
-                if (!formData.compose_plat_1) newErrors.compose_plat_1 = "Requis";
-                if (!formData.compose_plat_2) newErrors.compose_plat_2 = "Requis";
+                if (!formData.Viande_1) newErrors.Viande_1 = "Requis";
+                if (!formData.Viande_2) newErrors.Viande_2 = "Requis";
             } else if (isBBQDinatoire) {
                 if (!formData.dinatoire_service_1) newErrors.dinatoire_service_1 = "Requis";
                 if (!formData.dinatoire_service_2) newErrors.dinatoire_service_2 = "Requis";
                 if (!formData.Viande_1) newErrors.Viande_1 = "Requis";
                 if (!formData.Viande_2) newErrors.Viande_2 = "Requis";
+            } else if (isBBQNobles) {
+                if (!formData.Viande_1) newErrors.Viande_1 = "Requis";
+                if (!formData.Viande_2) newErrors.Viande_2 = "Requis";
             } else {
-                // Classique, Mer, Vege, Nobles (Standard 3 choices)
+                // Classique, Mer, Vege
                 if (!formData.Viande_1) newErrors.Viande_1 = "Requis";
                 if (!formData.Viande_2) newErrors.Viande_2 = "Requis";
                 if (!formData.Viande_3) newErrors.Viande_3 = "Requis";
@@ -539,10 +538,6 @@ function ContactForm() {
             ...(formData.Viande_1 && { "🥩 Plat / Viande 1": formData.Viande_1 }),
             ...(formData.Viande_2 && { "🥩 Plat / Viande 2": formData.Viande_2 }),
             ...(formData.Viande_3 && { "🥩 Plat / Viande 3": formData.Viande_3 }),
-            // @ts-ignore
-            ...(formData.Viande_4 && { "🥩 Plat / Viande 4": formData.Viande_4 }),
-            // @ts-ignore
-            ...(formData.Viande_5 && { "🥩 Plat / Viande 5": formData.Viande_5 }),
 
             // PLAT UNIQUE
             ...(formData.Plat_Associatif && { "🍽️ Plat Principal": formData.Plat_Associatif }),
@@ -581,8 +576,9 @@ function ContactForm() {
             const result = await response.json();
 
             if (result.success) {
-                // Tracking GA4
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 if (typeof window !== 'undefined' && (window as any).gtag) {
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (window as any).gtag('event', 'generate_lead', {
                         'event_category': 'Contact',
                         'event_label': 'Formulaire_Envoye_Web3Forms',
@@ -625,7 +621,7 @@ function ContactForm() {
 
     const renderDropdown = (label: string, name: string, options: string[], excludeValues: string[] = [], req = false) => {
         // Filter options: remove if in excludeValues AND not the current value
-        const currentVal = (formData as any)[name];
+        const currentVal = (formData as Record<string, string>)[name];
         const filteredOptions = options.filter(opt => !excludeValues.includes(opt) || opt === currentVal);
 
         return (
@@ -653,7 +649,6 @@ function ContactForm() {
         // Prepare exclusion lists with NEW keys
         const bbqChoices = [formData.Viande_1, formData.Viande_2, formData.Viande_3].filter(Boolean);
         const composeEntreeChoices = [formData.compose_entree_1, formData.compose_entree_2].filter(Boolean);
-        const composePlatChoices = [formData.compose_plat_1, formData.compose_plat_2].filter(Boolean);
         const dinatoireServiceChoices = [formData.dinatoire_service_1, formData.dinatoire_service_2].filter(Boolean);
         const froidChoices = [formData.Accompagnement_Froid_1, formData.Accompagnement_Froid_2, formData.Accompagnement_Froid_3].filter(Boolean);
 
@@ -693,8 +688,8 @@ function ContactForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {renderDropdown("Entrée 1", "compose_entree_1", entreesCompose, composeEntreeChoices)}
                             {renderDropdown("Entrée 2", "compose_entree_2", entreesCompose, composeEntreeChoices)}
-                            {renderDropdown("Plat 1", "compose_plat_1", viandesCompose, composePlatChoices)}
-                            {renderDropdown("Plat 2", "compose_plat_2", viandesCompose, composePlatChoices)}
+                            {renderDropdown("Plat 1", "Viande_1", viandesCompose, bbqChoices)}
+                            {renderDropdown("Plat 2", "Viande_2", viandesCompose, bbqChoices)}
                         </div>
                     )}
 
@@ -708,10 +703,10 @@ function ContactForm() {
                     )}
 
                     {!isCochonOrPorchetta && !isBBQCompose && !isBBQDinatoire && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className={`grid grid-cols-1 ${isBBQNobles ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-6`}>
                             {renderDropdown("Choix 1", "Viande_1", getBBQList(), bbqChoices)}
                             {renderDropdown("Choix 2", "Viande_2", getBBQList(), bbqChoices)}
-                            {renderDropdown("Choix 3", "Viande_3", getBBQList(), bbqChoices)}
+                            {!isBBQNobles && renderDropdown("Choix 3", "Viande_3", getBBQList(), bbqChoices)}
                         </div>
                     )}
                 </div>
@@ -783,6 +778,53 @@ function ContactForm() {
                                 </AnimatePresence>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* DESSERTS SECTION */}
+                <div className="mt-8 border-t border-dashed border-neutral-200 pt-8">
+                    <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 hover:border-[#D4AF37]/30 transition-colors">
+                        <div className="flex items-center gap-3 mb-2">
+                            <input
+                                type="checkbox"
+                                name="Dessert_Check"
+                                id="Dessert_Check"
+                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                                checked={formData.Dessert_Check === "Oui"}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="Dessert_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
+                                Ajouter un Dessert (+6€ / pers)
+                            </label>
+                        </div>
+                        <AnimatePresence>
+                            {formData.Dessert_Check === "Oui" && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                    animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                    transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="relative">
+                                        <select
+                                            name="Dessert_Choix"
+                                            value={formData.Dessert_Choix}
+                                            onChange={handleChange}
+                                            className={getInputStyle("Dessert_Choix")}
+                                        >
+                                            <option value="">Faites votre choix...</option>
+                                            {dessertsList.map((c) => (
+                                                <option key={c} value={c}>{c}</option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
 
@@ -983,51 +1025,6 @@ function ContactForm() {
                 </div>
             </div>
 
-            <div className="mt-8 border-t border-dashed border-neutral-200 pt-8">
-                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 hover:border-[#D4AF37]/30 transition-colors">
-                    <div className="flex items-center gap-3 mb-2">
-                        <input
-                            type="checkbox"
-                            name="Dessert_Check"
-                            id="Dessert_Check"
-                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                            checked={formData.Dessert_Check === "Oui"}
-                            onChange={handleChange}
-                        />
-                        <label htmlFor="Dessert_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
-                            Ajouter un Dessert (+6€ / pers)
-                        </label>
-                    </div>
-                    <AnimatePresence>
-                        {formData.Dessert_Check === "Oui" && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                                animate={{ opacity: 1, height: "auto", marginTop: 16 }}
-                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
-                                className="overflow-hidden"
-                            >
-                                <div className="relative">
-                                    <select
-                                        name="Dessert_Choix"
-                                        value={formData.Dessert_Choix}
-                                        onChange={handleChange}
-                                        className={getInputStyle("Dessert_Choix")}
-                                    >
-                                        <option value="">Faites votre choix...</option>
-                                        {dessertsList.map((c) => (
-                                            <option key={c} value={c}>{c}</option>
-                                        ))}
-                                    </select>
-                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
         </>
     );
 
@@ -1051,7 +1048,7 @@ function ContactForm() {
                                 <Check className="w-12 h-12 text-green-600" strokeWidth={4} />
                             </div>
 
-                            <h2 className="text-4xl font-serif text-neutral-900">C'est envoyé !</h2>
+                            <h2 className="text-4xl font-serif text-neutral-900">C&apos;est envoyé !</h2>
 
                             <p className="text-neutral-600 text-lg max-w-lg mx-auto leading-relaxed">
                                 Merci de votre confiance. Nous avons bien reçu votre demande et reviendrons vers vous très rapidement.
@@ -1061,7 +1058,7 @@ function ContactForm() {
                                 <div className="inline-block bg-neutral-100 px-6 py-3 rounded-full border border-neutral-200">
                                     <p className="text-sm text-neutral-500 font-medium animate-pulse flex items-center gap-2">
                                         <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></span>
-                                        Redirection vers l'accueil dans 3 secondes...
+                                        Redirection vers l&apos;accueil dans 3 secondes...
                                     </p>
                                 </div>
                             </div>
@@ -1074,7 +1071,7 @@ function ContactForm() {
                                     {isPlatUnique && renderPlatUniqueFields()}
                                     {(isBuffet || isAssociations) && (
                                         <div className="bg-neutral-50 p-6 rounded-xl text-center">
-                                            <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ "Dites-nous en plus" ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
+                                            <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
                                         </div>
                                     )}
 
