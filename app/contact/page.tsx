@@ -75,6 +75,30 @@ const BBQ_PRICES: Record<string, number> = {
 const SIDES_COLD = ["Salade de Pâtes Pesto 🌿", "Salade de Pâtes Curry 🌿", "Salade Grecque (Feta/Olives) 🌿", "Taboulé Oriental 🌿", "Tomate Mozza Di Bufala 🌿", "Salade de Pomme de Terre (Mayonnaise) 🌿", "Salade de Pomme de Terre (Vinaigrette) 🌿", "Carottes Râpées (Citron) 🌿", "Céleri Râpé & Pommes 🌿", "Concombre à la crème 🌿", "Salade de chou blanc 🌿"];
 const SIDES_HOT = ["Pomme de terre en chemise 🌿", "Gratin Dauphinois 🌿", "Grenailles au Romarin 🌿", "Riz aux petits légumes 🌿", "Pâtes à l'italienne 🌿"];
 
+const BUFFET_FROID_PRICES: Record<string, number> = {
+    buffet_campagnard: 13,
+    buffet_ardenais: 15,
+    buffet_reception: 18,
+    buffet_gala: 22
+};
+
+const feculentsFroids = [
+    "Pommes de terre vapeur ou grenaille", "Pommes de terre rôties froides aux herbes",
+    "Purée froide à la ciboulette ou au beurre", "Riz blanc parfumé (basmati ou thaï)",
+    "Riz pilaf", "Pâtes classiques froides (penne, fusilli, coquillettes)", "Semoule de couscous fine ou perlé"
+];
+
+const cruditesFroids = [
+    "Salade de riz exotique", "Salade de pâtes au pesto à l'italienne", "Quinoa aux fines herbes et légumes grillés",
+    "Salade de pommes de terre campagnarde", "Salade gourmande à la grecque", "Salade de céleri",
+    "Carottes râpées à l'orange", "Salade de concombre et radis", "Salade méditerranéenne (tomates, olives et feta)",
+    "Salade de haricots aux échalotes et fines herbes", "Coleslaw au miel", "Salade de betteraves façon bistrot",
+    "Chou blanc au vinaigre", "Salade de lentilles vertes aux herbes", "Salade de pois chiches aux tomates séchées",
+    "Taboulé libanais classique", "Salade de chou rouge et pommes", "Salade de haricots verts aux noix",
+    "Salade de patate douce rôtie froide", "Salade de fenouil et agrumes", "Salade de radis, concombre et menthe fraîche",
+    "Salade d'épinards frais, pommes et noix", "Salade de pois gourmands et carottes fines"
+];
+
 // Legacy/Other Menus
 const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿", "Quiche aux légumes 🌿"];
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
@@ -151,6 +175,9 @@ function ContactForm() {
     const isAnyBBQ = menuParam?.startsWith('bbq_');
     const isCochonOrPorchetta = isBBQCochon || isBBQPorchetta;
 
+    // Buffets froids
+    const isBuffetFroidMode = menuParam?.startsWith('buffet_');
+
     // Other Menus
     const isArdennais = menuParam === 'ardennais';
     const isGala = menuParam === 'gala';
@@ -158,7 +185,7 @@ function ContactForm() {
     const isBuffet = isArdennais || isGala;
     const isPlatUnique = menuParam === 'plat_unique';
 
-    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique;
+    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode;
     const showMenuFirst = isCustomMode;
 
     const [formData, setFormData] = useState({
@@ -219,8 +246,19 @@ function ContactForm() {
 
         // Plat Unique / Associatif
         Plat_Associatif: "",
-        Plat_Associatif_Detail: ""
+        Plat_Associatif_Detail: "",
+
+        // Buffets Froids
+        Feculent_Froid: "",
+        Crudite_1: "",
+        Crudite_2: "",
+        Crudite_3: "",
+        Suppl_Crudite_1: "",
+        Suppl_Crudite_2: "",
+        Suppl_Crudite_3: ""
     });
+
+    const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
 
     // --- PRICING ENGINE ---
 
@@ -235,20 +273,25 @@ function ContactForm() {
 
     const calculateTotal = () => {
         if (isPlatUnique) return 14.5;
-        if (!isAnyBBQ) return 0;
+        if (!isAnyBBQ && !isBuffetFroidMode) return 0;
 
         // 1. Base Price
-        const bbqType = menuParam?.replace('bbq_', '') || 'classique';
-        const basePrice = BBQ_PRICES[bbqType];
-        if (basePrice === undefined) return 0;
+        let base = 0;
+        let supplements = 0;
+
+        if (isAnyBBQ) {
+            const bbqType = menuParam?.replace('bbq_', '') || 'classique';
+            const basePrice = BBQ_PRICES[bbqType];
+            if (basePrice === undefined) return 0;
+            base = basePrice;
+        } else if (isBuffetFroidMode) {
+            base = BUFFET_FROID_PRICES[menuParam || ''] || 0;
+        }
 
         const tier = getPriceTier(formData.Nombre_Convives);
         if (tier === 'high') return -1; // -1 signals "Sur Devis" specifically
 
-        const base = basePrice;
-
         // 2. Supplements
-        let supplements = 0;
 
         // Loop over selected meats
         const meatFields = [
@@ -273,6 +316,13 @@ function ContactForm() {
             supplements += 6;
         }
 
+        // 5. Suppléments Crudités (Buffets Froids)
+        if (isBuffetFroid) {
+            if (formData.Suppl_Crudite_1) supplements += 2;
+            if (formData.Suppl_Crudite_2) supplements += 2;
+            if (formData.Suppl_Crudite_3) supplements += 2;
+        }
+
         return base + supplements;
     };
 
@@ -291,7 +341,7 @@ function ContactForm() {
     const getInitialConvivesOptions = () => {
         if (isCochonOrPorchetta) return OPTIONS_COCHON;
         if (isAnyBBQ) return OPTIONS_BBQ;
-        if (isBuffet) return OPTIONS_BUFFET;
+        if (isBuffet || isBuffetFroidMode) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
         return OPTIONS_STANDARD;
@@ -312,6 +362,14 @@ function ContactForm() {
                 if (menuParam.startsWith('bbq_')) {
                     const type = menuParam.replace('bbq_', '');
                     newData.Type_Evenement = `Barbecue ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                } else if (menuParam === 'buffet_campagnard') {
+                    newData.Type_Evenement = 'Buffet Froid Campagnard';
+                } else if (menuParam === 'buffet_ardenais') {
+                    newData.Type_Evenement = 'Buffet Froid Ardenais';
+                } else if (menuParam === 'buffet_reception') {
+                    newData.Type_Evenement = 'Buffet Froid Réception';
+                } else if (menuParam === 'buffet_gala') {
+                    newData.Type_Evenement = 'Buffet Froid Gala';
                 } else if (menuParam === 'ardennais') {
                     newData.Type_Evenement = 'Buffet Ardennais';
                 } else if (menuParam === 'gala') {
@@ -334,7 +392,7 @@ function ContactForm() {
                     if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
                     else if (isAnyBBQ) newData.Nombre_Convives = "Moins de 25";
                     else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
-                    else if (isBuffet) newData.Nombre_Convives = "Moins de 40";
+                    else if (isBuffet || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 40";
                     else newData.Nombre_Convives = "Moins de 20";
                 } else if (safeParam.includes('plus') && safeParam.includes('250')) {
                     newData.Nombre_Convives = "Plus de 250";
@@ -367,7 +425,7 @@ function ContactForm() {
 
             return newData;
         });
-    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations, isPlatUnique]);
+    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations, isPlatUnique, isBuffetFroidMode]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -447,6 +505,11 @@ function ContactForm() {
         // Dynamic Validation
         if (isPlatUnique) {
             if (!formData.Plat_Associatif) newErrors.Plat_Associatif = "Requis";
+        } else if (isBuffetFroid) {
+            if (!formData.Feculent_Froid) newErrors.Feculent_Froid = "Requis";
+            if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
+            if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
+            if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
         } else if (isAnyBBQ) {
             if (isCochonOrPorchetta) {
                 // No specific dynamic fields required for these
@@ -506,6 +569,10 @@ function ContactForm() {
         // Formatage propre du nom de la formule (ex: "bbq_classique" -> "Barbecue Classique")
         const formatFormulaName = (rawName: string | null) => {
             if (!rawName) return "Sur mesure / Non spécifié";
+            if (rawName.startsWith('buffet_')) {
+                const name = rawName.replace('buffet_', '').replace(/_/g, ' ');
+                return `Buffet Froid ${name.charAt(0).toUpperCase() + name.slice(1)}`;
+            }
             const name = rawName.replace('bbq_', '').replace(/_/g, ' ');
             return `Barbecue ${name.charAt(0).toUpperCase() + name.slice(1)}`;
         };
@@ -542,6 +609,15 @@ function ContactForm() {
             // PLAT UNIQUE
             ...(formData.Plat_Associatif && { "🍽️ Plat Principal": formData.Plat_Associatif }),
             ...(formData.Plat_Associatif_Detail && { "👨‍🍳 Option du Plat": formData.Plat_Associatif_Detail }),
+
+            // BUFFETS FROIDS
+            ...(formData.Feculent_Froid && { "🥔 Féculent Froid": formData.Feculent_Froid }),
+            ...(formData.Crudite_1 && { "🥗 Crudité 1": formData.Crudite_1 }),
+            ...(formData.Crudite_2 && { "🥗 Crudité 2": formData.Crudite_2 }),
+            ...(formData.Crudite_3 && { "🥗 Crudité 3": formData.Crudite_3 }),
+            ...(formData.Suppl_Crudite_1 && { "⭐ Supplément Crudité 1 (+2€)": formData.Suppl_Crudite_1 }),
+            ...(formData.Suppl_Crudite_2 && { "⭐ Supplément Crudité 2 (+2€)": formData.Suppl_Crudite_2 }),
+            ...(formData.Suppl_Crudite_3 && { "⭐ Supplément Crudité 3 (+2€)": formData.Suppl_Crudite_3 }),
 
             // SUPPLÉMENTS
             ...(formData.Supplement_Viande_1 && { "⭐ Supplément Viande 1": formData.Supplement_Viande_1 }),
@@ -934,6 +1010,82 @@ function ContactForm() {
         </div>
     );
 
+    const renderBuffetFroidFields = () => {
+        if (!isBuffetFroid) return null;
+
+        const cruditesChoices = [
+            formData.Crudite_1, formData.Crudite_2, formData.Crudite_3,
+            formData.Suppl_Crudite_1, formData.Suppl_Crudite_2, formData.Suppl_Crudite_3
+        ].filter(Boolean);
+
+        const renderCruditeSelect = (name: string, label: string, isOpt: boolean) => (
+            <div className="group relative" key={name}>
+                <label className={labelStyle}>{label}</label>
+                <div className="relative">
+                    <select
+                        name={name}
+                        value={(formData as any)[name] || ""}
+                        onChange={handleChange}
+                        className={`${getInputStyle(name)} appearance-none`}
+                    >
+                        <option value="">{isOpt ? "Optionnel..." : "Faites votre choix..."}</option>
+                        {cruditesFroids.filter(c => !cruditesChoices.includes(c) || c === (formData as any)[name]).map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </div>
+                </div>
+            </div>
+        );
+
+        return (
+            <div className="space-y-8 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37]">
+                <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mb-4">Votre Sélection : {formData.Type_Evenement}</h3>
+
+                {/* Féculent */}
+                <div className="group">
+                    <label className={labelStyle}>Votre Féculent (Inclus) <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                        <select name="Feculent_Froid" value={formData.Feculent_Froid || ""} onChange={handleChange} className={`${getInputStyle("Feculent_Froid")} appearance-none`}>
+                            <option value="">Choisissez 1 féculent...</option>
+                            {feculentsFroids.map(f => <option key={f} value={f}>{f}</option>)}
+                        </select>
+                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Crudités Incluses */}
+                <div>
+                    <h4 className="text-md font-bold text-neutral-800 mb-4 border-b pb-2">Vos 3 Crudités Incluses</h4>
+                    <div className="space-y-4">
+                        {[1, 2, 3].map(num => renderCruditeSelect(`Crudite_${num}`, `Choix ${num} *`, false))}
+                    </div>
+                </div>
+
+                {/* Suppléments Crudités */}
+                <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200 mt-6">
+                    <h4 className="text-md font-bold text-[#D4AF37] mb-2">Envie de plus de choix ?</h4>
+                    <p className="text-sm text-neutral-500 mb-4">Ajoutez des crudités supplémentaires (+2€ / pers / choix)</p>
+                    <div className="space-y-4">
+                        {[1, 2, 3].map(num => renderCruditeSelect(`Suppl_Crudite_${num}`, `Supplément ${num}`, true))}
+                    </div>
+                </div>
+
+                {/* PRICE INDICATION */}
+                {totalPrice > 0 && totalPrice !== -1 && (
+                    <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
+                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
+                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
+                            <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderContactFields = () => (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1069,7 +1221,8 @@ function ContactForm() {
                                 <>
                                     {isAnyBBQ && renderBBQComposition()}
                                     {isPlatUnique && renderPlatUniqueFields()}
-                                    {(isBuffet || isAssociations) && (
+                                    {isBuffetFroid && renderBuffetFroidFields()}
+                                    {(isBuffet || isAssociations) && !isBuffetFroid && (
                                         <div className="bg-neutral-50 p-6 rounded-xl text-center">
                                             <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
                                         </div>
