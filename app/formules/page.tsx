@@ -122,7 +122,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
     id: string;
     description: string;
     composition: string[];
-    price: string;
+    basePrice: number;
 }> = {
     campagnard: {
         label: "Campagnard",
@@ -134,7 +134,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Salades de pommes de terre",
             "Crudités variées et œuf dur"
         ],
-        price: "13€"
+        basePrice: 13
     },
     ardenais: {
         label: "Ardennais",
@@ -146,7 +146,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Rôti de porc froid moutardé",
             "Salades et féculents"
         ],
-        price: "15€"
+        basePrice: 15
     },
     reception: {
         label: "Réception",
@@ -158,7 +158,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Assortiment de viandes froides nobles",
             "Salades raffinées"
         ],
-        price: "18€"
+        basePrice: 18
     },
     gala: {
         label: "Gala",
@@ -170,7 +170,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Médaillon de saumon en belle-vue",
             "Salades prestige"
         ],
-        price: "22€"
+        basePrice: 22
     }
 };
 
@@ -567,20 +567,30 @@ function PricingBlock({ price, tag, selectedBBQ, activeBuffetTab }: { price: str
     if (tag === "Buffets Froids" && activeBuffetTab) {
         const data = BUFFETS_FROIDS_OPTIONS[activeBuffetTab];
         return (
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 text-center">
+            <div className="flex flex-wrap gap-4 mt-8">
                 <Link
-                    href={`/contact?menu=${data.id}&convives=40 et plus`}
-                    className="bg-black text-white p-4 rounded-xl transform scale-100 shadow-xl flex flex-row items-center justify-between relative overflow-hidden hover:scale-105 transition-transform cursor-pointer group"
+                    href={`/contact?menu=${data.id}&convives=moins_25`}
+                    className="flex-1 min-w-[120px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-neutral-300 transition group"
                 >
-                    <div className="absolute top-0 left-0 w-1 h-full bg-[#D4AF37]" />
-                    <div className="flex flex-col text-left pl-4">
-                        <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide">Réserver ce buffet</span>
-                        <span className="text-2xl font-bold font-serif">{data.label}</span>
-                    </div>
-                    <div className="text-right pr-4">
-                        <span className="text-3xl font-bold font-serif text-[#D4AF37]">{data.price}</span>
-                        <span className="text-xs text-gray-300 ml-1">/ pers</span>
-                    </div>
+                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-neutral-700 transition">Moins de 25 pers.</p>
+                    <p className="text-xl font-bold text-neutral-800">{data.basePrice + 2}€ <span className="text-sm font-normal text-neutral-500">/ pers</span></p>
+                </Link>
+
+                <Link
+                    href={`/contact?menu=${data.id}&convives=25_250`}
+                    className="flex-1 min-w-[120px] bg-black p-4 rounded-xl text-center hover:bg-neutral-800 transition shadow-lg transform hover:-translate-y-0.5"
+                >
+                    <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 250 pers.</p>
+                    <p className="text-2xl font-bold text-white">{data.basePrice}€ <span className="text-sm font-normal text-neutral-300">/ pers</span></p>
+                </Link>
+
+                <Link
+                    href={`/contact?menu=${data.id}&convives=plus_250`}
+                    className="flex-1 min-w-[120px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-neutral-300 transition group"
+                >
+                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-neutral-700 transition">Plus de 250 pers.</p>
+                    <p className="text-xl font-bold text-neutral-800">Sur devis</p>
+                    <p className="text-xs text-neutral-400 mt-1">(Tarifs dégressifs)</p>
                 </Link>
             </div>
         );
