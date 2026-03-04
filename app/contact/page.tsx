@@ -253,6 +253,9 @@ function ContactForm() {
         Crudite_1: "",
         Crudite_2: "",
         Crudite_3: "",
+        Crudite_4: "",
+        Crudite_5: "",
+        Crudite_6: "",
         Suppl_Crudite_1: "",
         Suppl_Crudite_2: "",
         Suppl_Crudite_3: ""
@@ -510,6 +513,9 @@ function ContactForm() {
             if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
             if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
             if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
+            if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
+            if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
+            if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
         } else if (isAnyBBQ) {
             if (isCochonOrPorchetta) {
                 // No specific dynamic fields required for these
@@ -615,6 +621,9 @@ function ContactForm() {
             ...(formData.Crudite_1 && { "🥗 Crudité 1": formData.Crudite_1 }),
             ...(formData.Crudite_2 && { "🥗 Crudité 2": formData.Crudite_2 }),
             ...(formData.Crudite_3 && { "🥗 Crudité 3": formData.Crudite_3 }),
+            ...(formData.Crudite_4 && { "🥗 Crudité 4": formData.Crudite_4 }),
+            ...(formData.Crudite_5 && { "🥗 Crudité 5": formData.Crudite_5 }),
+            ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
             ...(formData.Suppl_Crudite_1 && { "⭐ Supplément Crudité 1 (+2€)": formData.Suppl_Crudite_1 }),
             ...(formData.Suppl_Crudite_2 && { "⭐ Supplément Crudité 2 (+2€)": formData.Suppl_Crudite_2 }),
             ...(formData.Suppl_Crudite_3 && { "⭐ Supplément Crudité 3 (+2€)": formData.Suppl_Crudite_3 }),
@@ -1012,41 +1021,19 @@ function ContactForm() {
 
     const renderBuffetFroidFields = () => {
         if (!isBuffetFroid) return null;
-
-        const cruditesChoices = [
-            formData.Crudite_1, formData.Crudite_2, formData.Crudite_3,
-            formData.Suppl_Crudite_1, formData.Suppl_Crudite_2, formData.Suppl_Crudite_3
-        ].filter(Boolean);
-
-        const renderCruditeSelect = (name: string, label: string, isOpt: boolean) => (
-            <div className="group relative" key={name}>
-                <label className={labelStyle}>{label}</label>
-                <div className="relative">
-                    <select
-                        name={name}
-                        value={(formData as any)[name] || ""}
-                        onChange={handleChange}
-                        className={`${getInputStyle(name)} appearance-none`}
-                    >
-                        <option value="">{isOpt ? "Optionnel..." : "Faites votre choix..."}</option>
-                        {cruditesFroids.filter(c => !cruditesChoices.includes(c) || c === (formData as any)[name]).map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </div>
-                </div>
-            </div>
-        );
-
         return (
-            <div className="space-y-8 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37]">
-                <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mb-4">Votre Sélection : {formData.Type_Evenement}</h3>
+            <div className="space-y-8 animate-fade-in mt-8">
+                <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
+                    Composition de votre Buffet
+                </h3>
 
                 {/* Féculent */}
-                <div className="group">
-                    <label className={labelStyle}>Votre Féculent (Inclus) <span className="text-red-500">*</span></label>
+                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200">
+                    <label className={`${labelStyle} flex items-center gap-2`}>
+                        <span>🍚</span> Votre Féculent (Inclus)
+                    </label>
                     <div className="relative">
-                        <select name="Feculent_Froid" value={formData.Feculent_Froid || ""} onChange={handleChange} className={`${getInputStyle("Feculent_Froid")} appearance-none`}>
+                        <select name="Feculent_Froid" value={formData.Feculent_Froid || ""} onChange={handleChange} className={getInputStyle("Feculent_Froid") + " appearance-none"}>
                             <option value="">Choisissez 1 féculent...</option>
                             {feculentsFroids.map(f => <option key={f} value={f}>{f}</option>)}
                         </select>
@@ -1056,20 +1043,54 @@ function ContactForm() {
                     </div>
                 </div>
 
-                {/* Crudités Incluses */}
+                {/* Crudités Incluses (Grille de 6) */}
                 <div>
-                    <h4 className="text-md font-bold text-neutral-800 mb-4 border-b pb-2">Vos 3 Crudités Incluses</h4>
-                    <div className="space-y-4">
-                        {[1, 2, 3].map(num => renderCruditeSelect(`Crudite_${num}`, `Choix ${num} *`, false))}
+                    <label className={`${labelStyle} flex items-center gap-2 mb-4`}>
+                        <span>🥗</span> Vos 6 Crudités Incluses
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[1, 2, 3, 4, 5, 6].map(num => (
+                            <div className="relative group" key={`Crudite_${num}`}>
+                                <select
+                                    name={`Crudite_${num}`}
+                                    value={(formData as any)[`Crudite_${num}`] || ""}
+                                    onChange={handleChange}
+                                    className={getInputStyle(`Crudite_${num}`) + " appearance-none"}
+                                >
+                                    <option value="">Choix {num}...</option>
+                                    {cruditesFroids.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
                 {/* Suppléments Crudités */}
-                <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200 mt-6">
-                    <h4 className="text-md font-bold text-[#D4AF37] mb-2">Envie de plus de choix ?</h4>
+                <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
+                    <h4 className="text-md font-bold text-[#D4AF37] mb-2 flex items-center gap-2">
+                        <span>⭐</span> Envie de plus de choix ?
+                    </h4>
                     <p className="text-sm text-neutral-500 mb-4">Ajoutez des crudités supplémentaires (+2€ / pers / choix)</p>
-                    <div className="space-y-4">
-                        {[1, 2, 3].map(num => renderCruditeSelect(`Suppl_Crudite_${num}`, `Supplément ${num}`, true))}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {[1, 2, 3].map(num => (
+                            <div className="relative group" key={`Suppl_Crudite_${num}`}>
+                                <select
+                                    name={`Suppl_Crudite_${num}`}
+                                    value={(formData as any)[`Suppl_Crudite_${num}`] || ""}
+                                    onChange={handleChange}
+                                    className={getInputStyle(`Suppl_Crudite_${num}`) + " appearance-none"}
+                                >
+                                    <option value="">Supplément {num} (Optionnel)...</option>
+                                    {cruditesFroids.map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
