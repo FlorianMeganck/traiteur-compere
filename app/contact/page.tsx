@@ -99,6 +99,28 @@ const cruditesFroids = [
     "Salade d'épinards frais, pommes et noix", "Salade de pois gourmands et carottes fines"
 ];
 
+const buffetCompositions: Record<string, string[]> = {
+    'Buffet Froid Campagnard': [
+        "Croûte de pâté au poivre vert", "Jambon d'Ardenne", "Jambon à l'os sur griffe",
+        "Assortiment de charcuterie de campagne", "Pilon de poulet braisé", "Rôti de porc braisé aux herbes de Provence"
+    ],
+    'Buffet Froid Ardenais': [
+        "Croûte de pâté de chevreuil", "Boudin blanc de Liège et boudin noir au raisin",
+        "Duo de jambon sur griffes", "Plateau de spécialités de nos Ardennes", "Pêche au thon",
+        "Rosbif et rôti de porc braisé", "Hure de veau aux petits légumes"
+    ],
+    'Buffet Froid Réception': [
+        "Mousse de foie de canard au Sauternes", "Assortiment de boudin", "Trio de viandes fumées et séchées",
+        "Filet de dinde braisé", "Rosbif et rôti de porc braisé", "Pilon de poulet braisé",
+        "Tomate-crevette grise et pêche au thon", "Darne de saumon en belle-vue", "Terrine au fenouil"
+    ],
+    'Buffet Froid Gala': [
+        "Duo de jambon sur griffe", "Mousse de foie de canard au Sauternes", "Trio de viandes braisées",
+        "Pilon de poulet braisé", "Saumon aux deux saveurs", "Farandole de langoustines",
+        "Tomates aux crevettes grises", "Terrine de sandre au basilic"
+    ]
+};
+
 // Legacy/Other Menus
 const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿", "Quiche aux légumes 🌿"];
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
@@ -1018,11 +1040,32 @@ function ContactForm() {
 
     const renderBuffetFroidFields = () => {
         if (!isBuffetFroid) return null;
+
+        // Récupérer la liste des viandes pour le buffet sélectionné
+        const viandesIncluses = buffetCompositions[formData.Type_Evenement] || [];
+
         return (
             <div className="space-y-8 animate-fade-in mt-8">
                 <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
                     Composition de votre Buffet
                 </h3>
+
+                {/* NOUVEAU : Encart des plats inclus */}
+                {viandesIncluses.length > 0 && (
+                    <div className="bg-[#f9f9f9] p-6 rounded-2xl border border-neutral-200">
+                        <label className={`${labelStyle} flex items-center gap-2 mb-4`}>
+                            <span>🍖</span> Plats et Viandes Inclus
+                        </label>
+                        <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
+                            {viandesIncluses.map((item, index) => (
+                                <li key={index} className="flex items-start gap-2 text-sm text-neutral-700">
+                                    <span className="text-[#D4AF37] font-bold">✓</span>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
                 {/* Féculent */}
                 <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200">
