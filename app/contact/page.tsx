@@ -319,11 +319,9 @@ function ContactForm() {
             supplements += 6;
         }
 
-        // 5. Suppléments Crudités (Buffets Froids)
-        if (isBuffetFroid) {
-            if (formData.Suppl_Crudite_1) supplements += 2;
-            if (formData.Suppl_Crudite_2) supplements += 2;
-            if (formData.Suppl_Crudite_3) supplements += 2;
+        // 5. Majoration pour les petits groupes (Buffets Froids)
+        if (isBuffetFroidMode && formData.Nombre_Convives === 'Moins de 25') {
+            base += 2; // +2€ par personne si moins de 25
         }
 
         return base + supplements;
@@ -343,8 +341,8 @@ function ContactForm() {
 
     const getInitialConvivesOptions = () => {
         if (isCochonOrPorchetta) return OPTIONS_COCHON;
-        if (isAnyBBQ) return OPTIONS_BBQ;
-        if (isBuffet || isBuffetFroidMode) return OPTIONS_BUFFET;
+        if (isAnyBBQ || isBuffetFroidMode) return OPTIONS_BBQ;
+        if (isBuffet) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
         return OPTIONS_STANDARD;
@@ -565,6 +563,8 @@ function ContactForm() {
         let isSurDevis = false;
         if (isPlatUnique) {
             isSurDevis = formData.Nombre_Convives === 'Moins de 50' || formData.Nombre_Convives === 'Plus de 100';
+        } else if (isBuffetFroid) {
+            isSurDevis = formData.Nombre_Convives === 'Plus de 250';
         } else if (isCochonOrPorchetta) {
             isSurDevis = getConvivesMax(formData.Nombre_Convives) > 180;
         } else {
@@ -624,9 +624,6 @@ function ContactForm() {
             ...(formData.Crudite_4 && { "🥗 Crudité 4": formData.Crudite_4 }),
             ...(formData.Crudite_5 && { "🥗 Crudité 5": formData.Crudite_5 }),
             ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
-            ...(formData.Suppl_Crudite_1 && { "⭐ Supplément Crudité 1 (+2€)": formData.Suppl_Crudite_1 }),
-            ...(formData.Suppl_Crudite_2 && { "⭐ Supplément Crudité 2 (+2€)": formData.Suppl_Crudite_2 }),
-            ...(formData.Suppl_Crudite_3 && { "⭐ Supplément Crudité 3 (+2€)": formData.Suppl_Crudite_3 }),
 
             // SUPPLÉMENTS
             ...(formData.Supplement_Viande_1 && { "⭐ Supplément Viande 1": formData.Supplement_Viande_1 }),
@@ -1058,32 +1055,6 @@ function ContactForm() {
                                     className={getInputStyle(`Crudite_${num}`) + " appearance-none"}
                                 >
                                     <option value="">Choix {num}...</option>
-                                    {cruditesFroids.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Suppléments Crudités */}
-                <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
-                    <h4 className="text-md font-bold text-[#D4AF37] mb-2 flex items-center gap-2">
-                        <span>⭐</span> Envie de plus de choix ?
-                    </h4>
-                    <p className="text-sm text-neutral-500 mb-4">Ajoutez des crudités supplémentaires (+2€ / pers / choix)</p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {[1, 2, 3].map(num => (
-                            <div className="relative group" key={`Suppl_Crudite_${num}`}>
-                                <select
-                                    name={`Suppl_Crudite_${num}`}
-                                    value={(formData as any)[`Suppl_Crudite_${num}`] || ""}
-                                    onChange={handleChange}
-                                    className={getInputStyle(`Suppl_Crudite_${num}`) + " appearance-none"}
-                                >
-                                    <option value="">Supplément {num} (Optionnel)...</option>
                                     {cruditesFroids.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
