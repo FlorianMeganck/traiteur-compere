@@ -115,6 +115,65 @@ const BBQ_OPTIONS: Record<BBQType, {
     }
 };
 
+type BuffetFroidType = 'campagnard' | 'ardenais' | 'reception' | 'gala';
+
+const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
+    label: string;
+    id: string;
+    description: string;
+    composition: string[];
+    price: string;
+}> = {
+    campagnard: {
+        label: "Campagnard",
+        id: "buffet_campagnard",
+        description: "Un assortiment rustique et généreux, parfait pour une ambiance conviviale.",
+        composition: [
+            "Assortiment de charcuteries artisanales",
+            "Pâté de campagne et cornichons",
+            "Salades de pommes de terre",
+            "Crudités variées et œuf dur"
+        ],
+        price: "13€"
+    },
+    ardenais: {
+        label: "Ardennais",
+        id: "buffet_ardenais",
+        description: "Les délices de l'Ardenne avec des charcuteries et viandes froides régionales.",
+        composition: [
+            "Jambon d'Ardenne et saucisson gaumais",
+            "Boudin blanc et noir",
+            "Rôti de porc froid moutardé",
+            "Salades et féculents"
+        ],
+        price: "15€"
+    },
+    reception: {
+        label: "Réception",
+        id: "buffet_reception",
+        description: "Un buffet élégant mêlant viandes fines et poissons délicats.",
+        composition: [
+            "Saumon fumé extra doux",
+            "Carpaccio de bœuf parfumé",
+            "Assortiment de viandes froides nobles",
+            "Salades raffinées"
+        ],
+        price: "18€"
+    },
+    gala: {
+        label: "Gala",
+        id: "buffet_gala",
+        description: "Le summum du raffinement avec fruits de mer, foie gras et créations du chef.",
+        composition: [
+            "Foie gras mi-cuit et confit d'oignons",
+            "Cascade de fruits de mer",
+            "Médaillon de saumon en belle-vue",
+            "Salades prestige"
+        ],
+        price: "22€"
+    }
+};
+
 const FORMULES = [
     {
         tag: "Terroir",
@@ -142,6 +201,16 @@ const FORMULES = [
         image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=2070&auto=format&fit=crop",
         items: [], // Dynamic
         allergens: ["fish", "crustace", "moutarde"],
+        imageStyle: "rounded-t-2xl"
+    },
+    {
+        tag: "Buffets Froids",
+        title: "Nos Buffets Froids",
+        description: "Découvrez notre sélection de buffets froids, du plus rustique au plus raffiné.",
+        price: "Dès 13€ / pers", // Dynamic
+        image: "https://images.unsplash.com/photo-1628198544464-9eb5112faee1?q=80&w=2070&auto=format&fit=crop",
+        items: [], // Dynamic
+        allergens: ["gluten", "egg", "lait", "moutarde", "celeri", "fish", "crustace"],
         imageStyle: "rounded-t-2xl"
     },
     {
@@ -291,10 +360,15 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
     const isEven = index % 2 === 0;
     const isAssociatif = formule.tag === "Événements & Associations";
     const isBBQ = formule.tag === "BBQ & Feu de bois";
+    const isBuffetFroid = formule.tag === "Buffets Froids";
 
     // BBQ State
     const [selectedBBQ, setSelectedBBQ] = useState<BBQType>('classique');
     const currentBBQ = BBQ_OPTIONS[selectedBBQ];
+
+    // Buffet Froid State
+    const [activeBuffetTab, setActiveBuffetTab] = useState<BuffetFroidType>('campagnard');
+    const currentBuffetFroid = BUFFETS_FROIDS_OPTIONS[activeBuffetTab];
 
     return (
         <motion.section
@@ -325,7 +399,9 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             <div className="w-full md:w-1/2 flex-1 space-y-6 md:space-y-8 mt-6 md:mt-0 relative z-10">
                 <div className="flex flex-col gap-2">
                     <span className="text-[#D4AF37] font-sans text-sm font-bold uppercase tracking-widest md:hidden">{formule.tag}</span>
-                    <h2 className="text-3xl md:text-4xl font-serif text-black">{isBBQ ? currentBBQ.label : formule.title}</h2>
+                    <h2 className="text-3xl md:text-4xl font-serif text-black">
+                        {isBBQ ? currentBBQ.label : isBuffetFroid ? `Buffet ${currentBuffetFroid.label}` : formule.title}
+                    </h2>
                     {isAssociatif && (
                         <div className="inline-block bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider w-fit">
                             Livraison Seule
@@ -335,7 +411,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 <div className="w-20 h-1 bg-neutral-300" />
 
                 <p className="text-gray-600 leading-relaxed text-lg">
-                    {isBBQ ? currentBBQ.description : formule.description}
+                    {isBBQ ? currentBBQ.description : isBuffetFroid ? currentBuffetFroid.description : formule.description}
                 </p>
 
                 {/* --- DYNAMIC BBQ SELECTOR --- */}
@@ -364,13 +440,38 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                     </div>
                 )}
 
+                {/* --- DYNAMIC BUFFET FROID SELECTOR --- */}
+                {isBuffetFroid && (
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                        {Object.entries(BUFFETS_FROIDS_OPTIONS).map(([key, data]) => {
+                            const isSelected = activeBuffetTab === key;
+                            return (
+                                <button
+                                    key={key}
+                                    onClick={() => setActiveBuffetTab(key as BuffetFroidType)}
+                                    className={`
+                                        px-2 py-3 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-300
+                                        flex flex-col items-center justify-center gap-1 text-center border
+                                        ${isSelected
+                                            ? 'bg-black text-[#D4AF37] border-black shadow-lg scale-105'
+                                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        }
+                                    `}
+                                >
+                                    {data.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+
                 {/* COMPOSITION */}
                 <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border-l-4 border-neutral-300">
                     <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wide text-sm">
                         {isAssociatif ? "Choix du Plat Unique" : "Composition"}
                     </h3>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
-                        {(isBBQ ? currentBBQ.composition : formule.items).map((item: string, i: number) => (
+                        {(isBBQ ? currentBBQ.composition : isBuffetFroid ? currentBuffetFroid.composition : formule.items).map((item: string, i: number) => (
                             <li key={i} className="flex items-start gap-2 text-neutral-700">
                                 <Check size={16} className="text-[#D4AF37] flex-shrink-0 mt-1" strokeWidth={3} />
                                 <span className="text-sm leading-relaxed">{item}</span>
@@ -412,6 +513,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                         price={formule.price}
                         tag={formule.tag}
                         selectedBBQ={selectedBBQ}
+                        activeBuffetTab={activeBuffetTab}
                     />
                 </div>
             </div>
@@ -419,7 +521,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
     );
 }
 
-function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string, selectedBBQ?: BBQType }) {
+function PricingBlock({ price, tag, selectedBBQ, activeBuffetTab }: { price: string, tag: string, selectedBBQ?: BBQType, activeBuffetTab?: BuffetFroidType }) {
     // If it's the BBQ menu, show the 3 specific options with dynamic prices
     if (tag === "BBQ & Feu de bois" && selectedBBQ) {
         const data = BBQ_OPTIONS[selectedBBQ];
@@ -456,6 +558,29 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
                     <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">{data.counts.large}</span>
                     <span className="text-sm font-medium text-gray-900">{data.prices.large}</span>
                     <span className="text-[10px] text-gray-400">(Tarifs dégressifs)</span>
+                </Link>
+            </div>
+        );
+    }
+
+    // Logic for Buffets Froids
+    if (tag === "Buffets Froids" && activeBuffetTab) {
+        const data = BUFFETS_FROIDS_OPTIONS[activeBuffetTab];
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4 text-center">
+                <Link
+                    href={`/contact?menu=${data.id}&convives=40 et plus`}
+                    className="bg-black text-white p-4 rounded-xl transform scale-100 shadow-xl flex flex-row items-center justify-between relative overflow-hidden hover:scale-105 transition-transform cursor-pointer group"
+                >
+                    <div className="absolute top-0 left-0 w-1 h-full bg-[#D4AF37]" />
+                    <div className="flex flex-col text-left pl-4">
+                        <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide">Réserver ce buffet</span>
+                        <span className="text-2xl font-bold font-serif">{data.label}</span>
+                    </div>
+                    <div className="text-right pr-4">
+                        <span className="text-3xl font-bold font-serif text-[#D4AF37]">{data.price}</span>
+                        <span className="text-xs text-gray-300 ml-1">/ pers</span>
+                    </div>
                 </Link>
             </div>
         );
