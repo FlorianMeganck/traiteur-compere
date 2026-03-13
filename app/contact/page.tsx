@@ -254,6 +254,7 @@ function ContactForm() {
         Accompagnement_Chaud_Supplement: "",
         Accompagnement_Chaud_Supplement_Check: "Non",
         Feculent: "",
+        Feculent_Extra: "",
         Suppl_Crudite_Extra: "",
 
         // Desserts
@@ -339,6 +340,7 @@ function ContactForm() {
             if (formData.Viande_Extra_1) supplements += 2;
             if (formData.Viande_Extra_2) supplements += 3;
             if (formData.Suppl_Crudite_Extra) supplements += 1.5;
+            if (formData.Feculent_Extra) supplements += 2;
         }
 
         // 3. Extra Hot Side
@@ -657,7 +659,8 @@ function ContactForm() {
             ...(formData.Plat_Associatif_Detail && { "👨‍🍳 Option du Plat": formData.Plat_Associatif_Detail }),
 
             // FÉCULENTS (BBQ & Buffets)
-            ...(formData.Feculent && { "🍚 Féculent": formData.Feculent }),
+            ...(formData.Feculent && { "🍚 Féculent Inclus": formData.Feculent }),
+            ...(formData.Feculent_Extra && { "🍚 Féculent Supplémentaire (+2€)": formData.Feculent_Extra }),
             ...(formData.Feculent_Froid && { "🥔 Féculent Froid": formData.Feculent_Froid }),
 
             // CRUDITÉS (BBQ & Buffets)
@@ -842,13 +845,39 @@ function ContactForm() {
 
                 {/* ACCOMPAGNEMENTS & SUPPLÉMENTS */}
                 <div className="space-y-6">
-                    <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mt-8">Accompagnements (Inclus)</h3>
+                    {/* SECTION FÉCULENTS (Groupés) */}
+                    <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 mb-8 mt-8">
+                        <h4 className="text-md font-bold text-neutral-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                            <span>🍚</span> Vos Féculents
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Féculent Inclus */}
+                            <div>
+                                <label className={labelStyle}>Féculent (Inclus)</label>
+                                <div className="relative">
+                                    <select name="Feculent" value={formData.Feculent || ""} onChange={handleChange} className={getInputStyle("Feculent") + " appearance-none"}>
+                                        <option value="">Faites votre choix...</option>
+                                        {feculentsBBQ.map(f => <option key={f} value={f}>{f}</option>)}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                    </div>
+                                </div>
+                            </div>
 
-                    {/* FÉCULENT */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="md:col-span-1">
-                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Féculent</label>
-                            {renderDropdown("Féculent Inclus", "Feculent", feculentsBBQ, [])}
+                            {/* Féculent Supplémentaire */}
+                            <div>
+                                <label className={labelStyle}>Féculent Extra (+2,00€ / pers)</label>
+                                <div className="relative">
+                                    <select name="Feculent_Extra" value={formData.Feculent_Extra || ""} onChange={handleChange} className={getInputStyle("Feculent_Extra") + " appearance-none"}>
+                                        <option value="">Aucun supplément...</option>
+                                        {feculentsBBQ.map(f => <option key={f} value={f}>{f}</option>)}
+                                    </select>
+                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
