@@ -31,6 +31,10 @@ export default function Services() {
                     &ldquo;De la célébration intime au grand banquet, nous créons l'ambiance gourmande qui vous ressemble.&rdquo;
                 </motion.p>
 
+                <div className="mt-2 mb-10">
+                    <a href="#livraison" className="text-sm font-bold text-[#D4AF37] underline underline-offset-4 hover:text-black transition-colors duration-300">Voir nos options de livraison seule ↓</a>
+                </div>
+
                 {/* VISUAL SUMMARY */}
                 <VisualSummary />
             </section>
@@ -44,8 +48,6 @@ export default function Services() {
                 <div id="mariages" className="scroll-mt-24 relative z-10">
                     <SectionService
                         title="VOTRE MARIAGE"
-                        quote="Jean-Paul a été à l'écoute de nos demandes du début à la fin. Le jour J, tout était parfait et délicieux."
-                        quoteAuthor="— Julie & Thomas"
                         desc="Le repas est au cœur de cette journée spéciale. Nous prenons le temps de vous rencontrer pour construire un menu qui vous ressemble, en respectant votre budget et vos goûts. Pas de stress, on gère."
                         ctaLabel="En discuter ensemble"
                         images={[
@@ -63,8 +65,6 @@ export default function Services() {
                 <div id="entreprises" className="scroll-mt-24 relative z-10">
                     <SectionService
                         title="VOS ÉVÉNEMENTS PRO"
-                        quote="Ponctuel, discret et surtout très bon. Nos collaborateurs nous en parlent encore."
-                        quoteAuthor="— Société Technifutur"
                         desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
                         ctaLabel="Demander un devis"
                         images={[
@@ -82,8 +82,6 @@ export default function Services() {
                 <div id="particuliers" className="scroll-mt-24 relative z-10">
                     <SectionService
                         title="VOS FÊTES DE FAMILLE"
-                        quote="On a enfin pu profiter de notre fête sans passer la soirée en cuisine. Tout le monde s'est régalé !"
-                        quoteAuthor="— Sophie & Marc"
                         desc="Un anniversaire, un baptême ou simplement un repas entre amis ? Nous nous occupons de tout pour que vous puissiez profiter de vos invités. Buffet froid, échoppes chaudes ou service à table : on s'adapte à l'ambiance que vous voulez donner."
                         ctaLabel="Voir les formules"
                         ctaLink="/formules"
@@ -101,10 +99,9 @@ export default function Services() {
 
 
                 {/* 6. LIVRAISON SEULE & ASSOCIATIONS (Texte Droite / Mosaïque Gauche) */}
-                <div id="associations" className="scroll-mt-24 relative z-10 pt-20"> {/* PT-20 to separate from CTA */}
+                <section id="livraison" className="scroll-mt-24 relative z-10 pt-20"> {/* PT-20 to separate from CTA */}
                     <SectionService
                         title="Livraison Seule & Associations"
-                        quote="Convivialité et générosité pour vos grands rassemblements."
                         desc="Idéal pour vos soupers d'école, clubs sportifs ou fêtes de quartier. Nous livrons des plats généreux et conviviaux, prêts à être servis par vos soins. Une solution économique et pratique sans personnel ni vaisselle, qui ne sacrifie rien à la qualité."
                         ctaLink="/formules#associatif"
                         images={[
@@ -115,7 +112,7 @@ export default function Services() {
                         decorType="geometric" // Reusing geometric or maybe herb
                         reverse={true} // Alternate from Particuliers (false) -> True is good.
                     />
-                </div>
+                </section>
             </div>
 
             {/* 5. VALUES / REASSURANCE (Moved to bottom) */}
@@ -220,8 +217,8 @@ function ServiceThread() {
 
 // --- REUSABLE COMPONENTS ---
 
-function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir plus", ctaLink = "/contact", images, decorType, reverse }: {
-    title: string, quote: string, quoteAuthor?: string, desc: string, ctaLabel?: string, ctaLink?: string, images: string[], decorType: 'flower' | 'herb' | 'geometric', reverse: boolean
+function SectionService({ title, desc, ctaLabel = "En savoir plus", ctaLink = "/contact", images, decorType, reverse }: {
+    title: string, desc: string, ctaLabel?: string, ctaLink?: string, images: string[], decorType: 'flower' | 'herb' | 'geometric', reverse: boolean
 }) {
     const ref = useRef(null);
     const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
@@ -317,15 +314,10 @@ function SectionService({ title, quote, quoteAuthor, desc, ctaLabel = "En savoir
                                 {title}
                             </h2>
 
-                            <div className="border-l border-gray-300 pl-6 py-2 mt-8">
-                                <p className="font-serif italic text-gray-400 text-lg">
-                                    &ldquo;{quote}&rdquo;
+                            <div className="border-l border-[#D4AF37] pl-6 py-2 mt-8">
+                                <p className="font-sans text-gray-700 text-lg font-medium">
+                                    Une équipe dédiée à la réussite de votre événement, avec des produits frais, locaux et un savoir-faire authentique.
                                 </p>
-                                {quoteAuthor && (
-                                    <p className="font-sans text-xs uppercase tracking-widest text-gray-500 mt-2">
-                                        {quoteAuthor}
-                                    </p>
-                                )}
                             </div>
 
                             <p className="text-gray-600 font-sans font-light leading-relaxed text-lg mt-8 bg-white/60 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none rounded-2xl p-2 md:p-0">

@@ -19,7 +19,7 @@ export default function MentionsLegales() {
                             <li><strong>Siège social :</strong> Rue Potay 3, 4470 Saint-Georges-sur-Meuse</li>
                             <li><strong>Numéro d&apos;entreprise (BCE) :</strong> 0457.043.709</li>
                             <li><strong>Tribunal de l&apos;entreprise :</strong> Liège</li>
-                            <li><strong>Email :</strong> <a href="mailto:traiteurcompere@gmail.com" className="text-[#D4AF37] hover:underline">traiteurcompere@gmail.com</a></li>
+                            <li><strong>Email :</strong> <a href="mailto:contact@traiteur-compere.be" className="text-[#D4AF37] hover:underline">contact@traiteur-compere.be</a></li>
                             <li><strong>Responsable de la publication :</strong> Jean-Paul Compère (Gérant)</li>
                         </ul>
                     </section>
@@ -51,7 +51,7 @@ export default function MentionsLegales() {
                         </p>
                         <p className="mt-4">
                             Elles sont conservées pendant la durée nécessaire à la gestion commerciale et sont destinées uniquement à l&apos;usage interne de l&apos;entreprise.
-                            Conformément à la loi « informatique et libertés » et au RGPD, vous pouvez exercer votre droit d&apos;accès aux données vous concernant et les faire rectifier en contactant : <a href="mailto:traiteurcompere@gmail.com" className="text-[#D4AF37] hover:underline">traiteurcompere@gmail.com</a>.
+                            Conformément à la loi « informatique et libertés » et au RGPD, vous pouvez exercer votre droit d&apos;accès aux données vous concernant et les faire rectifier en contactant : <a href="mailto:contact@traiteur-compere.be" className="text-[#D4AF37] hover:underline">contact@traiteur-compere.be</a>.
                         </p>
                     </section>
 

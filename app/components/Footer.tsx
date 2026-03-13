@@ -30,9 +30,9 @@ export default function Footer() {
                                 <PhoneIcon className="w-5 h-5 text-[#D4AF37]" />
                                 <span className="group-hover:translate-x-1 transition-transform duration-300">+32 476 86 54 07</span>
                             </a>
-                            <a href="mailto:traiteurcompere@gmail.com" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
+                            <a href="mailto:contact@traiteur-compere.be" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
                                 <MailIcon className="w-5 h-5 text-[#D4AF37]" />
-                                <span className="group-hover:translate-x-1 transition-transform duration-300">traiteurcompere@gmail.com</span>
+                                <span className="group-hover:translate-x-1 transition-transform duration-300">contact@traiteur-compere.be</span>
                             </a>
                             <a href="https://www.google.com/maps?q=Saint-Georges-sur-Meuse" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
                                 <MapPinIcon className="w-5 h-5 text-[#D4AF37]" />
