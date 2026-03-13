@@ -840,6 +840,41 @@ function ContactForm() {
                             {!isBBQNobles && renderDropdown("Choix 3", "Viande_3", getBBQList(), bbqChoices)}
                         </div>
                     )}
+
+                    {/* Suppléments Viandes (Rattachés à la catégorie Viande) */}
+                    {!isCochonOrPorchetta && (
+                        <div className="mt-4 p-4 bg-neutral-50/70 rounded-xl border border-dashed border-neutral-300">
+                            <label className={`${labelStyle} flex items-center gap-2`}>
+                                <span>🥩</span> Viande supplémentaire (+2,00€ / pers)
+                            </label>
+                            <div className="relative">
+                                <select name="Viande_Extra_1" value={formData.Viande_Extra_1 || ""} onChange={handleChange} className={getInputStyle("Viande_Extra_1") + " appearance-none"}>
+                                    <option value="">Aucun supplément...</option>
+                                    {getBBQList().map(v => <option key={v} value={v}>{v}</option>)}
+                                </select>
+                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                </div>
+                            </div>
+
+                            {formData.Viande_Extra_1 && (
+                                <div className="mt-4 animate-fade-in">
+                                    <label className={`${labelStyle} flex items-center gap-2`}>
+                                        <span>🥩</span> 2ème viande supplémentaire (+3,00€ / pers)
+                                    </label>
+                                    <div className="relative">
+                                        <select name="Viande_Extra_2" value={formData.Viande_Extra_2 || ""} onChange={handleChange} className={getInputStyle("Viande_Extra_2") + " appearance-none"}>
+                                            <option value="">Aucun supplément...</option>
+                                            {getBBQList().map(v => <option key={v} value={v}>{v}</option>)}
+                                        </select>
+                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
 
@@ -892,12 +927,20 @@ function ContactForm() {
                         ))}
                     </div>
 
-                    {/* SUPPLÉMENTS EN CASCADE */}
-                    <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mt-8 pt-8">Suppléments Optionnels</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {renderDropdown("Ajouter une crudité supplémentaire (+1,50€ / pers)", "Suppl_Crudite_Extra", SIDES_COLD)}
-                        {renderDropdown("Ajouter une viande supplémentaire (+2€ / pers)", "Viande_Extra_1", getBBQList())}
-                        {formData.Viande_Extra_1 && renderDropdown("Ajouter une autre viande supplémentaire (+3€ / pers)", "Viande_Extra_2", getBBQList())}
+                    {/* Supplément Crudité (Rattaché à la catégorie Crudités) */}
+                    <div className="mt-4 p-4 bg-neutral-50/70 rounded-xl border border-dashed border-neutral-300">
+                        <label className={`${labelStyle} flex items-center gap-2`}>
+                            <span>🥗</span> Crudité supplémentaire (+1,50€ / pers)
+                        </label>
+                        <div className="relative">
+                            <select name="Suppl_Crudite_Extra" value={formData.Suppl_Crudite_Extra || ""} onChange={handleChange} className={getInputStyle("Suppl_Crudite_Extra") + " appearance-none"}>
+                                <option value="">Aucun supplément...</option>
+                                {SIDES_COLD.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
