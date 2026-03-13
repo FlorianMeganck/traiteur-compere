@@ -73,7 +73,7 @@ const BBQ_PRICES: Record<string, number> = {
 };
 
 const SIDES_COLD = ["Salade de Pâtes Pesto 🌿", "Salade de Pâtes Curry 🌿", "Salade Grecque (Feta/Olives) 🌿", "Taboulé Oriental 🌿", "Tomate Mozza Di Bufala 🌿", "Salade de Pomme de Terre (Mayonnaise) 🌿", "Salade de Pomme de Terre (Vinaigrette) 🌿", "Carottes Râpées (Citron) 🌿", "Céleri Râpé & Pommes 🌿", "Concombre à la crème 🌿", "Salade de chou blanc 🌿"];
-const SIDES_HOT = ["Pomme de terre en chemise 🌿", "Gratin Dauphinois 🌿", "Grenailles au Romarin 🌿", "Riz aux petits légumes 🌿", "Pâtes à l'italienne 🌿"];
+const feculentsBBQ = ["Pomme de terre en chemise 🌿", "Gratin Dauphinois 🌿", "Grenailles au Romarin 🌿", "Baguette", "Petits pains"];
 
 const BUFFET_FROID_PRICES: Record<string, number> = {
     buffet_campagnard: 13,
@@ -243,6 +243,8 @@ function ContactForm() {
         Supplement_Viande_1: "",
         Supplement_Viande_2: "",
         Supplement_Viande_3: "",
+        Viande_Extra_1: "",
+        Viande_Extra_2: "",
 
         // Accompaniments
         Accompagnement_Froid_1: "",
@@ -251,6 +253,8 @@ function ContactForm() {
         Accompagnement_Chaud: "",
         Accompagnement_Chaud_Supplement: "",
         Accompagnement_Chaud_Supplement_Check: "Non",
+        Feculent: "",
+        Suppl_Crudite_Extra: "",
 
         // Desserts
         Dessert_Check: "Non",
@@ -330,6 +334,12 @@ function ContactForm() {
                 if (field.includes("(+3€)")) supplements += 3;
             }
         });
+
+        if (isAnyBBQ) {
+            if (formData.Viande_Extra_1) supplements += 2;
+            if (formData.Viande_Extra_2) supplements += 3;
+            if (formData.Suppl_Crudite_Extra) supplements += 1.5;
+        }
 
         // 3. Extra Hot Side
         if (formData.Accompagnement_Chaud_Supplement_Check === "Oui" && formData.Accompagnement_Chaud_Supplement) {
@@ -537,6 +547,14 @@ function ContactForm() {
             if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
             if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
         } else if (isAnyBBQ) {
+            if (!formData.Feculent) newErrors.Feculent = "Requis";
+            if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
+            if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
+            if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
+            if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
+            if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
+            if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
+
             if (isCochonOrPorchetta) {
                 // No specific dynamic fields required for these
             } else if (isBBQCompose) {
@@ -607,7 +625,7 @@ function ContactForm() {
 
         // 3. Construction du Payload Web3Forms (Propre pour le Web, Visuel pour le Mail)
         const payload = {
-            access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
+            access_key: "METTRE_LA_NOUVELLE_CLE_ICI",
             subject: `Nouvelle demande : ${formData.Nom} ${formData.Prenom}`,
             from_name: "Site Traiteur Compère",
 
@@ -638,21 +656,27 @@ function ContactForm() {
             ...(formData.Plat_Associatif && { "🍽️ Plat Principal": formData.Plat_Associatif }),
             ...(formData.Plat_Associatif_Detail && { "👨‍🍳 Option du Plat": formData.Plat_Associatif_Detail }),
 
-            // BUFFETS FROIDS
+            // FÉCULENTS (BBQ & Buffets)
+            ...(formData.Feculent && { "🍚 Féculent": formData.Feculent }),
             ...(formData.Feculent_Froid && { "🥔 Féculent Froid": formData.Feculent_Froid }),
+
+            // CRUDITÉS (BBQ & Buffets)
             ...(formData.Crudite_1 && { "🥗 Crudité 1": formData.Crudite_1 }),
             ...(formData.Crudite_2 && { "🥗 Crudité 2": formData.Crudite_2 }),
             ...(formData.Crudite_3 && { "🥗 Crudité 3": formData.Crudite_3 }),
             ...(formData.Crudite_4 && { "🥗 Crudité 4": formData.Crudite_4 }),
             ...(formData.Crudite_5 && { "🥗 Crudité 5": formData.Crudite_5 }),
             ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
+            ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra }),
 
-            // SUPPLÉMENTS
+            // SUPPLÉMENTS VIANDES (BBQ)
+            ...(formData.Viande_Extra_1 && { "🥩 Viande Suppl. 1 (+2€)": formData.Viande_Extra_1 }),
+            ...(formData.Viande_Extra_2 && { "🥩 Viande Suppl. 2 (+3€)": formData.Viande_Extra_2 }),
+
+            // ANCIENS CHAMPS (Compatibilité)
             ...(formData.Supplement_Viande_1 && { "⭐ Supplément Viande 1": formData.Supplement_Viande_1 }),
             ...(formData.Supplement_Viande_2 && { "⭐ Supplément Viande 2": formData.Supplement_Viande_2 }),
             ...(formData.Supplement_Viande_3 && { "⭐ Supplément Viande 3": formData.Supplement_Viande_3 }),
-
-            // ACCOMPAGNEMENTS
             ...(formData.Accompagnement_Froid_1 && { "🥗 Accompagnement Froid 1": formData.Accompagnement_Froid_1 }),
             ...(formData.Accompagnement_Froid_2 && { "🥗 Accompagnement Froid 2": formData.Accompagnement_Froid_2 }),
             ...(formData.Accompagnement_Froid_3 && { "🥗 Accompagnement Froid 3": formData.Accompagnement_Froid_3 }),
@@ -767,7 +791,7 @@ function ContactForm() {
                     <h2 className="text-2xl font-serif text-neutral-800 font-bold mb-2">Configuration : BBQ {bbqName}</h2>
                     <div className="text-center mb-6">
                         <p className="text-sm text-neutral-500 italic mb-2">
-                            Note : 100g de viande par personne/choix.
+                            Note : 300g de viande par personne pour les 3 choix.
                         </p>
                         <Link href="/allergenes" target="_blank" className="inline-flex items-center gap-2 text-xs font-bold text-[#D4AF37] hover:underline uppercase tracking-widest border border-[#D4AF37]/30 px-4 py-2 rounded-full hover:bg-[#D4AF37]/10 transition-colors">
                             <span>ℹ️ Voir le détail des allergènes par produit</span>
@@ -816,72 +840,35 @@ function ContactForm() {
                 </div>
 
 
-                {/* ACCOMPAGNEMENTS */}
+                {/* ACCOMPAGNEMENTS & SUPPLÉMENTS */}
                 <div className="space-y-6">
-                    <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Accompagnements</h3>
+                    <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mt-8">Accompagnements (Inclus)</h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="md:col-span-3">
-                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Froids (3 Choix)</label>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {renderDropdown("Salade Froide 1", "Accompagnement_Froid_1", SIDES_COLD, froidChoices)}
-                                {renderDropdown("Salade Froide 2", "Accompagnement_Froid_2", SIDES_COLD, froidChoices)}
-                                {renderDropdown("Salade Froide 3", "Accompagnement_Froid_3", SIDES_COLD, froidChoices)}
-                            </div>
-                        </div>
-
-                        <div className="md:col-span-3 border-t border-dashed border-neutral-200 pt-6"></div>
-
+                    {/* FÉCULENT */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="md:col-span-1">
-                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Chauds</label>
-                            {renderDropdown("Accomp. Chaud Inclus", "Accompagnement_Chaud", SIDES_HOT)}
+                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Féculent</label>
+                            {renderDropdown("Féculent Inclus", "Feculent", feculentsBBQ, [])}
                         </div>
+                    </div>
 
-                        <div className="col-span-1 md:col-span-2 flex flex-col justify-end">
-                            <div className="bg-neutral-50/50 p-5 rounded-2xl border border-neutral-200 hover:border-[#D4AF37]/30 transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <input
-                                        type="checkbox"
-                                        name="Accompagnement_Chaud_Supplement_Check"
-                                        id="Accompagnement_Chaud_Supplement_Check"
-                                        className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                                        checked={formData.Accompagnement_Chaud_Supplement_Check === "Oui"}
-                                        onChange={handleChange}
-                                    />
-                                    <label htmlFor="Accompagnement_Chaud_Supplement_Check" className="text-neutral-700 font-medium cursor-pointer select-none">
-                                        Ajouter un accompagnement chaud supplémentaire (+1€ / pers)
-                                    </label>
-                                </div>
-                                <AnimatePresence>
-                                    {formData.Accompagnement_Chaud_Supplement_Check === "Oui" && (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                                            animate={{ opacity: 1, height: "auto", marginTop: 16 }}
-                                            exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                            transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
-                                            className="overflow-hidden"
-                                        >
-                                            <div className="relative">
-                                                <select
-                                                    name="Accompagnement_Chaud_Supplement"
-                                                    value={formData.Accompagnement_Chaud_Supplement}
-                                                    onChange={handleChange}
-                                                    className={getInputStyle("Accompagnement_Chaud_Supplement")}
-                                                >
-                                                    <option value="">Faites votre choix...</option>
-                                                    {SIDES_HOT.map((c) => (
-                                                        <option key={c} value={c}>{c}</option>
-                                                    ))}
-                                                </select>
-                                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                    {/* CRUDITÉS */}
+                    <div className="mt-6 border-t border-dashed border-neutral-200 pt-6"></div>
+                    <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Crudités (6 Incluses)</label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3, 4, 5, 6].map(num => (
+                            <div key={`bbq_crudite_${num}`}>
+                                {renderDropdown(`Crudité ${num}`, `Crudite_${num}`, SIDES_COLD, [formData.Crudite_1, formData.Crudite_2, formData.Crudite_3, formData.Crudite_4, formData.Crudite_5, formData.Crudite_6].filter(Boolean))}
                             </div>
-                        </div>
+                        ))}
+                    </div>
+
+                    {/* SUPPLÉMENTS EN CASCADE */}
+                    <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mt-8 pt-8">Suppléments Optionnels</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {renderDropdown("Ajouter une crudité supplémentaire (+1,50€ / pers)", "Suppl_Crudite_Extra", SIDES_COLD)}
+                        {renderDropdown("Ajouter une viande supplémentaire (+2€ / pers)", "Viande_Extra_1", getBBQList())}
+                        {formData.Viande_Extra_1 && renderDropdown("Ajouter une autre viande supplémentaire (+3€ / pers)", "Viande_Extra_2", getBBQList())}
                     </div>
                 </div>
 
