@@ -26,7 +26,7 @@ export default function Home() {
           className="absolute inset-0 z-0"
         >
           <Image
-            src="/images/hero_v3.png"
+            src="/images/hero_elegant.png"
             alt="Traiteur Compère Hero"
             fill
             className="object-cover" // Removed brightness-75 to let overlay handle darkening
@@ -48,18 +48,18 @@ export default function Home() {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
-            className="text-4xl md:text-6xl lg:text-7xl font-serif text-white tracking-wide drop-shadow-lg font-bold mb-6"
+            className="text-4xl md:text-6xl lg:text-7xl font-serif text-white tracking-wide drop-shadow-lg font-bold mb-6 leading-tight"
           >
-            Votre Traiteur d&apos;Excellence à Saint-Georges
+            Maison fondée en 1821.<br /> L&apos;excellence d&apos;un savoir-faire bicentenaire.
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 1 }}
-            className="text-lg md:text-2xl text-white/90 font-light mb-10 max-w-3xl mx-auto"
+            className="text-lg md:text-2xl text-white/90 font-light mb-10 max-w-3xl mx-auto leading-relaxed"
           >
-            Mariages, Entreprises & Événements privés : Une cuisine authentique et généreuse.
+            Forts de plus de deux siècles d&apos;histoire, nous mettons notre passion et notre expérience au service de vos plus beaux événements. Une cuisine de cœur, de caractère et d&apos;authenticité, reconnue à travers les générations.
           </motion.p>
 
           <motion.div
@@ -80,8 +80,8 @@ export default function Home() {
       {/* --- 2. SERVICES SECTION (Moved Up & Overlap) --- */}
       <ServicesSection />
 
-      {/* --- 3. NARRATIVE TEXT (New) --- */}
-      <NarrativeTextSection />
+      {/* --- 3. REVIEWS SECTION (New) --- */}
+      <ReviewsSection />
 
       {/* --- 4. KEY FIGURES (Stats) --- */}
       <KeyFiguresSection />
@@ -95,20 +95,79 @@ export default function Home() {
 
 // --- SUB-SECTIONS ---
 
-function NarrativeTextSection() {
+function ReviewsSection() {
+  const reviews = [
+    {
+      text: "Organisation parfaite pour notre séminaire d'entreprise. Le buffet était délicieux et le service impeccable. Merci !",
+      author: "Michel B."
+    },
+    {
+      text: "Le barbecue de notre mariage a fait l'unanimité ! Viande incroyable, crudités fraîches et équipe super sympa. Je recommande à 100%.",
+      author: "Sophie L."
+    },
+    {
+      text: "Un anniversaire inoubliable grâce au Traiteur Compère. Plats copieux, savoureux et livraison à l'heure. Top !",
+      author: "Jean-Pierre D."
+    },
+    {
+      text: "Produits de grande qualité, présentation soignée et professionnalisme au rendez-vous. La notoriété de la maison est bien méritée.",
+      author: "Nadine C."
+    }
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % reviews.length);
+    }, 6000); // 6 seconds interval
+    return () => clearInterval(timer);
+  }, [reviews.length]);
+
   return (
-    <section className="py-24 bg-white text-center px-6">
-      <div className="max-w-2xl mx-auto flex flex-col items-center">
+    <section className="py-24 bg-[#FAF9F6] text-center px-6 overflow-hidden">
+      <div className="max-w-4xl mx-auto flex flex-col items-center">
         {/* Decorative Separator */}
-        <div className="w-[1px] h-16 bg-[#D4AF37] mb-8"></div>
+        <div className="w-[1px] h-12 bg-[#D4AF37] mb-8"></div>
 
-        <h3 className="text-2xl font-serif text-gray-900 mb-8 italic">
-          Une Cuisine de Cœur & de Caractère
-        </h3>
+        <h2 className="text-3xl md:text-4xl font-serif text-black mb-16">
+          Vos Avis
+        </h2>
 
-        <p className="text-lg text-gray-600 leading-relaxed font-light">
-          Chez Traiteur Compère, nous ne faisons pas que cuisiner, nous créons des souvenirs. Chaque plat est préparé avec des produits locaux sélectionnés rigoureusement, pour vous offrir une expérience authentique, généreuse et sans fausse note.
-        </p>
+        <div className="relative w-full min-h-[160px] md:min-h-[120px] flex items-center justify-center mb-8">
+          {reviews.map((review, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{
+                opacity: index === currentIndex ? 1 : 0,
+                x: index === currentIndex ? 0 : index < currentIndex ? -20 : 20,
+                zIndex: index === currentIndex ? 10 : 0
+              }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              className={`absolute w-full px-4 ${index === currentIndex ? 'pointer-events-auto' : 'pointer-events-none'}`}
+            >
+              <p className="text-xl md:text-2xl text-gray-800 italic font-serif leading-relaxed mb-8 max-w-3xl mx-auto">
+                &ldquo;{review.text}&rdquo;
+              </p>
+              <p className="text-sm md:text-base uppercase tracking-widest text-[#D4AF37] font-semibold">
+                — {review.author}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Dots */}
+        <div className="flex gap-4 mt-8">
+          {reviews.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentIndex ? "bg-[#D4AF37] scale-125" : "bg-gray-300 hover:bg-gray-400"}`}
+              aria-label={`Aller à l'avis ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -117,21 +176,21 @@ function NarrativeTextSection() {
 function ServicesSection() {
   const services = [
     {
-      title: "Mariages",
-      image: "/images/wedding.png",
-      desc: "Pour le plus beau jour de votre vie.",
-      link: "/services#mariages"
-    },
-    {
-      title: "Entreprises",
-      image: "/images/corporate.png",
-      desc: "Impressionnez vos collaborateurs.",
+      title: "Événements d'Entreprise",
+      image: "/images/corporate_cocktail.png",
+      desc: "Séminaires, cocktails dînatoires ou repas d'équipe : marquez les esprits de vos collaborateurs et clients avec un service traiteur irréprochable et savoureux.",
       link: "/services#entreprises"
     },
     {
-      title: "Particuliers",
-      image: "/images/banquet.png",
-      desc: "Fêtez vos moments précieux.",
+      title: "Votre Mariage",
+      image: "/images/wedding_table.png",
+      desc: "Du vin d'honneur au dessert, nous sublimons le plus beau jour de votre vie. Une prestation sur mesure, raffinée et inoubliable pour régaler vos convives.",
+      link: "/services#mariages"
+    },
+    {
+      title: "Événements Privés",
+      image: "/images/private_party.png",
+      desc: "Baptêmes, anniversaires ou fêtes de famille : profitez pleinement de vos proches, nous nous occupons de tout pour créer des moments gourmands et conviviaux à domicile.",
       link: "/services#particuliers"
     }
   ];
