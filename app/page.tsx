@@ -13,7 +13,7 @@ export default function Home() {
         {/* Image d'arrière-plan (Fixe, pas de carrousel) */}
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/hero_elegant.png"
+            src="/images/hero-traiteur.png"
             alt="Traiteur Compère - Buffet de réception"
             fill
             className="object-cover"
@@ -25,17 +25,17 @@ export default function Home() {
 
         {/* Contenu centré */}
         <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-4xl mx-auto mt-16">
-          
+
           {/* Titre principal (Police Serif élégante) */}
           <h1 className="text-5xl md:text-7xl font-serif text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
             Traiteur Compère
           </h1>
-          
+
           {/* Sous-titre / Date de fondation (Doré) */}
           <h2 className="text-xl md:text-2xl font-medium text-[#D4AF37] mb-6 tracking-wide drop-shadow-md">
             Maison fondée en 1821
           </h2>
-          
+
           {/* Paragraphe court */}
           <p className="text-lg md:text-xl text-neutral-100 mb-10 max-w-2xl font-light drop-shadow">
             Savoir-faire bicentenaire d&apos;exception au service de vos événements les plus précieux.
@@ -43,14 +43,14 @@ export default function Home() {
 
           {/* Boutons d'action (Côte à côte) */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link 
-              href="/formules" 
+            <Link
+              href="/formules"
               className="bg-black text-[#D4AF37] border border-black hover:bg-neutral-900 px-8 py-3 uppercase text-sm tracking-widest transition duration-300"
             >
               Découvrez nos formules
             </Link>
-            <Link 
-              href="/contact" 
+            <Link
+              href="/contact"
               className="bg-transparent text-white border border-white hover:bg-white hover:text-black px-8 py-3 uppercase text-sm tracking-widest transition duration-300"
             >
               Demandez un devis
