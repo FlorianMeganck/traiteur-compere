@@ -189,7 +189,7 @@ function ServicesSection() {
     },
     {
       title: "Événements Privés",
-      image: "/images/private_party.png",
+      image: "/images/banquet.png",
       desc: "Baptêmes, anniversaires ou fêtes de famille : profitez pleinement de vos proches, nous nous occupons de tout pour créer des moments gourmands et conviviaux à domicile.",
       link: "/services#particuliers"
     }
