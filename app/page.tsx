@@ -3,78 +3,60 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, useInView, animate } from "framer-motion";
+import { motion, useInView, animate } from "framer-motion";
 
 export default function Home() {
-  // Parallax Setup for Hero
-  const heroRef = useRef(null);
-  const { scrollYProgress: heroScroll } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"]
-  });
-  const heroY = useTransform(heroScroll, [0, 1], ["0%", "50%"]);
-  const textY = useTransform(heroScroll, [0, 1], ["0%", "100%"]);
-
   return (
     <main className="bg-white text-gray-800 font-sans selection:bg-[#D4AF37] selection:text-white overflow-hidden">
 
-      {/* --- 1. HERO SECTION (Modified) --- */}
-      <section ref={heroRef} className="relative h-[110vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Parallax */}
-        <motion.div
-          style={{ y: heroY }}
-          className="absolute inset-0 z-0"
-        >
+      <section className="relative w-full h-[80vh] md:h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+        {/* Image d'arrière-plan (Fixe, pas de carrousel) */}
+        <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero_elegant.png"
-            alt="Traiteur Compère Hero"
+            alt="Traiteur Compère - Buffet de réception"
             fill
-            className="object-cover" // Removed brightness-75 to let overlay handle darkening
+            className="object-cover"
             priority
           />
-          {/* Overlay - Darker as requested */}
-          <div className="absolute inset-0 bg-black/40" />
-        </motion.div>
+          {/* Voile sombre pour faire ressortir le texte */}
+          <div className="absolute inset-0 bg-black/50"></div>
+        </div>
 
-        {/* Subtle Gradient at the bottom for text readability if needed */}
-        <div className="absolute bottom-0 left-0 w-full h-40 bg-gradient-to-b from-transparent to-white/10 z-20 pointer-events-none"></div>
+        {/* Contenu centré */}
+        <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-4xl mx-auto mt-16">
+          
+          {/* Titre principal (Police Serif élégante) */}
+          <h1 className="text-5xl md:text-7xl font-serif text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
+            Traiteur Compère
+          </h1>
+          
+          {/* Sous-titre / Date de fondation (Doré) */}
+          <h2 className="text-xl md:text-2xl font-medium text-[#D4AF37] mb-6 tracking-wide drop-shadow-md">
+            Maison fondée en 1821
+          </h2>
+          
+          {/* Paragraphe court */}
+          <p className="text-lg md:text-xl text-neutral-100 mb-10 max-w-2xl font-light drop-shadow">
+            Savoir-faire bicentenaire d&apos;exception au service de vos événements les plus précieux.
+          </p>
 
-        {/* Hero Content */}
-        <motion.div
-          style={{ y: textY }}
-          className="relative z-20 text-center px-4 md:px-6 max-w-5xl mx-auto pb-40 md:pb-32"
-        >
-          <motion.h1
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="text-4xl md:text-6xl lg:text-7xl font-serif text-white tracking-wide drop-shadow-lg font-bold mb-6 leading-tight"
-          >
-            Maison fondée en 1821.<br /> L&apos;excellence d&apos;un savoir-faire bicentenaire.
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 1 }}
-            className="text-lg md:text-2xl text-white/90 font-light mb-10 max-w-3xl mx-auto leading-relaxed"
-          >
-            Forts de plus de deux siècles d&apos;histoire, nous mettons notre passion et notre expérience au service de vos plus beaux événements. Une cuisine de cœur, de caractère et d&apos;authenticité, reconnue à travers les générations.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-          >
-            <Link
-              href="/formules"
-              className="inline-block bg-[#D4AF37] text-white text-lg md:text-xl font-semibold py-4 px-10 rounded-full hover:bg-white hover:text-[#D4AF37] transition-all duration-300 transform hover:scale-105 shadow-lg"
+          {/* Boutons d'action (Côte à côte) */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link 
+              href="/formules" 
+              className="bg-black text-[#D4AF37] border border-black hover:bg-neutral-900 px-8 py-3 uppercase text-sm tracking-widest transition duration-300"
             >
-              Découvrez nos Formules
+              Découvrez nos formules
             </Link>
-          </motion.div>
-        </motion.div>
+            <Link 
+              href="/contact" 
+              className="bg-transparent text-white border border-white hover:bg-white hover:text-black px-8 py-3 uppercase text-sm tracking-widest transition duration-300"
+            >
+              Demandez un devis
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* --- 2. SERVICES SECTION (Moved Up & Overlap) --- */}
