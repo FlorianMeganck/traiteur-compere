@@ -296,6 +296,14 @@ const SectionTitle = ({ title }: { title: string }) => (
     </div>
 );
 
+const AllergenLink = ({ section }: { section: string }) => (
+    <div className="text-center mt-2 mb-8">
+        <Link href={`/allergenes?section=${section}`} target="_blank" className="inline-flex items-center gap-2 text-xs font-bold text-[#D4AF37] hover:underline uppercase tracking-widest px-4 py-2 rounded-full border border-[#D4AF37]/30 hover:bg-[#D4AF37]/10 transition-colors">
+            ℹ️ Consulter la matrice des allergènes
+        </Link>
+    </div>
+);
+
 export default function Formules() {
     const [activeAperitifTab, setActiveAperitifTab] = useState('zakouskis');
 
@@ -360,6 +368,10 @@ export default function Formules() {
                                         </ul>
                                     </div>
 
+                                    {activeAperitifTab === 'zakouskis' && <AllergenLink section="zakouskis" />}
+                                    {activeAperitifTab === 'verrines' && <AllergenLink section="verrines" />}
+                                    {activeAperitifTab === 'pains_garnis' && <AllergenLink section="pains" />}
+
                                     {/* Boutons de Convives */}
                                     <div className="flex flex-wrap gap-3 mt-8">
                                         {activeAperitifTab === 'zakouskis' || activeAperitifTab === 'pains_garnis' || activeAperitifTab === 'verrines' ? (
@@ -414,6 +426,8 @@ export default function Formules() {
                             <div key={index}>
                                 {renderSectionTitle()}
                                 <FormuleSection formule={formule} index={index} />
+                                {index === 0 && <AllergenLink section="bbq" />}
+                                {formule.title === "Nos Buffets Froids" && <AllergenLink section="buffets" />}
                             </div>
                         );
                     })}
@@ -442,6 +456,8 @@ export default function Formules() {
                                 </ul>
                             </div>
                             
+                            <AllergenLink section="collectivite" />
+
                             <div className="inline-block bg-black text-[#D4AF37] px-4 py-2 rounded-lg font-bold text-sm tracking-widest mb-6">
                                 De 8,00€ à 14,00€ / personne
                             </div>

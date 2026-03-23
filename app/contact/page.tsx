@@ -306,6 +306,14 @@ function ContactForm() {
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
     const [errors, setErrors] = useState<Record<string, string>>({});
 
+    const FormAllergenLink = ({ section }: { section: string }) => (
+        <div className="text-center mt-2 mb-6">
+            <Link href={`/allergenes?section=${section}`} target="_blank" className="inline-flex items-center gap-2 text-xs font-bold text-[#D4AF37] hover:underline uppercase tracking-widest border border-[#D4AF37]/30 px-4 py-2 rounded-full hover:bg-[#D4AF37]/10 transition-colors">
+                ℹ️ Voir le détail des allergènes
+            </Link>
+        </div>
+    );
+
     // --- MENU CONTEXT ---
     const menuParam = searchParams.get('menu');
 
@@ -1110,9 +1118,7 @@ function ContactForm() {
                         <p className="text-sm text-neutral-500 italic mb-2">
                             Note : 300g de viande par personne pour les 3 choix.
                         </p>
-                        <Link href="/allergenes" target="_blank" className="inline-flex items-center gap-2 text-xs font-bold text-[#D4AF37] hover:underline uppercase tracking-widest border border-[#D4AF37]/30 px-4 py-2 rounded-full hover:bg-[#D4AF37]/10 transition-colors">
-                            <span>ℹ️ Voir le détail des allergènes par produit</span>
-                        </Link>
+                        <FormAllergenLink section="bbq" />
                     </div>
                 </div>
 
@@ -1422,6 +1428,7 @@ function ContactForm() {
                 <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
                     Composition de votre Buffet
                 </h3>
+                {FormAllergenLink({ section: 'buffets' })}
 
                 {/* NOUVEAU : Encart des plats inclus */}
                 {viandesIncluses.length > 0 && (
@@ -1512,6 +1519,7 @@ function ContactForm() {
                 <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
                     Composition de votre Assortiment
                 </h3>
+                {FormAllergenLink({ section: 'pains' })}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
@@ -1654,6 +1662,7 @@ function ContactForm() {
                     Votre Sélection de Zakouskis
                 </h3>
                 <p className="text-sm text-neutral-500 mb-6 italic">Minimum 3 pièces par personne. Maximum 10 pièces.</p>
+                {FormAllergenLink({ section: 'zakouskis' })}
 
                 {/* Bloc 1 : Choix 1 à 3 (Obligatoires) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1769,6 +1778,7 @@ function ContactForm() {
                     Votre Sélection de Verrines
                 </h3>
                 <p className="text-sm text-neutral-500 mb-6 italic">Minimum 3 pièces par personne. Maximum 10 pièces.</p>
+                {FormAllergenLink({ section: 'verrines' })}
 
                 {/* ÉTAPE 1 : CHOIX DU FORMAT */}
                 <div className="bg-neutral-100 p-6 rounded-2xl border border-neutral-200">
@@ -1845,6 +1855,7 @@ function ContactForm() {
                 <h3 className="text-xl font-bold text-neutral-800 uppercase tracking-wide border-b border-neutral-200 pb-2 mb-4">
                     Choix du Plat Unique
                 </h3>
+                {FormAllergenLink({ section: 'collectivite' })}
 
                 <div className="group">
                     <label className={labelStyle}>Sélectionnez le plat pour votre groupe <span className="text-red-500">*</span></label>
