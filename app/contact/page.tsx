@@ -166,6 +166,37 @@ const getZakouskiBasePrice = (itemName: string): number => {
     return 0;
 };
 
+// Structure pour Verrines (Prix différents selon format 6cl / 12cl)
+const verrinesData: Record<string, { items: string[], price6cl: number, price12cl: number }> = {
+    "Végétariennes": {
+        price6cl: 2.00,
+        price12cl: 2.50,
+        items: ["Verrine italienne au parmesan, mozzarella di bufala et pesto", "Duo de melon feta et jambon serrano", "Mousse d'avocat et crevettes marinées au citron vert", "Taboulé oriental façon Compère", "Gaspacho andalou aux herbes fraîches", "Mini tartare de légumes et féta"]
+    },
+    "Poisson & Fruits de Mer": {
+        price6cl: 3.00,
+        price12cl: 4.00,
+        items: ["Roulé de saumon au fromage frais et herbes fines", "Tartare de saumon frais à l'aneth", "Verrine cocktail crevettes et avocat", "Ceviche de poisson blanc au lait de coco", "Mousse de thon au fromage frais et herbes fines"]
+    },
+    "Viande & Volaille": {
+        price6cl: 3.00,
+        price12cl: 3.80,
+        items: ["Mini brochette de poulet mariné aux épices douces", "Carpaccio de bœuf au parmesan et roquette", "Mousse de foie de canard au Sauternes et gelée de porto", "Verrine de tartare de bœuf aux herbes fines", "Risotto crémeux aux champignons de saison"]
+    },
+    "Gamme Premium": {
+        price6cl: 3.50,
+        price12cl: 4.50,
+        items: ["Verrine de foie gras avec chutney de figues", "Carpaccio de bœuf Black Angus, truffe d'été et parmesan", "Tartare de Saint-Jacques et fruits exotiques", "Duo de saumon (frais et fumé) et œufs de poisson", "Dôme de chocolat noir avec son cœur praliné"]
+    }
+};
+
+const getVerrineBasePrices = (itemName: string): { price6cl: number, price12cl: number } | null => {
+    for (const data of Object.values(verrinesData)) {
+        if (data.items.includes(itemName)) return { price6cl: data.price6cl, price12cl: data.price12cl };
+    }
+    return null;
+};
+
 // Legacy/Other Menus
 const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿", "Quiche aux légumes 🌿"];
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
@@ -349,12 +380,26 @@ function ContactForm() {
         Zakouski_Cat_7: "", Zakouski_Item_7: "",
         Zakouski_Cat_8: "", Zakouski_Item_8: "",
         Zakouski_Cat_9: "", Zakouski_Item_9: "",
-        Zakouski_Cat_10: "", Zakouski_Item_10: ""
+        Zakouski_Cat_10: "", Zakouski_Item_10: "",
+
+        // Verrines
+        Format_Verrines: "", // "6cl" ou "12cl"
+        Verrine_Cat_1: "", Verrine_Item_1: "",
+        Verrine_Cat_2: "", Verrine_Item_2: "",
+        Verrine_Cat_3: "", Verrine_Item_3: "",
+        Verrine_Cat_4: "", Verrine_Item_4: "",
+        Verrine_Cat_5: "", Verrine_Item_5: "",
+        Verrine_Cat_6: "", Verrine_Item_6: "",
+        Verrine_Cat_7: "", Verrine_Item_7: "",
+        Verrine_Cat_8: "", Verrine_Item_8: "",
+        Verrine_Cat_9: "", Verrine_Item_9: "",
+        Verrine_Cat_10: "", Verrine_Item_10: ""
     });
 
     const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
     const isPains = formData.Type_Evenement === 'Petits pains';
     const isZakouskis = formData.Type_Evenement === 'Zakouskis';
+    const isVerrines = formData.Type_Evenement === 'Verrines';
 
     // --- PRICING ENGINE ---
 
@@ -369,7 +414,7 @@ function ContactForm() {
 
     const calculateTotal = () => {
         if (isPlatUnique) return 14.5;
-        if (!isAnyBBQ && !isBuffetFroidMode && !isPains && !isZakouskis) return 0;
+        if (!isAnyBBQ && !isBuffetFroidMode && !isPains && !isZakouskis && !isVerrines) return 0;
 
         // 1. Base Price
         let base = 0;
@@ -408,13 +453,32 @@ function ContactForm() {
                 }
             }
             base = basePriceTotal;
+        } else if (isVerrines && formData.Format_Verrines) {
+            let basePriceTotal = 0;
+            const format = formData.Format_Verrines; // "6cl" ou "12cl"
+
+            for (let i = 1; i <= 10; i++) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const item = (formData as any)[`Verrine_Item_${i}`];
+                if (item) {
+                    const basePrices = getVerrineBasePrices(item);
+                    if (basePrices) {
+                        let itemPrice = format === "6cl" ? basePrices.price6cl : basePrices.price12cl;
+                        if (formData.Nombre_Convives === 'Moins de 25') itemPrice += 0.30;
+                        else if (formData.Nombre_Convives === '100 à 200') itemPrice -= 0.20;
+                        basePriceTotal += itemPrice;
+                    }
+                }
+            }
+            base = basePriceTotal;
         }
 
         const tier = getPriceTier(formData.Nombre_Convives);
         if (tier === 'high') {
             if (isPains && formData.Nombre_Convives === 'Plus de 200') return -1;
             if (isZakouskis && formData.Nombre_Convives === 'Plus de 200') return -1;
-            if (!isPains && !isZakouskis) return -1;
+            if (isVerrines && formData.Nombre_Convives === 'Plus de 200') return -1;
+            if (!isPains && !isZakouskis && !isVerrines) return -1;
         }
 
         // 2. Supplements
@@ -475,7 +539,7 @@ function ContactForm() {
         if (isBuffet) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
-        if (isPainsMode || isZakouskisMode) return OPTIONS_PAINS;
+        if (isPainsMode || isZakouskisMode || menuParam === 'verrines') return OPTIONS_PAINS;
         return OPTIONS_STANDARD;
     };
 
@@ -514,6 +578,8 @@ function ContactForm() {
                     newData.Type_Evenement = 'Petits pains';
                 } else if (menuParam === 'zakouskis') {
                     newData.Type_Evenement = 'Zakouskis';
+                } else if (menuParam === 'verrines') {
+                    newData.Type_Evenement = 'Verrines';
                 }
             }
 
@@ -528,7 +594,7 @@ function ContactForm() {
                     if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
                     else if (isAnyBBQ) newData.Nombre_Convives = "Moins de 25";
                     else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
-                    else if (isPainsMode || isZakouskisMode) newData.Nombre_Convives = "Moins de 25";
+                    else if (isPainsMode || isZakouskisMode || menuParam === 'verrines') newData.Nombre_Convives = "Moins de 25";
                     else if (isBuffet || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 40";
                     else newData.Nombre_Convives = "Moins de 20";
                 } else if (safeParam.includes('100') && safeParam.includes('200')) {
@@ -695,6 +761,13 @@ function ContactForm() {
             if (!formAny.Zakouski_Item_1) newErrors.Zakouski_Item_1 = "Requis";
             if (!formAny.Zakouski_Item_2) newErrors.Zakouski_Item_2 = "Requis";
             if (!formAny.Zakouski_Item_3) newErrors.Zakouski_Item_3 = "Requis";
+        } else if (isVerrines) {
+            if (!formData.Format_Verrines) newErrors.Format_Verrines = "Requis";
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const formAny = formData as any;
+            if (!formAny.Verrine_Item_1) newErrors.Verrine_Item_1 = "Requis";
+            if (!formAny.Verrine_Item_2) newErrors.Verrine_Item_2 = "Requis";
+            if (!formAny.Verrine_Item_3) newErrors.Verrine_Item_3 = "Requis";
         }
 
         return newErrors;
@@ -730,6 +803,8 @@ function ContactForm() {
             isSurDevis = formData.Nombre_Convives === 'Plus de 200';
         } else if (isZakouskis) {
             isSurDevis = formData.Nombre_Convives === 'Plus de 200';
+        } else if (isVerrines) {
+            isSurDevis = formData.Nombre_Convives === 'Plus de 200';
         } else {
             isSurDevis = getConvivesMax(formData.Nombre_Convives) > 250;
         }
@@ -744,6 +819,7 @@ function ContactForm() {
             }
             if (rawName === 'pains_garnis') return "Petits pains";
             if (rawName === 'zakouskis') return "Zakouskis";
+            if (rawName === 'verrines') return "Verrines";
             const name = rawName.replace('bbq_', '').replace(/_/g, ' ');
             return `Barbecue ${name.charAt(0).toUpperCase() + name.slice(1)}`;
         };
@@ -815,6 +891,22 @@ function ContactForm() {
                 ...(formData as any).Zakouski_Item_8 && { "Choix 8": (formData as any).Zakouski_Item_8 },
                 ...(formData as any).Zakouski_Item_9 && { "Choix 9": (formData as any).Zakouski_Item_9 },
                 ...(formData as any).Zakouski_Item_10 && { "Choix 10": (formData as any).Zakouski_Item_10 }
+            }),
+
+            // --- SECTION VERRINES ---
+            ...(formData.Type_Evenement === 'Verrines' && {
+                "🍵 MENU SÉLECTIONNÉ": "VERRINES",
+                "📐 Format choisi": formData.Format_Verrines || "Non spécifié",
+                ...(formData as any).Verrine_Item_1 && { "Choix Verrine 1": (formData as any).Verrine_Item_1 },
+                ...(formData as any).Verrine_Item_2 && { "Choix Verrine 2": (formData as any).Verrine_Item_2 },
+                ...(formData as any).Verrine_Item_3 && { "Choix Verrine 3": (formData as any).Verrine_Item_3 },
+                ...(formData as any).Verrine_Item_4 && { "Choix Verrine 4": (formData as any).Verrine_Item_4 },
+                ...(formData as any).Verrine_Item_5 && { "Choix Verrine 5": (formData as any).Verrine_Item_5 },
+                ...(formData as any).Verrine_Item_6 && { "Choix Verrine 6": (formData as any).Verrine_Item_6 },
+                ...(formData as any).Verrine_Item_7 && { "Choix Verrine 7": (formData as any).Verrine_Item_7 },
+                ...(formData as any).Verrine_Item_8 && { "Choix Verrine 8": (formData as any).Verrine_Item_8 },
+                ...(formData as any).Verrine_Item_9 && { "Choix Verrine 9": (formData as any).Verrine_Item_9 },
+                ...(formData as any).Verrine_Item_10 && { "Choix Verrine 10": (formData as any).Verrine_Item_10 }
             }),
 
             // SUPPLÉMENTS VIANDES (BBQ)
@@ -1529,6 +1621,137 @@ function ContactForm() {
         );
     };
 
+    const renderVerrinesFields = () => {
+        if (!isVerrines) return null;
+
+        const selectedFormat = formData.Format_Verrines; // "6cl" ou "12cl"
+
+        const getAdjustedPriceDisplay = (category: string) => {
+            if (!selectedFormat) return 0;
+            const catData = verrinesData[category];
+            const basePrice = selectedFormat === "6cl" ? catData.price6cl : catData.price12cl;
+            
+            if (formData.Nombre_Convives === 'Moins de 25') return basePrice + 0.30;
+            if (formData.Nombre_Convives === '100 à 200') return basePrice - 0.20;
+            return basePrice;
+        };
+
+        const renderVerrineSlot = (num: number, isRequired: boolean) => {
+            const catKey = `Verrine_Cat_${num}`;
+            const itemKey = `Verrine_Item_${num}`;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const formAny = formData as any;
+            const selectedCat = formAny[catKey];
+
+            const isSlotsDisabled = !selectedFormat;
+
+            return (
+                <div key={`verrine_slot_${num}`} className={`bg-white p-4 rounded-xl border border-neutral-200 shadow-sm transition-opacity duration-300 ${isSlotsDisabled ? 'opacity-50' : ''}`}>
+                    <label className="block text-xs font-bold text-neutral-800 uppercase tracking-widest mb-3 border-b pb-2">
+                        Choix {num} {isRequired && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="space-y-3">
+                        <div className="relative">
+                            <select name={catKey} value={selectedCat || ""} onChange={handleChange} disabled={isSlotsDisabled} className={getInputStyle(catKey as any) + " appearance-none py-2 text-sm"}>
+                                <option value="">Famille de verrine...</option>
+                                {Object.keys(verrinesData).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                        <div className="relative">
+                            <select name={itemKey} value={formAny[itemKey] || ""} onChange={handleChange} disabled={isSlotsDisabled || !selectedCat} className={getInputStyle(itemKey as any) + ` appearance-none py-2 text-sm ${(isSlotsDisabled || !selectedCat) ? 'bg-neutral-100 opacity-60' : ''}`}>
+                                <option value="">Sélectionnez la pièce...</option>
+                                {selectedCat && (
+                                    <optgroup label={`--- ${selectedCat} (${getAdjustedPriceDisplay(selectedCat).toFixed(2).replace('.', ',')}€ / pièce) ---`}>
+                                        {verrinesData[selectedCat].items.map(item => <option key={item} value={item}>{item}</option>)}
+                                    </optgroup>
+                                )}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const formAny = formData as any;
+        const showBlock2 = !!formAny.Verrine_Item_3;
+        const showSlot7 = !!formAny.Verrine_Item_6;
+        const showSlot8 = !!formAny.Verrine_Item_7;
+        const showSlot9 = !!formAny.Verrine_Item_8;
+        const showSlot10 = !!formAny.Verrine_Item_9;
+
+        return (
+            <div className="space-y-8 animate-fade-in mt-8">
+                <h3 className="text-xl font-bold text-neutral-800 mb-2 border-b pb-2 uppercase tracking-wide">
+                    Votre Sélection de Verrines
+                </h3>
+                <p className="text-sm text-neutral-500 mb-6 italic">Minimum 3 pièces par personne. Maximum 10 pièces.</p>
+
+                {/* ÉTAPE 1 : CHOIX DU FORMAT */}
+                <div className="bg-neutral-100 p-6 rounded-2xl border border-neutral-200">
+                    <label className={`${labelStyle} flex items-center gap-2`}>
+                        <span>🍸</span> 1. Choisissez d&apos;abord le Format <span className="text-red-500">*</span>
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, Format_Verrines: "6cl" }))} className={`px-5 py-3 rounded-xl border text-sm font-bold flex flex-col items-center gap-1 transition-all ${selectedFormat === "6cl" ? "bg-black text-white border-black" : "bg-white text-neutral-800 border-neutral-200 hover:border-black"}`}>
+                            <span>Format Apéritif</span>
+                            <span className="font-serif text-xl">6 cl</span>
+                        </button>
+                        <button type="button" onClick={() => setFormData(prev => ({ ...prev, Format_Verrines: "12cl" }))} className={`px-5 py-3 rounded-xl border text-sm font-bold flex flex-col items-center gap-1 transition-all ${selectedFormat === "12cl" ? "bg-black text-white border-black" : "bg-white text-neutral-800 border-neutral-200 hover:border-black"}`}>
+                            <span>Format Dînatoire</span>
+                            <span className="font-serif text-xl">12 cl</span>
+                        </button>
+                    </div>
+                    {!selectedFormat && <p className="text-red-500 text-xs mt-3 font-medium ml-1">Veuillez sélectionner un format pour activer les choix de verrines.</p>}
+                </div>
+
+                {/* ÉTAPE 2 : SÉLECTION DES PIÈCES */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[1, 2, 3].map(i => renderVerrineSlot(i, true))}
+                </div>
+
+                <AnimatePresence>
+                    {showBlock2 && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-dashed border-neutral-200">
+                            {[4, 5, 6].map(i => renderVerrineSlot(i, false))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <AnimatePresence>
+                    {(showSlot7 || showSlot8 || showSlot9 || showSlot10) && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-dashed border-neutral-200">
+                            {showSlot7 && renderVerrineSlot(7, false)}
+                            {showSlot8 && renderVerrineSlot(8, false)}
+                            {showSlot9 && renderVerrineSlot(9, false)}
+                            {showSlot10 && renderVerrineSlot(10, false)}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* PRICE INDICATION */}
+                {totalPrice !== 0 && (
+                    <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
+                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
+                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
+                            {totalPrice === -1 ? (
+                                <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
+                            ) : (
+                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderContactFields = () => (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1667,6 +1890,7 @@ function ContactForm() {
                                     {isBuffetFroid && renderBuffetFroidFields()}
                                     {isPains && renderPainsFields()}
                                     {isZakouskis && renderZakouskisFields()}
+                                    {isVerrines && renderVerrinesFields()}
                                     {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && (
                                         <div className="bg-neutral-50 p-6 rounded-xl text-center">
                                             <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>

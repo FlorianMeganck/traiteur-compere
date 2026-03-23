@@ -371,43 +371,27 @@ export default function Formules() {
 
                                     {/* Boutons de Convives */}
                                     <div className="flex flex-wrap gap-3 mt-8">
-                                        {activeAperitifTab === 'zakouskis' || activeAperitifTab === 'pains_garnis' ? (
+                                        {activeAperitifTab === 'zakouskis' || activeAperitifTab === 'pains_garnis' || activeAperitifTab === 'verrines' ? (
                                             <>
-                                                {/* 4 Boutons pour Zakouskis et Petits Pains */}
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=moins_25`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
+                                                {/* 4 Boutons partagés pour Pains, Zakouskis et Verrines */}
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=moins_25`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group flex flex-col justify-center">
                                                     <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">Moins de 25 pers.</p>
-                                                    <p className="text-lg font-bold text-neutral-800">Prix sur sélection</p>
+                                                    <p className="text-sm font-bold text-neutral-800">Prix sur sélection</p>
                                                 </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=25_100`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=25_100`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group flex flex-col justify-center">
                                                     <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">25 à 100 pers.</p>
-                                                    <p className="text-lg font-bold text-neutral-800">Prix sur sélection</p>
+                                                    <p className="text-sm font-bold text-neutral-800">Prix sur sélection</p>
                                                 </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=100_200`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=100_200`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group flex flex-col justify-center">
                                                     <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">100 à 200 pers.</p>
-                                                    <p className="text-lg font-bold text-neutral-800">Prix sur sélection</p>
+                                                    <p className="text-sm font-bold text-neutral-800">Prix sur sélection</p>
                                                 </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=plus_200`} className="flex-1 min-w-[110px] bg-black p-3 rounded-xl text-center hover:bg-neutral-800 transition shadow-md transform hover:-translate-y-0.5">
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=plus_200`} className="flex-1 min-w-[110px] bg-black p-3 rounded-xl text-center hover:bg-neutral-800 transition shadow-md transform hover:-translate-y-0.5 flex flex-col justify-center">
                                                     <p className="text-[10px] font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">Plus de 200 pers.</p>
-                                                    <p className="text-lg font-bold text-white">Prix dégressifs</p>
+                                                    <p className="text-sm font-bold text-white">Prix dégressifs</p>
                                                 </Link>
                                             </>
-                                        ) : (
-                                            <>
-                                                {/* Anciens boutons pour Verrines (temporaire avant leur refonte) */}
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=moins_25`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
-                                                    <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">Moins de 25 pers.</p>
-                                                    <p className="text-lg font-bold text-neutral-800">À la carte</p>
-                                                </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=25_250`} className="flex-1 min-w-[110px] bg-black p-3 rounded-xl text-center hover:bg-neutral-800 transition shadow-md transform hover:-translate-y-0.5">
-                                                    <p className="text-[10px] font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 250 pers.</p>
-                                                    <p className="text-xl font-bold text-white">À la carte</p>
-                                                </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=plus_250`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
-                                                    <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">Plus de 250 pers.</p>
-                                                    <p className="text-lg font-bold text-neutral-800">Sur devis</p>
-                                                </Link>
-                                            </>
-                                        )}
+                                        ) : null}
                                     </div>
                                 </div>
                             </div>
