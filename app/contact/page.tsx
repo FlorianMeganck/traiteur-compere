@@ -72,8 +72,8 @@ const BBQ_PRICES: Record<string, number> = {
     nobles: 45,
 };
 
-const SIDES_COLD = ["Salade de Pâtes Pesto 🌿", "Salade de Pâtes Curry 🌿", "Salade Grecque (Feta/Olives) 🌿", "Taboulé Oriental 🌿", "Tomate Mozza Di Bufala 🌿", "Salade de Pomme de Terre (Mayonnaise) 🌿", "Salade de Pomme de Terre (Vinaigrette) 🌿", "Carottes Râpées (Citron) 🌿", "Céleri Râpé & Pommes 🌿", "Concombre à la crème 🌿", "Salade de chou blanc 🌿"];
-const feculentsBBQ = ["Pomme de terre en chemise 🌿", "Gratin Dauphinois 🌿", "Grenailles au Romarin 🌿", "Baguette", "Petits pains"];
+const SIDES_COLD = ["Salade de Pâtes Pesto", "Salade de Pâtes Curry", "Salade Grecque (Feta/Olives)", "Taboulé Oriental", "Tomate Mozza Di Bufala", "Salade de Pomme de Terre (Mayonnaise)", "Salade de Pomme de Terre (Vinaigrette)", "Carottes Râpées (Citron)", "Céleri Râpé & Pommes", "Concombre à la crème", "Salade de chou blanc"];
+const feculentsBBQ = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Baguette", "Petits pains"];
 
 const BUFFET_FROID_PRICES: Record<string, number> = {
     buffet_campagnard: 13,
@@ -245,9 +245,9 @@ const collectiviteData: Record<string, number> = {
 };
 
 // Legacy/Other Menus
-const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿", "Quiche aux légumes 🌿"];
-const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
-const ITEMS_ASSOCIATIONS = ["Boulets Liégeois (Sauce Lapin)", "Boulets Liégeois (Sauce Tomate)", "Vol-au-vent artisanal", "Pâtes Bolognaise", "Pâtes Carbonara", "Burgers Spécial Compère", "Option Végé : Grande Salade & Quiche 🌿"];
+const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison", "Quiche aux légumes"];
+const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison", "Terrine de légumes"];
+const ITEMS_ASSOCIATIONS = ["Boulets Liégeois (Sauce Lapin)", "Boulets Liégeois (Sauce Tomate)", "Vol-au-vent artisanal", "Pâtes Bolognaise", "Pâtes Carbonara", "Burgers Spécial Compère", "Option Végé : Grande Salade & Quiche"];
 
 // OPTIONS
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
@@ -1340,7 +1340,7 @@ function ContactForm() {
                         <option value="Burgers">Burgers Spécial Compère</option>
                         <option value="Boulets Liégeois">Boulets Liégeois & Frites</option>
                         <option value="Vol-au-vent">Vol-au-vent artisanal & Frites</option>
-                        <option value="Option Végétarienne">Option Végé (Salade & Quiche) 🌿</option>
+                        <option value="Option Végétarienne">Option Végé (Salade & Quiche)</option>
                     </select>
                     <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
