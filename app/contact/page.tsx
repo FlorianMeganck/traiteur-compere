@@ -731,7 +731,6 @@ function ContactForm() {
 
             // --- SECTION PETITS PAINS ---
             ...(formData.Type_Evenement === 'Petits pains' && {
-                "-------------------": "-------------------", // Petit séparateur visuel pour le mail
                 "🥖 MENU SÉLECTIONNÉ": "PETITS PAINS & WRAPS",
                 ...(formData.Categorie_Pains && { "🏷️ Gamme choisie": formData.Categorie_Pains }),
                 ...(formData.Quantite_Pains && { "🔢 Quantité": `${formData.Quantite_Pains} pièces / pers.` })
