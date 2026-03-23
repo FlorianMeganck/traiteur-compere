@@ -1247,16 +1247,6 @@ function ContactForm() {
         const selectedCategory = formData.Categorie_Pains;
         const categoryInfo = selectedCategory ? painsData[selectedCategory] : null;
 
-        let adjustedPrice = 0;
-        if (categoryInfo) {
-            adjustedPrice = categoryInfo.price;
-            if (formData.Nombre_Convives === 'Moins de 25') {
-                adjustedPrice += 0.30;
-            } else if (formData.Nombre_Convives === '100 à 200') {
-                adjustedPrice -= 0.20;
-            }
-        }
-
         return (
             <div className="space-y-8 animate-fade-in mt-8">
                 <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
@@ -1272,7 +1262,9 @@ function ContactForm() {
                             <select name="Categorie_Pains" value={formData.Categorie_Pains || ""} onChange={handleChange} className={getInputStyle("Categorie_Pains") + " appearance-none"}>
                                 <option value="">Sélectionnez une gamme...</option>
                                 {Object.keys(painsData).map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
+                                    <option key={cat} value={cat}>
+                                        {cat} ({painsData[cat].price.toFixed(2).replace('.', ',')}€ / pièce)
+                                    </option>
                                 ))}
                             </select>
                             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
@@ -1299,16 +1291,11 @@ function ContactForm() {
                             <span>🔢</span> Quantité par personne
                         </label>
                         <div className="relative">
-                            <select name="Quantite_Pains" value={formData.Quantite_Pains || ""} onChange={handleChange} className={getInputStyle("Quantite_Pains") + " appearance-none"} disabled={!selectedCategory}>
+                            <select name="Quantite_Pains" value={formData.Quantite_Pains || ""} onChange={handleChange} className={getInputStyle("Quantite_Pains") + " appearance-none"}>
                                 <option value="">Nombre de pièces/pers...</option>
-                                {[3, 4, 5, 6, 7, 8, 9, 10].map(num => {
-                                    const priceInfo = adjustedPrice > 0 ? ` (${(adjustedPrice * num).toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€)` : "";
-                                    return (
-                                        <option key={num} value={num}>
-                                            {num} pièces / pers {priceInfo}
-                                        </option>
-                                    );
-                                })}
+                                {[3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                                    <option key={num} value={num}>{num} pièces / pers</option>
+                                ))}
                             </select>
                             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
@@ -1322,11 +1309,15 @@ function ContactForm() {
                 </div>
 
                 {/* PRICE INDICATION */}
-                {totalPrice > 0 && totalPrice !== -1 && (
+                {totalPrice !== 0 && (
                     <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
                         <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
                             <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                            <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                            {totalPrice === -1 ? (
+                                <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
+                            ) : (
+                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                            )}
                         </div>
                     </div>
                 )}
