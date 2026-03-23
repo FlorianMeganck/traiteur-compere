@@ -174,25 +174,46 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
     }
 };
 
-const FORMULES = [
-    {
-        tag: "Terroir",
-        title: "Le Buffet Ardennais",
-        description: "Une véritable immersion dans le terroir : un assortiment généreux de charcuteries artisanales, spécialités de Liège et viandes mijotées pour une convivialité absolue.",
-        price: "15€ / pers",
-        image: "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=2070&auto=format&fit=crop",
-        items: [
-            "Croûte de pâté de chevreuil",
-            "Boudin blanc de Liège & Boudin noir",
-            "Duo de jambons sur griffes",
-            "Pêche au thon",
-            "Rosbif et Rôti de porc braisés",
-            "Hure de veau",
-            "Féculents et Crudités de saison"
-        ],
-        allergens: ["gluten", "egg", "lait", "fish", "moutarde", "celeri"],
-        imageStyle: "rounded-t-2xl"
+const aperitifsData = {
+    zakouskis: {
+        id: 'zakouskis',
+        title: 'Zakouskis',
+        desc: "Des bouchées raffinées pour éveiller les papilles. Découvrez nos créations déclinées en gammes Classique, Internationale et Premium.",
+        image: '/images/zakouskis.jpg', // Image à ajouter dans /public/images
+        composition: [
+            "Légumes & Végé (ex: Arancini à la truffe, Falafel)",
+            "Poisson & Mer (ex: Saint-Jacques snackée, Lobster roll)",
+            "Viande & Volaille (ex: Mini burger Black Angus, Tataki)",
+            "Tarification à la pièce (de 2,00€ à 4,50€)"
+        ]
     },
+    verrines: {
+        id: 'verrines',
+        title: 'Verrines (Apéritives ou Dînatoires)',
+        desc: "Élégantes et savoureuses, nos verrines se déclinent en format apéritif (6cl) ou dînatoire (12cl) pour s'adapter à votre événement.",
+        image: '/images/verrines.jpg', // Image à ajouter dans /public/images
+        composition: [
+            "Végétariennes (ex: Burrata pesto, Mousse de ricotta)",
+            "Poisson & Mer (ex: Ceviche de langoustine, Tartare saumon)",
+            "Viande & Volaille (ex: Carpaccio de bœuf, Parmentier de canard)",
+            "Tarification au format (de 2,00€ à 5,00€)"
+        ]
+    },
+    pains_garnis: {
+        id: 'pains_garnis',
+        title: 'Petits Pains & Wraps',
+        desc: "L'authenticité au creux de la main. Parfait pour vos déjeuners d'entreprise ou réceptions en journée.",
+        image: '/images/pains-garnis.jpg', // Image à ajouter dans /public/images
+        composition: [
+            "Pains Classiques Fermés (ex: Crabe fondant, Américain)",
+            "Pains Signature (ex: Le Suédois, L'Italien, Le Périgord)",
+            "Pains Ouverts Festifs (décorés de fleurs comestibles)",
+            "L'Instant Wraps (ex: Le Norvégien, Le Maraîcher)"
+        ]
+    }
+};
+
+const FORMULES = [
     {
         tag: "BBQ & Feu de bois",
         title: "Le Barbecue sur Mesure",
@@ -284,6 +305,8 @@ interface FormuleType {
 }
 
 export default function Formules() {
+    const [activeAperitifTab, setActiveAperitifTab] = useState('zakouskis');
+
     return (
         <main className="min-h-screen pt-32 pb-20 bg-gray-50">
             <div className="max-w-7xl mx-auto px-6">
@@ -296,6 +319,86 @@ export default function Formules() {
                         Du simple buffet aux plats mijotés, nous avons la formule qu&apos;il vous faut.
                     </p>
                 </header>
+
+                {/* SECTION APÉRITIFS */}
+                <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-4xl font-serif text-neutral-800 mb-4">Apéritifs & Mises en bouche</h2>
+                            <div className="w-24 h-1 bg-[#D4AF37] mx-auto"></div>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                            {/* Colonne Gauche : Onglets & Infos */}
+                            <div className="lg:col-span-5 space-y-8">
+                                
+                                {/* Navigation des onglets */}
+                                <div className="flex flex-wrap gap-2">
+                                    {Object.keys(aperitifsData).map((key) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => setActiveAperitifTab(key)}
+                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] ${
+                                                activeAperitifTab === key
+                                                    ? "bg-black text-[#D4AF37] shadow-lg scale-105"
+                                                    : "bg-white text-neutral-500 border border-neutral-200 hover:border-[#D4AF37] hover:text-black"
+                                            }`}
+                                        >
+                                            {aperitifsData[key as keyof typeof aperitifsData].title.split(' ')[0]}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Contenu Dynamique */}
+                                <div className="animate-fade-in">
+                                    <h3 className="text-2xl font-bold text-neutral-800 mb-4">{aperitifsData[activeAperitifTab as keyof typeof aperitifsData].title}</h3>
+                                    <p className="text-neutral-600 mb-6 leading-relaxed">
+                                        {aperitifsData[activeAperitifTab as keyof typeof aperitifsData].desc}
+                                    </p>
+
+                                    <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 mb-8">
+                                        <h4 className="text-sm font-bold text-black uppercase tracking-widest mb-4">À la carte</h4>
+                                        <ul className="grid grid-cols-1 gap-3">
+                                            {aperitifsData[activeAperitifTab as keyof typeof aperitifsData].composition.map((item, idx) => (
+                                                <li key={idx} className="flex items-start gap-3 text-neutral-700 text-sm">
+                                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                                    <span>{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    {/* Boutons de Convives (Redirection avec paramètres) */}
+                                    <div className="flex flex-wrap gap-3">
+                                        <Link href={`/contact?menu=aperitif&convives=moins_25`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
+                                            <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">Moins de 25 pers.</p>
+                                            <p className="text-lg font-bold text-neutral-800">À la carte</p>
+                                        </Link>
+                                        <Link href={`/contact?menu=aperitif&convives=25_250`} className="flex-1 min-w-[110px] bg-black p-3 rounded-xl text-center hover:bg-neutral-800 transition shadow-md transform hover:-translate-y-0.5">
+                                            <p className="text-[10px] font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 250 pers.</p>
+                                            <p className="text-xl font-bold text-white">À la carte</p>
+                                        </Link>
+                                        <Link href={`/contact?menu=aperitif&convives=plus_250`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
+                                            <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">Plus de 250 pers.</p>
+                                            <p className="text-lg font-bold text-neutral-800">Sur devis</p>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Colonne Droite : Image Dynamique */}
+                            <div className="lg:col-span-7 h-[500px] relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in">
+                                <Image
+                                    src={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].image}
+                                    alt={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].title}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </section>
 
                 {/* FORMULES LIST */}
                 <div className="space-y-24">
@@ -634,29 +737,7 @@ function PricingBlock({ price, tag, selectedBBQ, activeBuffetTab }: { price: str
         );
     }
 
-    // Logic for Ardennais (Terroir)
-    if (tag === "Terroir") {
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-                <Link
-                    href="/contact?menu=ardennais&count=4&convives=Moins de 40"
-                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
-                >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 40 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">4 Choix à composer</span>
-                </Link>
 
-                <Link
-                    href="/contact?menu=ardennais&count=5&convives=40 et plus"
-                    className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
-                >
-                    <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">40 pers. et plus</span>
-                    <span className="text-lg font-bold font-serif">5 Choix à composer</span>
-                </Link>
-            </div>
-        );
-    }
 
     // Logic for Gala (Banquet & Mariage)
     if (tag === "Banquet & Mariage") {
