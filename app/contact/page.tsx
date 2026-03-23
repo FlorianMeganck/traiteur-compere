@@ -285,8 +285,9 @@ function ContactForm() {
     const isPlatUnique = menuParam === 'plat_unique';
     const isPainsMode = menuParam === 'pains_garnis';
     const isZakouskisMode = menuParam === 'zakouskis';
+    const isVerrinesMode = menuParam === 'verrines';
 
-    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode;
+    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode;
     const showMenuFirst = isCustomMode;
 
     const [formData, setFormData] = useState({
@@ -539,7 +540,7 @@ function ContactForm() {
         if (isBuffet) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
-        if (isPainsMode || isZakouskisMode || menuParam === 'verrines') return OPTIONS_PAINS;
+        if (isPainsMode || isZakouskisMode || isVerrinesMode) return OPTIONS_PAINS;
         return OPTIONS_STANDARD;
     };
 
@@ -594,7 +595,7 @@ function ContactForm() {
                     if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
                     else if (isAnyBBQ) newData.Nombre_Convives = "Moins de 25";
                     else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
-                    else if (isPainsMode || isZakouskisMode || menuParam === 'verrines') newData.Nombre_Convives = "Moins de 25";
+                    else if (isPainsMode || isZakouskisMode || isVerrinesMode) newData.Nombre_Convives = "Moins de 25";
                     else if (isBuffet || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 40";
                     else newData.Nombre_Convives = "Moins de 20";
                 } else if (safeParam.includes('100') && safeParam.includes('200')) {
