@@ -690,7 +690,7 @@ function ContactForm() {
 
             // DÉTAILS ÉVÉNEMENT
             "📋 Formule Choisie": formatFormulaName(menuParam),
-            "💶 Prix Estimé": finalPriceStr,
+            "💰 PRIX ESTIMATIF AFFICHÉ": finalPriceStr,
             "📅 Date de l'événement": formData.Date,
             "👥 Nombre de convives": formData.Nombre_Convives,
 
@@ -729,9 +729,13 @@ function ContactForm() {
             ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
             ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra }),
             
-            // PETITS PAINS
-            ...(formData.Categorie_Pains && { "🥖 Gamme Pains Choisie": formData.Categorie_Pains }),
-            ...(formData.Quantite_Pains && { "🔢 Quantité Pains / pers": `${formData.Quantite_Pains} pièces` }),
+            // --- SECTION PETITS PAINS ---
+            ...(formData.Type_Evenement === 'Petits pains' && {
+                "-------------------": "-------------------", // Petit séparateur visuel pour le mail
+                "🥖 MENU SÉLECTIONNÉ": "PETITS PAINS & WRAPS",
+                ...(formData.Categorie_Pains && { "🏷️ Gamme choisie": formData.Categorie_Pains }),
+                ...(formData.Quantite_Pains && { "🔢 Quantité": `${formData.Quantite_Pains} pièces / pers.` })
+            }),
 
             // SUPPLÉMENTS VIANDES (BBQ)
             ...(formData.Viande_Extra_1 && { "🥩 Viande Suppl. 1 (+2€)": formData.Viande_Extra_1 }),
