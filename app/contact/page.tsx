@@ -122,21 +122,21 @@ const buffetCompositions: Record<string, string[]> = {
 };
 
 const painsData: Record<string, { price: number; items: string[] }> = {
-    "Petits Pains Classiques (Fermés)": { 
-        price: 2.20, 
-        items: ["Côté Mer (Salade crevettes, Thon, Saumon, Crabe)", "Côté Boucherie (Américain, Tartare, Jambon, Salade viande)", "Côté Volaille (Poulet Curry, Estragon)", "Côté Fromager (Abbaye, Emmental, Brie)"] 
+    "Petits Pains Classiques (Fermés)": {
+        price: 2.20,
+        items: ["Côté Mer (Salade crevettes, Thon, Saumon, Crabe)", "Côté Boucherie (Américain, Tartare, Jambon, Salade viande)", "Côté Volaille (Poulet Curry, Estragon)", "Côté Fromager (Abbaye, Emmental, Brie)"]
     },
-    "Petits Pains Signature (Fermés)": { 
-        price: 2.20, 
-        items: ["Le Suédois (Saumon, Philadelphia)", "L'Italien (Jambon de Parme, Olives)", "Le Périgord (Mousse de canard, Magret)", "Le Spécial (Houmous poivron, Chorizo)"] 
+    "Petits Pains Signature (Fermés)": {
+        price: 2.20,
+        items: ["Le Suédois (Saumon, Philadelphia)", "L'Italien (Jambon de Parme, Olives)", "Le Périgord (Mousse de canard, Magret)", "Le Spécial (Houmous poivron, Chorizo)"]
     },
-    "Pains Ouverts Festifs": { 
-        price: 2.75, 
-        items: ["Compositions Classiques et Signature présentées ouvertes", "Garniture généreuse", "Décoration fleurs comestibles et micro-pousses"] 
+    "Pains Ouverts Festifs": {
+        price: 2.75,
+        items: ["Compositions Classiques et Signature présentées ouvertes", "Garniture généreuse", "Décoration fleurs comestibles et micro-pousses"]
     },
-    "L'Instant Wraps": { 
-        price: 2.20, 
-        items: ["Le Maraîcher (Crudités, crème légère)", "Le Norvégien (Saumon fumé, cream cheese)", "L'Oriental (Houmous, légumes grillés)", "Le Terroir (Charcuteries fines)"] 
+    "L'Instant Wraps": {
+        price: 2.20,
+        items: ["Le Maraîcher (Crudités, crème légère)", "Le Norvégien (Saumon fumé, cream cheese)", "L'Oriental (Houmous, légumes grillés)", "Le Terroir (Charcuteries fines)"]
     }
 };
 
@@ -307,7 +307,7 @@ function ContactForm() {
         Suppl_Crudite_1: "",
         Suppl_Crudite_2: "",
         Suppl_Crudite_3: "",
-        
+
         // Petits Pains
         Categorie_Pains: "",
         Quantite_Pains: ""
@@ -323,7 +323,7 @@ function ContactForm() {
         if (!countStr) return 'high'; // Default if empty
         if (countStr.includes("Moins de 25")) return 'low';
         if (countStr.includes("Moins de 20")) return 'high';
-        if (countStr.includes("Plus de")) return 'high'; 
+        if (countStr.includes("Plus de")) return 'high';
         return 'mid';
     };
 
@@ -684,7 +684,7 @@ function ContactForm() {
 
         // 3. Construction du Payload Web3Forms (Propre pour le Web, Visuel pour le Mail)
         const payload = {
-            access_key: "METTRE_LA_NOUVELLE_CLE_ICI",
+            access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
             subject: `Nouvelle demande : ${formData.Nom} ${formData.Prenom}`,
             from_name: "Site Traiteur Compère",
 
@@ -728,7 +728,7 @@ function ContactForm() {
             ...(formData.Crudite_5 && { "🥗 Crudité 5": formData.Crudite_5 }),
             ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
             ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra }),
-            
+
             // --- SECTION PETITS PAINS ---
             ...(formData.Type_Evenement === 'Petits pains' && {
                 "-------------------": "-------------------", // Petit séparateur visuel pour le mail
@@ -1247,7 +1247,7 @@ function ContactForm() {
 
     const renderPainsFields = () => {
         if (!isPains) return null;
-        
+
         const selectedCategory = formData.Categorie_Pains;
         const categoryInfo = selectedCategory ? painsData[selectedCategory] : null;
 
@@ -1255,7 +1255,7 @@ function ContactForm() {
         const getAdjustedUnitPrice = (basePrice: number) => {
             if (formData.Nombre_Convives === 'Moins de 25') return basePrice + 0.30;
             if (formData.Nombre_Convives === '100 à 200') return basePrice - 0.20;
-            return basePrice; 
+            return basePrice;
         };
 
         return (
