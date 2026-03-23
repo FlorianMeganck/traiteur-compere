@@ -167,26 +167,49 @@ const getZakouskiBasePrice = (itemName: string): number => {
 };
 
 // Structure pour Verrines (Prix différents selon format 6cl / 12cl)
+// Structure stricte des Verrines selon le PDF (Prix 6cl / 12cl)
 const verrinesData: Record<string, { items: string[], price6cl: number, price12cl: number }> = {
     "Végétariennes": {
         price6cl: 2.00,
-        price12cl: 2.50,
-        items: ["Verrine italienne au parmesan, mozzarella di bufala et pesto", "Duo de melon feta et jambon serrano", "Mousse d'avocat et crevettes marinées au citron vert", "Taboulé oriental façon Compère", "Gaspacho andalou aux herbes fraîches", "Mini tartare de légumes et féta"]
+        price12cl: 3.50,
+        items: [
+            "Verrine italienne au parmesan et tomates confites", "Poivron, feta et olives noires", 
+            "Quinoa et légumes d'été au citron", "Lentilles et betterave au vinaigre balsamique", 
+            "Pois chiches et épinards, sauce tahini", "Houmous de lentilles", 
+            "Épinard, avocat, noix et lentilles", "Tomate cerise, mozzarella, huile d'olive", 
+            "Burrata, pesto et tomates cerises", "Polenta crémeuse et champignons poêlés", 
+            "Mousse de ricotta citron et courgettes grillées"
+        ]
     },
     "Poisson & Fruits de Mer": {
         price6cl: 3.00,
-        price12cl: 4.00,
-        items: ["Roulé de saumon au fromage frais et herbes fines", "Tartare de saumon frais à l'aneth", "Verrine cocktail crevettes et avocat", "Ceviche de poisson blanc au lait de coco", "Mousse de thon au fromage frais et herbes fines"]
+        price12cl: 4.50,
+        items: [
+            "Guacamole et saumon frais", "Saumon et fromage frais aux herbes", 
+            "Crevette et mangue fraîche", "Quinoa, thon et radis rose", 
+            "Tartare de saumon citron vert et aneth", "Crème d'avocat et chair de crabe", 
+            "Ceviche de cabillaud aux agrumes", "Rillettes de maquereau fumé et ciboulette"
+        ]
     },
     "Viande & Volaille": {
         price6cl: 3.00,
-        price12cl: 3.80,
-        items: ["Mini brochette de poulet mariné aux épices douces", "Carpaccio de bœuf au parmesan et roquette", "Mousse de foie de canard au Sauternes et gelée de porto", "Verrine de tartare de bœuf aux herbes fines", "Risotto crémeux aux champignons de saison"]
+        price12cl: 4.50,
+        items: [
+            "Carpaccio de bœuf, parmesan et balsamique", "Poulet grillé et quinoa aux herbes", 
+            "Bœuf et patate douce au thym", "Œufs mimosa et légumes grillés", 
+            "Butternut au chorizo piquant et abricot", "Mousse de chèvre frais, basilic, gingembre et noisettes", 
+            "Effiloché de bœuf au jus réduit", "Volaille curry coco", "Parmentier de canard en verrine"
+        ]
     },
     "Gamme Premium": {
         price6cl: 3.50,
-        price12cl: 4.50,
-        items: ["Verrine de foie gras avec chutney de figues", "Carpaccio de bœuf Black Angus, truffe d'été et parmesan", "Tartare de Saint-Jacques et fruits exotiques", "Duo de saumon (frais et fumé) et œufs de poisson", "Dôme de chocolat noir avec son cœur praliné"]
+        price12cl: 5.00,
+        items: [
+            "Ceviche de langoustine au citron vert", "Tartare de bœuf Black Angus et brisure de truffe", 
+            "Saumon fumé supérieur, crème ciboulette et œufs de saumon", "Tataki de thon rouge, sésame noir et sauce yuzu", 
+            "Foie gras mi-cuit, gelée de Porto et pain d'épices croustillant", "Noix de Saint-Jacques poêlées, crème légère au citron", 
+            "Asperges blanches, œuf parfait et crumble ibérique", "Carpaccio de Saint-Pierre, huile de basilic"
+        ]
     }
 };
 
