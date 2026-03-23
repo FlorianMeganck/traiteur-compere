@@ -1247,6 +1247,13 @@ function ContactForm() {
         const selectedCategory = formData.Categorie_Pains;
         const categoryInfo = selectedCategory ? painsData[selectedCategory] : null;
 
+        // Calcul du prix unitaire ajusté en fonction des convives
+        const getAdjustedUnitPrice = (basePrice: number) => {
+            if (formData.Nombre_Convives === 'Moins de 25') return basePrice + 0.30;
+            if (formData.Nombre_Convives === '100 à 200') return basePrice - 0.20;
+            return basePrice; 
+        };
+
         return (
             <div className="space-y-8 animate-fade-in mt-8">
                 <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
@@ -1261,11 +1268,14 @@ function ContactForm() {
                         <div className="relative">
                             <select name="Categorie_Pains" value={formData.Categorie_Pains || ""} onChange={handleChange} className={getInputStyle("Categorie_Pains") + " appearance-none"}>
                                 <option value="">Sélectionnez une gamme...</option>
-                                {Object.keys(painsData).map(cat => (
-                                    <option key={cat} value={cat}>
-                                        {cat} ({painsData[cat].price.toFixed(2).replace('.', ',')}€ / pièce)
-                                    </option>
-                                ))}
+                                {Object.keys(painsData).map(cat => {
+                                    const adjustedPrice = getAdjustedUnitPrice(painsData[cat].price);
+                                    return (
+                                        <option key={cat} value={cat}>
+                                            {cat} ({adjustedPrice.toFixed(2).replace('.', ',')}€ / pièce)
+                                        </option>
+                                    );
+                                })}
                             </select>
                             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
