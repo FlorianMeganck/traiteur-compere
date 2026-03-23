@@ -220,6 +220,30 @@ const getVerrineBasePrices = (itemName: string): { price6cl: number, price12cl: 
     return null;
 };
 
+const collectiviteData: Record<string, number> = {
+    "Lasagne aux légumes du soleil": 8,
+    "Cannellonis ricotta épinards": 8,
+    "Roulade de chicons au jambon, purée": 9,
+    "Roulade de chicons ardennaise (lard fumé), purée": 9,
+    "Potée aux carottes, saucisse": 9,
+    "Potée liégeoise": 9,
+    "Potée aux choux, saucisse": 9,
+    "Pâtes bolognaise": 9,
+    "Pâtes carbonara": 9,
+    "Ravioli de boeuf, sauce tomates": 9,
+    "Boulettes sauce tomate, purée": 9,
+    "Boulettes sauce chasseur, purée et compote de pomme": 9,
+    "Tartiflette": 9,
+    "Pâtes poulet estragon": 9,
+    "Vol au vent": 9,
+    "Lasagne de boeuf": 10,
+    "Lasagne au saumon": 10,
+    "Hachis parmentier épinards": 10,
+    "Boulet (tomates, chasseur) frite salade": 10,
+    "Carbonnade flamande, purée et compote de pomme": 12,
+    "Blanquette de veau à l'ancienne, purée": 14
+};
+
 // Legacy/Other Menus
 const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿", "Quiche aux légumes 🌿"];
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
@@ -232,6 +256,7 @@ const OPTIONS_COCHON = ["Moins de 25", "25 à 180", "Plus de 180"]; // Specific 
 const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
 const OPTIONS_ASSOCIATIONS = ["Moins de 50", "50 à 100", "Plus de 100"];
 const OPTIONS_PLAT_UNIQUE = ["Moins de 50", "50 à 100", "Plus de 100"];
+const OPTIONS_COLLECTIVITE = ["Moins de 50", "50 à 100", "Plus de 100"];
 const OPTIONS_PAINS = ["Moins de 25", "25 à 100", "100 à 200", "Plus de 200"];
 
 // --- VALIDATION HELPERS ---
@@ -309,8 +334,9 @@ function ContactForm() {
     const isPainsMode = menuParam === 'pains_garnis';
     const isZakouskisMode = menuParam === 'zakouskis';
     const isVerrinesMode = menuParam === 'verrines';
+    const isCollectiviteMode = menuParam === 'collectivite';
 
-    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode;
+    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode;
     const showMenuFirst = isCustomMode;
 
     const [formData, setFormData] = useState({
@@ -417,13 +443,17 @@ function ContactForm() {
         Verrine_Cat_7: "", Verrine_Item_7: "",
         Verrine_Cat_8: "", Verrine_Item_8: "",
         Verrine_Cat_9: "", Verrine_Item_9: "",
-        Verrine_Cat_10: "", Verrine_Item_10: ""
+        Verrine_Cat_10: "", Verrine_Item_10: "",
+
+        // Collectivite
+        Plat_Collectivite: ""
     });
 
     const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
     const isPains = formData.Type_Evenement === 'Petits pains';
     const isZakouskis = formData.Type_Evenement === 'Zakouskis';
     const isVerrines = formData.Type_Evenement === 'Verrines';
+    const isCollectivite = formData.Type_Evenement === 'Repas de collectivité';
 
     // --- PRICING ENGINE ---
 
@@ -495,6 +525,13 @@ function ContactForm() {
                 }
             }
             base = basePriceTotal;
+        } else if (isCollectivite && formData.Plat_Collectivite) {
+            let itemPrice = collectiviteData[formData.Plat_Collectivite];
+            // Majoration de 10% si moins de 50 personnes
+            if (formData.Nombre_Convives === 'Moins de 50') {
+                itemPrice = itemPrice * 1.10; 
+            }
+            base = itemPrice;
         }
 
         const tier = getPriceTier(formData.Nombre_Convives);
@@ -502,7 +539,8 @@ function ContactForm() {
             if (isPains && formData.Nombre_Convives === 'Plus de 200') return -1;
             if (isZakouskis && formData.Nombre_Convives === 'Plus de 200') return -1;
             if (isVerrines && formData.Nombre_Convives === 'Plus de 200') return -1;
-            if (!isPains && !isZakouskis && !isVerrines) return -1;
+            if (isCollectivite && formData.Nombre_Convives === 'Plus de 100') return -1;
+            if (!isPains && !isZakouskis && !isVerrines && !isCollectivite) return -1;
         }
 
         // 2. Supplements
@@ -564,6 +602,7 @@ function ContactForm() {
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
         if (isPainsMode || isZakouskisMode || isVerrinesMode) return OPTIONS_PAINS;
+        if (isCollectiviteMode) return OPTIONS_COLLECTIVITE;
         return OPTIONS_STANDARD;
     };
 
@@ -604,6 +643,8 @@ function ContactForm() {
                     newData.Type_Evenement = 'Zakouskis';
                 } else if (menuParam === 'verrines') {
                     newData.Type_Evenement = 'Verrines';
+                } else if (menuParam === 'collectivite') {
+                    newData.Type_Evenement = 'Repas de collectivité';
                 }
             }
 
@@ -613,10 +654,11 @@ function ContactForm() {
                 const safeParam = decodeURIComponent(convivesParam).toLowerCase();
 
                 // Détection intelligente selon les mots-clés
-                if (safeParam.includes('moins') && (safeParam.includes('20') || safeParam.includes('25'))) {
+                if (safeParam.includes('moins') && (safeParam.includes('20') || safeParam.includes('25') || safeParam.includes('40') || safeParam.includes('50'))) {
                     // Check specific menus restrictions first
                     if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
                     else if (isAnyBBQ) newData.Nombre_Convives = "Moins de 25";
+                    else if (isCollectiviteMode) newData.Nombre_Convives = "Moins de 50";
                     else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
                     else if (isPainsMode || isZakouskisMode || isVerrinesMode) newData.Nombre_Convives = "Moins de 25";
                     else if (isBuffet || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 40";
@@ -792,6 +834,8 @@ function ContactForm() {
             if (!formAny.Verrine_Item_1) newErrors.Verrine_Item_1 = "Requis";
             if (!formAny.Verrine_Item_2) newErrors.Verrine_Item_2 = "Requis";
             if (!formAny.Verrine_Item_3) newErrors.Verrine_Item_3 = "Requis";
+        } else if (isCollectivite) {
+            if (!formData.Plat_Collectivite) newErrors.Plat_Collectivite = "Requis";
         }
 
         return newErrors;
@@ -829,6 +873,8 @@ function ContactForm() {
             isSurDevis = formData.Nombre_Convives === 'Plus de 200';
         } else if (isVerrines) {
             isSurDevis = formData.Nombre_Convives === 'Plus de 200';
+        } else if (isCollectivite) {
+            isSurDevis = formData.Nombre_Convives === 'Plus de 100';
         } else {
             isSurDevis = getConvivesMax(formData.Nombre_Convives) > 250;
         }
@@ -844,6 +890,7 @@ function ContactForm() {
             if (rawName === 'pains_garnis') return "Petits pains";
             if (rawName === 'zakouskis') return "Zakouskis";
             if (rawName === 'verrines') return "Verrines";
+            if (rawName === 'collectivite') return "Repas de collectivité";
             const name = rawName.replace('bbq_', '').replace(/_/g, ' ');
             return `Barbecue ${name.charAt(0).toUpperCase() + name.slice(1)}`;
         };
@@ -931,6 +978,12 @@ function ContactForm() {
                 ...(formData as any).Verrine_Item_8 && { "Choix Verrine 8": (formData as any).Verrine_Item_8 },
                 ...(formData as any).Verrine_Item_9 && { "Choix Verrine 9": (formData as any).Verrine_Item_9 },
                 ...(formData as any).Verrine_Item_10 && { "Choix Verrine 10": (formData as any).Verrine_Item_10 }
+            }),
+
+            // --- SECTION COLLECTIVITÉS ---
+            ...(formData.Type_Evenement === 'Repas de collectivité' && {
+                "🥘 MENU SÉLECTIONNÉ": "REPAS DE COLLECTIVITÉ",
+                "🍽️ Plat Unique Choisi": formData.Plat_Collectivite || "Non spécifié"
             }),
 
             // SUPPLÉMENTS VIANDES (BBQ)
@@ -1776,6 +1829,57 @@ function ContactForm() {
         );
     };
 
+    const renderCollectiviteFields = () => {
+        if (!isCollectivite) return null;
+
+        // Tri alphabétique des plats pour un affichage propre
+        const sortedDishes = Object.keys(collectiviteData).sort((a, b) => a.localeCompare(b));
+
+        const getAdjustedPriceDisplay = (basePrice: number) => {
+            if (formData.Nombre_Convives === 'Moins de 50') return basePrice * 1.10;
+            return basePrice;
+        };
+
+        return (
+            <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-black mt-8">
+                <h3 className="text-xl font-bold text-neutral-800 uppercase tracking-wide border-b border-neutral-200 pb-2 mb-4">
+                    Choix du Plat Unique
+                </h3>
+
+                <div className="group">
+                    <label className={labelStyle}>Sélectionnez le plat pour votre groupe <span className="text-red-500">*</span></label>
+                    <div className="relative">
+                        <select name="Plat_Collectivite" value={formData.Plat_Collectivite} onChange={handleChange} className={getInputStyle("Plat_Collectivite" as any) + " appearance-none"}>
+                            <option value="">Faites votre choix parmi nos 21 plats...</option>
+                            {sortedDishes.map(dish => {
+                                const price = getAdjustedPriceDisplay(collectiviteData[dish]);
+                                return (
+                                    <option key={dish} value={dish}>
+                                        {dish} ({price.toFixed(2).replace('.', ',')}€ / pers)
+                                    </option>
+                                );
+                            })}
+                        </select>
+                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </div>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-2 italic px-1">Un seul et même plat pour l'ensemble des convives.</p>
+                </div>
+
+                {/* PRICE INDICATION */}
+                {totalPrice > 0 && totalPrice !== -1 && (
+                    <div className={`transition-all duration-300 border-t border-neutral-200 pt-6 mt-6`}>
+                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
+                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
+                            <span className="text-xl font-serif font-bold">{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderContactFields = () => (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1915,7 +2019,8 @@ function ContactForm() {
                                     {isPains && renderPainsFields()}
                                     {isZakouskis && renderZakouskisFields()}
                                     {isVerrines && renderVerrinesFields()}
-                                    {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && (
+                                    {isCollectivite && renderCollectiviteFields()}
+                                    {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && !isCollectivite && (
                                         <div className="bg-neutral-50 p-6 rounded-xl text-center">
                                             <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
                                         </div>

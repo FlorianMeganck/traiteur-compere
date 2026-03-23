@@ -249,22 +249,6 @@ const FORMULES = [
         ],
         allergens: ["crustace", "fish", "gluten", "egg", "lait", "sulfite"],
         imageStyle: "rounded-t-2xl"
-    },
-    {
-        tag: "Événements & Associations",
-        title: "Le Buffet Associatif",
-        description: "Formule conviviale en livraison seule. Idéal pour les grands groupes. Matériel et service non inclus.",
-        price: "14,50€ / pers",
-        image: "https://images.unsplash.com/photo-1547924475-f9e5b2931a26?q=80&w=2070&auto=format&fit=crop",
-        items: [
-            "Boulets Liégeois (Sauce Lapin ou Tomate) & Frites",
-            "Vol-au-vent artisanal & Frites",
-            "Bar à Pâtes (Bolognaise ou Carbonara)",
-            "Burgers Spécial Compère",
-            "Option Végé : Grande Salade de saison & Quiche aux légumes 🌿"
-        ],
-        allergens: ["gluten", "egg", "lait", "celeri", "moutarde"],
-        imageStyle: "rounded-t-2xl"
     }
 ];
 
@@ -419,32 +403,66 @@ export default function Formules() {
                 {/* FORMULES LIST */}
                 <div className="space-y-24">
                     {FORMULES.map((formule, index) => {
-                        const isAssociatif = formule.tag === "Événements & Associations";
                         const renderSectionTitle = () => {
                             if (index === 0) return <SectionTitle title="Barbecues" />;
                             if (formule.title === "Nos Buffets Froids") return <SectionTitle title="Buffets Froids" />;
                             if (formule.title === "Le Buffet de Gala") return <SectionTitle title="Buffets Chauds" />;
-                            if (isAssociatif) return <SectionTitle title="Plats Uniques & Associations" />;
                             return null;
                         };
 
                         return (
                             <div key={index}>
                                 {renderSectionTitle()}
-                                {isAssociatif && (
-                                    <div className="py-12 flex items-center justify-center gap-6 mb-12">
-                                        <div className="h-px bg-neutral-200 w-24 md:w-64"></div>
-                                        <div className="flex flex-col items-center gap-2 text-neutral-400">
-                                            <Package size={24} strokeWidth={1} />
-                                            <span className="text-xs font-serif italic tracking-widest uppercase">Offre Livraison Seule</span>
-                                        </div>
-                                        <div className="h-px bg-neutral-200 w-24 md:w-64"></div>
-                                    </div>
-                                )}
                                 <FormuleSection formule={formule} index={index} />
                             </div>
                         );
                     })}
+                </div>
+
+                <SectionTitle title="Plats Uniques & Associations" />
+
+                {/* SECTION COLLECTIVITÉS */}
+                <div className="bg-white rounded-3xl p-8 border border-neutral-200 shadow-xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-black rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+                    
+                    <div className="flex flex-col md:flex-row gap-8">
+                        <div className="flex-1">
+                            <h3 className="text-3xl font-serif text-neutral-900 mb-4">Repas de Collectivité</h3>
+                            <p className="text-neutral-600 mb-6 leading-relaxed">
+                                Des plats mijotés, généreux et réconfortants, pensés spécialement pour les grands groupes, les clubs sportifs et les associations. La convivialité au meilleur prix avec un plat unique pour tous.
+                            </p>
+                            
+                            <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 mb-6">
+                                <h4 className="text-sm font-bold text-neutral-800 uppercase tracking-widest mb-4">Quelques exemples à la carte</h4>
+                                <ul className="space-y-2">
+                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Carbonnade flamande, purée et compote</li>
+                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Lasagnes (Bœuf, Saumon, Légumes)</li>
+                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Boulettes sauce tomate ou chasseur</li>
+                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Et bien d'autres (21 plats au choix)...</li>
+                                </ul>
+                            </div>
+                            
+                            <div className="inline-block bg-black text-[#D4AF37] px-4 py-2 rounded-lg font-bold text-sm tracking-widest mb-6">
+                                De 8,00€ à 14,00€ / personne
+                            </div>
+                        </div>
+
+                        {/* Boutons de Convives (Vertical sur Desktop) */}
+                        <div className="md:w-64 flex flex-col justify-center gap-3">
+                            <Link href="/contact?menu=collectivite&convives=moins_50" className="w-full bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
+                                <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">Moins de 50 pers.</p>
+                                <p className="text-lg font-bold text-neutral-800">À la carte (+10%)</p>
+                            </Link>
+                            <Link href="/contact?menu=collectivite&convives=50_100" className="w-full bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
+                                <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">50 à 100 pers.</p>
+                                <p className="text-lg font-bold text-neutral-800">À la carte</p>
+                            </Link>
+                            <Link href="/contact?menu=collectivite&convives=plus_100" className="w-full bg-black p-4 rounded-xl text-center hover:bg-neutral-800 transition shadow-md transform hover:-translate-y-0.5">
+                                <p className="text-[10px] font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">Plus de 100 pers.</p>
+                                <p className="text-lg font-bold text-white">Tarifs dégressifs</p>
+                            </Link>
+                        </div>
+                    </div>
                 </div>
 
                 {/* BOTTOM LEGEND */}
