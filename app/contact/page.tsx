@@ -314,7 +314,7 @@ function ContactForm() {
     });
 
     const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
-    const isPains = formData.Type_Evenement === 'Petits Pains & Wraps';
+    const isPains = formData.Type_Evenement === 'Petits pains';
 
     // --- PRICING ENGINE ---
 
@@ -357,7 +357,10 @@ function ContactForm() {
         }
 
         const tier = getPriceTier(formData.Nombre_Convives);
-        if (tier === 'high' && !isPains) return -1; // -1 signals "Sur Devis" specifically. Excluded for isPains since we handle Plus de 200 specifically later
+        if (tier === 'high') {
+            if (isPains && formData.Nombre_Convives === 'Plus de 200') return -1;
+            if (!isPains) return -1;
+        }
 
         // 2. Supplements
 
@@ -453,7 +456,7 @@ function ContactForm() {
                 } else if (menuParam === 'plat_unique') {
                     newData.Type_Evenement = 'Plat Unique / Associatif';
                 } else if (menuParam === 'pains_garnis') {
-                    newData.Type_Evenement = 'Petits Pains & Wraps';
+                    newData.Type_Evenement = 'Petits pains';
                 }
             }
 
@@ -674,7 +677,7 @@ function ContactForm() {
                 const name = rawName.replace('buffet_', '').replace(/_/g, ' ');
                 return `Buffet Froid ${name.charAt(0).toUpperCase() + name.slice(1)}`;
             }
-            if (rawName === 'pains_garnis') return "Petits Pains & Wraps";
+            if (rawName === 'pains_garnis') return "Petits pains";
             const name = rawName.replace('bbq_', '').replace(/_/g, ' ');
             return `Barbecue ${name.charAt(0).toUpperCase() + name.slice(1)}`;
         };
@@ -1244,6 +1247,16 @@ function ContactForm() {
         const selectedCategory = formData.Categorie_Pains;
         const categoryInfo = selectedCategory ? painsData[selectedCategory] : null;
 
+        let adjustedPrice = 0;
+        if (categoryInfo) {
+            adjustedPrice = categoryInfo.price;
+            if (formData.Nombre_Convives === 'Moins de 25') {
+                adjustedPrice += 0.30;
+            } else if (formData.Nombre_Convives === '100 à 200') {
+                adjustedPrice -= 0.20;
+            }
+        }
+
         return (
             <div className="space-y-8 animate-fade-in mt-8">
                 <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
@@ -1286,16 +1299,25 @@ function ContactForm() {
                             <span>🔢</span> Quantité par personne
                         </label>
                         <div className="relative">
-                            <select name="Quantite_Pains" value={formData.Quantite_Pains || ""} onChange={handleChange} className={getInputStyle("Quantite_Pains") + " appearance-none"}>
+                            <select name="Quantite_Pains" value={formData.Quantite_Pains || ""} onChange={handleChange} className={getInputStyle("Quantite_Pains") + " appearance-none"} disabled={!selectedCategory}>
                                 <option value="">Nombre de pièces/pers...</option>
-                                {[3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                                    <option key={num} value={num}>{num} pièces / pers</option>
-                                ))}
+                                {[3, 4, 5, 6, 7, 8, 9, 10].map(num => {
+                                    const priceInfo = adjustedPrice > 0 ? ` (${(adjustedPrice * num).toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€)` : "";
+                                    return (
+                                        <option key={num} value={num}>
+                                            {num} pièces / pers {priceInfo}
+                                        </option>
+                                    );
+                                })}
                             </select>
                             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                             </div>
                         </div>
+                        {/* Message intolérances */}
+                        <p className="text-xs text-neutral-500 mt-2 italic px-1">
+                            En cas d'intolérances, merci de le préciser dans le champ message en bas du formulaire.
+                        </p>
                     </div>
                 </div>
 
