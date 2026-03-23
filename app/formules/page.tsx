@@ -301,8 +301,16 @@ interface FormuleType {
     price: string;
     image: string;
     items: string[];
-    allergens: string[];
+    allergens?: string[];
+    imageStyle?: string;
 }
+
+const SectionTitle = ({ title }: { title: string }) => (
+    <div className="mt-24 mb-12 text-center">
+        <h2 className="text-3xl md:text-4xl font-serif text-neutral-900 mb-4">{title}</h2>
+        <div className="w-16 h-1 bg-[#D4AF37] mx-auto rounded-full"></div>
+    </div>
+);
 
 export default function Formules() {
     const [activeAperitifTab, setActiveAperitifTab] = useState('zakouskis');
@@ -325,8 +333,7 @@ export default function Formules() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         
                         <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl font-serif text-neutral-800 mb-4">Apéritifs & Mises en bouche</h2>
-                            <div className="w-24 h-1 bg-[#D4AF37] mx-auto"></div>
+                            <SectionTitle title="Apéritifs & Mises en bouche" />
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
@@ -413,8 +420,17 @@ export default function Formules() {
                 <div className="space-y-24">
                     {FORMULES.map((formule, index) => {
                         const isAssociatif = formule.tag === "Événements & Associations";
+                        const renderSectionTitle = () => {
+                            if (index === 0) return <SectionTitle title="Barbecues" />;
+                            if (formule.title === "Nos Buffets Froids") return <SectionTitle title="Buffets Froids" />;
+                            if (formule.title === "Le Buffet de Gala") return <SectionTitle title="Buffets Chauds" />;
+                            if (isAssociatif) return <SectionTitle title="Plats Uniques & Associations" />;
+                            return null;
+                        };
+
                         return (
                             <div key={index}>
+                                {renderSectionTitle()}
                                 {isAssociatif && (
                                     <div className="py-12 flex items-center justify-center gap-6 mb-12">
                                         <div className="h-px bg-neutral-200 w-24 md:w-64"></div>
@@ -596,7 +612,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 <div className="flex items-center gap-4 text-sm text-gray-400">
                     <span className="uppercase tracking-widest text-xs font-bold">Contient :</span>
                     <div className="flex gap-3">
-                        {formule.allergens.map((alg) => {
+                        {formule.allergens?.map((alg) => {
                             const data = ALLERGEN_ICONS[alg];
                             if (!data) return null;
 
