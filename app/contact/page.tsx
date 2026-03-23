@@ -121,6 +121,25 @@ const buffetCompositions: Record<string, string[]> = {
     ]
 };
 
+const painsData: Record<string, { price: number; items: string[] }> = {
+    "Petits Pains Classiques (Fermés)": { 
+        price: 2.20, 
+        items: ["Côté Mer (Salade crevettes, Thon, Saumon, Crabe)", "Côté Boucherie (Américain, Tartare, Jambon, Salade viande)", "Côté Volaille (Poulet Curry, Estragon)", "Côté Fromager (Abbaye, Emmental, Brie)"] 
+    },
+    "Petits Pains Signature (Fermés)": { 
+        price: 2.20, 
+        items: ["Le Suédois (Saumon, Philadelphia)", "L'Italien (Jambon de Parme, Olives)", "Le Périgord (Mousse de canard, Magret)", "Le Spécial (Houmous poivron, Chorizo)"] 
+    },
+    "Pains Ouverts Festifs": { 
+        price: 2.75, 
+        items: ["Compositions Classiques et Signature présentées ouvertes", "Garniture généreuse", "Décoration fleurs comestibles et micro-pousses"] 
+    },
+    "L'Instant Wraps": { 
+        price: 2.20, 
+        items: ["Le Maraîcher (Crudités, crème légère)", "Le Norvégien (Saumon fumé, cream cheese)", "L'Oriental (Houmous, légumes grillés)", "Le Terroir (Charcuteries fines)"] 
+    }
+};
+
 // Legacy/Other Menus
 const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿", "Quiche aux légumes 🌿"];
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
@@ -133,6 +152,7 @@ const OPTIONS_COCHON = ["Moins de 25", "25 à 180", "Plus de 180"]; // Specific 
 const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
 const OPTIONS_ASSOCIATIONS = ["Moins de 50", "50 à 100", "Plus de 100"];
 const OPTIONS_PLAT_UNIQUE = ["Moins de 50", "50 à 100", "Plus de 100"];
+const OPTIONS_PAINS = ["Moins de 25", "25 à 100", "100 à 200", "Plus de 200"];
 
 // --- VALIDATION HELPERS ---
 
@@ -206,8 +226,9 @@ function ContactForm() {
     const isAssociations = menuParam === 'associations';
     const isBuffet = isArdennais || isGala;
     const isPlatUnique = menuParam === 'plat_unique';
+    const isPainsMode = menuParam === 'pains_garnis';
 
-    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode;
+    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode;
     const showMenuFirst = isCustomMode;
 
     const [formData, setFormData] = useState({
@@ -220,7 +241,7 @@ function ContactForm() {
         Type_Evenement: "Mariage",
         type_autre: "",
         Date: "",
-        Nombre_Convives: isCochonOrPorchetta ? OPTIONS_COCHON[0] : (isAnyBBQ ? OPTIONS_BBQ[0] : (isBuffet ? OPTIONS_BUFFET[0] : (isAssociations ? OPTIONS_ASSOCIATIONS[0] : OPTIONS_STANDARD[0]))),
+        Nombre_Convives: isCochonOrPorchetta ? OPTIONS_COCHON[0] : (isAnyBBQ ? OPTIONS_BBQ[0] : (isBuffet ? OPTIONS_BUFFET[0] : (isAssociations ? OPTIONS_ASSOCIATIONS[0] : (isPainsMode ? OPTIONS_PAINS[0] : OPTIONS_STANDARD[0])))),
         details_projet: "",
         Souhaite_etre_recontacte: "Non",
 
@@ -285,25 +306,30 @@ function ContactForm() {
         Crudite_6: "",
         Suppl_Crudite_1: "",
         Suppl_Crudite_2: "",
-        Suppl_Crudite_3: ""
+        Suppl_Crudite_3: "",
+        
+        // Petits Pains
+        Categorie_Pains: "",
+        Quantite_Pains: ""
     });
 
     const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
+    const isPains = formData.Type_Evenement === 'Petits Pains & Wraps';
 
     // --- PRICING ENGINE ---
 
     // Derived State for Price
     const getPriceTier = (countStr: string): 'low' | 'mid' | 'high' => {
         if (!countStr) return 'high'; // Default if empty
-        if (countStr.includes("Moins de 25")) return 'low'; // < 25 -> Higher Base Price
-        if (countStr.includes("Moins de 20")) return 'high'; // Standard ? NO, usually "on quote"
-        if (countStr.includes("Plus de")) return 'high'; // > 250 -> Devis (0)
-        return 'mid'; // 25 - 250 -> Standard Price
+        if (countStr.includes("Moins de 25")) return 'low';
+        if (countStr.includes("Moins de 20")) return 'high';
+        if (countStr.includes("Plus de")) return 'high'; 
+        return 'mid';
     };
 
     const calculateTotal = () => {
         if (isPlatUnique) return 14.5;
-        if (!isAnyBBQ && !isBuffetFroidMode) return 0;
+        if (!isAnyBBQ && !isBuffetFroidMode && !isPains) return 0;
 
         // 1. Base Price
         let base = 0;
@@ -316,10 +342,22 @@ function ContactForm() {
             base = basePrice;
         } else if (isBuffetFroidMode) {
             base = BUFFET_FROID_PRICES[menuParam || ''] || 0;
+        } else if (isPains && formData.Categorie_Pains && formData.Quantite_Pains) {
+            const basePrice = painsData[formData.Categorie_Pains].price;
+            let adjustedPrice = basePrice;
+
+            if (formData.Nombre_Convives === 'Moins de 25') {
+                adjustedPrice += 0.30;
+            } else if (formData.Nombre_Convives === '100 à 200') {
+                adjustedPrice -= 0.20;
+            }
+
+            const quantity = parseInt(formData.Quantite_Pains, 10);
+            base = adjustedPrice * quantity;
         }
 
         const tier = getPriceTier(formData.Nombre_Convives);
-        if (tier === 'high') return -1; // -1 signals "Sur Devis" specifically
+        if (tier === 'high' && !isPains) return -1; // -1 signals "Sur Devis" specifically. Excluded for isPains since we handle Plus de 200 specifically later
 
         // 2. Supplements
 
@@ -379,6 +417,7 @@ function ContactForm() {
         if (isBuffet) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
+        if (isPainsMode) return OPTIONS_PAINS;
         return OPTIONS_STANDARD;
     };
 
@@ -413,6 +452,8 @@ function ContactForm() {
                     newData.Type_Evenement = 'Associations';
                 } else if (menuParam === 'plat_unique') {
                     newData.Type_Evenement = 'Plat Unique / Associatif';
+                } else if (menuParam === 'pains_garnis') {
+                    newData.Type_Evenement = 'Petits Pains & Wraps';
                 }
             }
 
@@ -427,10 +468,17 @@ function ContactForm() {
                     if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
                     else if (isAnyBBQ) newData.Nombre_Convives = "Moins de 25";
                     else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
+                    else if (isPainsMode) newData.Nombre_Convives = "Moins de 25";
                     else if (isBuffet || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 40";
                     else newData.Nombre_Convives = "Moins de 20";
+                } else if (safeParam.includes('100') && safeParam.includes('200')) {
+                    newData.Nombre_Convives = "100 à 200";
+                } else if (safeParam.includes('25') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "25 à 100";
                 } else if (safeParam.includes('plus') && safeParam.includes('250')) {
                     newData.Nombre_Convives = "Plus de 250";
+                } else if (safeParam.includes('plus') && safeParam.includes('200')) {
+                    newData.Nombre_Convives = "Plus de 200";
                 } else if (safeParam.includes('plus') && safeParam.includes('180')) {
                     newData.Nombre_Convives = "Plus de 180";
                 } else if (safeParam.includes('plus') && safeParam.includes('100')) {
@@ -460,7 +508,7 @@ function ContactForm() {
 
             return newData;
         });
-    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations, isPlatUnique, isBuffetFroidMode]);
+    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations, isPlatUnique, isBuffetFroidMode, isPainsMode]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -578,6 +626,9 @@ function ContactForm() {
                 if (!formData.Viande_2) newErrors.Viande_2 = "Requis";
                 if (!formData.Viande_3) newErrors.Viande_3 = "Requis";
             }
+        } else if (isPains) {
+            if (!formData.Categorie_Pains) newErrors.Categorie_Pains = "Requis";
+            if (!formData.Quantite_Pains) newErrors.Quantite_Pains = "Requis";
         }
 
         return newErrors;
@@ -609,6 +660,8 @@ function ContactForm() {
             isSurDevis = formData.Nombre_Convives === 'Plus de 250';
         } else if (isCochonOrPorchetta) {
             isSurDevis = getConvivesMax(formData.Nombre_Convives) > 180;
+        } else if (isPains) {
+            isSurDevis = formData.Nombre_Convives === 'Plus de 200';
         } else {
             isSurDevis = getConvivesMax(formData.Nombre_Convives) > 250;
         }
@@ -621,6 +674,7 @@ function ContactForm() {
                 const name = rawName.replace('buffet_', '').replace(/_/g, ' ');
                 return `Buffet Froid ${name.charAt(0).toUpperCase() + name.slice(1)}`;
             }
+            if (rawName === 'pains_garnis') return "Petits Pains & Wraps";
             const name = rawName.replace('bbq_', '').replace(/_/g, ' ');
             return `Barbecue ${name.charAt(0).toUpperCase() + name.slice(1)}`;
         };
@@ -671,6 +725,10 @@ function ContactForm() {
             ...(formData.Crudite_5 && { "🥗 Crudité 5": formData.Crudite_5 }),
             ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
             ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra }),
+            
+            // PETITS PAINS
+            ...(formData.Categorie_Pains && { "🥖 Gamme Pains Choisie": formData.Categorie_Pains }),
+            ...(formData.Quantite_Pains && { "🔢 Quantité Pains / pers": `${formData.Quantite_Pains} pièces` }),
 
             // SUPPLÉMENTS VIANDES (BBQ)
             ...(formData.Viande_Extra_1 && { "🥩 Viande Suppl. 1 (+2€)": formData.Viande_Extra_1 }),
@@ -1180,6 +1238,80 @@ function ContactForm() {
         );
     };
 
+    const renderPainsFields = () => {
+        if (!isPains) return null;
+        
+        const selectedCategory = formData.Categorie_Pains;
+        const categoryInfo = selectedCategory ? painsData[selectedCategory] : null;
+
+        return (
+            <div className="space-y-8 animate-fade-in mt-8">
+                <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
+                    Composition de votre Assortiment
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
+                        <label className={`${labelStyle} flex items-center gap-2`}>
+                            <span>🥖</span> Gamme de pains
+                        </label>
+                        <div className="relative">
+                            <select name="Categorie_Pains" value={formData.Categorie_Pains || ""} onChange={handleChange} className={getInputStyle("Categorie_Pains") + " appearance-none"}>
+                                <option value="">Sélectionnez une gamme...</option>
+                                {Object.keys(painsData).map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+
+                        {categoryInfo && (
+                            <div className="mt-4 pt-4 border-t border-neutral-200 animate-fade-in">
+                                <p className="text-xs font-bold text-neutral-500 mb-2 uppercase tracking-wider">Ce que comprend cette gamme :</p>
+                                <ul className="space-y-1">
+                                    {categoryInfo.items.map((item, idx) => (
+                                        <li key={idx} className="flex items-start gap-2 text-sm text-neutral-700">
+                                            <span className="text-[#D4AF37] font-bold">✓</span> {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
+                        <label className={`${labelStyle} flex items-center gap-2`}>
+                            <span>🔢</span> Quantité par personne
+                        </label>
+                        <div className="relative">
+                            <select name="Quantite_Pains" value={formData.Quantite_Pains || ""} onChange={handleChange} className={getInputStyle("Quantite_Pains") + " appearance-none"}>
+                                <option value="">Nombre de pièces/pers...</option>
+                                {[3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                                    <option key={num} value={num}>{num} pièces / pers</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* PRICE INDICATION */}
+                {totalPrice > 0 && totalPrice !== -1 && (
+                    <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
+                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
+                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
+                            <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderContactFields = () => (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1316,7 +1448,8 @@ function ContactForm() {
                                     {isAnyBBQ && renderBBQComposition()}
                                     {isPlatUnique && renderPlatUniqueFields()}
                                     {isBuffetFroid && renderBuffetFroidFields()}
-                                    {(isBuffet || isAssociations) && !isBuffetFroid && (
+                                    {isPains && renderPainsFields()}
+                                    {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && (
                                         <div className="bg-neutral-50 p-6 rounded-xl text-center">
                                             <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
                                         </div>
