@@ -345,7 +345,7 @@ export default function Formules() {
                                                     : "bg-white text-neutral-500 border border-neutral-200 hover:border-[#D4AF37] hover:text-black"
                                             }`}
                                         >
-                                            {aperitifsData[key as keyof typeof aperitifsData].title.split(' ')[0]}
+                                            {key === 'pains_garnis' ? 'Petits Pains' : aperitifsData[key as keyof typeof aperitifsData].title.split(' ')[0]}
                                         </button>
                                     ))}
                                 </div>
