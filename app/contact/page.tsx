@@ -140,6 +140,32 @@ const painsData: Record<string, { price: number; items: string[] }> = {
     }
 };
 
+const zakouskisData: Record<string, Record<string, { price: number, items: string[] }>> = {
+    "Légumes & Végétariens": {
+        "Gamme Classique": { price: 2.00, items: ["Falafel et sauce tahini", "Mini bruschetta tomate et tapenade", "Samosa légumes", "Mini wrap grillé aux légumes méditerranéens", "Croquette de fromage", "Mini croustade aux champignons", "Gougère au fromage"] },
+        "Gamme Internationale": { price: 2.50, items: ["Arancini à la truffe", "Tempura de légumes et sauce aigre-douce", "Mini tacos végétariens avocat et pickles", "Cromesquis de fromage affiné", "Croustillant de camembert au miel"] }
+    },
+    "Poisson & Fruits de Mer": {
+        "Gamme Classique": { price: 3.00, items: ["Roulé de saumon au fromage frais", "Duo concombre et saumon fumé", "Mousse d'avocat et crevettes marinées au citron", "Nems crevettes", "Mini brochette crevette marinée"] },
+        "Gamme Internationale": { price: 3.00, items: ["Ceviche de poisson en mini-cuillère", "Sushi roll cocktail", "Tataki de thon au sésame", "Gambas tempura", "Mini quésadilla aux crevettes"] },
+        "Gamme Premium": { price: 4.50, items: ["Saint-Jacques snackée", "Mini lobster roll", "Blini saumon et œufs de poisson", "Tartare de thon rouge", "Mini ceviche de langoustine"] }
+    },
+    "Viande & Volaille": {
+        "Gamme Standard": { price: 3.00, items: ["Mini brochette de poulet mariné", "Nems poulet", "Feuilleté saucisse artisanale", "Mini burger bœuf", "Mini croque-monsieur"] },
+        "Gamme Internationale": { price: 3.00, items: ["Mini tacos bœuf épicé", "Gyoza poulet", "Kefta orientale et sauce yaourt", "Mini shawarma poulet", "Bao bun porc effiloché"] },
+        "Gamme Premium": { price: 4.00, items: ["Mini burger Black Angus", "Tataki de bœuf", "Parmentier de canard en bouchée", "Mini vol-au-vent aux ris de veau", "Brochette de magret fumé"] }
+    }
+};
+
+const getZakouskiBasePrice = (itemName: string): number => {
+    for (const cat of Object.values(zakouskisData)) {
+        for (const gamme of Object.values(cat)) {
+            if (gamme.items.includes(itemName)) return gamme.price;
+        }
+    }
+    return 0;
+};
+
 // Legacy/Other Menus
 const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison 🌿", "Quiche aux légumes 🌿"];
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison 🌿", "Terrine de légumes 🌿"];
@@ -227,8 +253,9 @@ function ContactForm() {
     const isBuffet = isArdennais || isGala;
     const isPlatUnique = menuParam === 'plat_unique';
     const isPainsMode = menuParam === 'pains_garnis';
+    const isZakouskisMode = menuParam === 'zakouskis';
 
-    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode;
+    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode;
     const showMenuFirst = isCustomMode;
 
     const [formData, setFormData] = useState({
@@ -310,11 +337,24 @@ function ContactForm() {
 
         // Petits Pains
         Categorie_Pains: "",
-        Quantite_Pains: ""
+        Quantite_Pains: "",
+        
+        // Zakouskis
+        Zakouski_Cat_1: "", Zakouski_Item_1: "",
+        Zakouski_Cat_2: "", Zakouski_Item_2: "",
+        Zakouski_Cat_3: "", Zakouski_Item_3: "",
+        Zakouski_Cat_4: "", Zakouski_Item_4: "",
+        Zakouski_Cat_5: "", Zakouski_Item_5: "",
+        Zakouski_Cat_6: "", Zakouski_Item_6: "",
+        Zakouski_Cat_7: "", Zakouski_Item_7: "",
+        Zakouski_Cat_8: "", Zakouski_Item_8: "",
+        Zakouski_Cat_9: "", Zakouski_Item_9: "",
+        Zakouski_Cat_10: "", Zakouski_Item_10: ""
     });
 
     const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
     const isPains = formData.Type_Evenement === 'Petits pains';
+    const isZakouskis = formData.Type_Evenement === 'Zakouskis';
 
     // --- PRICING ENGINE ---
 
@@ -329,7 +369,7 @@ function ContactForm() {
 
     const calculateTotal = () => {
         if (isPlatUnique) return 14.5;
-        if (!isAnyBBQ && !isBuffetFroidMode && !isPains) return 0;
+        if (!isAnyBBQ && !isBuffetFroidMode && !isPains && !isZakouskis) return 0;
 
         // 1. Base Price
         let base = 0;
@@ -354,12 +394,27 @@ function ContactForm() {
 
             const quantity = parseInt(formData.Quantite_Pains, 10);
             base = adjustedPrice * quantity;
+        } else if (isZakouskis) {
+            let basePriceTotal = 0;
+            // On boucle sur les 10 choix potentiels
+            for (let i = 1; i <= 10; i++) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const item = (formData as any)[`Zakouski_Item_${i}`];
+                if (item) {
+                    let itemPrice = getZakouskiBasePrice(item);
+                    if (formData.Nombre_Convives === 'Moins de 25') itemPrice += 0.30;
+                    else if (formData.Nombre_Convives === '100 à 200') itemPrice -= 0.20;
+                    basePriceTotal += itemPrice;
+                }
+            }
+            base = basePriceTotal;
         }
 
         const tier = getPriceTier(formData.Nombre_Convives);
         if (tier === 'high') {
             if (isPains && formData.Nombre_Convives === 'Plus de 200') return -1;
-            if (!isPains) return -1;
+            if (isZakouskis && formData.Nombre_Convives === 'Plus de 200') return -1;
+            if (!isPains && !isZakouskis) return -1;
         }
 
         // 2. Supplements
@@ -420,7 +475,7 @@ function ContactForm() {
         if (isBuffet) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
-        if (isPainsMode) return OPTIONS_PAINS;
+        if (isPainsMode || isZakouskisMode) return OPTIONS_PAINS;
         return OPTIONS_STANDARD;
     };
 
@@ -457,6 +512,8 @@ function ContactForm() {
                     newData.Type_Evenement = 'Plat Unique / Associatif';
                 } else if (menuParam === 'pains_garnis') {
                     newData.Type_Evenement = 'Petits pains';
+                } else if (menuParam === 'zakouskis') {
+                    newData.Type_Evenement = 'Zakouskis';
                 }
             }
 
@@ -471,7 +528,7 @@ function ContactForm() {
                     if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
                     else if (isAnyBBQ) newData.Nombre_Convives = "Moins de 25";
                     else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
-                    else if (isPainsMode) newData.Nombre_Convives = "Moins de 25";
+                    else if (isPainsMode || isZakouskisMode) newData.Nombre_Convives = "Moins de 25";
                     else if (isBuffet || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 40";
                     else newData.Nombre_Convives = "Moins de 20";
                 } else if (safeParam.includes('100') && safeParam.includes('200')) {
@@ -632,6 +689,12 @@ function ContactForm() {
         } else if (isPains) {
             if (!formData.Categorie_Pains) newErrors.Categorie_Pains = "Requis";
             if (!formData.Quantite_Pains) newErrors.Quantite_Pains = "Requis";
+        } else if (isZakouskis) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const formAny = formData as any;
+            if (!formAny.Zakouski_Item_1) newErrors.Zakouski_Item_1 = "Requis";
+            if (!formAny.Zakouski_Item_2) newErrors.Zakouski_Item_2 = "Requis";
+            if (!formAny.Zakouski_Item_3) newErrors.Zakouski_Item_3 = "Requis";
         }
 
         return newErrors;
@@ -665,6 +728,8 @@ function ContactForm() {
             isSurDevis = getConvivesMax(formData.Nombre_Convives) > 180;
         } else if (isPains) {
             isSurDevis = formData.Nombre_Convives === 'Plus de 200';
+        } else if (isZakouskis) {
+            isSurDevis = formData.Nombre_Convives === 'Plus de 200';
         } else {
             isSurDevis = getConvivesMax(formData.Nombre_Convives) > 250;
         }
@@ -678,6 +743,7 @@ function ContactForm() {
                 return `Buffet Froid ${name.charAt(0).toUpperCase() + name.slice(1)}`;
             }
             if (rawName === 'pains_garnis') return "Petits pains";
+            if (rawName === 'zakouskis') return "Zakouskis";
             const name = rawName.replace('bbq_', '').replace(/_/g, ' ');
             return `Barbecue ${name.charAt(0).toUpperCase() + name.slice(1)}`;
         };
@@ -734,6 +800,21 @@ function ContactForm() {
                 "🥖 MENU SÉLECTIONNÉ": "PETITS PAINS & WRAPS",
                 ...(formData.Categorie_Pains && { "🏷️ Gamme choisie": formData.Categorie_Pains }),
                 ...(formData.Quantite_Pains && { "🔢 Quantité": `${formData.Quantite_Pains} pièces / pers.` })
+            }),
+
+            // --- SECTION ZAKOUSKIS ---
+            ...(formData.Type_Evenement === 'Zakouskis' && {
+                "🥟 MENU SÉLECTIONNÉ": "ZAKOUSKIS",
+                ...(formData as any).Zakouski_Item_1 && { "Choix 1": (formData as any).Zakouski_Item_1 },
+                ...(formData as any).Zakouski_Item_2 && { "Choix 2": (formData as any).Zakouski_Item_2 },
+                ...(formData as any).Zakouski_Item_3 && { "Choix 3": (formData as any).Zakouski_Item_3 },
+                ...(formData as any).Zakouski_Item_4 && { "Choix 4": (formData as any).Zakouski_Item_4 },
+                ...(formData as any).Zakouski_Item_5 && { "Choix 5": (formData as any).Zakouski_Item_5 },
+                ...(formData as any).Zakouski_Item_6 && { "Choix 6": (formData as any).Zakouski_Item_6 },
+                ...(formData as any).Zakouski_Item_7 && { "Choix 7": (formData as any).Zakouski_Item_7 },
+                ...(formData as any).Zakouski_Item_8 && { "Choix 8": (formData as any).Zakouski_Item_8 },
+                ...(formData as any).Zakouski_Item_9 && { "Choix 9": (formData as any).Zakouski_Item_9 },
+                ...(formData as any).Zakouski_Item_10 && { "Choix 10": (formData as any).Zakouski_Item_10 }
             }),
 
             // SUPPLÉMENTS VIANDES (BBQ)
@@ -1338,6 +1419,116 @@ function ContactForm() {
         );
     };
 
+    const renderZakouskisFields = () => {
+        if (!isZakouskis) return null;
+
+        const getAdjustedPrice = (basePrice: number) => {
+            if (formData.Nombre_Convives === 'Moins de 25') return basePrice + 0.30;
+            if (formData.Nombre_Convives === '100 à 200') return basePrice - 0.20;
+            return basePrice;
+        };
+
+        const renderZakouskiSlot = (num: number, isRequired: boolean) => {
+            const catKey = `Zakouski_Cat_${num}`;
+            const itemKey = `Zakouski_Item_${num}`;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const formAny = formData as any;
+            const selectedCat = formAny[catKey];
+
+            return (
+                <div key={`zakouski_slot_${num}`} className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
+                    <label className="block text-xs font-bold text-neutral-800 uppercase tracking-widest mb-3 border-b pb-2">
+                        Choix {num} {isRequired && <span className="text-red-500">*</span>}
+                    </label>
+                    <div className="space-y-3">
+                        <div className="relative">
+                            <select name={catKey} value={selectedCat || ""} onChange={handleChange} className={getInputStyle(catKey as any) + " appearance-none py-2 text-sm"}>
+                                <option value="">Famille de produit...</option>
+                                {Object.keys(zakouskisData).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                        <div className="relative">
+                            <select name={itemKey} value={formAny[itemKey] || ""} onChange={handleChange} disabled={!selectedCat} className={getInputStyle(itemKey as any) + ` appearance-none py-2 text-sm ${!selectedCat ? 'bg-neutral-100 opacity-60' : ''}`}>
+                                <option value="">Sélectionnez la pièce...</option>
+                                {selectedCat && Object.entries(zakouskisData[selectedCat]).map(([gammeName, gammeData]) => {
+                                    const adjustedPrice = getAdjustedPrice(gammeData.price);
+                                    return (
+                                        <optgroup key={gammeName} label={`--- ${gammeName} (${adjustedPrice.toFixed(2).replace('.', ',')}€) ---`}>
+                                            {gammeData.items.map(item => <option key={item} value={item}>{item}</option>)}
+                                        </optgroup>
+                                    );
+                                })}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const formAny = formData as any;
+        const showBlock2 = !!formAny.Zakouski_Item_3;
+        const showSlot7 = !!formAny.Zakouski_Item_6;
+        const showSlot8 = !!formAny.Zakouski_Item_7;
+        const showSlot9 = !!formAny.Zakouski_Item_8;
+        const showSlot10 = !!formAny.Zakouski_Item_9;
+
+        return (
+            <div className="space-y-8 animate-fade-in mt-8">
+                <h3 className="text-xl font-bold text-neutral-800 mb-2 border-b pb-2 uppercase tracking-wide">
+                    Votre Sélection de Zakouskis
+                </h3>
+                <p className="text-sm text-neutral-500 mb-6 italic">Minimum 3 pièces par personne. Maximum 10 pièces.</p>
+
+                {/* Bloc 1 : Choix 1 à 3 (Obligatoires) */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {[1, 2, 3].map(i => renderZakouskiSlot(i, true))}
+                </div>
+
+                {/* Bloc 2 : Choix 4 à 6 */}
+                <AnimatePresence>
+                    {showBlock2 && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-dashed border-neutral-200">
+                            {[4, 5, 6].map(i => renderZakouskiSlot(i, false))}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Bloc 3 : Choix 7 à 10 (Individuels) */}
+                <AnimatePresence>
+                    {(showSlot7 || showSlot8 || showSlot9 || showSlot10) && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-dashed border-neutral-200">
+                            {showSlot7 && renderZakouskiSlot(7, false)}
+                            {showSlot8 && renderZakouskiSlot(8, false)}
+                            {showSlot9 && renderZakouskiSlot(9, false)}
+                            {showSlot10 && renderZakouskiSlot(10, false)}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* PRICE INDICATION */}
+                {totalPrice !== 0 && (
+                    <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
+                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
+                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
+                            {totalPrice === -1 ? (
+                                <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
+                            ) : (
+                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderContactFields = () => (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1475,6 +1666,7 @@ function ContactForm() {
                                     {isPlatUnique && renderPlatUniqueFields()}
                                     {isBuffetFroid && renderBuffetFroidFields()}
                                     {isPains && renderPainsFields()}
+                                    {isZakouskis && renderZakouskisFields()}
                                     {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && (
                                         <div className="bg-neutral-50 p-6 rounded-xl text-center">
                                             <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
