@@ -21,10 +21,8 @@ export const metadata: Metadata = {
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import GoogleAnalytics from "./components/GoogleAnalytics";
-import CookieBanner from "./components/CookieBanner";
-
 import ScrollToTop from "./components/ScrollToTop";
+import Analytics from "@/components/Analytics";
 
 export default function RootLayout({
   children,
@@ -38,12 +36,9 @@ export default function RootLayout({
       >
         <Navbar />
         {children}
-        <CookieBanner />
-        <Suspense fallback={null}>
-          <GoogleAnalytics GA_MEASUREMENT_ID='G-DM739YH09F' />
-        </Suspense>
         <Footer />
         <ScrollToTop />
+        <Analytics />
       </body>
     </html>
   );
