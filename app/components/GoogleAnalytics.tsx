@@ -10,23 +10,30 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID }: { GA_MEASUREMENT_
     const [consent, setConsent] = useState(false);
 
     useEffect(() => {
-        // Vérifie le consentement au démarrage
-        const consentGiven = localStorage.getItem("cookie_consent");
-        if (consentGiven === 'true') {
-            setConsent(true);
-        }
-
-        // Écoute l'événement personnalisé déclenché par la bannière
-        const handleConsentUpdate = () => {
-            setConsent(localStorage.getItem("cookie_consent") === 'true');
+        const checkConsent = () => {
+            const preferencesStr = localStorage.getItem("cookie_preferences");
+            if (preferencesStr) {
+                try {
+                    const preferences = JSON.parse(preferencesStr);
+                    setConsent(preferences.analytical === true);
+                } catch (e) {
+                    setConsent(false);
+                }
+            } else {
+                setConsent(false);
+            }
         };
 
-        window.addEventListener('storage', handleConsentUpdate); // Pour les autres onglets
-        window.addEventListener('local-consent-update', handleConsentUpdate); // Pour l'onglet actif
+        // Vérifie au démarrage
+        checkConsent();
+
+        // Écoute les changements
+        window.addEventListener('storage', checkConsent);
+        window.addEventListener('cookie-preferences-updated', checkConsent);
 
         return () => {
-            window.removeEventListener('storage', handleConsentUpdate);
-            window.removeEventListener('local-consent-update', handleConsentUpdate);
+            window.removeEventListener('storage', checkConsent);
+            window.removeEventListener('cookie-preferences-updated', checkConsent);
         };
     }, []);
 
@@ -48,14 +55,14 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID }: { GA_MEASUREMENT_
         <>
             <Script 
                 strategy="afterInteractive" 
-                src={`https://www.googletagmanager.com/gtag/js?id=G-DM739YH09F`} 
+                src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} 
             />
             <Script id="google-analytics" strategy="afterInteractive">
                 {`
                     window.dataLayer = window.dataLayer || [];
                     function gtag(){dataLayer.push(arguments);}
                     gtag('js', new Date());
-                    gtag('config', 'G-DM739YH09F');
+                    gtag('config', '${GA_MEASUREMENT_ID}');
                 `}
             </Script>
         </>

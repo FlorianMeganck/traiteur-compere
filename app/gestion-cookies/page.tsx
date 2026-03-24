@@ -40,6 +40,9 @@ function GestionCookiesContent() {
 
     const handleSave = () => {
         localStorage.setItem("cookie_preferences", JSON.stringify(preferences));
+        // Envoi du signal pour cacher le bandeau et mettre à jour GA4
+        window.dispatchEvent(new Event('cookie-preferences-updated'));
+        
         setShowToast(true);
         setTimeout(() => {
             setShowToast(false);

@@ -9,11 +9,22 @@ export default function CookieBanner() {
     const pathname = usePathname();
 
     useEffect(() => {
-        // Check if preferences are already set
-        const preferences = localStorage.getItem("cookie_preferences");
-        if (!preferences) {
-            setIsVisible(true);
-        }
+        // Vérifie si les préférences sont déjà définies au chargement
+        const checkPreferences = () => {
+            const preferences = localStorage.getItem("cookie_preferences");
+            setIsVisible(!preferences);
+        };
+
+        checkPreferences();
+
+        // Écoute les changements provenant d'autres pages (ex: gestion-cookies)
+        window.addEventListener('storage', checkPreferences);
+        window.addEventListener('cookie-preferences-updated', checkPreferences);
+
+        return () => {
+            window.removeEventListener('storage', checkPreferences);
+            window.removeEventListener('cookie-preferences-updated', checkPreferences);
+        };
     }, []);
 
     const handleRefuseAll = () => {
