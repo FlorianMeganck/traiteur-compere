@@ -46,19 +46,16 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID }: { GA_MEASUREMENT_
 
     return (
         <>
-            <Script
-                strategy="afterInteractive"
-                src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+            <Script 
+                strategy="afterInteractive" 
+                src={`https://www.googletagmanager.com/gtag/js?id=G-DM739YH09F`} 
             />
             <Script id="google-analytics" strategy="afterInteractive">
                 {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${GA_MEASUREMENT_ID}', {
-                    page_path: window.location.pathname,
-                    anonymize_ip: true
-                });
+                    window.dataLayer = window.dataLayer || [];
+                    function gtag(){dataLayer.push(arguments);}
+                    gtag('js', new Date());
+                    gtag('config', 'G-DM739YH09F');
                 `}
             </Script>
         </>
