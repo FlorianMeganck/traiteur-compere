@@ -41,19 +41,23 @@ export default function Home() {
             Savoir-faire bicentenaire d&apos;exception au service de vos événements les plus précieux.
           </p>
 
-          {/* Boutons d'action (Côte à côte) */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              href="/formules"
-              className="bg-black text-[#D4AF37] border border-black hover:bg-neutral-900 px-8 py-3 uppercase text-sm tracking-widest transition duration-300"
+          {/* Container des boutons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
+            
+            {/* Bouton 1 : Qui sommes-nous ? (Ghost Doré) */}
+            <Link 
+              href="/a-propos" 
+              className="inline-flex items-center justify-center px-10 py-4 rounded-full border-2 border-[#D4AF37] text-[#D4AF37] font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300 w-full sm:w-auto shadow-sm"
+            >
+              Qui sommes-nous ?
+            </Link>
+
+            {/* Bouton 2 : Découvrez nos formules (Plein Noir) */}
+            <Link 
+              href="/formules" 
+              className="inline-flex items-center justify-center px-10 py-4 rounded-full border-2 border-black bg-black text-white font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:border-[#D4AF37] transition-all duration-300 w-full sm:w-auto shadow-md"
             >
               Découvrez nos formules
-            </Link>
-            <Link
-              href="/contact"
-              className="bg-transparent text-white border border-white hover:bg-white hover:text-black px-8 py-3 uppercase text-sm tracking-widest transition duration-300"
-            >
-              Demandez un devis
             </Link>
           </div>
         </div>
