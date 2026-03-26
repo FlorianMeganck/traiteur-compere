@@ -233,22 +233,6 @@ const FORMULES = [
         items: [], // Dynamic
         allergens: ["gluten", "egg", "lait", "moutarde", "celeri", "fish", "crustace"],
         imageStyle: "rounded-t-2xl"
-    },
-    {
-        tag: "Banquet & Mariage",
-        title: "Le Buffet de Gala",
-        description: "Notre offre prestige pour vos événements d'exception. Des mets délicats et raffinés pour éblouir vos convives.",
-        price: "22€ / pers",
-        image: "https://images.unsplash.com/photo-1546241072-48010ad2862c?q=80&w=1974&auto=format&fit=crop",
-        items: [
-            "Mousse de foie de canard au Sauternes",
-            "Farandole de langoustines",
-            "Saumon aux deux saveurs",
-            "Terrine de Sandre au basilic & Tomates crevettes grises",
-            "Viandes braisées et accompagnements raffinés"
-        ],
-        allergens: ["crustace", "fish", "gluten", "egg", "lait", "sulfite"],
-        imageStyle: "rounded-t-2xl"
     }
 ];
 
@@ -304,7 +288,7 @@ const AllergenLink = ({ section }: { section: string }) => (
     </div>
 );
 
-function BuffetChaudCard() {
+function BuffetChaudSection() {
     const [services, setServices] = useState<number>(3);
 
     const descriptions = {
@@ -315,28 +299,39 @@ function BuffetChaudCard() {
     };
 
     return (
-        <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-neutral-100 mt-16 mb-8 relative overflow-hidden">
-            {/* Décoration de fond */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-            
-            <div className="relative z-10">
-                <div className="text-center mb-10">
-                    <h2 className="text-3xl md:text-4xl font-serif text-black mb-4">Buffets Chauds Sur-Mesure</h2>
-                    <p className="text-neutral-500 font-light max-w-2xl mx-auto">
-                        Créez un événement à votre image. Choisissez le format qui vous convient, et nous élaborerons ensemble un menu chaud personnalisé selon les saisons et vos envies.
-                    </p>
+        <div className="flex flex-col lg:flex-row gap-12 items-center mb-32">
+            {/* Colonne Gauche : Image */}
+            <div className="w-full lg:w-1/2 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl">
+                <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm px-4 py-2 text-xs font-bold text-[#D4AF37] tracking-widest uppercase z-10 rounded-sm shadow-sm">
+                    Sur-Mesure
                 </div>
+                {/* Remplace l'image par celle qui était utilisée pour le Gala ou une nouvelle */}
+                <Image 
+                    src="https://images.unsplash.com/photo-1546241072-48010ad2862c?q=80&w=1974&auto=format&fit=crop" 
+                    alt="Buffet Chaud Sur-Mesure" 
+                    fill 
+                    className="object-cover"
+                />
+            </div>
 
-                {/* Boutons de sélection (Pilules) */}
-                <div className="flex flex-wrap justify-center gap-4 mb-8">
+            {/* Colonne Droite : Contenu */}
+            <div className="w-full lg:w-1/2 flex flex-col items-start">
+                <h2 className="text-3xl md:text-4xl font-serif text-black mb-4">Buffets Chauds Sur-Mesure</h2>
+                <div className="w-12 h-1 bg-[#D4AF37] mb-6"></div>
+                <p className="text-neutral-500 font-light mb-8 leading-relaxed">
+                    Notre offre prestige pour vos événements d'exception. Choisissez le format qui vous convient, et nous élaborerons ensemble un menu chaud personnalisé selon les saisons et vos envies.
+                </p>
+
+                {/* Boutons de sélection */}
+                <div className="flex flex-wrap gap-3 mb-8">
                     {[2, 3, 4, 5].map((num) => (
                         <button
                             key={num}
                             onClick={() => setServices(num)}
-                            className={`px-6 py-2 rounded-full font-bold uppercase tracking-widest text-sm transition-all duration-300 border-2 
+                            className={`px-5 py-2 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 border-2 
                             ${services === num 
-                                ? 'bg-black text-white border-black shadow-lg scale-105' 
-                                : 'bg-transparent text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black'
+                                ? 'bg-black text-white border-black' 
+                                : 'bg-transparent text-neutral-400 border-neutral-200 hover:border-[#D4AF37] hover:text-black'
                             }`}
                         >
                             {num} Services
@@ -344,20 +339,28 @@ function BuffetChaudCard() {
                     ))}
                 </div>
 
-                {/* Contenu dynamique */}
-                <div className="bg-neutral-50 rounded-2xl p-6 md:p-8 text-center border border-neutral-100 min-h-[140px] flex items-center justify-center mb-10 transition-all duration-300">
-                    <p className="text-lg text-neutral-700 font-serif italic leading-relaxed">
+                {/* Encadré Composition (Design calqué sur le Gala) */}
+                <div className="w-full bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-100 mb-8">
+                    <h3 className="text-xs font-bold text-black uppercase tracking-widest mb-4">
+                        Exemple de Composition ({services} services)
+                    </h3>
+                    <p className="text-neutral-600 italic leading-relaxed min-h-[80px]">
                         "{descriptions[services as keyof typeof descriptions]}"
                     </p>
                 </div>
 
-                {/* Bouton d'action chaleureux */}
-                <div className="text-center">
-                    <Link 
-                        href={`/contact?formule=buffet-chaud&services=${services}`}
-                        className="inline-block bg-[#D4AF37] text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-black transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
-                    >
-                        Composer mon menu {services} services
+                {/* Bouton d'action */}
+                <Link 
+                    href={`/contact?formule=buffet-chaud&services=${services}`}
+                    className="inline-block bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300"
+                >
+                    Composer mon menu {services} services
+                </Link>
+                
+                {/* Lien Allergènes discret */}
+                <div className="mt-4">
+                    <Link href="/allergenes?section=buffets" target="_blank" className="text-[10px] text-neutral-400 hover:text-[#D4AF37] uppercase tracking-widest underline decoration-neutral-300 underline-offset-4 transition-colors">
+                        ℹ️ Voir les allergènes typiques
                     </Link>
                 </div>
             </div>
@@ -479,7 +482,6 @@ export default function Formules() {
                         const renderSectionTitle = () => {
                             if (index === 0) return <SectionTitle title="Barbecues" />;
                             if (formule.title === "Nos Buffets Froids") return <SectionTitle title="Buffets Froids" />;
-                            if (formule.title === "Le Buffet de Gala") return <SectionTitle title="Buffets Chauds" />;
                             return null;
                         };
 
@@ -494,7 +496,8 @@ export default function Formules() {
                     })}
                 </div>
                 
-                <BuffetChaudCard />
+                <SectionTitle title="Buffets Chauds" />
+                <BuffetChaudSection />
 
                 <SectionTitle title="Plats Uniques & Associations" />
 
