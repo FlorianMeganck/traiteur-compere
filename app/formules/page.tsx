@@ -298,6 +298,13 @@ function BuffetChaudSection() {
         5: "L'expérience ultime. Zakouskis en réception, double entrée (froide puis chaude), le majestueux buffet chaud garni, le buffet de fromages de nos régions, et la cascade de desserts."
     };
 
+    const images = {
+        2: "/images/buffet-2.jpg",
+        3: "/images/buffet-3.jpg",
+        4: "/images/buffet-4.jpg",
+        5: "/images/buffet-5.jpg"
+    };
+
     return (
         <div className="flex flex-col lg:flex-row gap-12 items-center mb-32">
             {/* Colonne Gauche : Image */}
@@ -305,22 +312,24 @@ function BuffetChaudSection() {
                 <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm px-4 py-2 text-xs font-bold text-[#D4AF37] tracking-widest uppercase z-10 rounded-sm shadow-sm">
                     Sur-Mesure
                 </div>
-                {/* Remplace l'image par celle qui était utilisée pour le Gala ou une nouvelle */}
                 <Image 
-                    src="https://images.unsplash.com/photo-1546241072-48010ad2862c?q=80&w=1974&auto=format&fit=crop" 
-                    alt="Buffet Chaud Sur-Mesure" 
+                    src={images[services as keyof typeof images]} 
+                    alt={`Buffet Chaud ${services} services`} 
                     fill 
-                    className="object-cover"
+                    className="object-cover transition-all duration-300"
                 />
             </div>
 
-            {/* Colonne Droite : Contenu */}
+            {/* Colonne Droite : Contenu Nettoyé */}
             <div className="w-full lg:w-1/2 flex flex-col items-start">
-                <h2 className="text-3xl md:text-4xl font-serif text-black mb-4">Buffets Chauds Sur-Mesure</h2>
-                <div className="w-12 h-1 bg-[#D4AF37] mb-6"></div>
                 <p className="text-neutral-500 font-light mb-8 leading-relaxed">
                     Notre offre prestige pour vos événements d'exception. Choisissez le format qui vous convient, et nous élaborerons ensemble un menu chaud personnalisé selon les saisons et vos envies.
                 </p>
+
+                {/* NOUVEAU TITRE DYNAMIQUE PLUS PETIT */}
+                <h3 className="text-sm font-bold text-black uppercase tracking-widest mb-4">
+                    Menu {services} Services
+                </h3>
 
                 {/* Boutons de sélection */}
                 <div className="flex flex-wrap gap-3 mb-8">

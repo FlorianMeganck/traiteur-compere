@@ -344,7 +344,7 @@ function ContactForm() {
     const isVerrinesMode = menuParam === 'verrines';
     const isCollectiviteMode = menuParam === 'collectivite';
 
-    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode;
+    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || searchParams.get('formule') === 'buffet-chaud';
     const showMenuFirst = isCustomMode;
 
     const [formData, setFormData] = useState({
@@ -454,7 +454,11 @@ function ContactForm() {
         Verrine_Cat_10: "", Verrine_Item_10: "",
 
         // Collectivite
-        Plat_Collectivite: ""
+        Plat_Collectivite: "",
+
+        // Buffet Chaud
+        Buffet_Chaud_Services: "3",
+        Buffet_Chaud_Commentaires: ""
     });
 
     const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
@@ -462,6 +466,7 @@ function ContactForm() {
     const isZakouskis = formData.Type_Evenement === 'Zakouskis';
     const isVerrines = formData.Type_Evenement === 'Verrines';
     const isCollectivite = formData.Type_Evenement === 'Repas de collectivité';
+    const isBuffetChaud = formData.Type_Evenement === 'Buffet Chaud';
 
     // --- PRICING ENGINE ---
 
@@ -606,7 +611,7 @@ function ContactForm() {
     const getInitialConvivesOptions = () => {
         if (isCochonOrPorchetta) return OPTIONS_COCHON;
         if (isAnyBBQ || isBuffetFroidMode) return OPTIONS_BBQ;
-        if (isBuffet) return OPTIONS_BUFFET;
+        if (isBuffet || isBuffetChaud) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
         if (isPainsMode || isZakouskisMode || isVerrinesMode) return OPTIONS_PAINS;
@@ -653,6 +658,16 @@ function ContactForm() {
                     newData.Type_Evenement = 'Verrines';
                 } else if (menuParam === 'collectivite') {
                     newData.Type_Evenement = 'Repas de collectivité';
+                }
+            }
+
+            const formuleParam = searchParams.get('formule');
+            const servicesParam = searchParams.get('services');
+
+            if (formuleParam === 'buffet-chaud') {
+                newData.Type_Evenement = 'Buffet Chaud';
+                if (servicesParam) {
+                    newData.Buffet_Chaud_Services = servicesParam;
                 }
             }
 
@@ -883,6 +898,8 @@ function ContactForm() {
             isSurDevis = formData.Nombre_Convives === 'Plus de 200';
         } else if (isCollectivite) {
             isSurDevis = formData.Nombre_Convives === 'Plus de 100';
+        } else if (isBuffetChaud) {
+            isSurDevis = true;
         } else {
             isSurDevis = getConvivesMax(formData.Nombre_Convives) > 250;
         }
@@ -890,6 +907,7 @@ function ContactForm() {
 
         // Formatage propre du nom de la formule (ex: "bbq_classique" -> "Barbecue Classique")
         const formatFormulaName = (rawName: string | null) => {
+            if (searchParams.get('formule') === 'buffet-chaud') return "Buffet Chaud Sur-Mesure";
             if (!rawName) return "Sur mesure / Non spécifié";
             if (rawName.startsWith('buffet_')) {
                 const name = rawName.replace('buffet_', '').replace(/_/g, ' ');
@@ -992,6 +1010,13 @@ function ContactForm() {
             ...(formData.Type_Evenement === 'Repas de collectivité' && {
                 "🥘 MENU SÉLECTIONNÉ": "REPAS DE COLLECTIVITÉ",
                 "🍽️ Plat Unique Choisi": formData.Plat_Collectivite || "Non spécifié"
+            }),
+
+            // --- SECTION BUFFET CHAUD ---
+            ...(formData.Type_Evenement === 'Buffet Chaud' && {
+                "🥘 MENU SÉLECTIONNÉ": "BUFFET CHAUD SUR-MESURE",
+                "🔢 Nombre de services": `${formData.Buffet_Chaud_Services} services`,
+                ...(formData.Buffet_Chaud_Commentaires && { "💬 Commentaires Menu": formData.Buffet_Chaud_Commentaires })
             }),
 
             // SUPPLÉMENTS VIANDES (BBQ)
@@ -1891,6 +1916,47 @@ function ContactForm() {
         );
     };
 
+    const renderBuffetChaudFields = () => {
+        if (!isBuffetChaud) return null;
+
+        return (
+            <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37] mt-8">
+                <h3 className="text-xl font-bold text-neutral-800 uppercase tracking-wide border-b border-neutral-200 pb-2 mb-4">
+                    Personnalisez votre Buffet Chaud
+                </h3>
+                {FormAllergenLink({ section: 'buffets' })}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                        <label className={labelStyle}>Nombre de services <span className="text-red-500">*</span></label>
+                        <div className="relative">
+                            <select name="Buffet_Chaud_Services" value={formData.Buffet_Chaud_Services} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Services") + " appearance-none"}>
+                                <option value="2">2 Services</option>
+                                <option value="3">3 Services</option>
+                                <option value="4">4 Services</option>
+                                <option value="5">5 Services</option>
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="group mt-6">
+                    <label className={labelStyle}>Commentaires spécifiques sur votre menu</label>
+                    <textarea 
+                        name="Buffet_Chaud_Commentaires" 
+                        value={formData.Buffet_Chaud_Commentaires} 
+                        onChange={handleChange} 
+                        className={`${getInputStyle("Buffet_Chaud_Commentaires")} h-24 resize-y`} 
+                        placeholder="Précisez vos envies (ex: viandes préférées, thème du repas...)" 
+                    />
+                </div>
+            </div>
+        );
+    };
+
     const renderContactFields = () => (
         <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -2031,7 +2097,8 @@ function ContactForm() {
                                     {isZakouskis && renderZakouskisFields()}
                                     {isVerrines && renderVerrinesFields()}
                                     {isCollectivite && renderCollectiviteFields()}
-                                    {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && !isCollectivite && (
+                                    {isBuffetChaud && renderBuffetChaudFields()}
+                                    {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && !isCollectivite && !isBuffetChaud && (
                                         <div className="bg-neutral-50 p-6 rounded-xl text-center">
                                             <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
                                         </div>
