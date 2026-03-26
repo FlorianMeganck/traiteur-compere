@@ -304,6 +304,67 @@ const AllergenLink = ({ section }: { section: string }) => (
     </div>
 );
 
+function BuffetChaudCard() {
+    const [services, setServices] = useState<number>(3);
+
+    const descriptions = {
+        2: "Un plat mijoté savoureux (comme notre Carbonnade flamande ou une Blanquette de veau) accompagné de ses féculents et crudités, suivi d'un buffet de desserts gourmands.",
+        3: "Une entrée raffinée servie à table (ex: Croûte de pâté au poivre), suivie d'un généreux buffet chaud avec deux choix de viandes, et clôturé par notre farandole de douceurs.",
+        4: "Démarrez avec un assortiment de zakouskis, suivi d'une entrée. Place ensuite au grand buffet chaud (viandes et poissons), et terminez sur une note sucrée ou un plateau de fromages affinés.",
+        5: "L'expérience ultime. Zakouskis en réception, double entrée (froide puis chaude), le majestueux buffet chaud garni, le buffet de fromages de nos régions, et la cascade de desserts."
+    };
+
+    return (
+        <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl border border-neutral-100 mt-16 mb-8 relative overflow-hidden">
+            {/* Décoration de fond */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+            
+            <div className="relative z-10">
+                <div className="text-center mb-10">
+                    <h2 className="text-3xl md:text-4xl font-serif text-black mb-4">Buffets Chauds Sur-Mesure</h2>
+                    <p className="text-neutral-500 font-light max-w-2xl mx-auto">
+                        Créez un événement à votre image. Choisissez le format qui vous convient, et nous élaborerons ensemble un menu chaud personnalisé selon les saisons et vos envies.
+                    </p>
+                </div>
+
+                {/* Boutons de sélection (Pilules) */}
+                <div className="flex flex-wrap justify-center gap-4 mb-8">
+                    {[2, 3, 4, 5].map((num) => (
+                        <button
+                            key={num}
+                            onClick={() => setServices(num)}
+                            className={`px-6 py-2 rounded-full font-bold uppercase tracking-widest text-sm transition-all duration-300 border-2 
+                            ${services === num 
+                                ? 'bg-black text-white border-black shadow-lg scale-105' 
+                                : 'bg-transparent text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black'
+                            }`}
+                        >
+                            {num} Services
+                        </button>
+                    ))}
+                </div>
+
+                {/* Contenu dynamique */}
+                <div className="bg-neutral-50 rounded-2xl p-6 md:p-8 text-center border border-neutral-100 min-h-[140px] flex items-center justify-center mb-10 transition-all duration-300">
+                    <p className="text-lg text-neutral-700 font-serif italic leading-relaxed">
+                        "{descriptions[services as keyof typeof descriptions]}"
+                    </p>
+                </div>
+
+                {/* Bouton d'action chaleureux */}
+                <div className="text-center">
+                    <Link 
+                        href={`/contact?formule=buffet-chaud&services=${services}`}
+                        className="inline-block bg-[#D4AF37] text-white px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-black transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:-translate-y-1"
+                    >
+                        Composer mon menu {services} services
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function Formules() {
     const [activeAperitifTab, setActiveAperitifTab] = useState('zakouskis');
 
@@ -432,6 +493,8 @@ export default function Formules() {
                         );
                     })}
                 </div>
+                
+                <BuffetChaudCard />
 
                 <SectionTitle title="Plats Uniques & Associations" />
 
