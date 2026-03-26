@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
@@ -137,6 +137,7 @@ const allergenMatrix: CategoryData[] = [
 
 function AllergenesContent() {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const [openSection, setOpenSection] = useState<string | null>(null);
 
     // Deep Linking: Ouvrir la bonne section selon l'URL (?section=...)
@@ -233,10 +234,13 @@ function AllergenesContent() {
                     ))}
                 </div>
 
-                <div className="mt-12 text-center">
-                    <Link href="/contact" className="inline-block bg-black text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] transition-colors">
-                        Retour au Formulaire
-                    </Link>
+                <div className="mt-12 text-center pb-8">
+                    <button 
+                        onClick={() => router.back()} 
+                        className="inline-block bg-[#D4AF37] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-black transition-colors shadow-lg"
+                    >
+                        Retour à la page précédente
+                    </button>
                 </div>
 
             </div>
