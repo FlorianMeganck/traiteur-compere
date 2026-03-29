@@ -236,18 +236,10 @@ function AllergenesContent() {
 
                 <div className="mt-12 text-center pb-8">
                     <button 
-                        onClick={() => {
-                            // Si on a ouvert un nouvel onglet, on le ferme
-                            window.close();
-                            
-                            // Fallback : si le navigateur bloque la fermeture (ex: accès direct), on renvoie vers les formules
-                            setTimeout(() => {
-                                router.push('/formules');
-                            }, 300);
-                        }} 
+                        onClick={() => router.back()} 
                         className="inline-block bg-[#D4AF37] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-black transition-colors shadow-lg"
                     >
-                        Fermer cette page
+                        Retour à la page précédente
                     </button>
                 </div>
 

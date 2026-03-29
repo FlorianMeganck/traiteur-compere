@@ -511,18 +511,41 @@ export default function Formules() {
                 <SectionTitle title="Plats Uniques & Associations" />
 
                 {/* SECTION COLLECTIVITÉS */}
-                <div className="bg-white rounded-3xl p-8 border border-neutral-200 shadow-xl relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-black rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
-                    
-                    <div className="flex flex-col md:flex-row gap-8">
-                        <div className="flex-1">
-                            <h3 className="text-3xl font-serif text-neutral-900 mb-4">Repas de Collectivité</h3>
-                            <p className="text-neutral-600 mb-6 leading-relaxed">
-                                Des plats mijotés, généreux et réconfortants, pensés spécialement pour les grands groupes, les clubs sportifs et les associations. La convivialité au meilleur prix avec un plat unique pour tous.
-                            </p>
-                            
-                            <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 mb-6">
-                                <h4 className="text-sm font-bold text-neutral-800 uppercase tracking-widest mb-4">Quelques exemples à la carte</h4>
+                <div className="flex flex-col lg:flex-row gap-12 items-center mb-32">
+                    {/* Colonne Image (À gauche ou à droite pour alterner) */}
+                    <div className="w-full lg:w-1/2 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl">
+                        <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm px-4 py-2 text-xs font-bold text-[#D4AF37] tracking-widest uppercase z-10 rounded-sm shadow-sm">
+                            Convivialité
+                        </div>
+                        <Image 
+                            src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop" 
+                            alt="Repas de Collectivité" 
+                            fill 
+                            className="object-cover"
+                        />
+                    </div>
+
+                    {/* Colonne Contenu */}
+                    <div className="w-full lg:w-1/2 flex flex-col items-start">
+                        <h2 className="text-3xl md:text-4xl font-serif text-black mb-4">Repas de Collectivité & Plats Uniques</h2>
+                        <div className="w-12 h-1 bg-[#D4AF37] mb-6"></div>
+                        
+                        <p className="text-neutral-500 font-light mb-8 leading-relaxed">
+                            Des plats mijotés, généreux et réconfortants, pensés spécialement pour les grands groupes, les clubs sportifs et les associations. La convivialité au meilleur prix avec un plat unique pour tous.
+                        </p>
+
+                        <div className="mb-4">
+                            <div className="inline-block bg-neutral-100 text-neutral-600 px-4 py-2 rounded-lg font-bold text-sm tracking-widest">
+                                De 8,00€ à 14,00€ / personne
+                            </div>
+                        </div>
+
+                        {/* Encadré Composition / Plats */}
+                        <div className="w-full bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-100 mb-8">
+                            <h3 className="text-xs font-bold text-black uppercase tracking-widest mb-4">
+                                Nos Propositions
+                            </h3>
+                            <div className="text-neutral-600 leading-relaxed">
                                 <ul className="space-y-2">
                                     <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Carbonnade flamande, purée et compote</li>
                                     <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Lasagnes (Bœuf, Saumon, Légumes)</li>
@@ -530,29 +553,19 @@ export default function Formules() {
                                     <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Et bien d'autres (21 plats au choix)...</li>
                                 </ul>
                             </div>
-                            
+                        </div>
+
+                        <div className="mb-6 -mt-2">
                             <AllergenLink section="collectivite" />
-
-                            <div className="inline-block bg-black text-[#D4AF37] px-4 py-2 rounded-lg font-bold text-sm tracking-widest mb-6">
-                                De 8,00€ à 14,00€ / personne
-                            </div>
                         </div>
 
-                        {/* Boutons de Convives (Vertical sur Desktop) */}
-                        <div className="md:w-64 flex flex-col justify-center gap-3">
-                            <Link href="/contact?menu=collectivite&convives=moins_50" className="w-full bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
-                                <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">Moins de 50 pers.</p>
-                                <p className="text-lg font-bold text-neutral-800">À la carte (+10%)</p>
-                            </Link>
-                            <Link href="/contact?menu=collectivite&convives=50_100" className="w-full bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black transition group">
-                                <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">50 à 100 pers.</p>
-                                <p className="text-lg font-bold text-neutral-800">À la carte</p>
-                            </Link>
-                            <Link href="/contact?menu=collectivite&convives=plus_100" className="w-full bg-black p-4 rounded-xl text-center hover:bg-neutral-800 transition shadow-md transform hover:-translate-y-0.5">
-                                <p className="text-[10px] font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">Plus de 100 pers.</p>
-                                <p className="text-lg font-bold text-white">Tarifs dégressifs</p>
-                            </Link>
-                        </div>
+                        {/* Bouton d'action existant (mis au format pilule) */}
+                        <Link 
+                            href="/contact?formule=collectivite"
+                            className="inline-block bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300"
+                        >
+                            Demander un devis
+                        </Link>
                     </div>
                 </div>
 
