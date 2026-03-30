@@ -113,7 +113,7 @@ export default function About() {
                             className="w-full lg:w-5/12 relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl"
                         >
                             <Image 
-                                src="/images/Releve1.jpg" 
+                                src="/images/Releve1.jpeg" 
                                 alt="Christophe, la nouvelle génération" 
                                 fill 
                                 className="object-cover" 
@@ -207,16 +207,16 @@ export default function About() {
                             className="grid grid-cols-2 gap-4"
                         >
                             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md group">
-                                <Image src="/images/Travail1.jpg" alt="Travail et préparation" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <Image src="/images/Travail1.jpeg" alt="Travail et préparation" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                             </div>
                             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md group mt-8">
-                                <Image src="/images/Event2.jpg" alt="Ambiance événement" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <Image src="/images/Event2.jpeg" alt="Ambiance événement" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                             </div>
                             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md group -mt-8">
                                 <Image src="/images/Bouffe8.jpg" alt="Nos pains saucisses gourmands" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                             </div>
                             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md group">
-                                <Image src="/images/Event1.jpg" alt="L'Affiche au chalet" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <Image src="/images/Event1.jpeg" alt="L'Affiche au chalet" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                             </div>
                         </motion.div>
                     </div>
