@@ -458,7 +458,12 @@ function ContactForm() {
 
         // Buffet Chaud
         Buffet_Chaud_Services: "3",
-        Buffet_Chaud_Commentaires: ""
+        Buffet_Chaud_Commentaires: "",
+        Buffet_Chaud_Zakouskis: "",
+        Buffet_Chaud_Entree_1: "",
+        Buffet_Chaud_Entree_2: "",
+        Buffet_Chaud_Plat: "",
+        Buffet_Chaud_Dessert: ""
     });
 
     const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
@@ -1022,7 +1027,12 @@ function ContactForm() {
             ...(formData.Type_Evenement === 'Buffet Chaud' && {
                 "🥘 MENU SÉLECTIONNÉ": "BUFFET CHAUD SUR-MESURE",
                 "🔢 Nombre de services": `${formData.Buffet_Chaud_Services} services`,
-                ...(formData.Buffet_Chaud_Commentaires && { "💬 Commentaires Menu": formData.Buffet_Chaud_Commentaires })
+                ...(formData.Buffet_Chaud_Zakouskis && { "🥟 Apéritif": formData.Buffet_Chaud_Zakouskis }),
+                ...(formData.Buffet_Chaud_Entree_1 && { "🥗 Entrée 1": formData.Buffet_Chaud_Entree_1 }),
+                ...(formData.Buffet_Chaud_Entree_2 && { "🍲 Entrée 2": formData.Buffet_Chaud_Entree_2 }),
+                ...(formData.Buffet_Chaud_Plat && { "🥘 Plat Principal": formData.Buffet_Chaud_Plat }),
+                ...(formData.Buffet_Chaud_Dessert && { "🍰 Dessert": formData.Buffet_Chaud_Dessert }),
+                ...(formData.Buffet_Chaud_Commentaires && { "💬 Commentaires": formData.Buffet_Chaud_Commentaires })
             }),
 
             // SUPPLÉMENTS VIANDES (BBQ)
@@ -1925,6 +1935,8 @@ function ContactForm() {
     const renderBuffetChaudFields = () => {
         if (!isBuffetChaud) return null;
 
+        const services = parseInt(formData.Buffet_Chaud_Services);
+
         return (
             <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37] mt-8">
                 <h3 className="text-xl font-bold text-neutral-800 uppercase tracking-wide border-b border-neutral-200 pb-2 mb-4">
@@ -1932,31 +1944,72 @@ function ContactForm() {
                 </h3>
                 {FormAllergenLink({ section: 'buffets' })}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="group">
-                        <label className={labelStyle}>Nombre de services <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                            <select name="Buffet_Chaud_Services" value={formData.Buffet_Chaud_Services} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Services") + " appearance-none"}>
-                                <option value="2">2 Services</option>
-                                <option value="3">3 Services</option>
-                                <option value="4">4 Services</option>
-                                <option value="5">5 Services</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
+                {/* Choix du nombre de services */}
+                <div className="group mb-8">
+                    <label className={labelStyle}>Nombre de services <span className="text-red-500">*</span></label>
+                    <div className="relative md:w-1/2">
+                        <select name="Buffet_Chaud_Services" value={formData.Buffet_Chaud_Services} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Services") + " appearance-none"}>
+                            <option value="2">2 Services (Plat + Dessert)</option>
+                            <option value="3">3 Services (Entrée + Plat + Dessert)</option>
+                            <option value="4">4 Services (Zakouskis + Entrée + Plat + Dessert)</option>
+                            <option value="5">5 Services (Zakouskis + 2 Entrées + Plat + Dessert)</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                         </div>
                     </div>
                 </div>
 
-                <div className="group mt-6">
-                    <label className={labelStyle}>Commentaires spécifiques sur votre menu</label>
+                {/* Champs dynamiques selon le nombre de services */}
+                <div className="space-y-4 animate-fade-in">
+                    <p className="text-sm text-neutral-500 italic mb-4">Décrivez vos envies pour chaque service (ex: "Je voudrais du saumon", "Plutôt de la volaille", etc.) :</p>
+
+                    {(services >= 4) && (
+                        <div className="group">
+                            <label className={labelStyle}>🥟 Apéritif / Zakouskis</label>
+                            <input type="text" name="Buffet_Chaud_Zakouskis" value={formData.Buffet_Chaud_Zakouskis} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Zakouskis")} placeholder="Vos envies pour l'apéritif..." />
+                        </div>
+                    )}
+
+                    {(services === 5) && (
+                        <>
+                            <div className="group">
+                                <label className={labelStyle}>🥗 Entrée Froide</label>
+                                <input type="text" name="Buffet_Chaud_Entree_1" value={formData.Buffet_Chaud_Entree_1} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Entree_1")} placeholder="Vos envies pour l'entrée froide..." />
+                            </div>
+                            <div className="group">
+                                <label className={labelStyle}>🍲 Entrée Chaude</label>
+                                <input type="text" name="Buffet_Chaud_Entree_2" value={formData.Buffet_Chaud_Entree_2} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Entree_2")} placeholder="Vos envies pour l'entrée chaude..." />
+                            </div>
+                        </>
+                    )}
+
+                    {(services === 3 || services === 4) && (
+                        <div className="group">
+                            <label className={labelStyle}>🥗 Entrée</label>
+                            <input type="text" name="Buffet_Chaud_Entree_1" value={formData.Buffet_Chaud_Entree_1} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Entree_1")} placeholder="Vos envies pour l'entrée..." />
+                        </div>
+                    )}
+
+                    <div className="group">
+                        <label className={labelStyle}>🥘 Plat Principal (Buffet Chaud)</label>
+                        <input type="text" name="Buffet_Chaud_Plat" value={formData.Buffet_Chaud_Plat} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Plat")} placeholder="Viandes, poissons, accompagnements souhaités..." />
+                    </div>
+
+                    <div className="group">
+                        <label className={labelStyle}>🍰 Dessert / Fromage</label>
+                        <input type="text" name="Buffet_Chaud_Dessert" value={formData.Buffet_Chaud_Dessert} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Dessert")} placeholder="Vos envies sucrées ou fromagères..." />
+                    </div>
+                </div>
+
+                <div className="group mt-8 border-t border-neutral-100 pt-6">
+                    <label className={labelStyle}>Thème de l'événement ou autres commentaires</label>
                     <textarea 
                         name="Buffet_Chaud_Commentaires" 
                         value={formData.Buffet_Chaud_Commentaires} 
                         onChange={handleChange} 
-                        className={`${getInputStyle("Buffet_Chaud_Commentaires")} h-24 resize-y`} 
-                        placeholder="Précisez vos envies (ex: viandes préférées, thème du repas...)" 
+                        className={`${getInputStyle("Buffet_Chaud_Commentaires")} h-20 resize-y`} 
+                        placeholder="Précisez le thème, le style de service attendu..." 
                     />
                 </div>
             </div>
