@@ -22,7 +22,7 @@ export default function About() {
             <section className="max-w-7xl mx-auto px-6 mb-32">
                 <div className="flex flex-col lg:flex-row gap-16 items-start">
                     {/* Colonne Texte */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: -30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
@@ -49,7 +49,7 @@ export default function About() {
                     </motion.div>
 
                     {/* Mosaïque d'images d'archives */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: 30 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
@@ -57,43 +57,43 @@ export default function About() {
                         className="w-full lg:w-1/2 grid grid-cols-2 gap-4 auto-rows-[200px]"
                     >
                         <div className="relative col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-xl group">
-                            <Image 
-                                src="/images/Histoire1.jpg" 
-                                alt="Archives fondateurs" 
-                                fill 
-                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]" 
+                            <Image
+                                src="/images/histoire/Histoire1.jpeg"
+                                alt="Archives fondateurs"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
                             />
                         </div>
                         <div className="relative rounded-2xl overflow-hidden shadow-lg group">
-                            <Image 
-                                src="/images/Histoire2.jpg" 
-                                alt="Ancienne devanture" 
-                                fill 
-                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]" 
+                            <Image
+                                src="/images/histoire/Histoire2.jpeg"
+                                alt="Ancienne devanture"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
                             />
                         </div>
                         <div className="relative rounded-2xl overflow-hidden shadow-lg group">
-                            <Image 
-                                src="/images/Histoire3.jpg" 
-                                alt="L'équipe d'antan" 
-                                fill 
-                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]" 
+                            <Image
+                                src="/images/histoire/Histoire3.jpeg"
+                                alt="L'équipe d'antan"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
                             />
                         </div>
                         <div className="relative rounded-2xl overflow-hidden shadow-lg group hidden md:block">
-                            <Image 
-                                src="/images/Histoire4.jpg" 
-                                alt="Outils traditionnels" 
-                                fill 
-                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]" 
+                            <Image
+                                src="/images/histoire/Histoire4.jpeg"
+                                alt="Outils traditionnels"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
                             />
                         </div>
                         <div className="relative rounded-2xl overflow-hidden shadow-lg group hidden md:block">
-                            <Image 
-                                src="/images/Histoire5.jpg" 
-                                alt="Savoir-faire artisanal" 
-                                fill 
-                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]" 
+                            <Image
+                                src="/images/histoire/Histoire5.jpeg"
+                                alt="Savoir-faire artisanal"
+                                fill
+                                className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
                             />
                         </div>
                     </motion.div>
@@ -105,18 +105,18 @@ export default function About() {
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="flex flex-col-reverse lg:flex-row gap-16 items-center">
                         {/* Image */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.8 }}
                             className="w-full lg:w-5/12 relative aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl"
                         >
-                            <Image 
-                                src="/images/Releve1.jpeg" 
-                                alt="Christophe, la nouvelle génération" 
-                                fill 
-                                className="object-cover" 
+                            <Image
+                                src="/images/Releve1.jpeg"
+                                alt="Christophe, la nouvelle génération"
+                                fill
+                                className="object-cover"
                             />
                             <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur px-6 py-3 rounded-xl shadow-lg border-l-4 border-[#D4AF37]">
                                 <span className="block text-sm font-bold uppercase tracking-widest text-[#D4AF37]">Christophe</span>
@@ -125,7 +125,7 @@ export default function About() {
                         </motion.div>
 
                         {/* Texte */}
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -149,7 +149,7 @@ export default function About() {
             {/* SECTION 3: QUALITÉ, OTTE & CHALET */}
             <section className="max-w-7xl mx-auto px-6 mb-24">
                 <div className="text-center mb-16">
-                    <motion.h2 
+                    <motion.h2
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -157,13 +157,13 @@ export default function About() {
                     >
                         Notre Engagement Qualité & Collaborations
                     </motion.h2>
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
-                        className="w-16 h-1 bg-[#D4AF37] mx-auto rounded-full mb-8" 
+                        className="w-16 h-1 bg-[#D4AF37] mx-auto rounded-full mb-8"
                     />
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -182,9 +182,9 @@ export default function About() {
                 {/* Bloc Mixte : Chalet & Illustrations */}
                 <div className="bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-neutral-100 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-                    
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, x: -30 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
@@ -199,7 +199,7 @@ export default function About() {
                             </p>
                         </motion.div>
 
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             whileInView={{ opacity: 1, scale: 1 }}
                             viewport={{ once: true }}
@@ -213,7 +213,7 @@ export default function About() {
                                 <Image src="/images/Event2.jpeg" alt="Ambiance événement" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                             </div>
                             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md group -mt-8">
-                                <Image src="/images/Bouffe8.jpg" alt="Nos pains saucisses gourmands" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                                <Image src="/images/bouffe/Bouffe8.jpeg" alt="Nos pains saucisses gourmands" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
                             </div>
                             <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md group">
                                 <Image src="/images/Event1.jpeg" alt="L'Affiche au chalet" fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
