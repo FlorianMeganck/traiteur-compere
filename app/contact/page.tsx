@@ -256,7 +256,7 @@ const OPTIONS_COCHON = ["Moins de 25", "25 à 180", "Plus de 180"]; // Specific 
 const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
 const OPTIONS_ASSOCIATIONS = ["Moins de 50", "50 à 100", "Plus de 100"];
 const OPTIONS_PLAT_UNIQUE = ["Moins de 50", "50 à 100", "Plus de 100"];
-const OPTIONS_COLLECTIVITE = ["Moins de 50", "50 à 100", "Plus de 100"];
+const OPTIONS_COLLECTIVITE = ["Moins de 30", "30 à 100", "Plus de 100"];
 const OPTIONS_PAINS = ["Moins de 25", "25 à 100", "100 à 200", "Plus de 200"];
 
 // --- VALIDATION HELPERS ---
@@ -540,8 +540,8 @@ function ContactForm() {
             base = basePriceTotal;
         } else if (isCollectivite && formData.Plat_Collectivite) {
             let itemPrice = collectiviteData[formData.Plat_Collectivite];
-            // Majoration de 10% si moins de 50 personnes
-            if (formData.Nombre_Convives === 'Moins de 50') {
+            // Majoration de 10% si moins de 30 personnes
+            if (formData.Nombre_Convives === 'Moins de 30') {
                 itemPrice = itemPrice * 1.10; 
             }
             base = itemPrice;
@@ -669,6 +669,12 @@ function ContactForm() {
                 if (servicesParam) {
                     newData.Buffet_Chaud_Services = servicesParam;
                 }
+            } else if (formuleParam === 'collectivite') {
+                newData.Type_Evenement = 'Repas de collectivité';
+                const groupeParam = searchParams.get('groupe');
+                if (groupeParam === 'petit') newData.Nombre_Convives = "Moins de 30";
+                else if (groupeParam === 'standard') newData.Nombre_Convives = "30 à 100";
+                else if (groupeParam === 'grand') newData.Nombre_Convives = "Plus de 100";
             }
 
             // 2. Pré-sélection du Nombre de Convives (NOUVEAU)
@@ -677,11 +683,11 @@ function ContactForm() {
                 const safeParam = decodeURIComponent(convivesParam).toLowerCase();
 
                 // Détection intelligente selon les mots-clés
-                if (safeParam.includes('moins') && (safeParam.includes('20') || safeParam.includes('25') || safeParam.includes('40') || safeParam.includes('50'))) {
+                if (safeParam.includes('moins') && (safeParam.includes('20') || safeParam.includes('25') || safeParam.includes('30') || safeParam.includes('40') || safeParam.includes('50'))) {
                     // Check specific menus restrictions first
                     if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
                     else if (isAnyBBQ) newData.Nombre_Convives = "Moins de 25";
-                    else if (isCollectiviteMode) newData.Nombre_Convives = "Moins de 50";
+                    else if (isCollectiviteMode) newData.Nombre_Convives = "Moins de 30";
                     else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
                     else if (isPainsMode || isZakouskisMode || isVerrinesMode) newData.Nombre_Convives = "Moins de 25";
                     else if (isBuffet || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 40";
@@ -1871,14 +1877,14 @@ function ContactForm() {
         const sortedDishes = Object.keys(collectiviteData).sort((a, b) => a.localeCompare(b));
 
         const getAdjustedPriceDisplay = (basePrice: number) => {
-            if (formData.Nombre_Convives === 'Moins de 50') return basePrice * 1.10;
+            if (formData.Nombre_Convives === 'Moins de 30') return basePrice * 1.10;
             return basePrice;
         };
 
         return (
             <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-black mt-8">
                 <h3 className="text-xl font-bold text-neutral-800 uppercase tracking-wide border-b border-neutral-200 pb-2 mb-4">
-                    Choix du Plat Unique
+                    Détails de votre Repas de Collectivité
                 </h3>
                 {FormAllergenLink({ section: 'collectivite' })}
 
