@@ -342,7 +342,7 @@ function ContactForm() {
     const isPainsMode = menuParam === 'pains_garnis';
     const isZakouskisMode = menuParam === 'zakouskis';
     const isVerrinesMode = menuParam === 'verrines';
-    const isCollectiviteMode = menuParam === 'collectivite';
+    const isCollectiviteMode = menuParam === 'collectivite' || searchParams.get('formule') === 'collectivite';
 
     const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || searchParams.get('formule') === 'buffet-chaud';
     const showMenuFirst = isCustomMode;
