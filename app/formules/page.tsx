@@ -559,13 +559,31 @@ export default function Formules() {
                             <AllergenLink section="collectivite" />
                         </div>
 
-                        {/* Bouton d'action existant (mis au format pilule) */}
-                        <Link 
-                            href="/contact?formule=collectivite"
-                            className="inline-block bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300"
-                        >
-                            Demander un devis
-                        </Link>
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-4">
+                            {/* Bouton 1 : Petit groupe (+10%) */}
+                            <Link 
+                                href="/contact?formule=collectivite&groupe=petit"
+                                className="flex-1 text-center bg-transparent border-2 border-black text-black px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-black hover:text-white transition-all duration-300"
+                            >
+                                Moins de 30 pers. (+10%)
+                            </Link>
+
+                            {/* Bouton 2 : Standard */}
+                            <Link 
+                                href="/contact?formule=collectivite&groupe=standard"
+                                className="flex-1 text-center bg-black border-2 border-black text-[#D4AF37] px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-[#D4AF37] hover:text-black hover:border-[#D4AF37] transition-all duration-300"
+                            >
+                                Devis Standard (30-100 pers.)
+                            </Link>
+
+                            {/* Bouton 3 : Grand groupe (Dégressif) */}
+                            <Link 
+                                href="/contact?formule=collectivite&groupe=grand"
+                                className="flex-1 text-center bg-transparent border-2 border-[#D4AF37] text-[#D4AF37] px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-[#D4AF37] hover:text-black transition-all duration-300"
+                            >
+                                Plus de 100 pers. (Dégressif)
+                            </Link>
+                        </div>
                     </div>
                 </div>
 
