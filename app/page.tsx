@@ -10,7 +10,7 @@ export default function Home() {
     <main className="bg-white text-gray-800 font-sans selection:bg-[#D4AF37] selection:text-white overflow-hidden">
 
       <section className="relative w-full h-[80vh] md:h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
-        {/* Image d'arrière-plan (Fixe, pas de carrousel) */}
+        {/* Image d'arrière-plan */}
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero-traiteur.png"
@@ -43,18 +43,18 @@ export default function Home() {
 
           {/* Container des boutons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
-            
+
             {/* Bouton 1 : Qui sommes-nous ? (Ghost Doré) */}
-            <Link 
-              href="/a-propos" 
+            <Link
+              href="/a-propos"
               className="inline-flex items-center justify-center px-10 py-4 rounded-full border-2 border-[#D4AF37] text-[#D4AF37] font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300 w-full sm:w-auto shadow-sm"
             >
               Qui sommes-nous ?
             </Link>
 
             {/* Bouton 2 : Découvrez nos formules (Plein Noir) */}
-            <Link 
-              href="/formules" 
+            <Link
+              href="/formules"
               className="inline-flex items-center justify-center px-10 py-4 rounded-full border-2 border-black bg-black text-white font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:border-[#D4AF37] transition-all duration-300 w-full sm:w-auto shadow-md"
             >
               Découvrez nos formules

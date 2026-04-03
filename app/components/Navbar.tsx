@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -84,8 +85,14 @@ export default function Navbar() {
 
                     {/* CENTER ZONE: Logo */}
                     <div className="flex justify-center items-center">
-                        <Link href="/" className={`relative z-50 transition-colors duration-500 ${finalLogoColor} hover:scale-105 transition-transform duration-300`}>
-                            <Logo className="h-20 w-auto" />
+                        <Link href="/" className="relative block w-32 h-16 md:w-40 md:h-20 transition-transform hover:scale-105 z-50">
+                            <Image 
+                                src="/images/Logo_traiteur.jpeg" 
+                                alt="Traiteur Compère" 
+                                fill 
+                                className="object-contain"
+                                priority
+                            />
                         </Link>
                     </div>
 
@@ -113,8 +120,14 @@ export default function Navbar() {
                 {/* --- MOBILE LAYOUT (Flex Between) --- */}
                 <div className="md:hidden flex justify-between items-center w-full">
                     {/* LOGO */}
-                    <Link href="/" className={`relative z-50 transition-colors duration-500 ${finalLogoColor}`}>
-                        <Logo className="h-14 w-auto" />
+                    <Link href="/" className="relative block w-32 h-16 transition-transform hover:scale-105 z-50">
+                        <Image 
+                            src="/images/Logo_traiteur.jpeg" 
+                            alt="Traiteur Compère" 
+                            fill 
+                            className="object-contain"
+                            priority
+                        />
                     </Link>
 
                     {/* BURGER */}
