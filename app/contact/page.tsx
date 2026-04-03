@@ -2192,10 +2192,14 @@ function ContactForm() {
                             </div>
 
                             <div className="flex justify-center mb-6 w-full">
-                                <ReCAPTCHA
-                                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
-                                    onChange={(token) => setCaptchaToken(token)}
-                                />
+                                {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ? (
+                                    <ReCAPTCHA
+                                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                                        onChange={(token) => setCaptchaToken(token)}
+                                    />
+                                ) : (
+                                    <p className="text-red-500 text-sm font-bold">⚠️ Clé ReCAPTCHA manquante dans la configuration.</p>
+                                )}
                             </div>
 
                             <button type="submit" disabled={status === "submitting"} className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all">
