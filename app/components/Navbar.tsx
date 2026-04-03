@@ -86,10 +86,10 @@ export default function Navbar() {
                     {/* CENTER ZONE: Logo */}
                     <div className="flex justify-center items-center">
                         <Link href="/" className="relative block w-32 h-16 md:w-40 md:h-20 transition-transform hover:scale-105 z-50">
-                            <Image 
-                                src="/images/Logo_traiteur.jpeg" 
-                                alt="Traiteur Compère" 
-                                fill 
+                            <Image
+                                src="/images/Logo_traiteur.png"
+                                alt="Traiteur Compère"
+                                fill
                                 className="object-contain"
                                 priority
                             />
@@ -121,10 +121,10 @@ export default function Navbar() {
                 <div className="md:hidden flex justify-between items-center w-full">
                     {/* LOGO */}
                     <Link href="/" className="relative block w-32 h-16 transition-transform hover:scale-105 z-50">
-                        <Image 
-                            src="/images/Logo_traiteur.jpeg" 
-                            alt="Traiteur Compère" 
-                            fill 
+                        <Image
+                            src="/images/Logo_traiteur.jpeg"
+                            alt="Traiteur Compère"
+                            fill
                             className="object-contain"
                             priority
                         />
