@@ -304,9 +304,6 @@ function BuffetChaudSection() {
         <div className="flex flex-col lg:flex-row gap-12 items-center mb-32">
             {/* Colonne Gauche : Image */}
             <div className="w-full lg:w-1/2 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl">
-                <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm px-4 py-2 text-xs font-bold text-[#D4AF37] tracking-widest uppercase z-10 rounded-sm shadow-sm">
-                    Sur-Mesure
-                </div>
                 <Image
                     src={images[services as keyof typeof images]}
                     alt={`Buffet Chaud ${services} services`}
@@ -593,9 +590,6 @@ export default function Formules() {
                 <div className="flex flex-col lg:flex-row gap-12 items-center mb-32">
                     {/* Colonne Image (À gauche ou à droite pour alterner) */}
                     <div className="w-full lg:w-1/2 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl">
-                        <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm px-4 py-2 text-xs font-bold text-[#D4AF37] tracking-widest uppercase z-10 rounded-sm shadow-sm">
-                            Convivialité
-                        </div>
                         <Image
                             src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"
                             alt="Repas de Collectivité"
@@ -727,18 +721,13 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 ${isAssociatif ? 'py-12 px-6 md:px-12 bg-neutral-50 border border-[#D4AF37]/20 rounded-2xl' : ''}`}
         >
             {/* IMAGE SIDE */}
-            <div className="w-full md:w-1/2 relative h-[280px] md:h-[500px] flex-shrink-0 overflow-hidden rounded-2xl shadow-xl group">
+            <div className="w-full md:w-1/2 relative h-[280px] md:h-[500px] flex-shrink-0 overflow-hidden rounded-2xl shadow-xl">
                 <Image
                     src={formule.image}
                     alt={formule.title}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700"
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
-                {/* Image Tag Overlay */}
-                <div className="absolute top-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-2 shadow-sm border-l-4 border-[#D4AF37]">
-                    <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37]">{formule.tag}</span>
-                </div>
             </div>
 
             {/* CONTENT SIDE */}
