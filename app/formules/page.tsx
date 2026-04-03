@@ -778,16 +778,14 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                                 <button
                                     key={key}
                                     onClick={() => setSelectedBBQ(key as BBQType)}
-                                    className={`
-                                        px-2 py-3 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-300
-                                        flex flex-col items-center justify-center gap-1 text-center border
+                                    className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] border flex flex-col items-center justify-center text-center gap-1
                                         ${isSelected
                                             ? 'bg-black text-[#D4AF37] border-black shadow-lg scale-105'
-                                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                            : 'bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50'
                                         }
                                     `}
                                 >
-                                    <Flame size={16} className={isSelected ? 'text-[#D4AF37]' : 'text-gray-300'} />
+                                    <Flame size={16} className={isSelected ? 'text-[#D4AF37]' : 'text-neutral-400'} />
                                     {data.label}
                                 </button>
                             );
@@ -857,36 +855,33 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
         const menuParam = `bbq_${selectedBBQ}`;
 
         return (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
                 {/* Option 1: Small Group */}
                 <Link
                     href={`/contact?menu=${menuParam}&count=3&convives=${data.counts.small}`}
-                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                    className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                 >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">{data.counts.small}</span>
-                    <span className="text-lg font-bold font-serif text-gray-900">{data.prices.small}</span>
-                    <span className="text-[10px] text-gray-400">/ pers</span>
+                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">{data.counts.small}</p>
+                    <p className="text-xl font-bold text-neutral-800 font-serif">{data.prices.small}</p>
                 </Link>
 
                 {/* Option 2: Medium Group (Highlighted) */}
                 <Link
                     href={`/contact?menu=${menuParam}&count=4&convives=${data.counts.medium}`}
-                    className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
+                    className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">{data.counts.medium}</span>
-                    <span className="text-2xl font-bold font-serif">{data.prices.medium}</span>
-                    <span className="text-[10px] text-gray-300">/ pers</span>
+                    <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">{data.counts.medium}</p>
+                    <p className="text-2xl font-bold text-white font-serif">{data.prices.medium}</p>
                 </Link>
 
                 {/* Option 3: Large Group */}
                 <Link
                     href={`/contact?menu=${menuParam}&count=5&convives=${data.counts.large}`}
-                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                    className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                 >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">{data.counts.large}</span>
-                    <span className="text-sm font-medium text-gray-900">{data.prices.large}</span>
-                    <span className="text-[10px] text-gray-400">(Tarifs dégressifs)</span>
+                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">{data.counts.large}</p>
+                    <p className="text-xl font-bold text-neutral-800 font-serif">{data.prices.large}</p>
                 </Link>
             </div>
         );
@@ -895,36 +890,33 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
     // Logic for Associations
     if (tag === "Événements & Associations") {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
                 {/* Option 1: < 50 */}
                 <Link
                     href="/contact?menu=plat_unique&convives=moins_50"
-                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                    className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                 >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 50 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">1 Plat Unique</span>
-                    <span className="text-xs text-gray-400 mt-1">(Sur devis)</span>
+                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 50 pers.</p>
+                    <p className="text-xl font-bold text-neutral-800 font-serif">1 Plat Unique</p>
                 </Link>
 
                 {/* Option 2: 50 - 100 */}
                 <Link
                     href="/contact?menu=plat_unique&convives=50_100"
-                    className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
+                    className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">50 à 100 pers.</span>
-                    <span className="text-lg font-bold font-serif">1 Plat Unique</span>
-                    <span className="text-xs text-gray-300 mt-1">(14,50€ / pers)</span>
+                    <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">50 à 100 pers.</p>
+                    <p className="text-2xl font-bold text-white font-serif">1 Plat Unique</p>
                 </Link>
 
                 {/* Option 3: > 100 */}
                 <Link
                     href="/contact?menu=plat_unique&convives=plus_100"
-                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                    className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                 >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 100 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">1 Plat Unique</span>
-                    <span className="text-xs text-gray-400 mt-1">(Tarifs dégressifs)</span>
+                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
+                    <p className="text-xl font-bold text-neutral-800 font-serif">1 Plat Unique</p>
                 </Link>
             </div>
         );
@@ -935,22 +927,22 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
     // Logic for Gala (Banquet & Mariage)
     if (tag === "Banquet & Mariage") {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+            <div className="flex flex-col sm:flex-row gap-4 mt-8">
                 <Link
                     href="/contact?menu=gala&count=4&convives=Moins de 40"
-                    className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                    className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                 >
-                    <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 40 pers.</span>
-                    <span className="text-sm font-medium text-gray-900">4 Choix à composer</span>
+                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 40 pers.</p>
+                    <p className="text-xl font-bold text-neutral-800 font-serif">4 Choix à composer</p>
                 </Link>
 
                 <Link
                     href="/contact?menu=gala&count=5&convives=40 et plus"
-                    className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
+                    className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                    <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">40 pers. et plus</span>
-                    <span className="text-lg font-bold font-serif">5 Choix à composer</span>
+                    <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">40 pers. et plus</p>
+                    <p className="text-2xl font-bold text-white font-serif">5 Choix à composer</p>
                 </Link>
             </div>
         );
@@ -960,35 +952,33 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
     const hasPrice = /\d/.test(price);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
             {/* < 20 */}
             <Link
                 href="/contact?convives=Moins de 20"
-                className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
             >
-                <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Moins de 20 pers.</span>
-                <span className="text-sm font-medium text-gray-900">Sur devis</span>
-                <span className="text-[10px] text-gray-400">(Nous contacter)</span>
+                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 20 pers.</p>
+                <p className="text-xl font-bold text-neutral-800 font-serif">Sur devis</p>
             </Link>
 
             {/* 20 - 100 */}
             <Link
                 href="/contact"
-                className="bg-black text-white p-3 rounded-lg transform scale-105 shadow-lg flex flex-col justify-center relative overflow-hidden hover:scale-[1.07] transition-transform cursor-pointer"
+                className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
             >
                 <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                <span className="text-xs text-[#D4AF37] uppercase font-bold tracking-wide mb-1">20 à 100 pers.</span>
-                <span className="text-lg font-bold font-serif">{hasPrice ? price : "Sur devis"}</span>
+                <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">20 à 100 pers.</p>
+                <p className="text-2xl font-bold text-white font-serif">{hasPrice ? price : "Sur devis"}</p>
             </Link>
 
             {/* > 100 */}
             <Link
                 href="/contact?convives=Plus de 100"
-                className="bg-gray-100 p-3 rounded-lg flex flex-col justify-center hover:scale-[1.02] transition-transform cursor-pointer"
+                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
             >
-                <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">Plus de 100 pers.</span>
-                <span className="text-sm font-medium text-gray-900">Sur devis</span>
-                <span className="text-[10px] text-gray-400">(Tarifs dégressifs)</span>
+                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
+                <p className="text-xl font-bold text-neutral-800 font-serif">Sur devis</p>
             </Link>
         </div>
     );
