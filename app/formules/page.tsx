@@ -327,12 +327,12 @@ function BuffetChaudSection() {
                 </h3>
 
                 {/* Boutons de sélection */}
-                <div className="flex flex-wrap gap-3 mb-8">
+                <div className="grid grid-cols-4 gap-2 mb-8 w-full">
                     {[2, 3, 4, 5].map((num) => (
                         <button
                             key={num}
                             onClick={() => setServices(num)}
-                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] border flex flex-col items-center justify-center text-center gap-1
+                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 border flex flex-col items-center justify-center text-center gap-1 w-full
                             ${services === num
                                     ? 'bg-black text-[#D4AF37] border-black shadow-lg scale-105'
                                     : 'bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50'
@@ -441,24 +441,24 @@ export default function Formules() {
                                     {activeAperitifTab === 'pains_garnis' && <AllergenLink section="pains" />}
 
                                     {/* Boutons de Convives */}
-                                    <div className="flex flex-wrap gap-4 mt-8">
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-8">
                                         {activeAperitifTab === 'zakouskis' || activeAperitifTab === 'pains_garnis' || activeAperitifTab === 'verrines' ? (
                                             <>
                                                 {/* 4 Boutons partagés pour Pains, Zakouskis et Verrines */}
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=moins_25`} className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5">
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=moins_25`} className="w-full bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5">
                                                     <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 25 pers.</p>
                                                     <p className="text-xl font-bold text-neutral-800 font-serif">Prix sur sélection</p>
                                                 </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=25_100`} className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105">
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=25_100`} className="w-full bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105">
                                                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
                                                     <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 100 pers.</p>
                                                     <p className="text-xl font-bold text-white font-serif">Prix sur sélection</p>
                                                 </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=100_200`} className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5">
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=100_200`} className="w-full bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5">
                                                     <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">100 à 200 pers.</p>
                                                     <p className="text-xl font-bold text-neutral-800 font-serif">Prix sur sélection</p>
                                                 </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=plus_200`} className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5">
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=plus_200`} className="w-full bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5">
                                                     <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 200 pers.</p>
                                                     <p className="text-xl font-bold text-neutral-800 font-serif">Dégressifs</p>
                                                 </Link>
@@ -481,6 +481,17 @@ export default function Formules() {
                     </div>
                 </section>
 
+                {/* SECTION BARBECUES */}
+                <div className="space-y-24 mb-24">
+                    {FORMULES.map((formule, index) => (
+                        <div key={index}>
+                            {index === 0 && <SectionTitle title="Barbecues" />}
+                            <FormuleSection formule={formule} index={index} />
+                            {index === 0 && <AllergenLink section="bbq" />}
+                        </div>
+                    ))}
+                </div>
+
                 {/* SECTION BUFFETS FROIDS */}
                 <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -494,12 +505,12 @@ export default function Formules() {
                             <div className="lg:col-span-5 space-y-8">
 
                                 {/* Navigation des onglets */}
-                                <div className="flex flex-wrap gap-2">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                     {(Object.keys(BUFFETS_FROIDS_OPTIONS) as Array<BuffetFroidType>).map((key) => (
                                         <button
                                             key={key}
                                             onClick={() => setActiveBuffetTab(key)}
-                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] border flex flex-col items-center justify-center text-center gap-1 ${activeBuffetTab === key
+                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 ${activeBuffetTab === key
                                                 ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
                                                 : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
                                                 }`}
@@ -572,26 +583,6 @@ export default function Formules() {
                         </div>
                     </div>
                 </section>
-
-                {/* FORMULES LIST */}
-                <div className="space-y-24">
-                    {FORMULES.map((formule, index) => {
-                        const renderSectionTitle = () => {
-                            if (index === 0) return <SectionTitle title="Barbecues" />;
-                            if (formule.title === "Nos Buffets Froids") return <SectionTitle title="Buffets Froids" />;
-                            return null;
-                        };
-
-                        return (
-                            <div key={index}>
-                                {renderSectionTitle()}
-                                <FormuleSection formule={formule} index={index} />
-                                {index === 0 && <AllergenLink section="bbq" />}
-                                {formule.title === "Nos Buffets Froids" && <AllergenLink section="buffets" />}
-                            </div>
-                        );
-                    })}
-                </div>
 
                 <SectionTitle title="Buffets Chauds" />
                 <BuffetChaudSection />
