@@ -179,7 +179,7 @@ const aperitifsData = {
         id: 'zakouskis',
         title: 'Zakouskis',
         desc: "Des bouchées raffinées pour éveiller les papilles. Découvrez nos créations déclinées en gammes Classique, Internationale et Premium.",
-        image: '/images/zakouskis.jpg', // Image à ajouter dans /public/images
+        image: '/images/zakouskis.jpeg',
         composition: [
             "Légumes & Végé (ex: Arancini à la truffe, Falafel)",
             "Poisson & Mer (ex: Saint-Jacques snackée, Lobster roll)",
@@ -191,7 +191,7 @@ const aperitifsData = {
         id: 'verrines',
         title: 'Verrines (Apéritives ou Dînatoires)',
         desc: "Élégantes et savoureuses, nos verrines se déclinent en format apéritif (6cl) ou dînatoire (12cl) pour s'adapter à votre événement.",
-        image: '/images/verrines.jpg', // Image à ajouter dans /public/images
+        image: '/images/verrines.jpeg',
         composition: [
             "Végétariennes (ex: Burrata pesto, Mousse de ricotta)",
             "Poisson & Mer (ex: Ceviche de langoustine, Tartare saumon)",
@@ -203,7 +203,7 @@ const aperitifsData = {
         id: 'pains_garnis',
         title: 'Petits Pains & Wraps',
         desc: "L'authenticité au creux de la main. Parfait pour vos déjeuners d'entreprise ou réceptions en journée.",
-        image: '/images/pains-garnis.jpg', // Image à ajouter dans /public/images
+        image: '/images/petits_pains.jpeg',
         composition: [
             "Pains Classiques Fermés (ex: Crabe fondant, Américain)",
             "Pains Signature (ex: Le Suédois, L'Italien, Le Périgord)",
@@ -312,10 +312,10 @@ function BuffetChaudSection() {
                 <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm px-4 py-2 text-xs font-bold text-[#D4AF37] tracking-widest uppercase z-10 rounded-sm shadow-sm">
                     Sur-Mesure
                 </div>
-                <Image 
-                    src={images[services as keyof typeof images]} 
-                    alt={`Buffet Chaud ${services} services`} 
-                    fill 
+                <Image
+                    src={images[services as keyof typeof images]}
+                    alt={`Buffet Chaud ${services} services`}
+                    fill
                     className="object-cover transition-all duration-300"
                 />
             </div>
@@ -338,10 +338,10 @@ function BuffetChaudSection() {
                             key={num}
                             onClick={() => setServices(num)}
                             className={`px-5 py-2 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 border-2 
-                            ${services === num 
-                                ? 'bg-black text-white border-black' 
-                                : 'bg-transparent text-neutral-400 border-neutral-200 hover:border-[#D4AF37] hover:text-black'
-                            }`}
+                            ${services === num
+                                    ? 'bg-black text-white border-black'
+                                    : 'bg-transparent text-neutral-400 border-neutral-200 hover:border-[#D4AF37] hover:text-black'
+                                }`}
                         >
                             {num} Services
                         </button>
@@ -359,13 +359,13 @@ function BuffetChaudSection() {
                 </div>
 
                 {/* Bouton d'action */}
-                <Link 
+                <Link
                     href={`/contact?formule=buffet-chaud&services=${services}`}
                     className="inline-block bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300"
                 >
                     Composer mon menu {services} services
                 </Link>
-                
+
                 {/* Lien Allergènes discret */}
                 <div className="mt-4">
                     <Link href="/allergenes?section=buffets" target="_blank" className="text-[10px] text-neutral-400 hover:text-[#D4AF37] uppercase tracking-widest underline decoration-neutral-300 underline-offset-4 transition-colors">
@@ -396,7 +396,7 @@ export default function Formules() {
                 {/* SECTION APÉRITIFS */}
                 <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        
+
                         <div className="text-center mb-12">
                             <SectionTitle title="Apéritifs & Mises en bouche" />
                         </div>
@@ -404,18 +404,17 @@ export default function Formules() {
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                             {/* Colonne Gauche : Onglets & Infos */}
                             <div className="lg:col-span-5 space-y-8">
-                                
+
                                 {/* Navigation des onglets */}
                                 <div className="flex flex-wrap gap-2">
                                     {Object.keys(aperitifsData).map((key) => (
                                         <button
                                             key={key}
                                             onClick={() => setActiveAperitifTab(key)}
-                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] ${
-                                                activeAperitifTab === key
+                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] ${activeAperitifTab === key
                                                     ? "bg-black text-[#D4AF37] shadow-lg scale-105"
                                                     : "bg-white text-neutral-500 border border-neutral-200 hover:border-[#D4AF37] hover:text-black"
-                                            }`}
+                                                }`}
                                         >
                                             {key === 'pains_garnis' ? 'Petits Pains' : aperitifsData[key as keyof typeof aperitifsData].title.split(' ')[0]}
                                         </button>
@@ -504,7 +503,7 @@ export default function Formules() {
                         );
                     })}
                 </div>
-                
+
                 <SectionTitle title="Buffets Chauds" />
                 <BuffetChaudSection />
 
@@ -517,10 +516,10 @@ export default function Formules() {
                         <div className="absolute top-6 left-6 bg-white/95 backdrop-blur-sm px-4 py-2 text-xs font-bold text-[#D4AF37] tracking-widest uppercase z-10 rounded-sm shadow-sm">
                             Convivialité
                         </div>
-                        <Image 
-                            src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop" 
-                            alt="Repas de Collectivité" 
-                            fill 
+                        <Image
+                            src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"
+                            alt="Repas de Collectivité"
+                            fill
                             className="object-cover"
                         />
                     </div>
@@ -529,7 +528,7 @@ export default function Formules() {
                     <div className="w-full lg:w-1/2 flex flex-col items-start">
                         <h2 className="text-3xl md:text-4xl font-serif text-black mb-4">Repas de Collectivité & Plats Uniques</h2>
                         <div className="w-12 h-1 bg-[#D4AF37] mb-6"></div>
-                        
+
                         <p className="text-neutral-500 font-light mb-8 leading-relaxed">
                             Des plats mijotés, généreux et réconfortants, pensés spécialement pour les grands groupes, les clubs sportifs et les associations. La convivialité au meilleur prix avec un plat unique pour tous.
                         </p>
@@ -561,7 +560,7 @@ export default function Formules() {
 
                         <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-4">
                             {/* Bouton 1 : Petit groupe (+10%) */}
-                            <Link 
+                            <Link
                                 href="/contact?formule=collectivite&groupe=petit"
                                 className="flex-1 text-center bg-transparent border-2 border-black text-black px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-black hover:text-white transition-all duration-300"
                             >
@@ -569,7 +568,7 @@ export default function Formules() {
                             </Link>
 
                             {/* Bouton 2 : Standard */}
-                            <Link 
+                            <Link
                                 href="/contact?formule=collectivite&groupe=standard"
                                 className="flex-1 text-center bg-black border-2 border-black text-[#D4AF37] px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-[#D4AF37] hover:text-black hover:border-[#D4AF37] transition-all duration-300"
                             >
@@ -577,7 +576,7 @@ export default function Formules() {
                             </Link>
 
                             {/* Bouton 3 : Grand groupe (Dégressif) */}
-                            <Link 
+                            <Link
                                 href="/contact?formule=collectivite&groupe=grand"
                                 className="flex-1 text-center bg-transparent border-2 border-[#D4AF37] text-[#D4AF37] px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-[#D4AF37] hover:text-black transition-all duration-300"
                             >
