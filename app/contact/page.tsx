@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Leaf, Check } from "lucide-react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function Contact() {
     return (
@@ -305,6 +306,7 @@ function ContactForm() {
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
     const FormAllergenLink = ({ section }: { section: string }) => (
         <div className="text-center mt-2 mb-6">
@@ -878,6 +880,11 @@ function ContactForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!captchaToken) {
+            alert("Veuillez valider le Captcha avant d'envoyer votre message.");
+            return;
+        }
+
         // 1. Validation (Garde ta fonction validateForm existante)
         const newErrors = validateForm();
         if (Object.keys(newErrors).length > 0) {
@@ -937,6 +944,7 @@ function ContactForm() {
             access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
             subject: `Nouvelle demande : ${formData.Nom} ${formData.Prenom}`,
             from_name: "Site Traiteur Compère",
+            captchaToken: captchaToken,
 
             // DÉTAILS ÉVÉNEMENT
             "📋 Formule Choisie": formatFormulaName(menuParam),
@@ -2181,6 +2189,13 @@ function ContactForm() {
                             <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 flex items-center gap-3">
                                 <input type="checkbox" name="Souhaite_etre_recontacte" id="recontact" className="w-5 h-5 text-[#D4AF37] rounded" checked={formData.Souhaite_etre_recontacte === "Oui"} onChange={handleChange} />
                                 <label htmlFor="recontact" className="text-neutral-700 cursor-pointer">Je souhaite être recontacté pour discuter de mon devis.</label>
+                            </div>
+
+                            <div className="flex justify-center mb-6 w-full">
+                                <ReCAPTCHA
+                                    sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+                                    onChange={(token) => setCaptchaToken(token)}
+                                />
                             </div>
 
                             <button type="submit" disabled={status === "submitting"} className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all">
