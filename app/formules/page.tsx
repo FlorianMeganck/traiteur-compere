@@ -123,6 +123,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
     description: string;
     composition: string[];
     basePrice: number;
+    image: string;
 }> = {
     campagnard: {
         label: "Campagnard",
@@ -134,7 +135,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Salades de pommes de terre",
             "Crudités variées et œuf dur"
         ],
-        basePrice: 13
+        basePrice: 13,
+        image: '/images/buffet-campagnard.jpg'
     },
     ardenais: {
         label: "Ardennais",
@@ -146,7 +148,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Rôti de porc froid moutardé",
             "Salades et féculents"
         ],
-        basePrice: 15
+        basePrice: 15,
+        image: '/images/buffet-ardennais.jpg'
     },
     reception: {
         label: "Réception",
@@ -158,7 +161,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Assortiment de viandes froides nobles",
             "Salades raffinées"
         ],
-        basePrice: 18
+        basePrice: 18,
+        image: '/images/buffet-reception.jpg'
     },
     gala: {
         label: "Gala",
@@ -170,7 +174,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Médaillon de saumon en belle-vue",
             "Salades prestige"
         ],
-        basePrice: 22
+        basePrice: 22,
+        image: '/images/buffet-gala.jpg'
     }
 };
 
@@ -218,20 +223,10 @@ const FORMULES = [
         tag: "BBQ & Feu de bois",
         title: "Le Barbecue sur Mesure",
         description: "Configurez votre barbecue idéal parmi nos 8 formules exclusives.",
-        price: "Dès 11€ / pers", // Dynamic
+        price: "Dès 11€ / pers",
         image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=2070&auto=format&fit=crop",
-        items: [], // Dynamic
+        items: [],
         allergens: ["fish", "crustace", "moutarde"],
-        imageStyle: "rounded-t-2xl"
-    },
-    {
-        tag: "Buffets Froids",
-        title: "Nos Buffets Froids",
-        description: "Découvrez notre sélection de buffets froids, du plus rustique au plus raffiné.",
-        price: "Dès 13€ / pers", // Dynamic
-        image: "https://images.unsplash.com/photo-1628198544464-9eb5112faee1?q=80&w=2070&auto=format&fit=crop",
-        items: [], // Dynamic
-        allergens: ["gluten", "egg", "lait", "moutarde", "celeri", "fish", "crustace"],
         imageStyle: "rounded-t-2xl"
     }
 ];
@@ -379,6 +374,7 @@ function BuffetChaudSection() {
 
 export default function Formules() {
     const [activeAperitifTab, setActiveAperitifTab] = useState('zakouskis');
+    const [activeBuffetTab, setActiveBuffetTab] = useState<BuffetFroidType>('campagnard');
 
     return (
         <main className="min-h-screen pt-32 pb-20 bg-gray-50">
@@ -412,8 +408,8 @@ export default function Formules() {
                                             key={key}
                                             onClick={() => setActiveAperitifTab(key)}
                                             className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] ${activeAperitifTab === key
-                                                    ? "bg-black text-[#D4AF37] shadow-lg scale-105"
-                                                    : "bg-white text-neutral-500 border border-neutral-200 hover:border-[#D4AF37] hover:text-black"
+                                                ? "bg-black text-[#D4AF37] shadow-lg scale-105"
+                                                : "bg-white text-neutral-500 border border-neutral-200 hover:border-[#D4AF37] hover:text-black"
                                                 }`}
                                         >
                                             {key === 'pains_garnis' ? 'Petits Pains' : aperitifsData[key as keyof typeof aperitifsData].title.split(' ')[0]}
@@ -476,6 +472,97 @@ export default function Formules() {
                                 <Image
                                     src={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].image}
                                     alt={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].title}
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* SECTION BUFFETS FROIDS */}
+                <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                        <div className="text-center mb-12">
+                            <SectionTitle title="Buffets Froids" />
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                            {/* Colonne Gauche : Onglets & Infos */}
+                            <div className="lg:col-span-5 space-y-8">
+
+                                {/* Navigation des onglets */}
+                                <div className="flex flex-wrap gap-2">
+                                    {(Object.keys(BUFFETS_FROIDS_OPTIONS) as Array<BuffetFroidType>).map((key) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => setActiveBuffetTab(key)}
+                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] ${activeBuffetTab === key
+                                                ? "bg-black text-[#D4AF37] shadow-lg scale-105"
+                                                : "bg-white text-neutral-500 border border-neutral-200 hover:border-[#D4AF37] hover:text-black"
+                                                }`}
+                                        >
+                                            {BUFFETS_FROIDS_OPTIONS[key].label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Contenu Dynamique */}
+                                <div className="animate-fade-in">
+                                    <h3 className="text-2xl font-bold text-neutral-800 mb-4">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].label}</h3>
+                                    <p className="text-neutral-600 mb-6 leading-relaxed">
+                                        {BUFFETS_FROIDS_OPTIONS[activeBuffetTab].description}
+                                    </p>
+
+                                    <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 mb-8">
+                                        <h4 className="text-sm font-bold text-black uppercase tracking-widest mb-4">Composition</h4>
+                                        <ul className="grid grid-cols-1 gap-3">
+                                            {BUFFETS_FROIDS_OPTIONS[activeBuffetTab].composition.map((item, idx) => (
+                                                <li key={idx} className="flex items-start gap-3 text-neutral-700 text-sm">
+                                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                                    <span>{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    <AllergenLink section="buffets" />
+
+                                    {/* Boutons de Prix / Convives */}
+                                    <div className="flex flex-wrap gap-4 mt-8">
+                                        <Link
+                                            href={`/contact?menu=${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].id}&convives=moins_25`}
+                                            className="flex-1 min-w-[120px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-neutral-300 transition group flex flex-col justify-center"
+                                        >
+                                            <p className="text-[10px] font-bold text-neutral-500 mb-2 uppercase tracking-wider group-hover:text-black">Moins de 25 pers.</p>
+                                            <p className="text-lg font-bold text-neutral-800">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice + 2}€ <span className="text-xs font-normal text-neutral-500">/ pers</span></p>
+                                        </Link>
+
+                                        <Link
+                                            href={`/contact?menu=${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].id}&convives=25_250`}
+                                            className="flex-1 min-w-[120px] bg-black p-4 rounded-xl text-center hover:bg-neutral-800 transition shadow-lg transform hover:-translate-y-0.5 flex flex-col justify-center"
+                                        >
+                                            <p className="text-[10px] font-bold text-[#D4AF37] mb-2 uppercase tracking-wider">25 à 250 pers.</p>
+                                            <p className="text-xl font-bold text-white">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice}€ <span className="text-xs font-normal text-neutral-300">/ pers</span></p>
+                                        </Link>
+
+                                        <Link
+                                            href={`/contact?menu=${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].id}&convives=plus_250`}
+                                            className="flex-1 min-w-[120px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-neutral-300 transition group flex flex-col justify-center"
+                                        >
+                                            <p className="text-[10px] font-bold text-neutral-500 mb-2 uppercase tracking-wider group-hover:text-black">Plus de 250 pers.</p>
+                                            <p className="text-lg font-bold text-neutral-800">Sur devis</p>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Colonne Droite : Image Dynamique */}
+                            <div className="lg:col-span-7 h-[500px] relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in">
+                                <Image
+                                    src={BUFFETS_FROIDS_OPTIONS[activeBuffetTab].image}
+                                    alt={BUFFETS_FROIDS_OPTIONS[activeBuffetTab].label}
                                     fill
                                     className="object-cover"
                                 />
@@ -627,15 +714,10 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
     const isEven = index % 2 === 0;
     const isAssociatif = formule.tag === "Événements & Associations";
     const isBBQ = formule.tag === "BBQ & Feu de bois";
-    const isBuffetFroid = formule.tag === "Buffets Froids";
 
     // BBQ State
     const [selectedBBQ, setSelectedBBQ] = useState<BBQType>('classique');
     const currentBBQ = BBQ_OPTIONS[selectedBBQ];
-
-    // Buffet Froid State
-    const [activeBuffetTab, setActiveBuffetTab] = useState<BuffetFroidType>('campagnard');
-    const currentBuffetFroid = BUFFETS_FROIDS_OPTIONS[activeBuffetTab];
 
     return (
         <motion.section
@@ -667,7 +749,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 <div className="flex flex-col gap-2">
                     <span className="text-[#D4AF37] font-sans text-sm font-bold uppercase tracking-widest md:hidden">{formule.tag}</span>
                     <h2 className="text-3xl md:text-4xl font-serif text-black">
-                        {isBBQ ? currentBBQ.label : isBuffetFroid ? `Buffet ${currentBuffetFroid.label}` : formule.title}
+                        {isBBQ ? currentBBQ.label : formule.title}
                     </h2>
                     {isAssociatif && (
                         <div className="inline-block bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider w-fit">
@@ -678,7 +760,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 <div className="w-20 h-1 bg-neutral-300" />
 
                 <p className="text-gray-600 leading-relaxed text-lg">
-                    {isBBQ ? currentBBQ.description : isBuffetFroid ? currentBuffetFroid.description : formule.description}
+                    {isBBQ ? currentBBQ.description : formule.description}
                 </p>
 
                 {/* --- DYNAMIC BBQ SELECTOR --- */}
@@ -707,38 +789,13 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                     </div>
                 )}
 
-                {/* --- DYNAMIC BUFFET FROID SELECTOR --- */}
-                {isBuffetFroid && (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-                        {Object.entries(BUFFETS_FROIDS_OPTIONS).map(([key, data]) => {
-                            const isSelected = activeBuffetTab === key;
-                            return (
-                                <button
-                                    key={key}
-                                    onClick={() => setActiveBuffetTab(key as BuffetFroidType)}
-                                    className={`
-                                        px-2 py-3 rounded-lg text-xs font-bold uppercase tracking-wide transition-all duration-300
-                                        flex flex-col items-center justify-center gap-1 text-center border
-                                        ${isSelected
-                                            ? 'bg-black text-[#D4AF37] border-black shadow-lg scale-105'
-                                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                                        }
-                                    `}
-                                >
-                                    {data.label}
-                                </button>
-                            );
-                        })}
-                    </div>
-                )}
-
                 {/* COMPOSITION */}
                 <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border-l-4 border-neutral-300">
                     <h3 className="font-bold text-gray-900 mb-4 uppercase tracking-wide text-sm">
                         {isAssociatif ? "Choix du Plat Unique" : "Composition"}
                     </h3>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
-                        {(isBBQ ? currentBBQ.composition : isBuffetFroid ? currentBuffetFroid.composition : formule.items).map((item: string, i: number) => (
+                        {(isBBQ ? currentBBQ.composition : formule.items).map((item: string, i: number) => (
                             <li key={i} className="flex items-start gap-2 text-neutral-700">
                                 <Check size={16} className="text-[#D4AF37] flex-shrink-0 mt-1" strokeWidth={3} />
                                 <span className="text-sm leading-relaxed">{item}</span>
@@ -780,7 +837,6 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                         price={formule.price}
                         tag={formule.tag}
                         selectedBBQ={selectedBBQ}
-                        activeBuffetTab={activeBuffetTab}
                     />
                 </div>
             </div>
@@ -788,7 +844,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
     );
 }
 
-function PricingBlock({ price, tag, selectedBBQ, activeBuffetTab }: { price: string, tag: string, selectedBBQ?: BBQType, activeBuffetTab?: BuffetFroidType }) {
+function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string, selectedBBQ?: BBQType }) {
     // If it's the BBQ menu, show the 3 specific options with dynamic prices
     if (tag === "BBQ & Feu de bois" && selectedBBQ) {
         const data = BBQ_OPTIONS[selectedBBQ];
@@ -825,39 +881,6 @@ function PricingBlock({ price, tag, selectedBBQ, activeBuffetTab }: { price: str
                     <span className="text-xs text-gray-500 uppercase font-bold tracking-wide mb-1">{data.counts.large}</span>
                     <span className="text-sm font-medium text-gray-900">{data.prices.large}</span>
                     <span className="text-[10px] text-gray-400">(Tarifs dégressifs)</span>
-                </Link>
-            </div>
-        );
-    }
-
-    // Logic for Buffets Froids
-    if (tag === "Buffets Froids" && activeBuffetTab) {
-        const data = BUFFETS_FROIDS_OPTIONS[activeBuffetTab];
-        return (
-            <div className="flex flex-wrap gap-4 mt-8">
-                <Link
-                    href={`/contact?menu=${data.id}&convives=moins_25`}
-                    className="flex-1 min-w-[120px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-neutral-300 transition group"
-                >
-                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-neutral-700 transition">Moins de 25 pers.</p>
-                    <p className="text-xl font-bold text-neutral-800">{data.basePrice + 2}€ <span className="text-sm font-normal text-neutral-500">/ pers</span></p>
-                </Link>
-
-                <Link
-                    href={`/contact?menu=${data.id}&convives=25_250`}
-                    className="flex-1 min-w-[120px] bg-black p-4 rounded-xl text-center hover:bg-neutral-800 transition shadow-lg transform hover:-translate-y-0.5"
-                >
-                    <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 250 pers.</p>
-                    <p className="text-2xl font-bold text-white">{data.basePrice}€ <span className="text-sm font-normal text-neutral-300">/ pers</span></p>
-                </Link>
-
-                <Link
-                    href={`/contact?menu=${data.id}&convives=plus_250`}
-                    className="flex-1 min-w-[120px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-neutral-300 transition group"
-                >
-                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-neutral-700 transition">Plus de 250 pers.</p>
-                    <p className="text-xl font-bold text-neutral-800">Sur devis</p>
-                    <p className="text-xs text-neutral-400 mt-1">(Tarifs dégressifs)</p>
                 </Link>
             </div>
         );
