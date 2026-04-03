@@ -332,10 +332,10 @@ function BuffetChaudSection() {
                         <button
                             key={num}
                             onClick={() => setServices(num)}
-                            className={`px-5 py-2 rounded-full font-bold uppercase tracking-widest text-xs transition-all duration-300 border-2 
+                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] border flex flex-col items-center justify-center text-center gap-1
                             ${services === num
-                                    ? 'bg-black text-white border-black'
-                                    : 'bg-transparent text-neutral-400 border-neutral-200 hover:border-[#D4AF37] hover:text-black'
+                                    ? 'bg-black text-[#D4AF37] border-black shadow-lg scale-105'
+                                    : 'bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50'
                                 }`}
                         >
                             {num} Services
@@ -356,7 +356,7 @@ function BuffetChaudSection() {
                 {/* Bouton d'action */}
                 <Link
                     href={`/contact?formule=buffet-chaud&services=${services}`}
-                    className="inline-block bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300"
+                    className="inline-flex items-center justify-center bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                 >
                     Composer mon menu {services} services
                 </Link>
@@ -407,9 +407,9 @@ export default function Formules() {
                                         <button
                                             key={key}
                                             onClick={() => setActiveAperitifTab(key)}
-                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] ${activeAperitifTab === key
-                                                ? "bg-black text-[#D4AF37] shadow-lg scale-105"
-                                                : "bg-white text-neutral-500 border border-neutral-200 hover:border-[#D4AF37] hover:text-black"
+                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] border flex flex-col items-center justify-center text-center gap-1 ${activeAperitifTab === key
+                                                ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
+                                                : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
                                                 }`}
                                         >
                                             {key === 'pains_garnis' ? 'Petits Pains' : aperitifsData[key as keyof typeof aperitifsData].title.split(' ')[0]}
@@ -441,25 +441,26 @@ export default function Formules() {
                                     {activeAperitifTab === 'pains_garnis' && <AllergenLink section="pains" />}
 
                                     {/* Boutons de Convives */}
-                                    <div className="flex flex-wrap gap-3 mt-8">
+                                    <div className="flex flex-wrap gap-4 mt-8">
                                         {activeAperitifTab === 'zakouskis' || activeAperitifTab === 'pains_garnis' || activeAperitifTab === 'verrines' ? (
                                             <>
                                                 {/* 4 Boutons partagés pour Pains, Zakouskis et Verrines */}
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=moins_25`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group flex flex-col justify-center">
-                                                    <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">Moins de 25 pers.</p>
-                                                    <p className="text-sm font-bold text-neutral-800">Prix sur sélection</p>
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=moins_25`} className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5">
+                                                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 25 pers.</p>
+                                                    <p className="text-xl font-bold text-neutral-800 font-serif">Prix sur sélection</p>
                                                 </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=25_100`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group flex flex-col justify-center">
-                                                    <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">25 à 100 pers.</p>
-                                                    <p className="text-sm font-bold text-neutral-800">Prix sur sélection</p>
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=25_100`} className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105">
+                                                    <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
+                                                    <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 100 pers.</p>
+                                                    <p className="text-xl font-bold text-white font-serif">Prix sur sélection</p>
                                                 </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=100_200`} className="flex-1 min-w-[110px] bg-neutral-50 p-3 rounded-xl text-center border border-neutral-200 hover:border-black transition group flex flex-col justify-center">
-                                                    <p className="text-[10px] font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black">100 à 200 pers.</p>
-                                                    <p className="text-sm font-bold text-neutral-800">Prix sur sélection</p>
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=100_200`} className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5">
+                                                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">100 à 200 pers.</p>
+                                                    <p className="text-xl font-bold text-neutral-800 font-serif">Prix sur sélection</p>
                                                 </Link>
-                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=plus_200`} className="flex-1 min-w-[110px] bg-black p-3 rounded-xl text-center hover:bg-neutral-800 transition shadow-md transform hover:-translate-y-0.5 flex flex-col justify-center">
-                                                    <p className="text-[10px] font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">Plus de 200 pers.</p>
-                                                    <p className="text-sm font-bold text-white">Prix dégressifs</p>
+                                                <Link href={`/contact?menu=${activeAperitifTab}&convives=plus_200`} className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5">
+                                                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 200 pers.</p>
+                                                    <p className="text-xl font-bold text-neutral-800 font-serif">Dégressifs</p>
                                                 </Link>
                                             </>
                                         ) : null}
@@ -498,9 +499,9 @@ export default function Formules() {
                                         <button
                                             key={key}
                                             onClick={() => setActiveBuffetTab(key)}
-                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] ${activeBuffetTab === key
-                                                ? "bg-black text-[#D4AF37] shadow-lg scale-105"
-                                                : "bg-white text-neutral-500 border border-neutral-200 hover:border-[#D4AF37] hover:text-black"
+                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 flex-1 min-w-[140px] border flex flex-col items-center justify-center text-center gap-1 ${activeBuffetTab === key
+                                                ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
+                                                : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
                                                 }`}
                                         >
                                             {BUFFETS_FROIDS_OPTIONS[key].label}
@@ -533,26 +534,27 @@ export default function Formules() {
                                     <div className="flex flex-wrap gap-4 mt-8">
                                         <Link
                                             href={`/contact?menu=${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].id}&convives=moins_25`}
-                                            className="flex-1 min-w-[120px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-neutral-300 transition group flex flex-col justify-center"
+                                            className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                                         >
-                                            <p className="text-[10px] font-bold text-neutral-500 mb-2 uppercase tracking-wider group-hover:text-black">Moins de 25 pers.</p>
-                                            <p className="text-lg font-bold text-neutral-800">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice + 2}€ <span className="text-xs font-normal text-neutral-500">/ pers</span></p>
+                                            <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 25 pers.</p>
+                                            <p className="text-xl font-bold text-neutral-800 font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice + 2}€ <span className="text-sm font-normal text-neutral-500 font-sans">/ pers</span></p>
                                         </Link>
 
                                         <Link
                                             href={`/contact?menu=${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].id}&convives=25_250`}
-                                            className="flex-1 min-w-[120px] bg-black p-4 rounded-xl text-center hover:bg-neutral-800 transition shadow-lg transform hover:-translate-y-0.5 flex flex-col justify-center"
+                                            className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
                                         >
-                                            <p className="text-[10px] font-bold text-[#D4AF37] mb-2 uppercase tracking-wider">25 à 250 pers.</p>
-                                            <p className="text-xl font-bold text-white">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice}€ <span className="text-xs font-normal text-neutral-300">/ pers</span></p>
+                                            <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
+                                            <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 250 pers.</p>
+                                            <p className="text-2xl font-bold text-white font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice}€ <span className="text-sm font-normal text-neutral-300 font-sans">/ pers</span></p>
                                         </Link>
 
                                         <Link
                                             href={`/contact?menu=${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].id}&convives=plus_250`}
-                                            className="flex-1 min-w-[120px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-neutral-300 transition group flex flex-col justify-center"
+                                            className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                                         >
-                                            <p className="text-[10px] font-bold text-neutral-500 mb-2 uppercase tracking-wider group-hover:text-black">Plus de 250 pers.</p>
-                                            <p className="text-lg font-bold text-neutral-800">Sur devis</p>
+                                            <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 250 pers.</p>
+                                            <p className="text-xl font-bold text-neutral-800 font-serif">Sur devis</p>
                                         </Link>
                                     </div>
                                 </div>
@@ -645,29 +647,33 @@ export default function Formules() {
                             <AllergenLink section="collectivite" />
                         </div>
 
-                        <div className="flex flex-col sm:flex-row flex-wrap gap-3 mt-4">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-8">
                             {/* Bouton 1 : Petit groupe (+10%) */}
                             <Link
                                 href="/contact?formule=collectivite&groupe=petit"
-                                className="flex-1 text-center bg-transparent border-2 border-black text-black px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-black hover:text-white transition-all duration-300"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                             >
-                                Moins de 30 pers. (+10%)
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 30 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">+10%</p>
                             </Link>
 
                             {/* Bouton 2 : Standard */}
                             <Link
                                 href="/contact?formule=collectivite&groupe=standard"
-                                className="flex-1 text-center bg-black border-2 border-black text-[#D4AF37] px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-[#D4AF37] hover:text-black hover:border-[#D4AF37] transition-all duration-300"
+                                className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
                             >
-                                Devis Standard (30-100 pers.)
+                                <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
+                                <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">30 à 100 pers.</p>
+                                <p className="text-2xl font-bold text-white font-serif">Devis Standard</p>
                             </Link>
 
                             {/* Bouton 3 : Grand groupe (Dégressif) */}
                             <Link
                                 href="/contact?formule=collectivite&groupe=grand"
-                                className="flex-1 text-center bg-transparent border-2 border-[#D4AF37] text-[#D4AF37] px-6 py-3 rounded-full font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-[#D4AF37] hover:text-black transition-all duration-300"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                             >
-                                Plus de 100 pers. (Dégressif)
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">Dégressif</p>
                             </Link>
                         </div>
                     </div>
