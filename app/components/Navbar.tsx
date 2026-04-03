@@ -85,7 +85,7 @@ export default function Navbar() {
 
                     {/* CENTER ZONE: Logo */}
                     <div className="flex justify-center items-center">
-                        <Link href="/" className="relative block w-70 h-36 md:w-70 md:h-36 transition-transform hover:scale-105 z-50">
+                        <Link href="/" className="relative block w-55 h-28 md:w-55 md:h-28 transition-transform hover:scale-105 z-50">
                             <Image
                                 src="/images/Logo_traiteur.png"
                                 alt="Traiteur Compère"
