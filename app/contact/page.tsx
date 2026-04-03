@@ -941,6 +941,7 @@ function ContactForm() {
             // DÉTAILS ÉVÉNEMENT
             "📋 Formule Choisie": formatFormulaName(menuParam),
             "💰 PRIX ESTIMATIF AFFICHÉ": finalPriceStr,
+            ...(finalPriceStr === "SUR DEVIS" && totalPrice > 0 && { "💡 Prix indicatif de base (Info Interne)": `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` }),
             "📅 Date de l'événement": formData.Date,
             "👥 Nombre de convives": formData.Nombre_Convives,
 
