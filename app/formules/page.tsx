@@ -136,7 +136,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Crudités variées et œuf dur"
         ],
         basePrice: 13,
-        image: '/images/buffet-campagnard.jpg'
+        image: '/images/buffet_campagnard.jpeg'
     },
     ardenais: {
         label: "Ardennais",
@@ -149,7 +149,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Salades et féculents"
         ],
         basePrice: 15,
-        image: '/images/buffet-ardennais.jpg'
+        image: '/images/buffet_ardennais.jpeg'
     },
     reception: {
         label: "Réception",
@@ -162,7 +162,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Salades raffinées"
         ],
         basePrice: 18,
-        image: '/images/buffet-reception.jpg'
+        image: '/images/buffet_reception.jpeg'
     },
     gala: {
         label: "Gala",
@@ -175,7 +175,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Salades prestige"
         ],
         basePrice: 22,
-        image: '/images/buffet-gala.jpg'
+        image: '/images/buffet_gala.jpeg'
     }
 };
 
@@ -441,7 +441,7 @@ export default function Formules() {
                                     {activeAperitifTab === 'pains_garnis' && <AllergenLink section="pains" />}
 
                                     {/* Boutons de Convives */}
-                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mt-8">
+                                    <div className="grid grid-cols-2 gap-3 md:gap-4 mt-8">
                                         {activeAperitifTab === 'zakouskis' || activeAperitifTab === 'pains_garnis' || activeAperitifTab === 'verrines' ? (
                                             <>
                                                 {/* 4 Boutons partagés pour Pains, Zakouskis et Verrines */}
