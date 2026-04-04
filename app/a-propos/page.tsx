@@ -147,7 +147,7 @@ export default function About() {
                                 transition={{ duration: 0.8 }}
                                 className="w-full lg:w-1/2 flex flex-col items-center gap-8"
                             >
-                                <div className="relative w-3/4 aspect-square rounded-2xl overflow-hidden shadow-xl">
+                                <div className="relative w-2/5 aspect-square rounded-2xl overflow-hidden shadow-xl">
                                     <Image
                                         src="/images/Maison_otte1.jpeg"
                                         alt="Logo de la Maison Otte"
@@ -155,7 +155,7 @@ export default function About() {
                                         className="object-cover transition-transform duration-700 hover:scale-105"
                                     />
                                 </div>
-                                <div className="relative w-3/4 aspect-square rounded-2xl overflow-hidden shadow-xl">
+                                <div className="relative w-2/5 aspect-square rounded-2xl overflow-hidden shadow-xl">
                                     <Image
                                         src="/images/Maison_otte2.jpeg"
                                         alt="La Maison Otte"
@@ -221,14 +221,10 @@ export default function About() {
                     >
                         <Image
                             src="/images/Releve1.jpeg"
-                            alt="Christophe, la nouvelle génération"
+                            alt="Christophe Compere, la relève"
                             fill
                             className="object-cover"
                         />
-                        <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur px-6 py-3 rounded-xl shadow-lg border-l-4 border-[#D4AF37]">
-                            <span className="block text-sm font-bold uppercase tracking-widest text-[#D4AF37]">Christophe</span>
-                            <span className="block text-xs uppercase tracking-wider text-neutral-500 mt-1">La relève assumée</span>
-                        </div>
                     </motion.div>
 
                     {/* Texte */}
