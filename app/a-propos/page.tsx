@@ -145,7 +145,7 @@ export default function About() {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8 }}
-                                className="w-full lg:w-1/2 flex flex-col gap-8 md:block md:relative md:h-[650px] lg:h-[750px] my-8 lg:my-0"
+                                className="w-full lg:w-1/2 flex flex-col gap-6 relative h-auto md:block md:h-[500px] lg:h-[600px] my-8 lg:my-0"
                             >
                                 {/* Image 1 : Haut Gauche (Le Logo) */}
                                 <motion.div 
@@ -153,7 +153,7 @@ export default function About() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.8, delay: 0.2 }}
-                                    className="relative md:absolute md:top-0 md:left-0 w-full md:w-[65%] aspect-[4/3] md:aspect-square shadow-xl rounded-2xl overflow-hidden"
+                                    className="relative md:absolute md:top-0 md:left-0 w-full md:w-[50%] aspect-square shadow-lg rounded-3xl overflow-hidden"
                                 >
                                     <Image
                                         src="/images/Maison_otte1.jpeg"
@@ -169,7 +169,7 @@ export default function About() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.8, delay: 0.4 }}
-                                    className="relative md:absolute md:bottom-0 md:right-0 w-full md:w-[75%] aspect-[4/3] md:aspect-square shadow-xl rounded-2xl overflow-hidden"
+                                    className="relative md:absolute md:bottom-0 md:right-0 w-full md:w-[70%] aspect-[4/3] shadow-lg rounded-3xl overflow-hidden"
                                 >
                                     <Image
                                         src="/images/Maison_otte2.jpeg"
