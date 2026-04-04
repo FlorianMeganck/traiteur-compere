@@ -46,7 +46,7 @@ export default function Footer() {
                         <h3 className="font-serif text-white text-lg tracking-widest uppercase">Navigation</h3>
                         <div className="flex flex-col gap-3 text-sm">
                             <FooterLink href="/" label="Accueil" />
-                            <FooterLink href="/about" label="À Propos" />
+                            <FooterLink href="/a-propos" label="À Propos" />
                             <FooterLink href="/services" label="Services" />
                             <FooterLink href="/contact" label="Contact" />
                         </div>
