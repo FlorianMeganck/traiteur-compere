@@ -85,7 +85,7 @@ export default function Navbar() {
 
                     {/* CENTER ZONE: Logo */}
                     <div className="flex justify-center items-center">
-                        <Link href="/" className="relative block w-55 h-28 md:w-55 md:h-28 transition-transform hover:scale-105 z-50">
+                        <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
                             <Image
                                 src="/images/Logo_traiteur.png"
                                 alt="Traiteur Compère"
@@ -120,9 +120,9 @@ export default function Navbar() {
                 {/* --- MOBILE LAYOUT (Flex Between) --- */}
                 <div className="md:hidden flex justify-between items-center w-full">
                     {/* LOGO */}
-                    <Link href="/" className="relative block w-32 h-16 transition-transform hover:scale-105 z-50">
+                    <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
                         <Image
-                            src="/images/Logo_traiteur.jpeg"
+                            src="/images/Logo_traiteur.png"
                             alt="Traiteur Compère"
                             fill
                             className="object-contain"
