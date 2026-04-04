@@ -145,14 +145,24 @@ export default function About() {
                                 whileInView={{ opacity: 1, scale: 1 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8 }}
-                                className="w-full lg:w-1/2 relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl"
+                                className="w-full lg:w-1/2 flex flex-col items-center gap-8"
                             >
-                                <Image
-                                    src="/images/Maison_otte.jpeg"
-                                    alt="Logo de la Maison Otte"
-                                    fill
-                                    className="object-cover transition-transform duration-700 hover:scale-105"
-                                />
+                                <div className="relative w-3/4 aspect-square rounded-2xl overflow-hidden shadow-xl">
+                                    <Image
+                                        src="/images/Maison_otte1.jpeg"
+                                        alt="Logo de la Maison Otte"
+                                        fill
+                                        className="object-cover transition-transform duration-700 hover:scale-105"
+                                    />
+                                </div>
+                                <div className="relative w-3/4 aspect-square rounded-2xl overflow-hidden shadow-xl">
+                                    <Image
+                                        src="/images/Maison_otte2.jpeg"
+                                        alt="La Maison Otte"
+                                        fill
+                                        className="object-cover transition-transform duration-700 hover:scale-105"
+                                    />
+                                </div>
                             </motion.div>
                         </div>
 
