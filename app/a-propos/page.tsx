@@ -148,8 +148,8 @@ export default function About() {
                                 className="w-full lg:w-1/2 relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl"
                             >
                                 <Image
-                                    src="/images/Travail1.jpeg"
-                                    alt="L'artisanat local et la Maison Otte"
+                                    src="/images/Maison_otte.jpeg"
+                                    alt="Logo de la Maison Otte"
                                     fill
                                     className="object-cover transition-transform duration-700 hover:scale-105"
                                 />
@@ -169,10 +169,10 @@ export default function About() {
                                     <Image src="/images/Event2.jpeg" alt="Chalet de Noël" fill className="object-cover transition-transform duration-700 hover:scale-105" />
                                 </div>
                                 <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md mt-8">
-                                    <Image src="/images/bouffe/Bouffe8.jpeg" alt="Pains saucisses" fill className="object-cover transition-transform duration-700 hover:scale-105" />
+                                    <Image src="/images/Event1.jpeg" alt="L'Affiche au chalet" fill className="object-cover transition-transform duration-700 hover:scale-105" />
                                 </div>
                                 <div className="relative aspect-[2/1] col-span-2 rounded-2xl overflow-hidden shadow-md">
-                                    <Image src="/images/Event1.jpeg" alt="L'Affiche au chalet" fill className="object-cover transition-transform duration-700 hover:scale-105" />
+                                    <Image src="/images/bouffe/Bouffe8.jpeg" alt="Les pains saucisses du chalet" fill className="object-cover transition-transform duration-700 hover:scale-105" />
                                 </div>
                             </motion.div>
 
