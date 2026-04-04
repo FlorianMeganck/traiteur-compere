@@ -31,9 +31,6 @@ export default function Services() {
                     &ldquo;De la célébration intime au grand banquet, nous créons l'ambiance gourmande qui vous ressemble.&rdquo;
                 </motion.p>
 
-                <div className="mt-2 mb-10">
-                    <a href="#livraison" className="text-sm font-bold text-[#D4AF37] underline underline-offset-4 hover:text-black transition-colors duration-300">Voir nos options de livraison seule ↓</a>
-                </div>
 
                 {/* VISUAL SUMMARY */}
                 <VisualSummary />
@@ -149,11 +146,12 @@ export default function Services() {
 // --- VISUAL SUMMARY ---
 function VisualSummary() {
     return (
-        <nav className="flex flex-wrap justify-center gap-8 md:gap-16 border-t border-b border-neutral-100 py-6 mt-12 bg-white/80 backdrop-blur-sm sticky top-20 z-40 transition-all duration-300">
+        <nav className="flex flex-wrap md:flex-nowrap justify-center gap-6 md:gap-12 border-t border-b border-neutral-100 py-6 mt-12 bg-white/80 backdrop-blur-sm sticky top-20 z-40 transition-all duration-300 text-center">
             {[
                 { label: "Mariages", href: "#mariages" },
                 { label: "Entreprises", href: "#entreprises" },
-                { label: "Particuliers", href: "#particuliers" }
+                { label: "Particuliers", href: "#particuliers" },
+                { label: "Livraison seule", href: "#livraison" }
             ].map((item) => (
                 <Link
                     key={item.label}

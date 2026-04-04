@@ -141,28 +141,46 @@ export default function About() {
                                 </div>
                             </motion.div>
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
+                                initial={{ opacity: 0, x: 20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8 }}
-                                className="w-full lg:w-1/2 flex flex-col items-center gap-8"
+                                className="w-full lg:w-1/2 relative h-[400px] sm:h-[500px] lg:h-[550px] my-8 lg:my-0"
                             >
-                                <div className="relative w-2/5 aspect-square rounded-2xl overflow-hidden shadow-xl">
+                                {/* Cadre décoratif doré façon magazine */}
+                                <div className="absolute top-8 bottom-8 left-12 right-0 border-2 border-[#D4AF37]/30 z-0"></div>
+
+                                {/* Image 1 : Haut Gauche (Le Logo) */}
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.8, delay: 0.2 }}
+                                    className="absolute top-0 left-0 w-3/5 lg:w-[55%] aspect-square shadow-xl border-[6px] border-white z-10 bg-white"
+                                >
                                     <Image
                                         src="/images/Maison_otte1.jpeg"
                                         alt="Logo de la Maison Otte"
                                         fill
-                                        className="object-cover transition-transform duration-700 hover:scale-105"
+                                        className="object-cover"
                                     />
-                                </div>
-                                <div className="relative w-2/5 aspect-square rounded-2xl overflow-hidden shadow-xl">
+                                </motion.div>
+
+                                {/* Image 2 : Bas Droite (La Photo) */}
+                                <motion.div 
+                                    initial={{ opacity: 0, y: -20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.8, delay: 0.4 }}
+                                    className="absolute bottom-0 right-0 w-3/4 lg:w-[65%] aspect-square shadow-2xl border-[6px] border-white z-20 bg-white"
+                                >
                                     <Image
                                         src="/images/Maison_otte2.jpeg"
                                         alt="La Maison Otte"
                                         fill
-                                        className="object-cover transition-transform duration-700 hover:scale-105"
+                                        className="object-cover"
                                     />
-                                </div>
+                                </motion.div>
                             </motion.div>
                         </div>
 
