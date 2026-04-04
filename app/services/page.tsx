@@ -65,8 +65,8 @@ export default function Services() {
                         desc="Du sandwich garnis pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide et une qualité constante."
                         ctaLabel="Demander un devis"
                         images={[
-                            "https://images.unsplash.com/photo-1551818255-e6e10975bc17?q=80&w=1000&auto=format&fit=crop", // Networking Setup
-                            "https://fr.vecteezy.com/photo/2254765-restauration-food-for-parties-corporate-parties-conferences-forums-banquets-selective-focus", // Precise Appetizers
+                            "/images/event_pro1.jpeg",
+                            "/images/event_pro2.jpeg",
                             "/images/event_pro3.jpeg",
                             "/images/event_pro4.jpeg"
                         ]}
