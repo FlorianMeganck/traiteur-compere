@@ -145,18 +145,15 @@ export default function About() {
                                 whileInView={{ opacity: 1, x: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ duration: 0.8 }}
-                                className="w-full lg:w-1/2 relative h-[400px] sm:h-[500px] lg:h-[550px] my-8 lg:my-0"
+                                className="w-full lg:w-1/2 flex flex-col gap-8 md:block md:relative md:h-[650px] lg:h-[750px] my-8 lg:my-0"
                             >
-                                {/* Cadre décoratif doré façon magazine */}
-                                <div className="absolute top-8 bottom-8 left-12 right-0 border-2 border-[#D4AF37]/30 z-0"></div>
-
                                 {/* Image 1 : Haut Gauche (Le Logo) */}
                                 <motion.div 
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.8, delay: 0.2 }}
-                                    className="absolute top-0 left-0 w-3/5 lg:w-[55%] aspect-square shadow-xl border-[6px] border-white z-10 bg-white"
+                                    className="relative md:absolute md:top-0 md:left-0 w-full md:w-[65%] aspect-[4/3] md:aspect-square shadow-xl rounded-2xl overflow-hidden"
                                 >
                                     <Image
                                         src="/images/Maison_otte1.jpeg"
@@ -172,7 +169,7 @@ export default function About() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.8, delay: 0.4 }}
-                                    className="absolute bottom-0 right-0 w-3/4 lg:w-[65%] aspect-square shadow-2xl border-[6px] border-white z-20 bg-white"
+                                    className="relative md:absolute md:bottom-0 md:right-0 w-full md:w-[75%] aspect-[4/3] md:aspect-square shadow-xl rounded-2xl overflow-hidden"
                                 >
                                     <Image
                                         src="/images/Maison_otte2.jpeg"

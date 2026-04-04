@@ -163,7 +163,7 @@ function ServicesSection() {
   const services = [
     {
       title: "Événements d'Entreprise",
-      image: "/images/corporate_cocktail.png",
+      image: "/images/entreprise.jpeg",
       desc: "Séminaires, cocktails dînatoires ou repas d'équipe : marquez les esprits de vos collaborateurs et clients avec un service traiteur irréprochable et savoureux.",
       link: "/services#entreprises"
     },
