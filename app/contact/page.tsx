@@ -952,6 +952,7 @@ function ContactForm() {
             access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
             subject: `Nouvelle demande : ${formData.Nom} ${formData.Prenom}`,
             from_name: "Site Traiteur Compère",
+            cc: "traiteurcompere@gmail.com",
 
             // DÉTAILS ÉVÉNEMENT
             "📋 Formule Choisie": formatFormulaName(menuParam),
