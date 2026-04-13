@@ -712,7 +712,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
 
     return (
         <motion.section
-            id={isAssociatif ? "associatif" : undefined}
+            id={isAssociatif ? "associatif" : isBBQ ? "bbq" : undefined}
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}

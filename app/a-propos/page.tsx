@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function About() {
     return (
@@ -138,6 +139,12 @@ export default function About() {
                                     <p>
                                         Dans une volonté constante de qualité et de respect envers nos clients, nous avons mis en place une sélection rigoureuse de nos viandes afin de vous offrir une expérience irréprochable. C'est tout naturellement que nous avons choisi de collaborer avec la boucherie Otte, récemment installée à Saint-Georges-sur-Meuse. Bien que nouvelle dans le paysage local, elle bénéficie déjà d'une solide réputation fondée sur le sérieux et la qualité de ses produits. En travaillant en étroite collaboration avec Steve, le patron de la boucherie, nous vous garantissons une parfaite maîtrise de la qualité ainsi qu'une traçabilité claire de l'origine de nos viandes.
                                     </p>
+                                    <Link 
+                                        href="/formules#bbq"
+                                        className="inline-block mt-8 px-6 py-3 bg-black text-white rounded-full hover:bg-zinc-800 transition-colors duration-300 shadow-lg"
+                                    >
+                                        découvrez notre sélection de viandes ! →
+                                    </Link>
                                 </div>
                             </motion.div>
                             <motion.div
