@@ -74,7 +74,7 @@ const BBQ_PRICES: Record<string, number> = {
 };
 
 const SIDES_COLD = ["Salade de Pâtes Pesto", "Salade de Pâtes Curry", "Salade Grecque (Feta/Olives)", "Taboulé Oriental", "Tomate Mozza Di Bufala", "Salade de Pomme de Terre (Mayonnaise)", "Salade de Pomme de Terre (Vinaigrette)", "Carottes Râpées (Citron)", "Céleri Râpé & Pommes", "Concombre à la crème", "Salade de chou blanc"];
-const feculentsBBQ = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Baguette", "Petits pains"];
+const feculentsBBQ = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Baguette", "Petit pain"];
 
 const BUFFET_FROID_PRICES: Record<string, number> = {
     buffet_campagnard: 13,
@@ -400,6 +400,9 @@ function ContactForm() {
         Dessert_Check: "Non",
         Dessert_Choix: "",
 
+        // Vaisselle
+        Location_Vaisselle_Check: "Non",
+
         // Buffet / Assoc Legacy
         plat_1: "",
         plat_2: "",
@@ -579,7 +582,7 @@ function ContactForm() {
         });
 
         if (isAnyBBQ) {
-            if (formData.Viande_Extra_1) supplements += 2;
+            if (formData.Viande_Extra_1) supplements += 3;
             if (formData.Viande_Extra_2) supplements += 3;
             if (formData.Suppl_Crudite_Extra) supplements += 1.5;
             if (formData.Feculent_Extra) supplements += 2;
@@ -593,6 +596,11 @@ function ContactForm() {
         // 4. Dessert
         if (formData.Dessert_Check === "Oui" && formData.Dessert_Choix) {
             supplements += 6;
+        }
+
+        // Location Vaisselle
+        if (formData.Location_Vaisselle_Check === "Oui") {
+            supplements += 1.5;
         }
 
         // 5. Majoration pour les petits groupes (Buffets Froids)
@@ -1044,7 +1052,7 @@ function ContactForm() {
             }),
 
             // SUPPLÉMENTS VIANDES (BBQ)
-            ...(formData.Viande_Extra_1 && { "🥩 Viande Suppl. 1 (+2€)": formData.Viande_Extra_1 }),
+            ...(formData.Viande_Extra_1 && { "🥩 Viande Suppl. 1 (+3€)": formData.Viande_Extra_1 }),
             ...(formData.Viande_Extra_2 && { "🥩 Viande Suppl. 2 (+3€)": formData.Viande_Extra_2 }),
 
             // ANCIENS CHAMPS (Compatibilité)
@@ -1060,6 +1068,7 @@ function ContactForm() {
             ...(formData.Dessert_Check === "Oui" && formData.Dessert_Choix && { "🍰 Dessert choisi (+6€)": formData.Dessert_Choix }),
 
             // DIVERS
+            "🍽️ Location de vaisselle": formData.Location_Vaisselle_Check === "Oui" ? "Oui (+1,50€/pers)" : "Non",
             "💬 Message / Allergies": formData.details_projet || "Aucun message",
             "🔄 Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
         };
@@ -1214,7 +1223,7 @@ function ContactForm() {
                     {!isCochonOrPorchetta && (
                         <div className="mt-4 p-4 bg-neutral-50/70 rounded-xl border border-dashed border-neutral-300">
                             <label className={`${labelStyle} flex items-center gap-2`}>
-                                <span>🥩</span> Viande supplémentaire (+2,00€ / pers)
+                                <span>🥩</span> Viande supplémentaire (+3,00€ / pers)
                             </label>
                             <div className="relative">
                                 <select name="Viande_Extra_1" value={formData.Viande_Extra_1 || ""} onChange={handleChange} className={getInputStyle("Viande_Extra_1") + " appearance-none"}>
@@ -2026,6 +2035,23 @@ function ContactForm() {
 
     const renderContactFields = () => (
         <>
+            <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 mb-8 max-w-lg mx-auto md:max-w-none">
+                <div className="flex items-center gap-3 mb-2">
+                    <input
+                        type="checkbox"
+                        name="Location_Vaisselle_Check"
+                        id="Location_Vaisselle_Check"
+                        className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                        checked={formData.Location_Vaisselle_Check === "Oui"}
+                        onChange={handleChange}
+                    />
+                    <label htmlFor="Location_Vaisselle_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
+                        Location de vaisselle (+1,50€ / pers)
+                    </label>
+                </div>
+                <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
                     <label className={labelStyle}>Prénom <span className="text-red-500">*</span></label>
