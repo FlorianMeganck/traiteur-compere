@@ -174,11 +174,11 @@ const verrinesData: Record<string, { items: string[], price6cl: number, price12c
         price6cl: 2.00,
         price12cl: 3.50,
         items: [
-            "Verrine italienne au parmesan et tomates confites", "Poivron, feta et olives noires", 
-            "Quinoa et légumes d'été au citron", "Lentilles et betterave au vinaigre balsamique", 
-            "Pois chiches et épinards, sauce tahini", "Houmous de lentilles", 
-            "Épinard, avocat, noix et lentilles", "Tomate cerise, mozzarella, huile d'olive", 
-            "Burrata, pesto et tomates cerises", "Polenta crémeuse et champignons poêlés", 
+            "Verrine italienne au parmesan et tomates confites", "Poivron, feta et olives noires",
+            "Quinoa et légumes d'été au citron", "Lentilles et betterave au vinaigre balsamique",
+            "Pois chiches et épinards, sauce tahini", "Houmous de lentilles",
+            "Épinard, avocat, noix et lentilles", "Tomate cerise, mozzarella, huile d'olive",
+            "Burrata, pesto et tomates cerises", "Polenta crémeuse et champignons poêlés",
             "Mousse de ricotta citron et courgettes grillées"
         ]
     },
@@ -186,9 +186,9 @@ const verrinesData: Record<string, { items: string[], price6cl: number, price12c
         price6cl: 3.00,
         price12cl: 4.50,
         items: [
-            "Guacamole et saumon frais", "Saumon et fromage frais aux herbes", 
-            "Crevette et mangue fraîche", "Quinoa, thon et radis rose", 
-            "Tartare de saumon citron vert et aneth", "Crème d'avocat et chair de crabe", 
+            "Guacamole et saumon frais", "Saumon et fromage frais aux herbes",
+            "Crevette et mangue fraîche", "Quinoa, thon et radis rose",
+            "Tartare de saumon citron vert et aneth", "Crème d'avocat et chair de crabe",
             "Ceviche de cabillaud aux agrumes", "Rillettes de maquereau fumé et ciboulette"
         ]
     },
@@ -196,9 +196,9 @@ const verrinesData: Record<string, { items: string[], price6cl: number, price12c
         price6cl: 3.00,
         price12cl: 4.50,
         items: [
-            "Carpaccio de bœuf, parmesan et balsamique", "Poulet grillé et quinoa aux herbes", 
-            "Bœuf et patate douce au thym", "Œufs mimosa et légumes grillés", 
-            "Butternut au chorizo piquant et abricot", "Mousse de chèvre frais, basilic, gingembre et noisettes", 
+            "Carpaccio de bœuf, parmesan et balsamique", "Poulet grillé et quinoa aux herbes",
+            "Bœuf et patate douce au thym", "Œufs mimosa et légumes grillés",
+            "Butternut au chorizo piquant et abricot", "Mousse de chèvre frais, basilic, gingembre et noisettes",
             "Effiloché de bœuf au jus réduit", "Volaille curry coco", "Parmentier de canard en verrine"
         ]
     },
@@ -206,9 +206,9 @@ const verrinesData: Record<string, { items: string[], price6cl: number, price12c
         price6cl: 3.50,
         price12cl: 5.00,
         items: [
-            "Ceviche de langoustine au citron vert", "Tartare de bœuf Black Angus et brisure de truffe", 
-            "Saumon fumé supérieur, crème ciboulette et œufs de saumon", "Tataki de thon rouge, sésame noir et sauce yuzu", 
-            "Foie gras mi-cuit, gelée de Porto et pain d'épices croustillant", "Noix de Saint-Jacques poêlées, crème légère au citron", 
+            "Ceviche de langoustine au citron vert", "Tartare de bœuf Black Angus et brisure de truffe",
+            "Saumon fumé supérieur, crème ciboulette et œufs de saumon", "Tataki de thon rouge, sésame noir et sauce yuzu",
+            "Foie gras mi-cuit, gelée de Porto et pain d'épices croustillant", "Noix de Saint-Jacques poêlées, crème légère au citron",
             "Asperges blanches, œuf parfait et crumble ibérique", "Carpaccio de Saint-Pierre, huile de basilic"
         ]
     }
@@ -432,7 +432,7 @@ function ContactForm() {
         // Petits Pains
         Categorie_Pains: "",
         Quantite_Pains: "",
-        
+
         // Zakouskis
         Zakouski_Cat_1: "", Zakouski_Item_1: "",
         Zakouski_Cat_2: "", Zakouski_Item_2: "",
@@ -552,7 +552,7 @@ function ContactForm() {
             let itemPrice = collectiviteData[formData.Plat_Collectivite];
             // Majoration de 10% si moins de 30 personnes
             if (formData.Nombre_Convives === 'Moins de 30') {
-                itemPrice = itemPrice * 1.10; 
+                itemPrice = itemPrice * 1.10;
             }
             base = itemPrice;
         }
@@ -952,7 +952,6 @@ function ContactForm() {
             access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
             subject: `Nouvelle demande : ${formData.Nom} ${formData.Prenom}`,
             from_name: "Site Traiteur Compère",
-            cc: "traiteurcompere@gmail.com",
 
             // DÉTAILS ÉVÉNEMENT
             "📋 Formule Choisie": formatFormulaName(menuParam),
@@ -1775,7 +1774,7 @@ function ContactForm() {
             if (!selectedFormat) return 0;
             const catData = verrinesData[category];
             const basePrice = selectedFormat === "6cl" ? catData.price6cl : catData.price12cl;
-            
+
             if (formData.Nombre_Convives === 'Moins de 25') return basePrice + 0.30;
             if (formData.Nombre_Convives === '100 à 200') return basePrice - 0.20;
             return basePrice;
@@ -2022,12 +2021,12 @@ function ContactForm() {
 
                 <div className="group mt-8 border-t border-neutral-100 pt-6">
                     <label className={labelStyle}>Thème de l'événement ou autres commentaires</label>
-                    <textarea 
-                        name="Buffet_Chaud_Commentaires" 
-                        value={formData.Buffet_Chaud_Commentaires} 
-                        onChange={handleChange} 
-                        className={`${getInputStyle("Buffet_Chaud_Commentaires")} h-20 resize-y`} 
-                        placeholder="Précisez le thème, le style de service attendu..." 
+                    <textarea
+                        name="Buffet_Chaud_Commentaires"
+                        value={formData.Buffet_Chaud_Commentaires}
+                        onChange={handleChange}
+                        className={`${getInputStyle("Buffet_Chaud_Commentaires")} h-20 resize-y`}
+                        placeholder="Précisez le thème, le style de service attendu..."
                     />
                 </div>
             </div>
