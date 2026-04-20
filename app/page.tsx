@@ -271,9 +271,9 @@ function KeyFiguresSection() {
           <div className="hidden md:block absolute left-1/3 top-0 bottom-0 w-[1px] bg-gray-200"></div>
           <div className="hidden md:block absolute right-1/3 top-0 bottom-0 w-[1px] bg-gray-200"></div>
 
-          <Counter end={60} label="Réalisations Culinaires" />
-          <Counter end={430} suffix="+" label="Convives Régalés" />
-          <Counter end={6} label="Événements Publics d'Exception" />
+          <Counter end={200} label="Réalisations Culinaires" />
+          <Counter end={10000} suffix="+" label="Convives Régalés" />
+          <Counter end={47} label="Événements Publics d'Exception" />
         </div>
       </div>
     </section>
