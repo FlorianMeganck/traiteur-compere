@@ -1091,10 +1091,8 @@ function ContactForm() {
                 if (typeof window !== 'undefined' && (window as any).gtag) {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     (window as any).gtag('event', 'generate_lead', {
-                        'event_category': 'Contact',
-                        'event_label': 'Formulaire_Envoye_Web3Forms',
-                        'value': typeof totalPrice !== 'undefined' ? totalPrice : 0,
-                        'currency': 'EUR'
+                        'event_category': 'formulaire',
+                        'event_label': 'contact_traiteur'
                     });
                 }
                 // Affichage du V vert
