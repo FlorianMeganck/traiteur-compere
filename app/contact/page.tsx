@@ -307,6 +307,19 @@ function ContactForm() {
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+    const [isStarted, setIsStarted] = useState(false);
+
+    const handleFormStart = () => {
+        if (!isStarted) {
+            setIsStarted(true);
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+                (window as any).gtag('event', 'form_start', {
+                    'event_category': 'engagement',
+                    'event_label': 'debut_saisie_formulaire'
+                });
+            }
+        }
+    };
 
     const FormAllergenLink = ({ section }: { section: string }) => (
         <div className="text-center mt-2 mb-6">
@@ -2053,7 +2066,7 @@ function ContactForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
                     <label className={labelStyle}>Prénom <span className="text-red-500">*</span></label>
-                    <input type="text" name="Prenom" required value={formData.Prenom} onChange={handleChange} className={getInputStyle("Prenom")} placeholder="Votre prénom" />
+                    <input type="text" name="Prenom" required value={formData.Prenom} onChange={handleChange} onFocus={handleFormStart} className={getInputStyle("Prenom")} placeholder="Votre prénom" />
                     {errors.Prenom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Prenom}</p>}
                 </div>
                 <div className="group">
