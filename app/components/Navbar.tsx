@@ -79,7 +79,7 @@ export default function Navbar() {
                 <div className="hidden md:grid grid-cols-3 items-center w-full relative">
 
                     {/* LEFT ZONE: À Propos & Services (Aligned Right -> Center) */}
-                    <div className="flex justify-end items-center gap-8 pr-12">
+                    <div className="flex justify-end items-center gap-6 pr-8">
                         <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
                         <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
                     </div>
@@ -98,7 +98,7 @@ export default function Navbar() {
                     </div>
 
                     {/* RIGHT ZONE: Plats Préparés, Formules & Contact (Aligned Left -> Center) */}
-                    <div className="flex justify-start items-center gap-8 pl-12">
+                    <div className="flex justify-start items-center gap-6 pl-8">
                         <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
                         <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
                         <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} />
@@ -208,7 +208,7 @@ function NavLink({ href, label, textColor, isActive }: { href: string; label: st
     return (
         <Link
             href={href}
-            className={`relative py-1 text-sm font-bold tracking-widest uppercase transition-all duration-300 group ${textColor} ${isActive ? "opacity-70 border-b-2 border-[#D4AF37]" : "opacity-100 hover:text-[#D4AF37]"
+            className={`relative py-1 text-sm font-bold tracking-widest uppercase whitespace-nowrap transition-all duration-300 group ${textColor} ${isActive ? "opacity-70 border-b-2 border-[#D4AF37]" : "opacity-100 hover:text-[#D4AF37]"
                 }`}
         >
             {label}

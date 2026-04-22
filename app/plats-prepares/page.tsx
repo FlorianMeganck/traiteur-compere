@@ -110,13 +110,13 @@ export default function PlatsPrepares() {
                 </motion.div>
 
                 {/* HOW IT WORKS & LOYALTY */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-24">
                     {/* Comment Commander */}
                     <motion.div 
                         initial={{ opacity: 0, x: -20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-white p-8 rounded-3xl shadow-sm border border-neutral-200"
+                        className="lg:col-span-2 bg-white p-8 rounded-3xl shadow-sm border border-neutral-200"
                     >
                         <h2 className="text-2xl font-serif text-black mb-8 flex items-center gap-3">
                             <span className="w-8 h-1 bg-[#D4AF37]"></span>
@@ -130,7 +130,7 @@ export default function PlatsPrepares() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-neutral-900 mb-1">1. Consultez le menu</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Retrouvez le menu du mois sur notre site : <a href="/" className="text-[#D4AF37] hover:underline font-semibold">traiteur-compere.be</a></p>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Retrouvez notre menu du mois <a href="/menu-du-mois.pdf" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline font-semibold">ici</a></p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
@@ -139,7 +139,7 @@ export default function PlatsPrepares() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-neutral-900 mb-1">2. Passez commande</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Commandez en ligne via notre formulaire ou par e-mail : <a href="mailto:traiteurcompere@gmail.com" className="text-[#D4AF37] hover:underline font-semibold">traiteurcompere@gmail.com</a></p>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Passez commande via un <Link href="/contact?sujet=plats-prepares" className="text-[#D4AF37] hover:underline font-semibold">formulaire</Link> ou par mail : <a href="mailto:traiteurcompere@gmail.com" className="text-[#D4AF37] hover:underline font-semibold">traiteurcompere@gmail.com</a></p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
@@ -157,7 +157,7 @@ export default function PlatsPrepares() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-neutral-900 mb-1">4. Paiement</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Paiement par virement bancaire uniquement. <br/>Communication : Nom Prénom + N° de commande.</p>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Paiement par virement bancaire uniquement, confirmation de la commande à la réception du paiement uniquement. <br/>Communication : Nom Prénom + N° de commande.</p>
                                 </div>
                             </li>
                         </ul>
@@ -168,7 +168,7 @@ export default function PlatsPrepares() {
                         initial={{ opacity: 0, x: 20 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        className="bg-black text-white p-8 rounded-3xl shadow-xl relative overflow-hidden flex flex-col justify-center border border-[#D4AF37]/30"
+                        className="lg:col-span-1 bg-black text-white p-8 rounded-3xl shadow-xl relative overflow-hidden flex flex-col justify-center border border-[#D4AF37]/30"
                     >
                         <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
                         
