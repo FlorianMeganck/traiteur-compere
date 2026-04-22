@@ -854,7 +854,7 @@ function ContactForm() {
         } else if (!isValidPhone(formData.Tel)) {
             newErrors.Tel = "Format invalide (ex: 0475 12 34 56)";
         }
-        if (!formData.Date.trim()) newErrors.Date = "Requis";
+        if (!isPlatPrepare && !formData.Date.trim()) newErrors.Date = "Requis";
         
         // Pour un plat préparé, on ne force pas le nombre de convives
         if (!isPlatPrepare && !formData.Nombre_Convives.trim()) newErrors.Nombre_Convives = "Requis";
@@ -1118,6 +1118,7 @@ function ContactForm() {
             if (isPlatPrepare) {
                 const apiPayload = {
                     ...formData,
+                    Date: `${jourParam ? jourParam.charAt(0).toUpperCase() + jourParam.slice(1) : ''} - Semaine ${semaineParam?.replace('semaine-', '')}`,
                     selectedPlat: selectedPlat?.meal,
                     selectedPlatPrice: selectedPlat?.price,
                     selectedPotage: formData.Plat_Prepare_Potage,
@@ -2105,22 +2106,24 @@ function ContactForm() {
 
     const renderContactFields = () => (
         <>
-            <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 mb-8 max-w-lg mx-auto md:max-w-none">
-                <div className="flex items-center gap-3 mb-2">
-                    <input
-                        type="checkbox"
-                        name="Location_Vaisselle_Check"
-                        id="Location_Vaisselle_Check"
-                        className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                        checked={formData.Location_Vaisselle_Check === "Oui"}
-                        onChange={handleChange}
-                    />
-                    <label htmlFor="Location_Vaisselle_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
-                        Location de vaisselle (+1,50€ / pers)
-                    </label>
+            {!isPlatPrepare && (
+                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 mb-8 max-w-lg mx-auto md:max-w-none">
+                    <div className="flex items-center gap-3 mb-2">
+                        <input
+                            type="checkbox"
+                            name="Location_Vaisselle_Check"
+                            id="Location_Vaisselle_Check"
+                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                            checked={formData.Location_Vaisselle_Check === "Oui"}
+                            onChange={handleChange}
+                        />
+                        <label htmlFor="Location_Vaisselle_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
+                            Location de vaisselle (+1,50€ / pers)
+                        </label>
+                    </div>
+                    <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
                 </div>
-                <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
-            </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
@@ -2185,19 +2188,28 @@ function ContactForm() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="group">
-                    <label className={labelStyle}>Date <span className="text-red-500">*</span></label>
-                    <input
-                        type="date"
-                        name="Date"
-                        required
-                        min={getMinDate()}
-                        value={formData.Date}
-                        onChange={handleChange}
-                        onBlur={handleDateBlur}
-                        className={getInputStyle("Date")}
-                    />
-                </div>
+                {isPlatPrepare ? (
+                    <div className="group">
+                        <label className={labelStyle}>Date de retrait</label>
+                        <div className="bg-neutral-50 px-5 py-4 rounded-xl border border-neutral-200 text-neutral-700 font-medium">
+                            Commande pour le : <span className="font-bold">{jourParam ? jourParam.charAt(0).toUpperCase() + jourParam.slice(1) : ''} - Semaine {semaineParam?.replace('semaine-', '')}</span>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="group">
+                        <label className={labelStyle}>Date <span className="text-red-500">*</span></label>
+                        <input
+                            type="date"
+                            name="Date"
+                            required
+                            min={getMinDate()}
+                            value={formData.Date}
+                            onChange={handleChange}
+                            onBlur={handleDateBlur}
+                            className={getInputStyle("Date")}
+                        />
+                    </div>
+                )}
                 {isPlatPrepare ? null : (
                     <div className="group">
                         <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
