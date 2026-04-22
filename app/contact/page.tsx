@@ -1124,7 +1124,8 @@ function ContactForm() {
                     quantite: formData.Plat_Prepare_Quantite,
                     totalPrice: totalPrice,
                     semaine: semaineParam,
-                    jour: jourParam
+                    jour: jourParam,
+                    captchaToken: captchaToken
                 };
 
                 const response = await fetch("/api/commande", {

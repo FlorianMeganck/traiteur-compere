@@ -11,12 +11,35 @@ export async function POST(req: Request) {
         const {
             Nom, Prenom, Mail, Tel, Societe, Nom_Societe, Date,
             selectedPlat, selectedPotage, quantite,
-            semaine, jour, details_projet
+            semaine, jour, details_projet, captchaToken
         } = data;
 
         // 1. Validation de base
         if (!Nom || !Prenom || !Mail || !Tel || !semaine || !jour) {
             return NextResponse.json({ success: false, error: 'Champs obligatoires manquants' }, { status: 400 });
+        }
+
+        // 1.5 Validation reCAPTCHA côté serveur
+        if (!captchaToken) {
+            return NextResponse.json({ success: false, error: 'Captcha manquant' }, { status: 400 });
+        }
+
+        const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+        if (!recaptchaSecret) {
+            console.error("RECAPTCHA_SECRET_KEY manquant dans l'environnement");
+            return NextResponse.json({ success: false, error: 'Erreur de configuration serveur' }, { status: 500 });
+        }
+
+        const verifyRes = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `secret=${recaptchaSecret}&response=${captchaToken}`
+        });
+
+        const recaptchaData = await verifyRes.json();
+        if (!recaptchaData.success) {
+            console.error("Erreur validation reCAPTCHA:", recaptchaData);
+            return NextResponse.json({ success: false, error: 'Validation Captcha échouée' }, { status: 400 });
         }
 
         // 2. Sécurité : Recalculer le prix côté serveur pour éviter la manipulation
