@@ -1388,7 +1388,7 @@ function ContactForm() {
                             {totalPrice === -1 ? (
                                 <span className="bg-[#D4AF37] text-black px-4 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
                             ) : (
-                                <span className="text-2xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                                <span className="text-2xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-sm font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
                             )}
                             {totalPrice > 0 && <p className="text-xs text-[#D4AF37]/70 mt-1 font-light">Hors frais de déplacement & service</p>}
                         </div>
@@ -1479,7 +1479,7 @@ function ContactForm() {
                 <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
                     <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
                         <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                        <span className="text-xl font-serif font-bold">14,50€</span>
+                        <span className="text-xl font-serif font-bold">14,50€ <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></span>
                     </div>
                 </div>
             )}
@@ -1562,7 +1562,7 @@ function ContactForm() {
                     <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
                         <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
                             <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                            <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                            <span className="text-xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
                         </div>
                     </div>
                 )}
@@ -1656,7 +1656,7 @@ function ContactForm() {
                             {totalPrice === -1 ? (
                                 <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
                             ) : (
-                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
                             )}
                         </div>
                     </div>
@@ -1767,7 +1767,7 @@ function ContactForm() {
                             {totalPrice === -1 ? (
                                 <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
                             ) : (
-                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
                             )}
                         </div>
                     </div>
@@ -1899,7 +1899,7 @@ function ContactForm() {
                             {totalPrice === -1 ? (
                                 <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
                             ) : (
-                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` : "---"}</span>
+                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
                             )}
                         </div>
                     </div>
@@ -1952,7 +1952,7 @@ function ContactForm() {
                     <div className={`transition-all duration-300 border-t border-neutral-200 pt-6 mt-6`}>
                         <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
                             <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                            <span className="text-xl font-serif font-bold">{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers</span>
+                            <span className="text-xl font-serif font-bold">{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></span>
                         </div>
                     </div>
                 )}

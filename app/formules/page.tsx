@@ -545,7 +545,7 @@ export default function Formules() {
                                             className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                                         >
                                             <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 25 pers.</p>
-                                            <p className="text-xl font-bold text-neutral-800 font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice + 2}€ <span className="text-sm font-normal text-neutral-500 font-sans">/ pers</span></p>
+                                            <p className="text-xl font-bold text-neutral-800 font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice + 2}€ <span className="text-sm font-normal text-neutral-500 font-sans">/ pers HTVA</span></p>
                                         </Link>
 
                                         <Link
@@ -554,7 +554,7 @@ export default function Formules() {
                                         >
                                             <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
                                             <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 250 pers.</p>
-                                            <p className="text-2xl font-bold text-white font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice}€ <span className="text-sm font-normal text-neutral-300 font-sans">/ pers</span></p>
+                                            <p className="text-2xl font-bold text-white font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice}€ <span className="text-sm font-normal text-neutral-300 font-sans">/ pers HTVA</span></p>
                                         </Link>
 
                                         <Link
@@ -609,7 +609,7 @@ export default function Formules() {
 
                         <div className="mb-4">
                             <div className="inline-block bg-neutral-100 text-neutral-600 px-4 py-2 rounded-lg font-bold text-sm tracking-widest">
-                                De 8,00€ à 14,00€ / personne
+                                De 8,00€ à 14,00€ HTVA / personne
                             </div>
                         </div>
 
@@ -847,7 +847,7 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
                     className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                 >
                     <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">{data.counts.small}</p>
-                    <p className="text-xl font-bold text-neutral-800 font-serif">{data.prices.small}</p>
+                    <p className="text-xl font-bold text-neutral-800 font-serif">{data.prices.small} {data.prices.small.includes('€') && <span className="text-xs font-sans text-neutral-500 font-normal ml-1">HTVA</span>}</p>
                 </Link>
 
                 {/* Option 2: Medium Group (Highlighted) */}
@@ -857,7 +857,7 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
                 >
                     <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
                     <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">{data.counts.medium}</p>
-                    <p className="text-2xl font-bold text-white font-serif">{data.prices.medium}</p>
+                    <p className="text-2xl font-bold text-white font-serif">{data.prices.medium} {data.prices.medium.includes('€') && <span className="text-xs font-sans text-neutral-300 font-normal ml-1">HTVA</span>}</p>
                 </Link>
 
                 {/* Option 3: Large Group */}
@@ -866,7 +866,7 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
                     className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                 >
                     <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">{data.counts.large}</p>
-                    <p className="text-xl font-bold text-neutral-800 font-serif">{data.prices.large}</p>
+                    <p className="text-xl font-bold text-neutral-800 font-serif">{data.prices.large} {data.prices.large.includes('€') && <span className="text-xs font-sans text-neutral-500 font-normal ml-1">HTVA</span>}</p>
                 </Link>
             </div>
         );
@@ -954,7 +954,7 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
             >
                 <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
                 <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">20 à 100 pers.</p>
-                <p className="text-2xl font-bold text-white font-serif">{hasPrice ? price : "Sur devis"}</p>
+                <p className="text-2xl font-bold text-white font-serif">{hasPrice ? price : "Sur devis"} {hasPrice && <span className="text-xs font-sans text-neutral-300 font-normal ml-1">HTVA</span>}</p>
             </Link>
 
             {/* > 100 */}
