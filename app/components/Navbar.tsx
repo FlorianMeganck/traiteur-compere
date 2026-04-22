@@ -79,7 +79,7 @@ export default function Navbar() {
                 <div className="hidden md:grid grid-cols-3 items-center w-full relative">
 
                     {/* LEFT ZONE: À Propos & Services (Aligned Right -> Center) */}
-                    <div className="flex justify-end items-center gap-6 pr-6">
+                    <div className="flex justify-end items-center gap-6 pr-4">
                         <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
                         <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
                     </div>
@@ -98,7 +98,7 @@ export default function Navbar() {
                     </div>
 
                     {/* RIGHT ZONE: Plats Préparés, Formules & Contact (Aligned Left -> Center) */}
-                    <div className="flex justify-start items-center gap-6 pl-6">
+                    <div className="flex justify-start items-center gap-6 pl-4">
                         <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
                         <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
                         <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} />
