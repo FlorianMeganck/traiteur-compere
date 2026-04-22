@@ -403,7 +403,7 @@ export default function Formules() {
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                             {/* Colonne Gauche : Onglets & Infos */}
-                            <div className="lg:col-span-5 space-y-8">
+                            <div className="lg:col-span-5 space-y-8 lg:order-last">
 
                                 {/* Navigation des onglets */}
                                 <div className="flex flex-wrap gap-2">
@@ -473,7 +473,7 @@ export default function Formules() {
                             </div>
 
                             {/* Colonne Droite : Image Dynamique */}
-                            <div className="lg:col-span-7 h-[500px] relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in">
+                            <div className="lg:col-span-7 h-[500px] relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in lg:order-first">
                                 <Image
                                     src={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].image}
                                     alt={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].title}
@@ -718,7 +718,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 items-start scroll-mt-32
+            className={`flex flex-col ${isEven ? 'md:flex-row-reverse' : 'md:flex-row'} gap-12 items-start scroll-mt-32
                 ${isAssociatif ? 'py-12 px-6 md:px-12 bg-neutral-50 border border-[#D4AF37]/20 rounded-2xl' : ''}`}
         >
             {/* IMAGE SIDE */}
@@ -823,7 +823,7 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                 )}
 
                 {/* PRICING LOGIC */}
-                <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="mt-4">
                     <PricingBlock
                         price={formule.price}
                         tag={formule.tag}
