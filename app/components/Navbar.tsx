@@ -10,6 +10,7 @@ import Logo from "./Logo";
 const NAV_LINKS = [
     { href: "/a-propos", label: "À Propos" },
     { href: "/services", label: "Services" },
+    { href: "/plats-prepares", label: "Plats Préparés" },
     { href: "/formules", label: "Formules" },
     { href: "/contact", label: "Contact" },
 ];
@@ -77,8 +78,8 @@ export default function Navbar() {
                 {/* --- DESKTOP LAYOUT (Grid 3 Cols) --- */}
                 <div className="hidden md:grid grid-cols-3 items-center w-full relative">
 
-                    {/* LEFT ZONE: Accueil & À Propos (Aligned Right -> Center) */}
-                    <div className="flex justify-end items-center gap-12 pr-12">
+                    {/* LEFT ZONE: À Propos & Services (Aligned Right -> Center) */}
+                    <div className="flex justify-end items-center gap-8 pr-12">
                         <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
                         <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
                     </div>
@@ -96,10 +97,11 @@ export default function Navbar() {
                         </Link>
                     </div>
 
-                    {/* RIGHT ZONE: Services & Contact (Aligned Left -> Center) */}
-                    <div className="flex justify-start items-center gap-12 pl-12">
+                    {/* RIGHT ZONE: Plats Préparés, Formules & Contact (Aligned Left -> Center) */}
+                    <div className="flex justify-start items-center gap-8 pl-12">
                         <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
                         <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
+                        <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} />
                     </div>
 
                     {/* SOCIALS (Absolute Right) */}
