@@ -105,7 +105,7 @@ export default function Navbar() {
                     </div>
 
                     {/* SOCIALS (Absolute Right) */}
-                    <div className="absolute right-0 flex items-center gap-4">
+                    <div className="absolute left-0 flex items-center gap-4">
                         <SocialLink
                             href="https://www.facebook.com/profile.php?id=61582940090708"
                             icon={<FacebookIcon />}
