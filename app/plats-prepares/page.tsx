@@ -6,60 +6,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed } from "lucide-react";
 
-const MENU_DATA = [
-    {
-        id: "semaine-1",
-        week: "SEMAINE 1",
-        soups: ["Crème de brocolis", "Velouté champignon"],
-        days: [
-            { day: "Lundi", meal: "Oiseau sans tête sauce poivre, petit pois et carotte, rösti", price: "11,50 €" },
-            { day: "Mardi", meal: "Pâtes aux quatre fromages", price: "10,00 €" },
-            { day: "Mercredi", meal: "Cuisse de poulet sauce champignon, compote de pomme et pomme de terre rissolée", price: "11,50 €" },
-            { day: "Jeudi", meal: "Cordon bleu, haricot à la crème et purée cerfeuil", price: "11,50 €" },
-            { day: "Vendredi", meal: "Waterzooi de poisson, purée brocolis", price: "16,00 €" },
-            { day: "Samedi", meal: "Parmentier aux épinards", price: "11,50 €" },
-        ]
-    },
-    {
-        id: "semaine-2",
-        week: "SEMAINE 2",
-        soups: ["Potage tomate", "Velouté de chou-fleur"],
-        days: [
-            { day: "Lundi", meal: "Cuisse de lapin à la bière, compote et pomme rissolée", price: "11,50 €" },
-            { day: "Mardi", meal: "Escalope de veau et tagliatelle sauce tomate crème et parmesan", price: "16,00 €" },
-            { day: "Mercredi", meal: "Potée aux carottes et saucisse de campagne", price: "11,50 €" },
-            { day: "Jeudi", meal: "Roulade ardennaise, sauce crème champignon, haricot et gratin", price: "11,50 €" },
-            { day: "Vendredi", meal: "Filet de colin aux petits légumes, purée de cerfeuil", price: "16,00 €" },
-            { day: "Samedi", meal: "Chicon farci et lard fumé, purée de pomme de terre", price: "11,50 €" },
-        ]
-    },
-    {
-        id: "semaine-3",
-        week: "SEMAINE 3",
-        soups: ["Potage champignons des bois", "Velouté d'asperge"],
-        days: [
-            { day: "Lundi", meal: "Blanquette de veau, purée de céleri et légumes vapeurs", price: "16,00 €" },
-            { day: "Mardi", meal: "Lasagne bolognaise", price: "10,00 €" },
-            { day: "Mercredi", meal: "Boulet liégeois et purée brocolis", price: "11,50 €" },
-            { day: "Jeudi", meal: "Filet de poulet sauce estragon, pomme duchesse, compote de rhubarbe", price: "11,50 €" },
-            { day: "Vendredi", meal: "Filet de saumon sauce crème, pomme vapeur, gratiné de brocolis", price: "16,00 €" },
-            { day: "Samedi", meal: "Roulade ardennaise et purée", price: "11,50 €" },
-        ]
-    },
-    {
-        id: "semaine-4",
-        week: "SEMAINE 4",
-        soups: ["Soupe à l'oignon", "Velouté butternut"],
-        days: [
-            { day: "Lundi", meal: "Carbonnade à la flamande, compote et croquette", price: "11,50 €" },
-            { day: "Mardi", meal: "Lasagne au saumon al verde", price: "10,00 €" },
-            { day: "Mercredi", meal: "Crépinette de veau, pois et carotte, pommes de terre rissolées", price: "16,00 €" },
-            { day: "Jeudi", meal: "Pavé de dindonneau sauce liégeoise, endive et gratin", price: "11,50 €" },
-            { day: "Vendredi", meal: "Poisson gratiné, écrasé de pomme de terre et poireau à la crème", price: "16,00 €" },
-            { day: "Samedi", meal: "Linguine à la bolognaise", price: "10,00 €" },
-        ]
-    }
-];
+import { MENU_DATA } from "../data/plats-prepares";
 
 export default function PlatsPrepares() {
     const [activeTab, setActiveTab] = useState(MENU_DATA[0].id);
@@ -259,18 +206,25 @@ export default function PlatsPrepares() {
                                             {/* Daily Meals Grid */}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                                 {menu.days.map((dayItem, idx) => (
-                                                    <div key={idx} className="flex flex-col justify-between p-6 rounded-2xl border border-neutral-100 hover:border-[#D4AF37]/50 hover:shadow-md transition-all duration-300 bg-white">
+                                                    <Link 
+                                                        href={`/contact?type=plat_prepare&semaine=${menu.id}&jour=${dayItem.day.toLowerCase()}`}
+                                                        key={idx} 
+                                                        className="flex flex-col justify-between p-6 rounded-2xl border border-neutral-100 hover:border-[#D4AF37] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white group cursor-pointer relative overflow-hidden"
+                                                    >
+                                                        <div className="absolute top-0 right-0 bg-[#D4AF37] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                            Commander
+                                                        </div>
                                                         <div>
                                                             <h5 className="font-serif text-xl text-[#D4AF37] mb-2">{dayItem.day}</h5>
-                                                            <p className="text-neutral-700 leading-relaxed font-medium">
+                                                            <p className="text-neutral-700 leading-relaxed font-medium group-hover:text-black transition-colors">
                                                                 {dayItem.meal}
                                                             </p>
                                                         </div>
-                                                        <div className="mt-4 pt-4 border-t border-neutral-100 flex justify-between items-center">
+                                                        <div className="mt-4 pt-4 border-t border-neutral-100 flex justify-between items-center group-hover:border-[#D4AF37]/30 transition-colors">
                                                             <span className="text-xs text-neutral-400 uppercase tracking-widest">Prix unitaire</span>
                                                             <span className="font-bold text-lg text-black">{dayItem.price} <span className="text-xs font-normal text-neutral-400">HTVA</span></span>
                                                         </div>
-                                                    </div>
+                                                    </Link>
                                                 ))}
                                             </div>
                                         </motion.div>
