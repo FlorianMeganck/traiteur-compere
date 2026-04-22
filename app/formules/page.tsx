@@ -355,12 +355,14 @@ function BuffetChaudSection() {
                 </div>
 
                 {/* Bouton d'action */}
-                <Link
-                    href={`/contact?formule=buffet-chaud&services=${services}`}
-                    className="inline-flex items-center justify-center bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 w-full md:w-auto"
-                >
-                    Composer mon menu {services} services
-                </Link>
+                <div className="w-full flex justify-center">
+                    <Link
+                        href={`/contact?formule=buffet-chaud&services=${services}`}
+                        className="inline-flex items-center justify-center bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 w-full md:w-auto"
+                    >
+                        Composer mon menu {services} services
+                    </Link>
+                </div>
             </div>
         </div>
     );
@@ -486,12 +488,9 @@ export default function Formules() {
                 </section>
 
                 {/* SECTION BUFFETS FROIDS */}
-                <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-                        <div className="text-center mb-12">
-                            <SectionTitle title="Buffets Froids" />
-                        </div>
+                <section className="mb-24">
+                    <div>
+                        <SectionTitle title="Buffets Froids" />
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                             {/* Colonne Gauche : Onglets & Infos */}
@@ -573,12 +572,18 @@ export default function Formules() {
                                     className="object-cover"
                                 />
                             </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <SectionTitle title="Buffets Chauds" />
-                <BuffetChaudSection />
+                {/* SECTION BUFFETS CHAUDS */}
+                <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <SectionTitle title="Buffets Chauds" />
+                        <BuffetChaudSection />
+                    </div>
+                </section>
 
                 <SectionTitle title="Plats Uniques & Associations" />
 
@@ -624,7 +629,7 @@ export default function Formules() {
                             </div>
                         </div>
 
-                        <div className="mb-6 -mt-2">
+                        <div className="mb-6 -mt-2 w-full flex justify-center">
                             <AllergenLink section="collectivite" />
                         </div>
 
