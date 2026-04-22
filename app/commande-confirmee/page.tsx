@@ -17,8 +17,8 @@ function CommandeConfirmeeContent() {
     const qrRef = useRef<HTMLDivElement>(null);
 
     // Informations bancaires pour la génération du QR Code (à adapter)
-    const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE49063665947471";
-    const BIC = process.env.NEXT_PUBLIC_TRAITEUR_BIC || "GKCCBEBB";
+    const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE";
+    const BIC = process.env.NEXT_PUBLIC_TRAITEUR_BIC || "";
     const BENEFICIAIRE = process.env.NEXT_PUBLIC_TRAITEUR_BENEFICIAIRE || "Traiteur Compère";
     const COMMUNICATION = `COMMANDE # ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
     const TOTAL_NUM = parseFloat(total);
