@@ -17,8 +17,8 @@ function CommandeConfirmeeContent() {
     const qrRef = useRef<HTMLDivElement>(null);
 
     // Informations bancaires pour la génération du QR Code (à adapter)
-    const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE00000000000000";
-    const BIC = process.env.NEXT_PUBLIC_TRAITEUR_BIC || "BXXXBEXX";
+    const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE49063665947471";
+    const BIC = process.env.NEXT_PUBLIC_TRAITEUR_BIC || "GKCCBEBB";
     const BENEFICIAIRE = process.env.NEXT_PUBLIC_TRAITEUR_BENEFICIAIRE || "Traiteur Compère";
     const COMMUNICATION = `COMMANDE # ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
     const TOTAL_NUM = parseFloat(total);
@@ -58,9 +58,9 @@ function CommandeConfirmeeContent() {
         <main className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
             {/* Decorative Elements */}
             <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" />
-            
+
             <div className="max-w-4xl mx-auto px-6 relative z-10">
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -71,7 +71,7 @@ function CommandeConfirmeeContent() {
                     </div>
 
                     <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Commande Confirmée</h1>
-                    
+
                     <p className="text-neutral-600 text-lg mb-8 max-w-2xl mx-auto">
                         Merci <span className="font-bold text-black">{prenom} {nom}</span>, votre commande pour <strong className="text-[#D4AF37] font-serif">{plat}</strong> a bien été enregistrée.
                     </p>
@@ -110,21 +110,21 @@ function CommandeConfirmeeContent() {
                         {/* Bloc QR Code */}
                         <div className="bg-black text-white p-8 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-                            
+
                             <h3 className="text-xl font-bold uppercase tracking-widest text-[#D4AF37] mb-6 z-10 text-center">
                                 Scannez & Payez
                             </h3>
                             <p className="text-sm text-neutral-400 mb-6 text-center z-10">Ouvrez votre application bancaire et scannez ce code pour pré-remplir le virement.</p>
-                            
+
                             <div className="bg-white p-4 rounded-xl z-10" ref={qrRef}>
-                                <QRCode 
-                                    value={generateEPCString()} 
+                                <QRCode
+                                    value={generateEPCString()}
                                     size={180}
                                     level="M"
                                 />
                             </div>
 
-                            <button 
+                            <button
                                 onClick={handleDownloadQR}
                                 className="mt-6 text-xs text-neutral-400 hover:text-white flex items-center gap-2 transition-colors z-10"
                             >
@@ -138,7 +138,7 @@ function CommandeConfirmeeContent() {
                         Un e-mail récapitulatif vous a été envoyé. N'oubliez pas que votre commande sera définitivement confirmée à la réception de votre paiement.
                     </p>
 
-                    <Link 
+                    <Link
                         href="/"
                         className="inline-flex items-center gap-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm transition-all"
                     >
