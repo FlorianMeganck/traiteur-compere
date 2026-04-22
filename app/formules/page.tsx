@@ -350,20 +350,17 @@ function BuffetChaudSection() {
                     </p>
                 </div>
 
+                <div className="mb-8 w-full">
+                    <AllergenLink section="buffets" />
+                </div>
+
                 {/* Bouton d'action */}
                 <Link
                     href={`/contact?formule=buffet-chaud&services=${services}`}
-                    className="inline-flex items-center justify-center bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    className="inline-flex items-center justify-center bg-black text-[#D4AF37] px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 w-full md:w-auto"
                 >
                     Composer mon menu {services} services
                 </Link>
-
-                {/* Lien Allergènes discret */}
-                <div className="mt-4">
-                    <Link href="/allergenes?section=buffets" target="_blank" className="text-[10px] text-neutral-400 hover:text-[#D4AF37] uppercase tracking-widest underline decoration-neutral-300 underline-offset-4 transition-colors">
-                        ℹ️ Voir les allergènes typiques
-                    </Link>
-                </div>
             </div>
         </div>
     );
@@ -392,7 +389,6 @@ export default function Formules() {
                         <div key={index}>
                             {index === 0 && <SectionTitle title="Barbecues" />}
                             <FormuleSection formule={formule} index={index} />
-                            {index === 0 && <AllergenLink section="bbq" />}
                         </div>
                     ))}
                 </div>
@@ -819,6 +815,12 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                         })}
                     </div>
                 </div>
+
+                {formule.tag === "BBQ & Feu de bois" && (
+                    <div className="mt-6 mb-2">
+                        <AllergenLink section="bbq" />
+                    </div>
+                )}
 
                 {/* PRICING LOGIC */}
                 <div className="mt-8 pt-6 border-t border-gray-200">
