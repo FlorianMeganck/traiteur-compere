@@ -105,7 +105,7 @@ export default function PlatsPrepares() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-neutral-900 mb-1">4. Paiement</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Paiement par virement bancaire uniquement, confirmation de la commande à la réception du paiement uniquement. <br />Communication : Nom Prénom + N° de commande.</p>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Paiement par virement bancaire uniquement, confirmation de la commande à la réception du paiement. <br />Communication : Nom Prénom + N° de commande.</p>
                                 </div>
                             </li>
                         </ul>
@@ -161,8 +161,8 @@ export default function PlatsPrepares() {
                                     key={menu.id}
                                     onClick={() => setActiveTab(menu.id)}
                                     className={`flex-1 py-5 px-4 text-sm md:text-base font-bold uppercase tracking-widest transition-all duration-300 relative ${activeTab === menu.id
-                                            ? "text-[#D4AF37] bg-neutral-50"
-                                            : "text-neutral-500 hover:bg-neutral-50 hover:text-black"
+                                        ? "text-[#D4AF37] bg-neutral-50"
+                                        : "text-neutral-500 hover:bg-neutral-50 hover:text-black"
                                         }`}
                                 >
                                     {menu.week}

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Leaf, Check } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
+import { MENU_DATA } from "../data/plats-prepares";
 
 export default function Contact() {
     return (
@@ -331,6 +332,15 @@ function ContactForm() {
 
     // --- MENU CONTEXT ---
     const menuParam = searchParams.get('menu');
+    const typeParam = searchParams.get('type');
+    const isPlatPrepare = typeParam === 'plat_prepare';
+    const semaineParam = searchParams.get('semaine');
+    const jourParam = searchParams.get('jour');
+
+    const selectedPlat = isPlatPrepare && semaineParam && jourParam 
+        ? MENU_DATA.find(m => m.id === semaineParam)?.days.find(d => d.day.toLowerCase() === jourParam.toLowerCase())
+        : null;
+    const selectedSoups = isPlatPrepare && semaineParam ? MENU_DATA.find(m => m.id === semaineParam)?.soups : [];
 
     // BBQ Types
     const isBBQClassique = menuParam === 'bbq_classique';
@@ -359,7 +369,7 @@ function ContactForm() {
     const isVerrinesMode = menuParam === 'verrines';
     const isCollectiviteMode = menuParam === 'collectivite' || searchParams.get('formule') === 'collectivite';
 
-    const isCustomMode = isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || searchParams.get('formule') === 'buffet-chaud';
+    const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || searchParams.get('formule') === 'buffet-chaud';
     const showMenuFirst = isCustomMode;
 
     const [formData, setFormData] = useState({
@@ -375,6 +385,10 @@ function ContactForm() {
         Nombre_Convives: isCochonOrPorchetta ? OPTIONS_COCHON[0] : (isAnyBBQ ? OPTIONS_BBQ[0] : (isBuffet ? OPTIONS_BUFFET[0] : (isAssociations ? OPTIONS_ASSOCIATIONS[0] : (isPainsMode ? OPTIONS_PAINS[0] : OPTIONS_STANDARD[0])))),
         details_projet: "",
         Souhaite_etre_recontacte: "Non",
+
+        // Plats Préparés
+        Plat_Prepare_Potage: "Non merci",
+        Plat_Prepare_Quantite: "1",
 
         // Dynamic Fields
         // BBQ Standard / Nobles / Vege / Mer (3 choices usually)
@@ -504,7 +518,14 @@ function ContactForm() {
 
     const calculateTotal = () => {
         if (isPlatUnique) return 14.5;
-        if (!isAnyBBQ && !isBuffetFroidMode && !isPains && !isZakouskis && !isVerrines) return 0;
+        if (isPlatPrepare) {
+            if (!selectedPlat) return 0;
+            const pricePlat = parseFloat(selectedPlat.price.replace(',', '.').replace(' €', ''));
+            const pricePotage = formData.Plat_Prepare_Potage !== "Non merci" ? 4 : 0;
+            const qty = parseInt(formData.Plat_Prepare_Quantite, 10) || 1;
+            return (pricePlat + pricePotage) * qty;
+        }
+        if (!isAnyBBQ && !isBuffetFroidMode && !isPains && !isZakouskis && !isVerrines && !isCollectivite) return 0;
 
         // 1. Base Price
         let base = 0;
@@ -687,6 +708,8 @@ function ContactForm() {
                 } else if (menuParam === 'collectivite') {
                     newData.Type_Evenement = 'Repas de collectivité';
                 }
+            } else if (typeParam === 'plat_prepare') {
+                newData.Type_Evenement = 'Plat Préparé';
             }
 
             const formuleParam = searchParams.get('formule');
@@ -832,10 +855,14 @@ function ContactForm() {
             newErrors.Tel = "Format invalide (ex: 0475 12 34 56)";
         }
         if (!formData.Date.trim()) newErrors.Date = "Requis";
-        if (!formData.Nombre_Convives.trim()) newErrors.Nombre_Convives = "Requis";
+        
+        // Pour un plat préparé, on ne force pas le nombre de convives
+        if (!isPlatPrepare && !formData.Nombre_Convives.trim()) newErrors.Nombre_Convives = "Requis";
 
         // Dynamic Validation
-        if (isPlatUnique) {
+        if (isPlatPrepare) {
+            if (!formData.Plat_Prepare_Quantite || parseInt(formData.Plat_Prepare_Quantite) < 1) newErrors.Plat_Prepare_Quantite = "Requis";
+        } else if (isPlatUnique) {
             if (!formData.Plat_Associatif) newErrors.Plat_Associatif = "Requis";
         } else if (isBuffetFroid) {
             if (!formData.Feculent_Froid) newErrors.Feculent_Froid = "Requis";
@@ -1086,20 +1113,50 @@ function ContactForm() {
             "🔄 Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
         };
 
-        // 4. Envoi à Web3Forms
+        // 4. Envoi à Web3Forms ou API Interne
         try {
-            const response = await fetch("https://api.web3forms.com/submit", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                },
-                body: JSON.stringify(payload)
-            });
+            if (isPlatPrepare) {
+                const apiPayload = {
+                    ...formData,
+                    selectedPlat: selectedPlat?.meal,
+                    selectedPlatPrice: selectedPlat?.price,
+                    selectedPotage: formData.Plat_Prepare_Potage,
+                    quantite: formData.Plat_Prepare_Quantite,
+                    totalPrice: totalPrice,
+                    semaine: semaineParam,
+                    jour: jourParam
+                };
 
-            const result = await response.json();
+                const response = await fetch("/api/commande", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(apiPayload)
+                });
 
-            if (result.success) {
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    setStatus("success");
+                    setTimeout(() => {
+                        router.push(`/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&plat=${encodeURIComponent(selectedPlat?.meal || '')}&total=${totalPrice}`);
+                    }, 1000);
+                } else {
+                    console.error("Erreur API Commande:", result);
+                    alert("Une erreur est survenue lors de l'envoi. Veuillez réessayer.");
+                    setStatus("error");
+                }
+            } else {
+                const response = await fetch("https://api.web3forms.com/submit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 if (typeof window !== 'undefined' && (window as any).gtag) {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1115,10 +1172,11 @@ function ContactForm() {
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 3000);
-            } else {
-                console.error("Erreur Web3Forms:", result);
-                alert("Une erreur est survenue lors de l'envoi. Veuillez réessayer.");
-                setStatus("error");
+                } else {
+                    console.error("Erreur Web3Forms:", result);
+                    alert("Une erreur est survenue lors de l'envoi. Veuillez réessayer.");
+                    setStatus("error");
+                }
             }
         } catch (error) {
             console.error("Erreur Fetch:", error);
@@ -2139,21 +2197,78 @@ function ContactForm() {
                         className={getInputStyle("Date")}
                     />
                 </div>
-                <div className="group">
-                    <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                        <select name="Nombre_Convives" value={formData.Nombre_Convives} onChange={handleChange} className={`${getInputStyle("Nombre_Convives")} appearance-none`}>
-                            {getInitialConvivesOptions().map(o => <option key={o} value={o}>{o}</option>)}
-                        </select>
-                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                {isPlatPrepare ? null : (
+                    <div className="group">
+                        <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
+                        <div className="relative">
+                            <select name="Nombre_Convives" value={formData.Nombre_Convives} onChange={handleChange} className={`${getInputStyle("Nombre_Convives")} appearance-none`}>
+                                {getInitialConvivesOptions().map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
 
         </>
     );
+
+    const renderPlatsPreparesFields = () => {
+        if (!isPlatPrepare || !selectedPlat) return null;
+
+        return (
+            <div className="space-y-8 animate-fade-in mt-8">
+                <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
+                    Votre commande de Plat Préparé
+                </h3>
+                {FormAllergenLink({ section: 'plats_prepares' })}
+
+                <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
+                    <div className="flex justify-between items-start mb-2">
+                        <div>
+                            <span className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest">{selectedPlat.day} - Semaine {semaineParam?.replace('semaine-', '')}</span>
+                            <h4 className="text-lg font-serif text-black mt-1">{selectedPlat.meal}</h4>
+                        </div>
+                        <span className="font-bold text-lg">{selectedPlat.price}</span>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                        <label className={`${labelStyle} flex items-center gap-2`}>
+                            <span>🥣</span> Potage (+4,00 €)
+                        </label>
+                        <div className="relative">
+                            <select name="Plat_Prepare_Potage" value={formData.Plat_Prepare_Potage} onChange={handleChange} className={`${getInputStyle("Plat_Prepare_Potage")} appearance-none`}>
+                                <option value="Non merci">Non merci</option>
+                                {selectedSoups?.map(soup => <option key={soup} value={soup}>{soup}</option>)}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="group">
+                        <label className={`${labelStyle} flex items-center gap-2`}>
+                            <span>🔢</span> Quantité
+                        </label>
+                        <input
+                            type="number"
+                            min="1"
+                            name="Plat_Prepare_Quantite"
+                            value={formData.Plat_Prepare_Quantite}
+                            onChange={handleChange}
+                            className={getInputStyle("Plat_Prepare_Quantite")}
+                        />
+                        {errors.Plat_Prepare_Quantite && <p className="text-red-500 text-xs mt-1">{errors.Plat_Prepare_Quantite}</p>}
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <main className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
@@ -2194,6 +2309,7 @@ function ContactForm() {
                         <form onSubmit={handleSubmit} className="space-y-8">
                             {showMenuFirst ? (
                                 <>
+                                    {isPlatPrepare && renderPlatsPreparesFields()}
                                     {isAnyBBQ && renderBBQComposition()}
                                     {isPlatUnique && renderPlatUniqueFields()}
                                     {isBuffetFroid && renderBuffetFroidFields()}
@@ -2217,15 +2333,30 @@ function ContactForm() {
                                 </>
                             )}
 
-                            <div className="group">
-                                <label className={labelStyle}>Dites-nous en plus !</label>
-                                <textarea name="details_projet" value={formData.details_projet} onChange={handleChange} className={`${getInputStyle("details_projet")} h-32 resize-y`} placeholder="Allergies, précisions, déroulement..." />
-                            </div>
+                            {!isPlatPrepare && (
+                                <div className="group">
+                                    <label className={labelStyle}>Dites-nous en plus !</label>
+                                    <textarea name="details_projet" value={formData.details_projet} onChange={handleChange} className={`${getInputStyle("details_projet")} h-32 resize-y`} placeholder="Allergies, précisions, déroulement..." />
+                                </div>
+                            )}
 
                             <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 flex items-center gap-3">
                                 <input type="checkbox" name="Souhaite_etre_recontacte" id="recontact" className="w-5 h-5 text-[#D4AF37] rounded" checked={formData.Souhaite_etre_recontacte === "Oui"} onChange={handleChange} />
-                                <label htmlFor="recontact" className="text-neutral-700 cursor-pointer">Je souhaite être recontacté pour discuter de mon devis.</label>
+                                <label htmlFor="recontact" className="text-neutral-700 cursor-pointer">{isPlatPrepare ? "Je souhaite ajouter un commentaire à ma commande" : "Je souhaite être recontacté pour discuter de mon devis."}</label>
                             </div>
+
+                            {isPlatPrepare && formData.Souhaite_etre_recontacte === "Oui" && (
+                                <div className="group">
+                                    <textarea name="details_projet" value={formData.details_projet} onChange={handleChange} className={`${getInputStyle("details_projet")} h-32 resize-y mt-4`} placeholder="Allergies, précisions..." />
+                                </div>
+                            )}
+
+                            {isPlatPrepare && (
+                                <div className="bg-[#D4AF37]/10 p-6 rounded-2xl border border-[#D4AF37]/30 mt-6 text-center">
+                                    <p className="text-neutral-800 font-bold mb-2">Total de votre commande : {totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</p>
+                                    <p className="text-xs text-neutral-500 uppercase tracking-widest">Paiement par virement bancaire uniquement.</p>
+                                </div>
+                            )}
 
                             <div className="flex justify-center mb-6 w-full">
                                 {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ? (
