@@ -666,9 +666,14 @@ export default function Formules() {
 
                 {/* BOTTOM LEGEND */}
                 <div className="mt-20 border-t border-neutral-200 pt-16">
-                    <p className="text-center text-neutral-600 italic mb-8">
-                        Tous nos plats peuvent contenir des traces d'autres allergènes. Reportez-vous à la légende ci-dessous :
-                    </p>
+                    <div className="text-center mb-12 space-y-4 max-w-3xl mx-auto">
+                        <p className="text-sm italic text-gray-500">
+                            Tous les prix affichés sont exprimés Hors TVA. Le taux de TVA définitif (12% ou 21%) sera appliqué sur la facture finale en fonction des prestations de service choisies.
+                        </p>
+                        <p className="text-neutral-600 italic">
+                            Tous nos plats peuvent contenir des traces d'autres allergènes. Reportez-vous à la légende ci-dessous :
+                        </p>
+                    </div>
 
                     <div className="text-center">
                         <p className="text-sm font-serif italic text-neutral-500 mb-6">Légende des allergènes :</p>

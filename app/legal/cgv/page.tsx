@@ -22,21 +22,28 @@ export default function CGV() {
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-serif text-black mb-3">Article 2 : Commande et Acompte</h2>
+                        <h2 className="text-2xl font-serif text-black mb-3">Article 2 : Tarifs et TVA</h2>
+                        <p>
+                            Tous les prix affichés s&apos;entendent Hors TVA (HTVA). Le taux de TVA applicable (12% ou 21%) est calculé et appliqué sur la facture finale en fonction du type de prestation, et non sur le récapitulatif de commande en ligne.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 className="text-2xl font-serif text-black mb-3">Article 3 : Commande et Acompte</h2>
                         <p>
                             La réservation ne devient définitive qu&apos;après réception du devis signé et du paiement d&apos;un acompte de 30% du montant total estimé. Le paiement de l&apos;acompte vaut acceptation pleine et entière des présentes conditions générales.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-serif text-black mb-3">Article 3 : Modification du nombre de convives</h2>
+                        <h2 className="text-2xl font-serif text-black mb-3">Article 4 : Modification du nombre de convives</h2>
                         <p>Le nombre exact de convives doit nous être communiqué par écrit au plus tard 7 jours ouvrables avant la date de l&apos;événement.</p>
                         <p className="mt-2">Ce nombre sera considéré comme le minimum facturable, même si le nombre de présents est inférieur le jour J.</p>
                         <p className="mt-2">Toute augmentation de dernière minute fera l&apos;objet d&apos;une facturation complémentaire, sous réserve de faisabilité.</p>
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-serif text-black mb-3">Article 4 : Annulation par le client</h2>
+                        <h2 className="text-2xl font-serif text-black mb-3">Article 5 : Annulation par le client</h2>
                         <p>En cas d&apos;annulation de la commande par le client :</p>
                         <ul className="list-disc pl-5 mt-2 space-y-1">
                             <li><strong>Plus de 30 jours avant l&apos;événement :</strong> L&apos;acompte versé reste acquis à titre d&apos;indemnité forfaitaire.</li>
@@ -45,21 +52,21 @@ export default function CGV() {
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-serif text-black mb-3">Article 5 : Modalités de Paiement</h2>
+                        <h2 className="text-2xl font-serif text-black mb-3">Article 6 : Modalités de Paiement</h2>
                         <p>
                             Sauf convention contraire écrite, le solde de la facture est payable au comptant le jour de la prestation ou à réception de facture. Tout retard de paiement entraînera de plein droit et sans mise en demeure l&apos;application d&apos;intérêts de retard au taux légal en vigueur majoré de 10%.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-serif text-black mb-3">Article 6 : Réclamations</h2>
+                        <h2 className="text-2xl font-serif text-black mb-3">Article 7 : Réclamations</h2>
                         <p>
                             Toute réclamation concernant la prestation doit être formulée le jour même de l&apos;événement auprès du responsable présent, afin de nous permettre d&apos;y remédier immédiatement. Aucune plainte ultérieure ne sera prise en compte.
                         </p>
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-serif text-black mb-3">Article 7 : Juridiction</h2>
+                        <h2 className="text-2xl font-serif text-black mb-3">Article 8 : Juridiction</h2>
                         <p>
                             En cas de litige, seuls les tribunaux de l&apos;arrondissement judiciaire de Liège sont compétents. Le droit belge est seul applicable.
                         </p>
