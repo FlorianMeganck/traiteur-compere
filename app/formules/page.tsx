@@ -386,6 +386,17 @@ export default function Formules() {
                     </p>
                 </header>
 
+                {/* SECTION BARBECUES */}
+                <div className="space-y-24 mb-24">
+                    {FORMULES.map((formule, index) => (
+                        <div key={index}>
+                            {index === 0 && <SectionTitle title="Barbecues" />}
+                            <FormuleSection formule={formule} index={index} />
+                            {index === 0 && <AllergenLink section="bbq" />}
+                        </div>
+                    ))}
+                </div>
+
                 {/* SECTION APÉRITIFS */}
                 <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -477,17 +488,6 @@ export default function Formules() {
                         </div>
                     </div>
                 </section>
-
-                {/* SECTION BARBECUES */}
-                <div className="space-y-24 mb-24">
-                    {FORMULES.map((formule, index) => (
-                        <div key={index}>
-                            {index === 0 && <SectionTitle title="Barbecues" />}
-                            <FormuleSection formule={formule} index={index} />
-                            {index === 0 && <AllergenLink section="bbq" />}
-                        </div>
-                    ))}
-                </div>
 
                 {/* SECTION BUFFETS FROIDS */}
                 <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
