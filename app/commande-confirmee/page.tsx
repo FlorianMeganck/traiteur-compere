@@ -11,6 +11,7 @@ function CommandeConfirmeeContent() {
     const searchParams = useSearchParams();
     const nom = searchParams.get('nom') || "Client";
     const prenom = searchParams.get('prenom') || "";
+    const orderId = searchParams.get('orderId') || "";
     const plat = searchParams.get('plat') || "votre commande";
     const total = searchParams.get('total') || "0";
 
@@ -20,7 +21,7 @@ function CommandeConfirmeeContent() {
     const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE22 0689 4683 8447";
     const BIC = process.env.NEXT_PUBLIC_TRAITEUR_BIC || "GKCCBEBB";
     const BENEFICIAIRE = process.env.NEXT_PUBLIC_TRAITEUR_BENEFICIAIRE || "JEAN COMPERE";
-    const COMMUNICATION = `COMMANDE # ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
+    const COMMUNICATION = `COMMANDE #${orderId} ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
     const TOTAL_NUM = parseFloat(total);
 
     // Fonction pour générer la chaîne EPC pour le QR Code (Virement SEPA)
