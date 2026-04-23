@@ -68,7 +68,7 @@ export default function PlatsPrepares() {
                     >
                         <h2 className="text-2xl font-serif text-black mb-8 flex items-center gap-3">
                             <span className="w-8 h-1 bg-[#D4AF37]"></span>
-                            Comment Commander
+                            Comment commander ?
                         </h2>
 
                         <ul className="space-y-6">
@@ -78,7 +78,7 @@ export default function PlatsPrepares() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-neutral-900 mb-1">1. Consultez le menu</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Retrouvez notre menu du mois <a href="/menu-du-mois.pdf" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline font-semibold">ici</a></p>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Retrouvez notre menu du mois <a href="public/menu/menu_mai_2026.pdf" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline font-semibold">ici</a></p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
