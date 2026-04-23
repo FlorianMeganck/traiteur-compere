@@ -57,24 +57,9 @@ export async function POST(req: Request) {
         const parsedQty = parseInt(quantite, 10) || 1;
         const finalTotalPrice = (pricePlat + pricePotage) * parsedQty;
 
-        // Gestion du numéro de commande
-        let orderNumber = 1;
-        try {
-            const counterPath = path.join(process.cwd(), 'order_counter.json');
-            try {
-                const data = await fs.promises.readFile(counterPath, 'utf-8');
-                orderNumber = JSON.parse(data).count + 1;
-            } catch (e) {
-                // Fichier n'existe pas encore
-            }
-            await fs.promises.writeFile(counterPath, JSON.stringify({ count: orderNumber }));
-        } catch (error) {
-            console.error("Impossible de sauvegarder le compteur :", error);
-            // Fallback sur un numéro aléatoire si le FS est en lecture seule (ex: Vercel)
-            orderNumber = Math.floor(Math.random() * 10000);
-        }
-
-        const formattedOrderNumber = String(orderNumber).padStart(4, '0');
+        // Génère un numéro unique à 5 chiffres pour chaque commande
+        const orderNumber = Math.floor(Math.random() * 90000) + 10000;
+        const formattedOrderNumber = String(orderNumber);
 
         // Informations bancaires pour le client
         const IBAN = "BE22 0689 4683 8447";
