@@ -304,6 +304,14 @@ const isValidPhone = (phone: string) => {
 
 function ContactForm() {
     const router = useRouter();
+    const getPickupDayPreview = (j: string | null) => {
+        if (!j) return "";
+        const d = j.toLowerCase();
+        if (d === 'lundi' || d === 'mardi') return 'Mardi';
+        if (d === 'mercredi' || d === 'jeudi') return 'Jeudi';
+        if (d === 'vendredi' || d === 'samedi') return 'Samedi';
+        return j;
+    };
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -2190,9 +2198,9 @@ function ContactForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {isPlatPrepare ? (
                     <div className="group">
-                        <label className={labelStyle}>Date de retrait</label>
+                        <label className={labelStyle}>Jour de retrait</label>
                         <div className="bg-neutral-50 px-5 py-4 rounded-xl border border-neutral-200 text-neutral-700 font-medium">
-                            Date du retrait : <span className="font-bold capitalize">{selectedPlat?.date || `${jourParam} - Semaine ${semaineParam?.replace('semaine-', '')}`}</span>
+                            Jour du retrait : <span className="font-bold text-[#D4AF37]">Le {getPickupDayPreview(jourParam)} après 11h</span>
                         </div>
                     </div>
                 ) : (
