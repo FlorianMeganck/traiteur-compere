@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://traiteur-compere.be'
+  const baseUrl = 'https://www.traiteur-compere.be'
 
   return [
     {
