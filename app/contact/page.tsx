@@ -337,7 +337,7 @@ function ContactForm() {
     const semaineParam = searchParams.get('semaine');
     const jourParam = searchParams.get('jour');
 
-    const selectedPlat = isPlatPrepare && semaineParam && jourParam 
+    const selectedPlat = isPlatPrepare && semaineParam && jourParam
         ? MENU_DATA.find(m => m.id === semaineParam)?.days.find(d => d.day.toLowerCase() === jourParam.toLowerCase())
         : null;
     const selectedSoups = isPlatPrepare && semaineParam ? MENU_DATA.find(m => m.id === semaineParam)?.soups : [];
@@ -855,7 +855,7 @@ function ContactForm() {
             newErrors.Tel = "Format invalide (ex: 0475 12 34 56)";
         }
         if (!isPlatPrepare && !formData.Date.trim()) newErrors.Date = "Requis";
-        
+
         // Pour un plat préparé, on ne force pas le nombre de convives
         if (!isPlatPrepare && !formData.Nombre_Convives.trim()) newErrors.Nombre_Convives = "Requis";
 
@@ -1118,7 +1118,7 @@ function ContactForm() {
             if (isPlatPrepare) {
                 const apiPayload = {
                     ...formData,
-                    Date: `${jourParam ? jourParam.charAt(0).toUpperCase() + jourParam.slice(1) : ''} - Semaine ${semaineParam?.replace('semaine-', '')}`,
+                    Date: selectedPlat?.date || `${jourParam ? jourParam.charAt(0).toUpperCase() + jourParam.slice(1) : ''} - Semaine ${semaineParam?.replace('semaine-', '')}`,
                     selectedPlat: selectedPlat?.meal,
                     selectedPlatPrice: selectedPlat?.price,
                     selectedPotage: formData.Plat_Prepare_Potage,
@@ -1159,21 +1159,21 @@ function ContactForm() {
                 const result = await response.json();
 
                 if (result.success) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                if (typeof window !== 'undefined' && (window as any).gtag) {
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (window as any).gtag('event', 'generate_lead', {
-                        'event_category': 'formulaire',
-                        'event_label': 'contact_traiteur'
-                    });
-                }
-                // Affichage du V vert
-                setStatus("success");
+                    if (typeof window !== 'undefined' && (window as any).gtag) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        (window as any).gtag('event', 'generate_lead', {
+                            'event_category': 'formulaire',
+                            'event_label': 'contact_traiteur'
+                        });
+                    }
+                    // Affichage du V vert
+                    setStatus("success");
 
-                // Redirection après 3s
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 3000);
+                    // Redirection après 3s
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
                 } else {
                     console.error("Erreur Web3Forms:", result);
                     alert("Une erreur est survenue lors de l'envoi. Veuillez réessayer.");
@@ -2192,7 +2192,7 @@ function ContactForm() {
                     <div className="group">
                         <label className={labelStyle}>Date de retrait</label>
                         <div className="bg-neutral-50 px-5 py-4 rounded-xl border border-neutral-200 text-neutral-700 font-medium">
-                            Commande pour le : <span className="font-bold">{jourParam ? jourParam.charAt(0).toUpperCase() + jourParam.slice(1) : ''} - Semaine {semaineParam?.replace('semaine-', '')}</span>
+                            Date du retrait : <span className="font-bold capitalize">{selectedPlat?.date || `${jourParam} - Semaine ${semaineParam?.replace('semaine-', '')}`}</span>
                         </div>
                     </div>
                 ) : (
