@@ -215,7 +215,9 @@ export default function PlatsPrepares() {
                                                             Commander
                                                         </div>
                                                         <div>
-                                                            <h5 className="font-serif text-xl text-[#D4AF37] mb-2">{dayItem.day}</h5>
+                                                            <h5 className="font-serif text-xl text-[#D4AF37] mb-2">
+                                                                {dayItem.date.charAt(0).toUpperCase() + dayItem.date.slice(1).replace(/ 2026$/, '')}
+                                                            </h5>
                                                             <p className="text-neutral-700 leading-relaxed font-medium group-hover:text-black transition-colors">
                                                                 {dayItem.meal}
                                                             </p>

@@ -15,7 +15,7 @@ export type MenuWeek = {
 export const MENU_DATA: MenuWeek[] = [
     {
         id: "semaine-1",
-        week: "SEMAINE 1",
+        week: "Semaine 1 : du 4 au 10 mai",
         soups: ["Crème de brocolis", "Velouté champignon"],
         days: [
             { day: "Lundi", date: "lundi 4 mai 2026", meal: "Oiseau sans tête sauce poivre, petit pois et carotte, rösti", price: "11,50 €" },
@@ -28,7 +28,7 @@ export const MENU_DATA: MenuWeek[] = [
     },
     {
         id: "semaine-2",
-        week: "SEMAINE 2",
+        week: "Semaine 2 : du 11 au 17 mai",
         soups: ["Potage tomate", "Velouté de chou-fleur"],
         days: [
             { day: "Lundi", date: "lundi 11 mai 2026", meal: "Cuisse de lapin à la bière, compote et pomme rissolée", price: "11,50 €" },
@@ -41,7 +41,7 @@ export const MENU_DATA: MenuWeek[] = [
     },
     {
         id: "semaine-3",
-        week: "SEMAINE 3",
+        week: "Semaine 3 : du 18 au 24 mai",
         soups: ["Potage champignons des bois", "Velouté d'asperge"],
         days: [
             { day: "Lundi", date: "lundi 18 mai 2026", meal: "Blanquette de veau, purée de céleri et légumes vapeurs", price: "16,00 €" },
@@ -54,7 +54,7 @@ export const MENU_DATA: MenuWeek[] = [
     },
     {
         id: "semaine-4",
-        week: "SEMAINE 4",
+        week: "Semaine 4 : du 25 au 31 mai",
         soups: ["Soupe à l'oignon", "Velouté butternut"],
         days: [
             { day: "Lundi", date: "lundi 25 mai 2026", meal: "Carbonnade à la flamande, compote et croquette", price: "11,50 €" },
