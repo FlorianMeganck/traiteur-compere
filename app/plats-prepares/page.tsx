@@ -78,7 +78,7 @@ export default function PlatsPrepares() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-neutral-900 mb-1">1. Consultez le menu</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Retrouvez notre menu du mois <a href="public/menu/menu_mai_2026.pdf" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline font-semibold">ici</a></p>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Retrouvez notre menu du mois <a href="/menu/menu_mai_2026.pdf" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline font-semibold">ici</a></p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
