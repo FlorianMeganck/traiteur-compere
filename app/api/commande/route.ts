@@ -61,6 +61,16 @@ export async function POST(req: Request) {
         const orderNumber = Math.floor(Math.random() * 90000) + 10000;
         const formattedOrderNumber = String(orderNumber);
 
+        // --- AJOUT : LOGIQUE DES JOURS DE RETRAIT ---
+        const getPickupDay = (j: string) => {
+            const day = j.toLowerCase();
+            if (day === 'lundi' || day === 'mardi') return 'le MARDI';
+            if (day === 'mercredi' || day === 'jeudi') return 'le JEUDI';
+            if (day === 'vendredi' || day === 'samedi') return 'le SAMEDI';
+            return j;
+        };
+        const jourRetrait = getPickupDay(jour);
+
         // Informations bancaires pour le client
         const IBAN = "BE22 0689 4683 8447";
         const BIC = "GKCCBEBB";
@@ -83,6 +93,7 @@ export async function POST(req: Request) {
                         <p><strong>Téléphone :</strong> ${Tel}</p>
                         <p><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
                         <p><strong>Date demandée :</strong> ${Date}</p>
+                        <p><strong>🚚 Jour de retrait prévu :</strong> ${jourRetrait}</p>
                         <hr />
                         <h3>Détails de la commande</h3>
                         <p><strong>Plat sélectionné :</strong> ${dayData.meal} (${dayData.day} - ${weekData.week})</p>
@@ -107,6 +118,7 @@ export async function POST(req: Request) {
                             <li><strong>Potage :</strong> ${selectedPotage}</li>
                             <li><strong>Quantité :</strong> ${parsedQty}</li>
                             <li><strong>Date :</strong> ${Date}</li>
+                            <li style="color: #D4AF37;"><strong>🚚 Retrait de votre commande : ${jourRetrait}</strong></li>
                         </ul>
                         <p><strong>Montant total à régler : ${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></p>
                         <br/>

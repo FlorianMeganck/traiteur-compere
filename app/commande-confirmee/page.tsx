@@ -12,10 +12,21 @@ function CommandeConfirmeeContent() {
     const nom = searchParams.get('nom') || "Client";
     const prenom = searchParams.get('prenom') || "";
     const orderId = searchParams.get('orderId') || "";
+    const jour = searchParams.get('jour') || "";
     const plat = searchParams.get('plat') || "votre commande";
     const total = searchParams.get('total') || "0";
 
     const qrRef = useRef<HTMLDivElement>(null);
+
+    // Logique pour déterminer le jour de retrait
+    const getPickupDay = (j: string) => {
+        const d = j.toLowerCase();
+        if (d === 'lundi' || d === 'mardi') return 'Mardi';
+        if (d === 'mercredi' || d === 'jeudi') return 'Jeudi';
+        if (d === 'vendredi' || d === 'samedi') return 'Samedi';
+        return null;
+    };
+    const jourRetrait = getPickupDay(jour);
 
     // Informations bancaires pour la génération du QR Code (à adapter)
     const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE22 0689 4683 8447";
@@ -97,6 +108,13 @@ function CommandeConfirmeeContent() {
                                     <div className="flex flex-col">
                                         <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Communication</span>
                                         <span className="font-medium text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1 rounded inline-block w-fit mt-1">{COMMUNICATION}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Jour de retrait</span>
+                                        <span className="font-bold text-black flex items-center gap-2">
+                                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                            {jourRetrait ? `Le ${jourRetrait} après 11h` : "À confirmer"}
+                                        </span>
                                     </div>
                                 </div>
                             </div>

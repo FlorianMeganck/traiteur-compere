@@ -1139,7 +1139,7 @@ function ContactForm() {
                 if (response.ok && result.success) {
                     setStatus("success");
                     setTimeout(() => {
-                        router.push(`/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&plat=${encodeURIComponent(selectedPlat?.meal || '')}&total=${totalPrice}`);
+                        router.push(`/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&jour=${jourParam}&plat=${encodeURIComponent(selectedPlat?.meal || '')}&total=${totalPrice}`);
                     }, 1000);
                 } else {
                     console.error("Erreur API Commande:", result);
