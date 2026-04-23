@@ -9,12 +9,9 @@ import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed } from "lu
 import { MENU_DATA } from "../data/plats-prepares";
 
 export default function PlatsPrepares() {
-    const [activeTab, setActiveTab] = useState(MENU_DATA[0].id);
-    // --- LOGIQUE DE ROTATION (Délai 2 jours) ---
+    // 1. On définit d'abord la logique de visibilité
     const isVisible = (dayName: string, weekId: string) => {
         const today = new Date();
-
-        // Dates de retrait réelles pour Mai 2026
         const pickupDates: Record<string, Record<string, Date>> = {
             "semaine-1": { "mardi": new Date(2026, 4, 5), "jeudi": new Date(2026, 4, 7), "samedi": new Date(2026, 4, 9) },
             "semaine-2": { "mardi": new Date(2026, 4, 12), "jeudi": new Date(2026, 4, 14), "samedi": new Date(2026, 4, 16) },
@@ -31,11 +28,19 @@ export default function PlatsPrepares() {
         const pickupDate = pickupDates[weekId]?.[targetDay];
         if (!pickupDate) return false;
 
-        // Calcul : si le retrait est dans moins de 2 jours, on masque le plat
         const diffTime = pickupDate.getTime() - today.getTime();
         const diffDays = diffTime / (1000 * 60 * 60 * 24);
         return diffDays >= 2;
     };
+
+    // 2. On cherche la première semaine qui a encore au moins un plat visible
+    const firstAvailableWeek = MENU_DATA.find(menu =>
+        menu.days.some(dayItem => isVisible(dayItem.day, menu.id))
+    )?.id || MENU_DATA[0].id;
+
+    // 3. On initialise l'onglet actif sur cette semaine
+    const [activeTab, setActiveTab] = useState(firstAvailableWeek);
+
     return (
         <main className="min-h-screen bg-gray-50 pb-24">
             {/* HERO SECTION */}
