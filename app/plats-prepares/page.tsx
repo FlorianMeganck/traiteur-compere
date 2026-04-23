@@ -147,7 +147,7 @@ export default function PlatsPrepares() {
                         {/* Notice Potage */}
                         <div className="inline-block bg-[#D4AF37]/10 border border-[#D4AF37]/30 px-6 py-3 rounded-full">
                             <p className="text-[#8c7322] font-semibold text-sm md:text-base">
-                                🥣 <span className="uppercase tracking-wider">Potage maison : 4,00 € HTVA</span> <span className="font-normal">(disponible tout au long de la semaine en accompagnement de votre plat).</span>
+                                🥣 <span className="uppercase tracking-wider">Potage maison : 4,00 €</span> <span className="font-normal">(disponible tout au long de la semaine en accompagnement de votre plat).</span>
                             </p>
                         </div>
                     </div>
@@ -224,7 +224,7 @@ export default function PlatsPrepares() {
                                                         </div>
                                                         <div className="mt-4 pt-4 border-t border-neutral-100 flex justify-between items-center group-hover:border-[#D4AF37]/30 transition-colors">
                                                             <span className="text-xs text-neutral-400 uppercase tracking-widest">Prix unitaire</span>
-                                                            <span className="font-bold text-lg text-black">{dayItem.price} <span className="text-xs font-normal text-neutral-400">HTVA</span></span>
+                                                            <span className="font-bold text-lg text-black">{dayItem.price} <span className="text-xs font-normal text-neutral-400"></span></span>
                                                         </div>
                                                     </Link>
                                                 ))}
