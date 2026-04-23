@@ -135,6 +135,7 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             totalPrice: finalTotalPrice,
+            orderNumber: formattedOrderNumber,
             message: 'Commande enregistrée avec succès'
         });
 
