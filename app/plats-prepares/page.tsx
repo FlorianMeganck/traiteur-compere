@@ -126,7 +126,7 @@ export default function PlatsPrepares() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-neutral-900 mb-1">3. Délai de réservation</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Toute commande doit être passée minimum 4 jours à l'avance.</p>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Passez commande au plus tard 2 jours avant le jour de retrait (Mardi, Jeudi ou Samedi).</p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">

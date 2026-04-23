@@ -107,7 +107,7 @@ export async function POST(req: Request) {
 
                 // Email au Client
                 await resend.emails.send({
-                    from: 'Traiteur Compère <commande@traiteur-compere.be>', // Modifiez avec votre domaine vérifié
+                    from: 'Traiteur Compère <commande@traiteur-compere.be>',
                     to: Mail,
                     subject: `Confirmation de votre commande #${formattedOrderNumber} - Traiteur Compère`,
                     html: `
