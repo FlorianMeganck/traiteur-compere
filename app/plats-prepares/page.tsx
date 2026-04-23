@@ -87,7 +87,7 @@ export default function PlatsPrepares() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-neutral-900 mb-1">2. Passez commande</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Passez commande via un <Link href="/contact?sujet=plats-prepares" className="text-[#D4AF37] hover:underline font-semibold">formulaire</Link> ou par mail : <a href="mailto:traiteurcompere@gmail.com" className="text-[#D4AF37] hover:underline font-semibold">traiteurcompere@gmail.com</a></p>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Passez commande via le formulaire ou par mail : <a href="mailto:traiteurcompere@gmail.com" className="text-[#D4AF37] hover:underline font-semibold">traiteurcompere@gmail.com</a></p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
@@ -248,12 +248,6 @@ export default function PlatsPrepares() {
                         *Menu susceptible d'évoluer en fonction des arrivages et de la saisonnalité.<br />
                         Pour toute question, n'hésitez pas à nous contacter au <strong className="text-black font-semibold">0476 86 54 07</strong>.
                     </p>
-                    <Link
-                        href="/contact?sujet=plats-prepares"
-                        className="inline-flex items-center justify-center bg-black text-[#D4AF37] px-10 py-5 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-[#D4AF37] hover:text-black transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1"
-                    >
-                        Passer ma commande
-                    </Link>
                 </motion.div>
             </div>
         </main>
