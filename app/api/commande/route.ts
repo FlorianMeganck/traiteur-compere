@@ -93,7 +93,7 @@ export async function POST(req: Request) {
                         <p><strong>Téléphone :</strong> ${Tel}</p>
                         <p><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
                         <p><strong>Date demandée :</strong> ${Date}</p>
-                        <p><strong>🚚 Jour de retrait prévu :</strong> ${jourRetrait}</p>
+                        <p><strong>Jour de retrait prévu :</strong> ${jourRetrait}</p>
                         <hr />
                         <h3>Détails de la commande</h3>
                         <p><strong>Plat sélectionné :</strong> ${dayData.meal} (${dayData.day} - ${weekData.week})</p>
@@ -118,7 +118,7 @@ export async function POST(req: Request) {
                             <li><strong>Potage :</strong> ${selectedPotage}</li>
                             <li><strong>Quantité :</strong> ${parsedQty}</li>
                             <li><strong>Date :</strong> ${Date}</li>
-                            <li style="color: #D4AF37;"><strong>🚚 Retrait de votre commande : ${jourRetrait}</strong></li>
+                            <li style="color: #D4AF37;"><strong>Retrait de votre commande : ${jourRetrait}</strong></li>
                         </ul>
                         <p><strong>Montant total à régler : ${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></p>
                         <br/>
