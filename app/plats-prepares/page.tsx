@@ -10,7 +10,32 @@ import { MENU_DATA } from "../data/plats-prepares";
 
 export default function PlatsPrepares() {
     const [activeTab, setActiveTab] = useState(MENU_DATA[0].id);
+    // --- LOGIQUE DE ROTATION (Délai 2 jours) ---
+    const isVisible = (dayName: string, weekId: string) => {
+        const today = new Date();
 
+        // Dates de retrait réelles pour Mai 2026
+        const pickupDates: Record<string, Record<string, Date>> = {
+            "semaine-1": { "mardi": new Date(2026, 4, 5), "jeudi": new Date(2026, 4, 7), "samedi": new Date(2026, 4, 9) },
+            "semaine-2": { "mardi": new Date(2026, 4, 12), "jeudi": new Date(2026, 4, 14), "samedi": new Date(2026, 4, 16) },
+            "semaine-3": { "mardi": new Date(2026, 4, 19), "jeudi": new Date(2026, 4, 21), "samedi": new Date(2026, 4, 23) },
+            "semaine-4": { "mardi": new Date(2026, 4, 26), "jeudi": new Date(2026, 4, 28), "samedi": new Date(2026, 4, 30) },
+        };
+
+        let targetDay = "";
+        const d = dayName.toLowerCase();
+        if (d === 'lundi' || d === 'mardi') targetDay = 'mardi';
+        else if (d === 'mercredi' || d === 'jeudi') targetDay = 'jeudi';
+        else targetDay = 'samedi';
+
+        const pickupDate = pickupDates[weekId]?.[targetDay];
+        if (!pickupDate) return false;
+
+        // Calcul : si le retrait est dans moins de 2 jours, on masque le plat
+        const diffTime = pickupDate.getTime() - today.getTime();
+        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+        return diffDays >= 2;
+    };
     return (
         <main className="min-h-screen bg-gray-50 pb-24">
             {/* HERO SECTION */}
@@ -205,29 +230,45 @@ export default function PlatsPrepares() {
 
                                             {/* Daily Meals Grid */}
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                                                {menu.days.map((dayItem, idx) => (
-                                                    <Link
-                                                        href={`/contact?type=plat_prepare&semaine=${menu.id}&jour=${dayItem.day.toLowerCase()}`}
-                                                        key={idx}
-                                                        className="flex flex-col justify-between p-6 rounded-2xl border border-neutral-100 hover:border-[#D4AF37] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white group cursor-pointer relative overflow-hidden"
-                                                    >
-                                                        <div className="absolute top-0 right-0 bg-[#D4AF37] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                            Commander
-                                                        </div>
-                                                        <div>
-                                                            <h5 className="font-serif text-xl text-[#D4AF37] mb-2">
-                                                                {dayItem.date.charAt(0).toUpperCase() + dayItem.date.slice(1).replace(/ 2026$/, '')}
-                                                            </h5>
-                                                            <p className="text-neutral-700 leading-relaxed font-medium group-hover:text-black transition-colors">
-                                                                {dayItem.meal}
-                                                            </p>
-                                                        </div>
-                                                        <div className="mt-4 pt-4 border-t border-neutral-100 flex justify-between items-center group-hover:border-[#D4AF37]/30 transition-colors">
-                                                            <span className="text-xs text-neutral-400 uppercase tracking-widest">Prix unitaire</span>
-                                                            <span className="font-bold text-lg text-black">{dayItem.price} <span className="text-xs font-normal text-neutral-400"></span></span>
-                                                        </div>
-                                                    </Link>
-                                                ))}
+                                                {/* On filtre les plats avant de les afficher */}
+                                                {menu.days.filter(dayItem => isVisible(dayItem.day, menu.id)).length > 0 ? (
+                                                    menu.days
+                                                        .filter(dayItem => isVisible(dayItem.day, menu.id))
+                                                        .map((dayItem, idx) => (
+                                                            <Link
+                                                                href={`/contact?type=plat_prepare&semaine=${menu.id}&jour=${dayItem.day.toLowerCase()}`}
+                                                                key={idx}
+                                                                className="flex flex-col justify-between p-6 rounded-2xl border border-neutral-100 hover:border-[#D4AF37] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white group cursor-pointer relative overflow-hidden"
+                                                            >
+                                                                <div className="absolute top-0 right-0 bg-[#D4AF37] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                                    Commander
+                                                                </div>
+                                                                <div>
+                                                                    <h5 className="font-serif text-xl text-[#D4AF37] mb-2">
+                                                                        {dayItem.date.charAt(0).toUpperCase() + dayItem.date.slice(1).replace(/ 2026$/, '')}
+                                                                    </h5>
+                                                                    <p className="text-neutral-700 leading-relaxed font-medium group-hover:text-black transition-colors">
+                                                                        {dayItem.meal}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="mt-4 pt-4 border-t border-neutral-100 flex justify-between items-center group-hover:border-[#D4AF37]/30 transition-colors">
+                                                                    <span className="text-xs text-neutral-400 uppercase tracking-widest">Prix unitaire</span>
+                                                                    <span className="font-bold text-lg text-black">{dayItem.price}</span>
+                                                                </div>
+                                                            </Link>
+                                                        ))
+                                                ) : (
+                                                    /* Message affiché quand la semaine est passée ou complète */
+                                                    <div className="col-span-full py-12 text-center bg-neutral-50 rounded-3xl border border-dashed border-neutral-200 animate-fade-in">
+                                                        <UtensilsCrossed className="mx-auto text-neutral-300 mb-4" size={40} />
+                                                        <p className="text-neutral-600 font-serif text-xl italic">
+                                                            Les commandes pour cette semaine sont désormais clôturées.
+                                                        </p>
+                                                        <p className="text-sm text-neutral-400 mt-2">
+                                                            Découvrez nos menus pour les semaines suivantes.
+                                                        </p>
+                                                    </div>
+                                                )}
                                             </div>
                                         </motion.div>
                                     )
