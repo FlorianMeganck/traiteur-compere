@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { MENU_DATA } from '../../data/plats-prepares';
+import fs from 'fs';
+import path from 'path';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789'); // Dummy if missing to prevent crash on init
 
@@ -55,11 +57,30 @@ export async function POST(req: Request) {
         const parsedQty = parseInt(quantite, 10) || 1;
         const finalTotalPrice = (pricePlat + pricePotage) * parsedQty;
 
-        // Informations bancaires pour le client (À configurer avec les vraies données)
-        const IBAN = process.env.TRAITEUR_IBAN || "[À COMPLÉTER PAR LE TRAITEUR]";
-        const BIC = process.env.TRAITEUR_BIC || "[À COMPLÉTER PAR LE TRAITEUR]";
-        const BENEFICIAIRE = process.env.TRAITEUR_BENEFICIAIRE || "Traiteur Compère";
-        const COMMUNICATION = `COMMANDE # ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`;
+        // Gestion du numéro de commande
+        let orderNumber = 1;
+        try {
+            const counterPath = path.join(process.cwd(), 'order_counter.json');
+            try {
+                const data = await fs.promises.readFile(counterPath, 'utf-8');
+                orderNumber = JSON.parse(data).count + 1;
+            } catch (e) {
+                // Fichier n'existe pas encore
+            }
+            await fs.promises.writeFile(counterPath, JSON.stringify({ count: orderNumber }));
+        } catch (error) {
+            console.error("Impossible de sauvegarder le compteur :", error);
+            // Fallback sur un numéro aléatoire si le FS est en lecture seule (ex: Vercel)
+            orderNumber = Math.floor(Math.random() * 10000);
+        }
+
+        const formattedOrderNumber = String(orderNumber).padStart(4, '0');
+
+        // Informations bancaires pour le client
+        const IBAN = "BE22 0689 4683 8447";
+        const BIC = "GKCCBEBB";
+        const BENEFICIAIRE = "JEAN COMPERE";
+        const COMMUNICATION = `COMMANDE #${formattedOrderNumber} ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`;
 
         // 3. Préparation et envoi des emails via Resend
         // On n'envoie réellement que si une clé API valide est présente (pas la clé dummy)
@@ -69,9 +90,9 @@ export async function POST(req: Request) {
                 await resend.emails.send({
                     from: 'Traiteur Compère <commande@traiteur-compere.be>', // Modifiez avec votre domaine vérifié si disponible (ex: commandes@traiteurcompere.be)
                     to: process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com', // Mettre l'email du traiteur ici
-                    subject: `[COMMANDE PLATS] ${Nom} ${Prenom} - ${Date}`,
+                    subject: `[COMMANDE #${formattedOrderNumber}] ${Nom} ${Prenom} - ${Date}`,
                     html: `
-                        <h2>Nouvelle commande de Plat Préparé</h2>
+                        <h2>Nouvelle commande de Plat Préparé (N° ${formattedOrderNumber})</h2>
                         <p><strong>Client :</strong> ${Nom} ${Prenom}</p>
                         <p><strong>Email :</strong> ${Mail}</p>
                         <p><strong>Téléphone :</strong> ${Tel}</p>
@@ -92,10 +113,10 @@ export async function POST(req: Request) {
                 await resend.emails.send({
                     from: 'Traiteur Compère <commande@traiteur-compere.be>', // Modifiez avec votre domaine vérifié
                     to: Mail,
-                    subject: `Confirmation de votre commande - Traiteur Compère`,
+                    subject: `Confirmation de votre commande #${formattedOrderNumber} - Traiteur Compère`,
                     html: `
                         <h2>Merci pour votre commande, ${Prenom} !</h2>
-                        <p>Votre demande a bien été enregistrée. Voici le récapitulatif de votre commande :</p>
+                        <p>Votre demande a bien été enregistrée. Voici le récapitulatif de votre commande (<strong>N° ${formattedOrderNumber}</strong>) :</p>
                         <ul>
                             <li><strong>Plat :</strong> ${dayData.meal}</li>
                             <li><strong>Potage :</strong> ${selectedPotage}</li>
