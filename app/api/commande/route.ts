@@ -67,7 +67,7 @@ export async function POST(req: Request) {
             try {
                 // Email au Traiteur
                 await resend.emails.send({
-                    from: 'Commandes <onboarding@resend.dev>', // Modifiez avec votre domaine vérifié si disponible (ex: commandes@traiteurcompere.be)
+                    from: 'Traiteur Compère <commande@traiteur-compere.be>', // Modifiez avec votre domaine vérifié si disponible (ex: commandes@traiteurcompere.be)
                     to: process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com', // Mettre l'email du traiteur ici
                     subject: `[COMMANDE PLATS] ${Nom} ${Prenom} - ${Date}`,
                     html: `
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
 
                 // Email au Client
                 await resend.emails.send({
-                    from: 'Traiteur Compère <onboarding@resend.dev>', // Modifiez avec votre domaine vérifié
+                    from: 'Traiteur Compère <commande@traiteur-compere.be>', // Modifiez avec votre domaine vérifié
                     to: Mail,
                     subject: `Confirmation de votre commande - Traiteur Compère`,
                     html: `
