@@ -256,10 +256,10 @@ function AllergenesContent() {
 
                 <div className="mt-12 text-center pb-8">
                     <button
-                        onClick={() => router.back()}
+                        onClick={() => window.close()}
                         className="inline-block bg-[#D4AF37] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-black transition-colors shadow-lg"
                     >
-                        Retour à la page précédente
+                        Fermer cette page
                     </button>
                 </div>
 
