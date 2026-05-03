@@ -70,6 +70,7 @@ export default function Navbar() {
     }, []);
 
     return (
+        <>
         <nav
             className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
                 }`}
@@ -231,6 +232,7 @@ export default function Navbar() {
                     )}
                 </AnimatePresence>
             </div>
+        </nav>
 
             {/* Cart Side Drawer */}
             <AnimatePresence>
@@ -322,7 +324,7 @@ export default function Navbar() {
                     </>
                 )}
             </AnimatePresence>
-        </nav>
+        </>
     );
 }
 
