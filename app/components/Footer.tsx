@@ -13,7 +13,7 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     {/* Column 1: Identity */}
                     <div className="flex flex-col items-start gap-6">
-                        <div className="text-white relative w-32 h-16 md:w-40 md:h-20">
+                        <div className="text-white relative w-48 h-24 md:w-56 md:h-28">
                             <Image
                                 src="/images/Logo-2.png"
                                 alt="Traiteur Compère"
