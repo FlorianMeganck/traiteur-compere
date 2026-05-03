@@ -176,20 +176,23 @@ function AllergenesContent() {
 
                 {/* Légende Globale des Allergènes */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200 mb-10 flex flex-wrap gap-4 justify-center">
-                    {Object.values(ALLERGENES).map(a => (
-                        <div key={a.id} className="flex flex-col items-center gap-2">
-                            <div className={`w-12 h-12 rounded-full border ${a.color} flex items-center justify-center overflow-hidden`}>
-                                {(a as any).image ? (
-                                    <Image src={(a as any).image} alt={a.name} width={32} height={32} className="object-contain" />
-                                ) : (a as any).icon ? (
-                                    <(a as any).icon size={24} strokeWidth={1.5} />
-                                ) : (
-                                    <span className="text-[10px] font-bold">{a.id}</span>
-                                )}
+                    {Object.values(ALLERGENES).map(a => {
+                        const IconComponent = (a as any).icon;
+                        return (
+                            <div key={a.id} className="flex flex-col items-center gap-2">
+                                <div className={`w-12 h-12 rounded-full border ${a.color} flex items-center justify-center overflow-hidden`}>
+                                    {(a as any).image ? (
+                                        <Image src={(a as any).image} alt={a.name} width={32} height={32} className="object-contain" />
+                                    ) : IconComponent ? (
+                                        <IconComponent size={24} strokeWidth={1.5} />
+                                    ) : (
+                                        <span className="text-[10px] font-bold">{a.id}</span>
+                                    )}
+                                </div>
+                                <span className="text-[10px] font-medium text-neutral-600">{a.name}</span>
                             </div>
-                            <span className="text-[10px] font-medium text-neutral-600">{a.name}</span>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Accordéons des Menus */}
@@ -222,13 +225,14 @@ function AllergenesContent() {
                                                         {item.allergens.length > 0 ? (
                                                             item.allergens.map(alCode => {
                                                                 const alInfo = ALLERGENES[alCode as keyof typeof ALLERGENES];
+                                                                const IconComponent = (alInfo as any).icon;
                                                                 return (
                                                                     <div key={alCode} className={`flex items-center gap-2 text-[10px] uppercase tracking-wider px-2 py-1 rounded border ${alInfo.color}`}>
                                                                         {(alInfo as any).image && (
                                                                             <Image src={(alInfo as any).image} alt={alInfo.name} width={16} height={16} className="object-contain" />
                                                                         )}
-                                                                        {(alInfo as any).icon && (
-                                                                            <(alInfo as any).icon size={14} strokeWidth={1.5} />
+                                                                        {IconComponent && (
+                                                                            <IconComponent size={14} strokeWidth={1.5} />
                                                                         )}
                                                                         {alInfo.name}
                                                                     </div>
