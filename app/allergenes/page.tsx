@@ -4,21 +4,22 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
 // --- BASE DE DONNÉES DES ALLERGÈNES ---
 // ATTENTION : Données standards pré-remplies. À valider obligatoirement par le Chef.
 const ALLERGENES = {
-    GLU: { id: "GLU", name: "Gluten", color: "bg-amber-100 text-amber-800 border-amber-200" },
-    CRU: { id: "CRU", name: "Crustacés", color: "bg-orange-100 text-orange-800 border-orange-200" },
-    OEU: { id: "OEU", name: "Œufs", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-    POI: { id: "POI", name: "Poissons", color: "bg-blue-100 text-blue-800 border-blue-200" },
-    ARA: { id: "ARA", name: "Arachides", color: "bg-stone-100 text-stone-800 border-stone-200" },
+    GLU: { id: "GLU", name: "Gluten", image: "/allergènes/ble.png", color: "bg-amber-100 text-amber-800 border-amber-200" },
+    CRU: { id: "CRU", name: "Crustacés", image: "/allergènes/crustace.png", color: "bg-orange-100 text-orange-800 border-orange-200" },
+    OEU: { id: "OEU", name: "Œufs", image: "/allergènes/oeuf.png", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+    POI: { id: "POI", name: "Poissons", image: "/allergènes/poisson.png", color: "bg-blue-100 text-blue-800 border-blue-200" },
+    ARA: { id: "ARA", name: "Arachides", image: "/allergènes/arachide.png", color: "bg-stone-100 text-stone-800 border-stone-200" },
     SOJ: { id: "SOJ", name: "Soja", color: "bg-green-100 text-green-800 border-green-200" },
-    LAI: { id: "LAI", name: "Lait (Lactose)", color: "bg-cyan-100 text-cyan-800 border-cyan-200" },
-    FRU: { id: "FRU", name: "Fruits à coque", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-    CEL: { id: "CEL", name: "Céleri", color: "bg-lime-100 text-lime-800 border-lime-200" },
-    MOU: { id: "MOU", name: "Moutarde", color: "bg-yellow-200 text-yellow-900 border-yellow-300" },
-    SES: { id: "SES", name: "Sésame", color: "bg-orange-50 text-orange-900 border-orange-200" },
+    LAI: { id: "LAI", name: "Lait (Lactose)", image: "/allergènes/lait.png", color: "bg-cyan-100 text-cyan-800 border-cyan-200" },
+    FRU: { id: "FRU", name: "Fruits à coque", image: "/allergènes/amande.png", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+    CEL: { id: "CEL", name: "Céleri", image: "/allergènes/celeri.png", color: "bg-lime-100 text-lime-800 border-lime-200" },
+    MOU: { id: "MOU", name: "Moutarde", image: "/allergènes/moutarde.png", color: "bg-yellow-200 text-yellow-900 border-yellow-300" },
+    SES: { id: "SES", name: "Sésame", image: "/allergènes/sesame.png", color: "bg-orange-50 text-orange-900 border-orange-200" },
     SUL: { id: "SUL", name: "Sulfites", color: "bg-purple-100 text-purple-800 border-purple-200" },
     LUP: { id: "LUP", name: "Lupin", color: "bg-rose-100 text-rose-800 border-rose-200" },
     MOL: { id: "MOL", name: "Mollusques", color: "bg-slate-100 text-slate-800 border-slate-200" },
@@ -174,10 +175,17 @@ function AllergenesContent() {
                 </div>
 
                 {/* Légende Globale des Allergènes */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200 mb-10 flex flex-wrap gap-2 justify-center">
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200 mb-10 flex flex-wrap gap-4 justify-center">
                     {Object.values(ALLERGENES).map(a => (
-                        <div key={a.id} className={`text-xs px-3 py-1.5 rounded-full border ${a.color} font-medium`}>
-                            {a.name}
+                        <div key={a.id} className="flex flex-col items-center gap-2">
+                            <div className={`w-12 h-12 rounded-full border ${a.color} flex items-center justify-center overflow-hidden bg-white`}>
+                                {(a as any).image ? (
+                                    <Image src={(a as any).image} alt={a.name} width={32} height={32} className="object-contain" />
+                                ) : (
+                                    <span className="text-[10px] font-bold">{a.id}</span>
+                                )}
+                            </div>
+                            <span className="text-[10px] font-medium text-neutral-600">{a.name}</span>
                         </div>
                     ))}
                 </div>
@@ -213,9 +221,12 @@ function AllergenesContent() {
                                                             item.allergens.map(alCode => {
                                                                 const alInfo = ALLERGENES[alCode as keyof typeof ALLERGENES];
                                                                 return (
-                                                                    <span key={alCode} className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border ${alInfo.color}`}>
+                                                                    <div key={alCode} className={`flex items-center gap-2 text-[10px] uppercase tracking-wider px-2 py-1 rounded border ${alInfo.color}`}>
+                                                                        {(alInfo as any).image && (
+                                                                            <Image src={(alInfo as any).image} alt={alInfo.name} width={16} height={16} className="object-contain" />
+                                                                        )}
                                                                         {alInfo.name}
-                                                                    </span>
+                                                                    </div>
                                                                 );
                                                             })
                                                         ) : (

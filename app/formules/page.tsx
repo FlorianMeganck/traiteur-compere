@@ -239,16 +239,16 @@ type AllergenData = {
 
 const ALLERGEN_ICONS: Record<string, AllergenData> = {
     // 10 Images
-    nut: { image: "/amande.png", label: "Amande (Fruits à coque)" },
-    arachide: { image: "/arachide.png", label: "Arachide" },
-    celeri: { image: "/celeri.png", label: "Céleri" },
-    fish: { image: "/poisson.png", label: "Poisson" },
-    sesame: { image: "/sesame.png", label: "Sésame" },
-    gluten: { image: "/ble.png", label: "Blé (Gluten)" },
-    lait: { image: "/lait.png", label: "Lait" },
-    moutarde: { image: "/moutarde.png", label: "Moutarde" },
-    egg: { image: "/oeuf.png", label: "Œufs" },
-    crustace: { image: "/crustace.png", label: "Crustacés" },
+    nut: { image: "/allergènes/amande.png", label: "Amande (Fruits à coque)" },
+    arachide: { image: "/allergènes/arachide.png", label: "Arachide" },
+    celeri: { image: "/allergènes/celeri.png", label: "Céleri" },
+    fish: { image: "/allergènes/poisson.png", label: "Poisson" },
+    sesame: { image: "/allergènes/sesame.png", label: "Sésame" },
+    gluten: { image: "/allergènes/ble.png", label: "Blé (Gluten)" },
+    lait: { image: "/allergènes/lait.png", label: "Lait" },
+    moutarde: { image: "/allergènes/moutarde.png", label: "Moutarde" },
+    egg: { image: "/allergènes/oeuf.png", label: "Œufs" },
+    crustace: { image: "/allergènes/crustace.png", label: "Crustacés" },
 
     // 4 Icônes Lucide
     soja: { icon: Sprout, label: "Soja" },
