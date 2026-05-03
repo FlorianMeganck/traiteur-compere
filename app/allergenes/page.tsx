@@ -7,19 +7,18 @@ import Link from "next/link";
 import Image from "next/image";
 
 // --- BASE DE DONNÉES DES ALLERGÈNES ---
-// ATTENTION : Données standards pré-remplies. À valider obligatoirement par le Chef.
 const ALLERGENES = {
-    GLU: { id: "GLU", name: "Gluten", image: "/allergènes/ble.png", color: "bg-amber-100 text-amber-800 border-amber-200" },
-    CRU: { id: "CRU", name: "Crustacés", image: "/allergènes/crustace.png", color: "bg-orange-100 text-orange-800 border-orange-200" },
-    OEU: { id: "OEU", name: "Œufs", image: "/allergènes/oeuf.png", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
-    POI: { id: "POI", name: "Poissons", image: "/allergènes/poisson.png", color: "bg-blue-100 text-blue-800 border-blue-200" },
-    ARA: { id: "ARA", name: "Arachides", image: "/allergènes/arachide.png", color: "bg-stone-100 text-stone-800 border-stone-200" },
+    GLU: { id: "GLU", name: "Gluten", image: "/allergene/ble.png", color: "bg-amber-100 text-amber-800 border-amber-200" },
+    CRU: { id: "CRU", name: "Crustacés", image: "/allergene/crustace.png", color: "bg-orange-100 text-orange-800 border-orange-200" },
+    OEU: { id: "OEU", name: "Œufs", image: "/allergene/oeuf.png", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+    POI: { id: "POI", name: "Poissons", image: "/allergene/poisson.png", color: "bg-blue-100 text-blue-800 border-blue-200" },
+    ARA: { id: "ARA", name: "Arachides", image: "/allergene/arachide.png", color: "bg-stone-100 text-stone-800 border-stone-200" },
     SOJ: { id: "SOJ", name: "Soja", color: "bg-green-100 text-green-800 border-green-200" },
-    LAI: { id: "LAI", name: "Lait (Lactose)", image: "/allergènes/lait.png", color: "bg-cyan-100 text-cyan-800 border-cyan-200" },
-    FRU: { id: "FRU", name: "Fruits à coque", image: "/allergènes/amande.png", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
-    CEL: { id: "CEL", name: "Céleri", image: "/allergènes/celeri.png", color: "bg-lime-100 text-lime-800 border-lime-200" },
-    MOU: { id: "MOU", name: "Moutarde", image: "/allergènes/moutarde.png", color: "bg-yellow-200 text-yellow-900 border-yellow-300" },
-    SES: { id: "SES", name: "Sésame", image: "/allergènes/sesame.png", color: "bg-orange-50 text-orange-900 border-orange-200" },
+    LAI: { id: "LAI", name: "Lait (Lactose)", image: "/allergene/lait.png", color: "bg-cyan-100 text-cyan-800 border-cyan-200" },
+    FRU: { id: "FRU", name: "Fruits à coque", image: "/allergene/amande.png", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+    CEL: { id: "CEL", name: "Céleri", image: "/allergene/celeri.png", color: "bg-lime-100 text-lime-800 border-lime-200" },
+    MOU: { id: "MOU", name: "Moutarde", image: "/allergene/moutarde.png", color: "bg-yellow-200 text-yellow-900 border-yellow-300" },
+    SES: { id: "SES", name: "Sésame", image: "/allergene/sesame.png", color: "bg-orange-50 text-orange-900 border-orange-200" },
     SUL: { id: "SUL", name: "Sulfites", color: "bg-purple-100 text-purple-800 border-purple-200" },
     LUP: { id: "LUP", name: "Lupin", color: "bg-rose-100 text-rose-800 border-rose-200" },
     MOL: { id: "MOL", name: "Mollusques", color: "bg-slate-100 text-slate-800 border-slate-200" },
@@ -163,14 +162,14 @@ function AllergenesContent() {
     return (
         <main className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative">
             <div className="max-w-4xl mx-auto px-6 relative z-10">
-                
+
                 {/* En-tête de page */}
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Matrice des Allergènes</h1>
                     <div className="w-16 h-1 bg-[#D4AF37] mx-auto rounded-full mb-6"></div>
                     <p className="text-neutral-500 font-light text-lg max-w-2xl mx-auto">
-                        La santé de nos convives est notre priorité. Consultez la liste des allergènes majeurs présents dans nos préparations. 
-                        <br/><span className="font-bold text-neutral-700">En cas d'allergie sévère, merci de le préciser impérativement lors de votre commande.</span>
+                        La santé de nos convives est notre priorité. Consultez la liste des allergènes majeurs présents dans nos préparations.
+                        <br /><span className="font-bold text-neutral-700">En cas d'allergie sévère, merci de le préciser impérativement lors de votre commande.</span>
                     </p>
                 </div>
 
@@ -194,7 +193,7 @@ function AllergenesContent() {
                 <div className="space-y-4">
                     {allergenMatrix.map((category) => (
                         <div key={category.id} id={`section-${category.id}`} className="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
-                            <button 
+                            <button
                                 onClick={() => toggleSection(category.id)}
                                 className="w-full px-6 py-5 flex items-center justify-between bg-white hover:bg-neutral-50 transition-colors"
                             >
@@ -206,7 +205,7 @@ function AllergenesContent() {
 
                             <AnimatePresence>
                                 {openSection === category.id && (
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ height: 0, opacity: 0 }}
                                         animate={{ height: "auto", opacity: 1 }}
                                         exit={{ height: 0, opacity: 0 }}
@@ -246,8 +245,8 @@ function AllergenesContent() {
                 </div>
 
                 <div className="mt-12 text-center pb-8">
-                    <button 
-                        onClick={() => router.back()} 
+                    <button
+                        onClick={() => router.back()}
                         className="inline-block bg-[#D4AF37] text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-black transition-colors shadow-lg"
                     >
                         Retour à la page précédente
