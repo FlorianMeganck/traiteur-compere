@@ -119,6 +119,7 @@ export default function PlatsPrepares() {
         };
         addToCart(item);
         setSelectedMeal(null);
+        window.dispatchEvent(new Event('open-cart-drawer'));
     };
 
     return (
@@ -138,116 +139,6 @@ export default function PlatsPrepares() {
                             <X size={16} />
                         </button>
                     </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Sticky Cart Button */}
-            <AnimatePresence>
-                {totalItems > 0 && (
-                    <motion.button
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        exit={{ scale: 0 }}
-                        onClick={() => setIsCartOpen(true)}
-                        className="fixed top-24 right-8 z-40 bg-[#D4AF37] text-white p-4 rounded-full shadow-2xl hover:bg-black transition-colors"
-                    >
-                        <div className="relative">
-                            <ShoppingCart size={28} />
-                            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full border-2 border-white">
-                                {totalItems}
-                            </span>
-                        </div>
-                    </motion.button>
-                )}
-            </AnimatePresence>
-
-            {/* Cart Side Drawer */}
-            <AnimatePresence>
-                {isCartOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsCartOpen(false)}
-                            className="fixed inset-0 bg-black/50 z-50"
-                        />
-                        <motion.div
-                            initial={{ x: "100%" }}
-                            animate={{ x: 0 }}
-                            exit={{ x: "100%" }}
-                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col"
-                        >
-                            <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-50">
-                                <h2 className="text-2xl font-serif text-black flex items-center gap-3">
-                                    <ShoppingCart className="text-[#D4AF37]" />
-                                    Votre Panier
-                                </h2>
-                                <button onClick={() => setIsCartOpen(false)} className="text-neutral-400 hover:text-black transition-colors">
-                                    <X size={24} />
-                                </button>
-                            </div>
-
-                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                                {cartItems.length === 0 ? (
-                                    <div className="text-center text-neutral-500 py-12">
-                                        <ShoppingCart className="mx-auto mb-4 opacity-50" size={48} />
-                                        <p>Votre panier est vide.</p>
-                                    </div>
-                                ) : (
-                                    cartItems.map((item) => (
-                                        <div key={item.id} className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm relative">
-                                            <button 
-                                                onClick={() => removeFromCart(item.id)}
-                                                className="absolute top-4 right-4 text-neutral-300 hover:text-red-500 transition-colors"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                            <div className="pr-8">
-                                                <h4 className="font-bold text-neutral-900 mb-1">{item.nomPlat}</h4>
-                                                <p className="text-sm text-[#D4AF37] font-medium capitalize mb-3">
-                                                    {item.jour} ({MENU_DATA.find(m => m.id === item.semaineId)?.week.split(' :')[0]})
-                                                </p>
-                                                
-                                                <div className="flex justify-between items-center text-sm mb-2">
-                                                    <span className="text-neutral-600">Quantité plat : <strong className="text-black">{item.quantitePlat}</strong></span>
-                                                    <span className="font-semibold">{item.prixUnitairePlat * item.quantitePlat} €</span>
-                                                </div>
-
-                                                {Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
-                                                    <div key={soupe} className="flex justify-between items-center text-sm text-neutral-500 mb-1 pl-4 border-l-2 border-[#D4AF37]/30">
-                                                        <span>+ {qty}x {soupe}</span>
-                                                        <span>{qty * item.prixUnitaireSoupe} €</span>
-                                                    </div>
-                                                ))}
-                                                
-                                                <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between items-center">
-                                                    <span className="text-xs uppercase tracking-widest text-neutral-400">Total ligne</span>
-                                                    <span className="font-bold text-lg text-black">{item.prixTotalLigne} €</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-
-                            {cartItems.length > 0 && (
-                                <div className="p-6 border-t border-neutral-100 bg-neutral-50">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <span className="text-lg text-neutral-600 uppercase tracking-widest">Total</span>
-                                        <span className="text-3xl font-serif text-[#D4AF37]">{cartTotal} €</span>
-                                    </div>
-                                    <Link 
-                                        href="/contact?type=plat_prepare" 
-                                        className="w-full bg-black text-white font-bold text-center py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-[#D4AF37] transition-colors"
-                                    >
-                                        Finaliser ma commande
-                                    </Link>
-                                </div>
-                            )}
-                        </motion.div>
-                    </>
                 )}
             </AnimatePresence>
 
@@ -620,7 +511,7 @@ export default function PlatsPrepares() {
                 >
                     <p className="text-neutral-500 italic mb-8 max-w-2xl mx-auto">
                         *Menu susceptible d'évoluer en fonction des arrivages et de la saisonnalité.<br />
-                        Pour toute question, n'hésitez pas à nous contacter au <strong className="text-black font-semibold">0476 86 54 07</strong>.
+                        Pour toute question, n'hésitez pas à nous contacter au <strong className="text-black font-semibold">+32 476 86 54 07</strong>.
                     </p>
                 </motion.div>
             </div>

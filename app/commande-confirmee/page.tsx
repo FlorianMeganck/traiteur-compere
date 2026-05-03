@@ -175,7 +175,7 @@ function CommandeConfirmeeContent() {
                                     </div>
                                     <div>
                                         <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Téléphone</p>
-                                        <p className="font-bold text-black text-lg">0476 86 54 07</p>
+                                        <p className="font-bold text-black text-lg">+32 476 86 54 07</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -184,13 +184,13 @@ function CommandeConfirmeeContent() {
                                     </div>
                                     <div>
                                         <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Adresse de retrait</p>
-                                        <p className="font-medium text-neutral-600">Rue de l'Atelier 27, 1480 Tubize</p>
+                                        <p className="font-medium text-neutral-600">Rue Potay 3, 4470 Saint-Georges-sur-Meuse<br/>Belgique</p>
                                     </div>
                                 </div>
                             </div>
                             <div className="h-48 rounded-xl overflow-hidden shadow-inner border border-neutral-200">
                                 <iframe 
-                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2524.898492212952!2d4.2084224!3d50.6938531!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c3ca1d2d3ec37b%3A0x6b8bc2138e072b22!2sRue%20de%20l&#39;Atelier%2027%2C%201480%20Tubize!5e0!3m2!1sfr!2sbe!4v1700000000000!5m2!1sfr!2sbe" 
+                                    src="https://www.google.com/maps?q=Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique&output=embed" 
                                     width="100%" 
                                     height="100%" 
                                     style={{border:0}} 
