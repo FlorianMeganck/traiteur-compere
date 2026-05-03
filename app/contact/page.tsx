@@ -2114,24 +2114,7 @@ function ContactForm() {
 
     const renderContactFields = () => (
         <>
-            {!isPlatPrepare && (
-                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 mb-8 max-w-lg mx-auto md:max-w-none">
-                    <div className="flex items-center gap-3 mb-2">
-                        <input
-                            type="checkbox"
-                            name="Location_Vaisselle_Check"
-                            id="Location_Vaisselle_Check"
-                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                            checked={formData.Location_Vaisselle_Check === "Oui"}
-                            onChange={handleChange}
-                        />
-                        <label htmlFor="Location_Vaisselle_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
-                            Location de vaisselle (+1,50€ / pers)
-                        </label>
-                    </div>
-                    <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
-                </div>
-            )}
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="group">
@@ -2295,6 +2278,25 @@ function ContactForm() {
                                 <div className="group">
                                     <label className={labelStyle}>Dites-nous en plus !</label>
                                     <textarea name="details_projet" value={formData.details_projet} onChange={handleChange} className={`${getInputStyle("details_projet")} h-32 resize-y`} placeholder="Allergies, précisions, déroulement..." />
+                                </div>
+                            )}
+
+                            {!isPlatPrepare && (
+                                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 mt-2 mb-6 max-w-lg mx-auto md:max-w-none">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <input
+                                            type="checkbox"
+                                            name="Location_Vaisselle_Check"
+                                            id="Location_Vaisselle_Check"
+                                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                                            checked={formData.Location_Vaisselle_Check === "Oui"}
+                                            onChange={handleChange}
+                                        />
+                                        <label htmlFor="Location_Vaisselle_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
+                                            Location de vaisselle (+1,50€ / pers)
+                                        </label>
+                                    </div>
+                                    <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
                                 </div>
                             )}
 

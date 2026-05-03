@@ -15,7 +15,7 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  title: "Traiteur Compère - L'Excellence du Goût",
+  title: "Traiteur Compère",
   description: "Traiteur haut de gamme pour mariages, banquets et événements d'entreprise à Saint-Georges-sur-Meuse.",
 };
 

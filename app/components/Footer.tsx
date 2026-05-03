@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Logo from "./Logo";
+import Image from "next/image";
 
 export default function Footer() {
     const pathname = usePathname();
@@ -13,8 +13,13 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
                     {/* Column 1: Identity */}
                     <div className="flex flex-col items-start gap-6">
-                        <div className="text-white">
-                            <Logo className="h-20 w-auto text-white" />
+                        <div className="text-white relative w-32 h-16 md:w-40 md:h-20">
+                            <Image
+                                src="/images/Logo_traiteur.png"
+                                alt="Traiteur Compère"
+                                fill
+                                className="object-contain"
+                            />
                         </div>
                         <p className="text-sm leading-relaxed font-light">
                             L&apos;art de recevoir avec passion. <br />
