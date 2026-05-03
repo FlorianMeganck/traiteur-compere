@@ -306,7 +306,7 @@ export default function Navbar() {
                             </div>
 
                             {cartItems.length > 0 && (
-                                <div className="p-6 pb-24 md:pb-6 border-t border-neutral-100 bg-neutral-50">
+                                <div className="p-6 pb-36 md:pb-6 border-t border-neutral-100 bg-neutral-50">
                                     <div className="flex justify-between items-center mb-6">
                                         <span className="text-lg text-neutral-600 uppercase tracking-widest">Total</span>
                                         <span className="text-3xl font-serif text-[#D4AF37]">{cartTotal} €</span>
