@@ -15,7 +15,7 @@ export default function Footer() {
                     <div className="flex flex-col items-start gap-6">
                         <div className="text-white relative w-32 h-16 md:w-40 md:h-20">
                             <Image
-                                src="/images/logo-2.png"
+                                src="/images/Logo-2.png"
                                 alt="Traiteur Compère"
                                 fill
                                 className="object-contain"
