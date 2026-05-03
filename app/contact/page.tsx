@@ -4,9 +4,10 @@ import { useState, useLayoutEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Leaf, Check } from "lucide-react";
+import { Users, Leaf, Check, ShoppingCart } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { MENU_DATA } from "../data/plats-prepares";
+import { useCart } from "../hooks/useCart";
 
 export default function Contact() {
     return (
@@ -342,13 +343,13 @@ function ContactForm() {
     const menuParam = searchParams.get('menu');
     const typeParam = searchParams.get('type');
     const isPlatPrepare = typeParam === 'plat_prepare';
-    const semaineParam = searchParams.get('semaine');
-    const jourParam = searchParams.get('jour');
+    const { cartItems, cartTotal, isLoaded, clearCart } = useCart();
 
-    const selectedPlat = isPlatPrepare && semaineParam && jourParam
-        ? MENU_DATA.find(m => m.id === semaineParam)?.days.find(d => d.day.toLowerCase() === jourParam.toLowerCase())
-        : null;
-    const selectedSoups = isPlatPrepare && semaineParam ? MENU_DATA.find(m => m.id === semaineParam)?.soups : [];
+    useLayoutEffect(() => {
+        if (isPlatPrepare && isLoaded && cartItems.length === 0) {
+            router.push('/plats-prepares');
+        }
+    }, [isPlatPrepare, isLoaded, cartItems.length, router]);
 
     // BBQ Types
     const isBBQClassique = menuParam === 'bbq_classique';
@@ -527,11 +528,7 @@ function ContactForm() {
     const calculateTotal = () => {
         if (isPlatUnique) return 14.5;
         if (isPlatPrepare) {
-            if (!selectedPlat) return 0;
-            const pricePlat = parseFloat(selectedPlat.price.replace(',', '.').replace(' €', ''));
-            const pricePotage = formData.Plat_Prepare_Potage !== "Non merci" ? 4 : 0;
-            const qty = parseInt(formData.Plat_Prepare_Quantite, 10) || 1;
-            return (pricePlat + pricePotage) * qty;
+            return cartTotal;
         }
         if (!isAnyBBQ && !isBuffetFroidMode && !isPains && !isZakouskis && !isVerrines && !isCollectivite) return 0;
 
@@ -1125,15 +1122,16 @@ function ContactForm() {
         try {
             if (isPlatPrepare) {
                 const apiPayload = {
-                    ...formData,
-                    Date: selectedPlat?.date || `${jourParam ? jourParam.charAt(0).toUpperCase() + jourParam.slice(1) : ''} - Semaine ${semaineParam?.replace('semaine-', '')}`,
-                    selectedPlat: selectedPlat?.meal,
-                    selectedPlatPrice: selectedPlat?.price,
-                    selectedPotage: formData.Plat_Prepare_Potage,
-                    quantite: formData.Plat_Prepare_Quantite,
-                    totalPrice: totalPrice,
-                    semaine: semaineParam,
-                    jour: jourParam,
+                    Nom: formData.Nom,
+                    Prenom: formData.Prenom,
+                    Mail: formData.Mail,
+                    Tel: formData.Tel,
+                    Societe: formData.Societe,
+                    Nom_Societe: formData.Nom_Societe,
+                    Date: new Date().toLocaleDateString('fr-BE'),
+                    details_projet: formData.details_projet,
+                    totalPrice: cartTotal,
+                    cartItems: cartItems,
                     captchaToken: captchaToken
                 };
 
@@ -1147,7 +1145,8 @@ function ContactForm() {
                 if (response.ok && result.success) {
                     setStatus("success");
                     setTimeout(() => {
-                        router.push(`/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&jour=${jourParam}&plat=${encodeURIComponent(selectedPlat?.meal || '')}&total=${totalPrice}`);
+                        clearCart();
+                        router.push(`/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}`);
                     }, 1000);
                 } else {
                     console.error("Erreur API Commande:", result);
@@ -2195,15 +2194,8 @@ function ContactForm() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {isPlatPrepare ? (
-                    <div className="group">
-                        <label className={labelStyle}>Jour de retrait</label>
-                        <div className="bg-neutral-50 px-5 py-4 rounded-xl border border-neutral-200 text-neutral-700 font-medium">
-                            Jour du retrait : <span className="font-bold text-[#D4AF37]">Le {getPickupDayPreview(jourParam)} après 11h</span>
-                        </div>
-                    </div>
-                ) : (
+            {!isPlatPrepare && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="group">
                         <label className={labelStyle}>Date <span className="text-red-500">*</span></label>
                         <input
@@ -2217,8 +2209,6 @@ function ContactForm() {
                             className={getInputStyle("Date")}
                         />
                     </div>
-                )}
-                {isPlatPrepare ? null : (
                     <div className="group">
                         <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
                         <div className="relative">
@@ -2230,66 +2220,13 @@ function ContactForm() {
                             </div>
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
         </>
     );
 
-    const renderPlatsPreparesFields = () => {
-        if (!isPlatPrepare || !selectedPlat) return null;
 
-        return (
-            <div className="space-y-8 animate-fade-in mt-8">
-                <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
-                    Votre commande de Plat Préparé
-                </h3>
-                {FormAllergenLink({ section: 'plats_prepares' })}
-
-                <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
-                    <div className="flex justify-between items-start mb-2">
-                        <div>
-                            <span className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest">{selectedPlat.day} - Semaine {semaineParam?.replace('semaine-', '')}</span>
-                            <h4 className="text-lg font-serif text-black mt-1">{selectedPlat.meal}</h4>
-                        </div>
-                        <span className="font-bold text-lg">{selectedPlat.price}</span>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="group">
-                        <label className={`${labelStyle} flex items-center gap-2`}>
-                            <span>🥣</span> Potage (+4,00 €)
-                        </label>
-                        <div className="relative">
-                            <select name="Plat_Prepare_Potage" value={formData.Plat_Prepare_Potage} onChange={handleChange} className={`${getInputStyle("Plat_Prepare_Potage")} appearance-none`}>
-                                <option value="Non merci">Non merci</option>
-                                {selectedSoups?.map(soup => <option key={soup} value={soup}>{soup}</option>)}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="group">
-                        <label className={`${labelStyle} flex items-center gap-2`}>
-                            <span>🔢</span> Quantité
-                        </label>
-                        <input
-                            type="number"
-                            min="1"
-                            name="Plat_Prepare_Quantite"
-                            value={formData.Plat_Prepare_Quantite}
-                            onChange={handleChange}
-                            className={getInputStyle("Plat_Prepare_Quantite")}
-                        />
-                        {errors.Plat_Prepare_Quantite && <p className="text-red-500 text-xs mt-1">{errors.Plat_Prepare_Quantite}</p>}
-                    </div>
-                </div>
-            </div>
-        );
-    };
 
     return (
         <main className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
@@ -2330,7 +2267,6 @@ function ContactForm() {
                         <form onSubmit={handleSubmit} className="space-y-8">
                             {showMenuFirst ? (
                                 <>
-                                    {isPlatPrepare && renderPlatsPreparesFields()}
                                     {isAnyBBQ && renderBBQComposition()}
                                     {isPlatUnique && renderPlatUniqueFields()}
                                     {isBuffetFroid && renderBuffetFroidFields()}
@@ -2373,9 +2309,40 @@ function ContactForm() {
                             )}
 
                             {isPlatPrepare && (
-                                <div className="bg-[#D4AF37]/10 p-6 rounded-2xl border border-[#D4AF37]/30 mt-6 text-center">
-                                    <p className="text-neutral-800 font-bold mb-2">Total de votre commande : {totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</p>
-                                    <p className="text-xs text-neutral-500 uppercase tracking-widest">Paiement par virement bancaire uniquement.</p>
+                                <div className="bg-white p-6 rounded-2xl border border-neutral-200 mt-6 shadow-sm">
+                                    <h3 className="text-xl font-serif text-black mb-4 flex items-center gap-2">
+                                        <ShoppingCart className="text-[#D4AF37]" size={20} /> Récapitulatif de votre panier
+                                    </h3>
+                                    <div className="overflow-x-auto mb-4">
+                                        <table className="w-full text-left text-sm text-neutral-600">
+                                            <thead className="bg-neutral-50 text-xs uppercase text-neutral-400">
+                                                <tr>
+                                                    <th className="px-4 py-3 rounded-tl-lg">Plat</th>
+                                                    <th className="px-4 py-3">Jour</th>
+                                                    <th className="px-4 py-3 text-center">Qte</th>
+                                                    <th className="px-4 py-3">Soupes</th>
+                                                    <th className="px-4 py-3 text-right rounded-tr-lg">S/Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {cartItems.map((item, idx) => (
+                                                    <tr key={idx} className="border-b border-neutral-100 last:border-0">
+                                                        <td className="px-4 py-3 font-medium text-black max-w-[200px] truncate" title={item.nomPlat}>{item.nomPlat}</td>
+                                                        <td className="px-4 py-3 capitalize">{item.jour}</td>
+                                                        <td className="px-4 py-3 text-center">{item.quantitePlat}</td>
+                                                        <td className="px-4 py-3">
+                                                            {Object.entries(item.soupes).map(([s, q]) => q > 0 ? <div key={s} className="text-xs">{q}x {s}</div> : null)}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-right font-bold whitespace-nowrap">{item.prixTotalLigne} €</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="bg-[#D4AF37]/10 p-4 rounded-xl border border-[#D4AF37]/30 text-center flex flex-col justify-center items-center gap-2">
+                                        <p className="text-neutral-800 font-bold text-lg">Total de votre commande : {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</p>
+                                        <p className="text-xs text-neutral-500 uppercase tracking-widest">Paiement par virement bancaire uniquement.</p>
+                                    </div>
                                 </div>
                             )}
 

@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { MENU_DATA } from '../../data/plats-prepares';
-import fs from 'fs';
-import path from 'path';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789'); // Dummy if missing to prevent crash on init
 
@@ -12,13 +10,16 @@ export async function POST(req: Request) {
 
         const {
             Nom, Prenom, Mail, Tel, Societe, Nom_Societe, Date,
-            selectedPlat, selectedPotage, quantite,
-            semaine, jour, details_projet, captchaToken
+            details_projet, captchaToken, cartItems
         } = data;
 
         // 1. Validation de base
-        if (!Nom || !Prenom || !Mail || !Tel || !semaine || !jour) {
+        if (!Nom || !Prenom || !Mail || !Tel) {
             return NextResponse.json({ success: false, error: 'Champs obligatoires manquants' }, { status: 400 });
+        }
+
+        if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+            return NextResponse.json({ success: false, error: 'Le panier est vide' }, { status: 400 });
         }
 
         // 1.5 Validation reCAPTCHA côté serveur
@@ -45,31 +46,64 @@ export async function POST(req: Request) {
         }
 
         // 2. Sécurité : Recalculer le prix côté serveur pour éviter la manipulation
-        const weekData = MENU_DATA.find(m => m.id === semaine);
-        const dayData = weekData?.days.find(d => d.day.toLowerCase() === jour.toLowerCase());
+        let finalTotalPrice = 0;
+        let htmlCartDetails = '';
 
-        if (!weekData || !dayData) {
-            return NextResponse.json({ success: false, error: 'Plat non trouvé' }, { status: 400 });
+        for (const item of cartItems) {
+            const weekData = MENU_DATA.find(m => m.id === item.semaineId);
+            const dayData = weekData?.days.find(d => d.day.toLowerCase() === item.jour.toLowerCase());
+
+            if (!weekData || !dayData) {
+                return NextResponse.json({ success: false, error: 'Un plat du panier est invalide ou expiré' }, { status: 400 });
+            }
+
+            const pricePlat = parseFloat(dayData.price.replace(',', '.').replace(' €', ''));
+            const pricePotage = 4;
+            
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const totalSoupes = Object.values(item.soupes).reduce((a: any, b: any) => a + (b as number), 0) as number;
+            
+            // Vérification de sécurité: totalSoupes <= quantitePlat
+            if (totalSoupes > item.quantitePlat) {
+                 return NextResponse.json({ success: false, error: 'Quantité de soupes invalide' }, { status: 400 });
+            }
+
+            const itemTotal = (pricePlat * item.quantitePlat) + (totalSoupes * pricePotage);
+            finalTotalPrice += itemTotal;
+
+            // Déterminer le jour de retrait
+            const getPickupDay = (j: string) => {
+                const day = j.toLowerCase();
+                if (day === 'lundi' || day === 'mardi') return 'Mardi après 11h';
+                if (day === 'mercredi' || day === 'jeudi') return 'Jeudi après 11h';
+                if (day === 'vendredi' || day === 'samedi') return 'Samedi après 11h';
+                return j;
+            };
+            const jourRetrait = getPickupDay(item.jour);
+
+            // Construire la liste des soupes
+            const soupesList = Object.entries(item.soupes)
+                .filter(([_, q]) => (q as number) > 0)
+                .map(([s, q]) => `${q}x ${s}`)
+                .join('<br/>');
+
+            htmlCartDetails += `
+                <tr>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+                        <strong>${dayData.meal}</strong><br/>
+                        <span style="color: #666; font-size: 12px;">${dayData.day} - ${weekData.week.split(' :')[0]}</span>
+                    </td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantitePlat}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px;">${soupesList || '-'}</td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px; color: #D4AF37;"><strong>${jourRetrait}</strong></td>
+                    <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;"><strong>${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
+                </tr>
+            `;
         }
-
-        const pricePlat = parseFloat(dayData.price.replace(',', '.').replace(' €', ''));
-        const pricePotage = selectedPotage && selectedPotage !== "Non merci" ? 4 : 0;
-        const parsedQty = parseInt(quantite, 10) || 1;
-        const finalTotalPrice = (pricePlat + pricePotage) * parsedQty;
 
         // Génère un numéro unique à 5 chiffres pour chaque commande
         const orderNumber = Math.floor(Math.random() * 90000) + 10000;
         const formattedOrderNumber = String(orderNumber);
-
-        // --- AJOUT : LOGIQUE DES JOURS DE RETRAIT ---
-        const getPickupDay = (j: string) => {
-            const day = j.toLowerCase();
-            if (day === 'lundi' || day === 'mardi') return 'le MARDI après 11h';
-            if (day === 'mercredi' || day === 'jeudi') return 'le JEUDI après 11h';
-            if (day === 'vendredi' || day === 'samedi') return 'le SAMEDI après 11h';
-            return j;
-        };
-        const jourRetrait = getPickupDay(jour);
 
         // Informations bancaires pour le client
         const IBAN = "BE22 0689 4683 8447";
@@ -77,31 +111,56 @@ export async function POST(req: Request) {
         const BENEFICIAIRE = "JEAN COMPERE";
         const COMMUNICATION = `COMMANDE #${formattedOrderNumber} ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`;
 
+        const cartTableHTML = `
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-family: sans-serif;">
+                <thead>
+                    <tr style="background-color: #f9f9f9;">
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Plat</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: center;">Qté</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Soupes</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Retrait</th>
+                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: right;">S/Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${htmlCartDetails}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" style="padding: 15px 10px; text-align: right; font-size: 16px;"><strong>TOTAL À PAYER :</strong></td>
+                        <td style="padding: 15px 10px; text-align: right; font-size: 18px; color: #D4AF37;"><strong>${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        `;
+
         // 3. Préparation et envoi des emails via Resend
-        // On n'envoie réellement que si une clé API valide est présente (pas la clé dummy)
         if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.startsWith('re_')) {
             try {
                 // Email au Traiteur
                 await resend.emails.send({
-                    from: 'Traiteur Compère <commande@traiteur-compere.be>', // Modifiez avec votre domaine vérifié si disponible (ex: commandes@traiteurcompere.be)
-                    to: process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com', // Mettre l'email du traiteur ici
+                    from: 'Traiteur Compère <commande@traiteur-compere.be>',
+                    to: process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com',
                     subject: `[COMMANDE #${formattedOrderNumber}] ${Nom} ${Prenom} - ${Date}`,
                     html: `
-                        <h2>Nouvelle commande de Plat Préparé (N° ${formattedOrderNumber})</h2>
-                        <p><strong>Client :</strong> ${Nom} ${Prenom}</p>
-                        <p><strong>Email :</strong> ${Mail}</p>
-                        <p><strong>Téléphone :</strong> ${Tel}</p>
-                        <p><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
-                        <p><strong>Date demandée :</strong> ${Date}</p>
-                        <p><strong>Jour de retrait prévu :</strong> ${jourRetrait} après 11h</p>
-                        <hr />
-                        <h3>Détails de la commande</h3>
-                        <p><strong>Plat sélectionné :</strong> ${dayData.meal} (${dayData.day} - ${weekData.week})</p>
-                        <p><strong>Potage :</strong> ${selectedPotage}</p>
-                        <p><strong>Quantité :</strong> ${parsedQty}</p>
-                        <p><strong>Total à payer :</strong> ${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</p>
-                        <hr />
-                        <p><strong>Commentaires supplémentaires :</strong><br/>${details_projet || 'Aucun'}</p>
+                        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                            <h2>Nouvelle commande de Plats Préparés (N° ${formattedOrderNumber})</h2>
+                            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                                <p style="margin: 5px 0;"><strong>Client :</strong> ${Nom} ${Prenom}</p>
+                                <p style="margin: 5px 0;"><strong>Email :</strong> ${Mail}</p>
+                                <p style="margin: 5px 0;"><strong>Téléphone :</strong> ${Tel}</p>
+                                <p style="margin: 5px 0;"><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
+                                <p style="margin: 5px 0;"><strong>Date de soumission :</strong> ${Date}</p>
+                            </div>
+                            
+                            <h3>Détail du panier</h3>
+                            ${cartTableHTML}
+                            
+                            ${details_projet ? `
+                            <div style="background: #fff8e1; padding: 15px; border-left: 4px solid #fbc02d; margin-top: 20px;">
+                                <p style="margin: 0;"><strong>Commentaires supplémentaires / Allergies :</strong><br/>${details_projet}</p>
+                            </div>` : ''}
+                        </div>
                     `
                 });
 
@@ -111,33 +170,28 @@ export async function POST(req: Request) {
                     to: Mail,
                     subject: `Confirmation de votre commande #${formattedOrderNumber} - Traiteur Compère`,
                     html: `
-                        <h2>Merci pour votre commande, ${Prenom} !</h2>
-                        <p>Votre demande a bien été enregistrée. Voici le récapitulatif de votre commande (<strong>N° ${formattedOrderNumber}</strong>) :</p>
-                        <ul>
-                            <li><strong>Plat :</strong> ${dayData.meal}</li>
-                            <li><strong>Potage :</strong> ${selectedPotage}</li>
-                            <li><strong>Quantité :</strong> ${parsedQty}</li>
-                            <li><strong>Date :</strong> ${Date}</li>
-                            <li style="color: #D4AF37;"><strong>Retrait de votre commande : ${jourRetrait} après 11h</strong></li>
-                        </ul>
-                        <p><strong>Montant total à régler : ${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></p>
-                        <br/>
-                        <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #D4AF37;">
-                            <h3>Informations de paiement</h3>
-                            <p>Toute commande doit être passée minimum 4 jours à l'avance et le paiement s'effectue par virement bancaire uniquement.</p>
-                            <p><strong>Bénéficiaire :</strong> ${BENEFICIAIRE}</p>
-                            <p><strong>IBAN :</strong> ${IBAN}</p>
-                            <p><strong>BIC :</strong> ${BIC}</p>
-                            <p><strong>Communication :</strong> ${COMMUNICATION}</p>
+                        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+                            <h2 style="color: #000;">Merci pour votre commande, ${Prenom} !</h2>
+                            <p>Votre demande a bien été enregistrée. Voici le récapitulatif de votre commande (<strong>N° ${formattedOrderNumber}</strong>) :</p>
+                            
+                            ${cartTableHTML}
+                            
+                            <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #D4AF37; border-radius: 0 8px 8px 0; margin-top: 30px;">
+                                <h3 style="margin-top: 0; color: #000;">Informations de paiement</h3>
+                                <p>Toute commande doit être passée minimum 4 jours à l'avance et le paiement s'effectue par virement bancaire uniquement.</p>
+                                <p style="margin: 5px 0;"><strong>Bénéficiaire :</strong> ${BENEFICIAIRE}</p>
+                                <p style="margin: 5px 0;"><strong>IBAN :</strong> ${IBAN}</p>
+                                <p style="margin: 5px 0;"><strong>BIC :</strong> ${BIC}</p>
+                                <p style="margin: 5px 0; color: #D4AF37; font-size: 16px;"><strong>Communication :</strong> ${COMMUNICATION}</p>
+                            </div>
+                            <p style="margin-top: 20px;">Votre commande sera définitivement confirmée à la réception du paiement.</p>
+                            <br/>
+                            <p>L'équipe Traiteur Compère</p>
                         </div>
-                        <p>Votre commande sera définitivement confirmée à la réception du paiement.</p>
-                        <br/>
-                        <p>L'équipe Traiteur Compère</p>
                     `
                 });
             } catch (emailError) {
                 console.error("Erreur d'envoi d'email Resend :", emailError);
-                // On peut décider de ne pas bloquer le flux client si l'email échoue, ou alors on renvoie une erreur
             }
         } else {
             console.log("Mode dev ou pas de clé Resend : Emails non envoyés. Voici ce qui aurait été envoyé :");
@@ -156,4 +210,3 @@ export async function POST(req: Request) {
         return NextResponse.json({ success: false, error: 'Erreur Serveur' }, { status: 500 });
     }
 }
-

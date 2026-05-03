@@ -2,14 +2,29 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed } from "lucide-react";
+import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
 
 import { MENU_DATA } from "../data/plats-prepares";
+import { useCart, CartItem } from "../hooks/useCart";
 
 export default function PlatsPrepares() {
-    // 1. On définit d'abord la logique de visibilité
+    const { cartItems, addToCart, removeFromCart, cartTotal, totalItems } = useCart();
+    
+    const [toastMessage, setToastMessage] = useState("");
+    const [isCartOpen, setIsCartOpen] = useState(false);
+
+    useEffect(() => {
+        const handleCartCleaned = () => {
+            setToastMessage("Certains plats de votre panier ne sont plus disponibles dans les délais et ont été retirés.");
+            setTimeout(() => setToastMessage(""), 5000);
+        };
+        window.addEventListener('cart-cleaned', handleCartCleaned);
+        return () => window.removeEventListener('cart-cleaned', handleCartCleaned);
+    }, []);
+
+    // 1. Logique de visibilité
     const isVisible = (dayName: string, weekId: string) => {
         const today = new Date();
         const pickupDates: Record<string, Record<string, Date>> = {
@@ -33,16 +48,329 @@ export default function PlatsPrepares() {
         return diffDays >= 2;
     };
 
-    // 2. On cherche la première semaine qui a encore au moins un plat visible
     const firstAvailableWeek = MENU_DATA.find(menu =>
         menu.days.some(dayItem => isVisible(dayItem.day, menu.id))
     )?.id || MENU_DATA[0].id;
 
-    // 3. On initialise l'onglet actif sur cette semaine
     const [activeTab, setActiveTab] = useState(firstAvailableWeek);
 
+    // ETAT MODALE D'AJOUT
+    const [selectedMeal, setSelectedMeal] = useState<{ weekId: string, day: string } | null>(null);
+    const [quantitePlat, setQuantitePlat] = useState(1);
+    const [soupes, setSoupes] = useState<Record<string, number>>({});
+
+    const handleOpenModal = (weekId: string, day: string, menuSoups: string[]) => {
+        setSelectedMeal({ weekId, day });
+        setQuantitePlat(1);
+        const initialSoupes: Record<string, number> = {};
+        menuSoups.forEach(s => initialSoupes[s] = 0);
+        setSoupes(initialSoupes);
+    };
+
+    const totalSoupes = Object.values(soupes).reduce((a, b) => a + b, 0);
+
+    const handleUpdatePlatQty = (delta: number) => {
+        setQuantitePlat(prev => {
+            const newVal = Math.max(1, prev + delta);
+            if (newVal < totalSoupes) {
+                let toRemove = totalSoupes - newVal;
+                const newSoupes = { ...soupes };
+                for (const s in newSoupes) {
+                    if (newSoupes[s] > 0 && toRemove > 0) {
+                        const reduction = Math.min(newSoupes[s], toRemove);
+                        newSoupes[s] -= reduction;
+                        toRemove -= reduction;
+                    }
+                }
+                setSoupes(newSoupes);
+            }
+            return newVal;
+        });
+    };
+
+    const handleUpdateSoupeQty = (soupe: string, delta: number) => {
+        setSoupes(prev => {
+            const current = prev[soupe] || 0;
+            const newVal = Math.max(0, current + delta);
+            const newTotal = totalSoupes - current + newVal;
+            if (newTotal > quantitePlat) return prev;
+            return { ...prev, [soupe]: newVal };
+        });
+    };
+
+    const handleAddToCart = () => {
+        if (!selectedMeal) return;
+        const week = MENU_DATA.find(m => m.id === selectedMeal.weekId);
+        const dayData = week?.days.find(d => d.day === selectedMeal.day);
+        if (!week || !dayData) return;
+
+        const pricePlat = parseFloat(dayData.price.replace(',', '.').replace(' €', ''));
+        const priceSoupe = 4;
+        const item: CartItem = {
+            id: `${week.id}-${dayData.day.toLowerCase()}`,
+            semaineId: week.id,
+            jour: dayData.day.toLowerCase(),
+            nomPlat: dayData.meal,
+            prixUnitairePlat: pricePlat,
+            quantitePlat: quantitePlat,
+            soupes: soupes,
+            prixUnitaireSoupe: priceSoupe,
+            prixTotalLigne: (pricePlat * quantitePlat) + (totalSoupes * priceSoupe)
+        };
+        addToCart(item);
+        setSelectedMeal(null);
+    };
+
     return (
-        <main className="min-h-screen bg-gray-50 pb-24">
+        <main className="min-h-screen bg-gray-50 pb-24 relative">
+            {/* Toast Notification */}
+            <AnimatePresence>
+                {toastMessage && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -50 }}
+                        className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-3"
+                    >
+                        <UtensilsCrossed size={18} />
+                        {toastMessage}
+                        <button onClick={() => setToastMessage("")} className="ml-2 hover:text-red-200">
+                            <X size={16} />
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Sticky Cart Button */}
+            <AnimatePresence>
+                {totalItems > 0 && (
+                    <motion.button
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                        onClick={() => setIsCartOpen(true)}
+                        className="fixed bottom-8 right-8 z-40 bg-[#D4AF37] text-white p-4 rounded-full shadow-2xl hover:bg-black transition-colors"
+                    >
+                        <div className="relative">
+                            <ShoppingCart size={28} />
+                            <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full border-2 border-white">
+                                {totalItems}
+                            </span>
+                        </div>
+                    </motion.button>
+                )}
+            </AnimatePresence>
+
+            {/* Cart Side Drawer */}
+            <AnimatePresence>
+                {isCartOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsCartOpen(false)}
+                            className="fixed inset-0 bg-black/50 z-50"
+                        />
+                        <motion.div
+                            initial={{ x: "100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col"
+                        >
+                            <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-50">
+                                <h2 className="text-2xl font-serif text-black flex items-center gap-3">
+                                    <ShoppingCart className="text-[#D4AF37]" />
+                                    Votre Panier
+                                </h2>
+                                <button onClick={() => setIsCartOpen(false)} className="text-neutral-400 hover:text-black transition-colors">
+                                    <X size={24} />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                {cartItems.length === 0 ? (
+                                    <div className="text-center text-neutral-500 py-12">
+                                        <ShoppingCart className="mx-auto mb-4 opacity-50" size={48} />
+                                        <p>Votre panier est vide.</p>
+                                    </div>
+                                ) : (
+                                    cartItems.map((item) => (
+                                        <div key={item.id} className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm relative">
+                                            <button 
+                                                onClick={() => removeFromCart(item.id)}
+                                                className="absolute top-4 right-4 text-neutral-300 hover:text-red-500 transition-colors"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                            <div className="pr-8">
+                                                <h4 className="font-bold text-neutral-900 mb-1">{item.nomPlat}</h4>
+                                                <p className="text-sm text-[#D4AF37] font-medium capitalize mb-3">
+                                                    {item.jour} ({MENU_DATA.find(m => m.id === item.semaineId)?.week.split(' :')[0]})
+                                                </p>
+                                                
+                                                <div className="flex justify-between items-center text-sm mb-2">
+                                                    <span className="text-neutral-600">Quantité plat : <strong className="text-black">{item.quantitePlat}</strong></span>
+                                                    <span className="font-semibold">{item.prixUnitairePlat * item.quantitePlat} €</span>
+                                                </div>
+
+                                                {Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
+                                                    <div key={soupe} className="flex justify-between items-center text-sm text-neutral-500 mb-1 pl-4 border-l-2 border-[#D4AF37]/30">
+                                                        <span>+ {qty}x {soupe}</span>
+                                                        <span>{qty * item.prixUnitaireSoupe} €</span>
+                                                    </div>
+                                                ))}
+                                                
+                                                <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between items-center">
+                                                    <span className="text-xs uppercase tracking-widest text-neutral-400">Total ligne</span>
+                                                    <span className="font-bold text-lg text-black">{item.prixTotalLigne} €</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+
+                            {cartItems.length > 0 && (
+                                <div className="p-6 border-t border-neutral-100 bg-neutral-50">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <span className="text-lg text-neutral-600 uppercase tracking-widest">Total</span>
+                                        <span className="text-3xl font-serif text-[#D4AF37]">{cartTotal} €</span>
+                                    </div>
+                                    <Link 
+                                        href="/contact?type=plat_prepare" 
+                                        className="w-full bg-black text-white font-bold text-center py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-[#D4AF37] transition-colors"
+                                    >
+                                        Finaliser ma commande
+                                    </Link>
+                                </div>
+                            )}
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
+            {/* Modal / Overlay de sélection de plat */}
+            <AnimatePresence>
+                {selectedMeal && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setSelectedMeal(null)}
+                            className="fixed inset-0 bg-black/60 z-50 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: 100, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 100, scale: 0.95 }}
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-3xl z-50 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                        >
+                            {(() => {
+                                const week = MENU_DATA.find(m => m.id === selectedMeal.weekId);
+                                const dayData = week?.days.find(d => d.day === selectedMeal.day);
+                                if (!week || !dayData) return null;
+
+                                return (
+                                    <>
+                                        <div className="p-6 md:p-8 border-b border-neutral-100 relative">
+                                            <button onClick={() => setSelectedMeal(null)} className="absolute top-6 right-6 text-neutral-400 hover:text-black bg-neutral-100 rounded-full p-2 transition-colors">
+                                                <X size={20} />
+                                            </button>
+                                            <span className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest bg-[#D4AF37]/10 px-3 py-1 rounded-full">
+                                                {dayData.date.charAt(0).toUpperCase() + dayData.date.slice(1).replace(/ 2026$/, '')}
+                                            </span>
+                                            <h3 className="text-2xl font-serif text-black mt-4 pr-12 leading-tight">
+                                                {dayData.meal}
+                                            </h3>
+                                            <p className="text-neutral-500 font-medium mt-2">{dayData.price}</p>
+                                        </div>
+
+                                        <div className="p-6 md:p-8 flex-1 overflow-y-auto space-y-8 bg-neutral-50">
+                                            {/* Quantité Plat */}
+                                            <div className="bg-white p-5 rounded-2xl shadow-sm border border-neutral-100">
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                        <h4 className="font-bold text-neutral-900">Quantité</h4>
+                                                        <p className="text-xs text-neutral-400 mt-1">Nombre de portions</p>
+                                                    </div>
+                                                    <div className="flex items-center gap-4 bg-neutral-50 rounded-xl p-1 border border-neutral-200">
+                                                        <button 
+                                                            onClick={() => handleUpdatePlatQty(-1)}
+                                                            className="w-10 h-10 flex items-center justify-center rounded-lg bg-white shadow-sm text-neutral-600 hover:text-black disabled:opacity-50"
+                                                            disabled={quantitePlat <= 1}
+                                                        >
+                                                            <Minus size={18} />
+                                                        </button>
+                                                        <span className="w-6 text-center font-bold text-lg">{quantitePlat}</span>
+                                                        <button 
+                                                            onClick={() => handleUpdatePlatQty(1)}
+                                                            className="w-10 h-10 flex items-center justify-center rounded-lg bg-white shadow-sm text-neutral-600 hover:text-black"
+                                                        >
+                                                            <Plus size={18} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Soupes */}
+                                            {quantitePlat > 0 && week.soups.length > 0 && (
+                                                <div className="bg-white p-5 rounded-2xl shadow-sm border border-neutral-100">
+                                                    <div className="mb-4">
+                                                        <h4 className="font-bold text-neutral-900 flex items-center gap-2">
+                                                            <UtensilsCrossed size={16} className="text-[#D4AF37]" />
+                                                            Accompagner d'un potage ?
+                                                        </h4>
+                                                        <p className="text-xs text-neutral-500 mt-1">4,00€/pc - Max {quantitePlat} potage(s) pour cette sélection.</p>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-3">
+                                                        {week.soups.map(soupe => (
+                                                            <div key={soupe} className="flex justify-between items-center p-3 rounded-xl hover:bg-neutral-50 transition-colors border border-transparent hover:border-neutral-100">
+                                                                <span className="text-sm font-medium text-neutral-700">{soupe}</span>
+                                                                <div className="flex items-center gap-3">
+                                                                    <button 
+                                                                        onClick={() => handleUpdateSoupeQty(soupe, -1)}
+                                                                        className="w-8 h-8 flex items-center justify-center rounded-full bg-neutral-100 text-neutral-500 hover:text-black hover:bg-neutral-200 disabled:opacity-50"
+                                                                        disabled={(soupes[soupe] || 0) <= 0}
+                                                                    >
+                                                                        <Minus size={14} />
+                                                                    </button>
+                                                                    <span className="w-4 text-center font-bold text-sm">{soupes[soupe] || 0}</span>
+                                                                    <button 
+                                                                        onClick={() => handleUpdateSoupeQty(soupe, 1)}
+                                                                        className="w-8 h-8 flex items-center justify-center rounded-full bg-neutral-100 text-neutral-500 hover:text-black hover:bg-neutral-200 disabled:opacity-50"
+                                                                        disabled={totalSoupes >= quantitePlat}
+                                                                    >
+                                                                        <Plus size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="p-6 md:p-8 bg-white border-t border-neutral-100">
+                                            <button 
+                                                onClick={handleAddToCart}
+                                                className="w-full bg-black text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-[#D4AF37] transition-colors"
+                                            >
+                                                <ShoppingCart size={20} />
+                                                Ajouter au panier - {((parseFloat(dayData.price.replace(',', '.').replace(' €', '')) * quantitePlat) + (totalSoupes * 4)).toLocaleString('fr-BE')} €
+                                            </button>
+                                        </div>
+                                    </>
+                                );
+                            })()}
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
             {/* HERO SECTION */}
             <section className="relative h-[60vh] min-h-[500px] flex items-center justify-center">
                 <div className="absolute inset-0">
@@ -113,11 +441,11 @@ export default function PlatsPrepares() {
                             </li>
                             <li className="flex items-start gap-4">
                                 <div className="bg-neutral-100 p-3 rounded-full text-[#D4AF37]">
-                                    <Mail size={20} />
+                                    <ShoppingCart size={20} />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-neutral-900 mb-1">2. Passez commande</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Passez commande via le formulaire ou par mail : <a href="mailto:traiteurcompere@gmail.com" className="text-[#D4AF37] hover:underline font-semibold">traiteurcompere@gmail.com</a></p>
+                                    <h3 className="font-bold text-neutral-900 mb-1">2. Ajoutez au panier</h3>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Sélectionnez vos plats et quantités directement sur cette page, puis validez votre panier pour accéder au formulaire de contact.</p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
@@ -240,13 +568,13 @@ export default function PlatsPrepares() {
                                                     menu.days
                                                         .filter(dayItem => isVisible(dayItem.day, menu.id))
                                                         .map((dayItem, idx) => (
-                                                            <Link
-                                                                href={`/contact?type=plat_prepare&semaine=${menu.id}&jour=${dayItem.day.toLowerCase()}`}
+                                                            <div
+                                                                onClick={() => handleOpenModal(menu.id, dayItem.day, menu.soups)}
                                                                 key={idx}
                                                                 className="flex flex-col justify-between p-6 rounded-2xl border border-neutral-100 hover:border-[#D4AF37] hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white group cursor-pointer relative overflow-hidden"
                                                             >
                                                                 <div className="absolute top-0 right-0 bg-[#D4AF37] text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                                    Commander
+                                                                    Ajouter au panier
                                                                 </div>
                                                                 <div>
                                                                     <h5 className="font-serif text-xl text-[#D4AF37] mb-2">
@@ -260,7 +588,7 @@ export default function PlatsPrepares() {
                                                                     <span className="text-xs text-neutral-400 uppercase tracking-widest">Prix unitaire</span>
                                                                     <span className="font-bold text-lg text-black">{dayItem.price}</span>
                                                                 </div>
-                                                            </Link>
+                                                            </div>
                                                         ))
                                                 ) : (
                                                     /* Message affiché quand la semaine est passée ou complète */
