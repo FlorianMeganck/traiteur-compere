@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { Sprout, Shell, Flower2, FlaskConical } from "lucide-react";
 
 // --- BASE DE DONNÉES DES ALLERGÈNES ---
 const ALLERGENES = {
@@ -13,15 +14,15 @@ const ALLERGENES = {
     OEU: { id: "OEU", name: "Œufs", image: "/allergene/oeuf.png", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
     POI: { id: "POI", name: "Poissons", image: "/allergene/poisson.png", color: "bg-blue-100 text-blue-800 border-blue-200" },
     ARA: { id: "ARA", name: "Arachides", image: "/allergene/arachide.png", color: "bg-stone-100 text-stone-800 border-stone-200" },
-    SOJ: { id: "SOJ", name: "Soja", color: "bg-green-100 text-green-800 border-green-200" },
+    SOJ: { id: "SOJ", name: "Soja", icon: Sprout, color: "bg-green-100 text-green-800 border-green-200" },
     LAI: { id: "LAI", name: "Lait (Lactose)", image: "/allergene/lait.png", color: "bg-cyan-100 text-cyan-800 border-cyan-200" },
     FRU: { id: "FRU", name: "Fruits à coque", image: "/allergene/amande.png", color: "bg-emerald-100 text-emerald-800 border-emerald-200" },
     CEL: { id: "CEL", name: "Céleri", image: "/allergene/celeri.png", color: "bg-lime-100 text-lime-800 border-lime-200" },
     MOU: { id: "MOU", name: "Moutarde", image: "/allergene/moutarde.png", color: "bg-yellow-200 text-yellow-900 border-yellow-300" },
     SES: { id: "SES", name: "Sésame", image: "/allergene/sesame.png", color: "bg-orange-50 text-orange-900 border-orange-200" },
-    SUL: { id: "SUL", name: "Sulfites", color: "bg-purple-100 text-purple-800 border-purple-200" },
-    LUP: { id: "LUP", name: "Lupin", color: "bg-rose-100 text-rose-800 border-rose-200" },
-    MOL: { id: "MOL", name: "Mollusques", color: "bg-slate-100 text-slate-800 border-slate-200" },
+    SUL: { id: "SUL", name: "Sulfites", icon: FlaskConical, color: "bg-purple-100 text-purple-800 border-purple-200" },
+    LUP: { id: "LUP", name: "Lupin", icon: Flower2, color: "bg-rose-100 text-rose-800 border-rose-200" },
+    MOL: { id: "MOL", name: "Mollusques", icon: Shell, color: "bg-slate-100 text-slate-800 border-slate-200" },
 };
 
 type ItemAllergens = { name: string; allergens: string[] };
@@ -177,9 +178,11 @@ function AllergenesContent() {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200 mb-10 flex flex-wrap gap-4 justify-center">
                     {Object.values(ALLERGENES).map(a => (
                         <div key={a.id} className="flex flex-col items-center gap-2">
-                            <div className={`w-12 h-12 rounded-full border ${a.color} flex items-center justify-center overflow-hidden bg-white`}>
+                            <div className={`w-12 h-12 rounded-full border ${a.color} flex items-center justify-center overflow-hidden`}>
                                 {(a as any).image ? (
                                     <Image src={(a as any).image} alt={a.name} width={32} height={32} className="object-contain" />
+                                ) : (a as any).icon ? (
+                                    <(a as any).icon size={24} strokeWidth={1.5} />
                                 ) : (
                                     <span className="text-[10px] font-bold">{a.id}</span>
                                 )}
@@ -223,6 +226,9 @@ function AllergenesContent() {
                                                                     <div key={alCode} className={`flex items-center gap-2 text-[10px] uppercase tracking-wider px-2 py-1 rounded border ${alInfo.color}`}>
                                                                         {(alInfo as any).image && (
                                                                             <Image src={(alInfo as any).image} alt={alInfo.name} width={16} height={16} className="object-contain" />
+                                                                        )}
+                                                                        {(alInfo as any).icon && (
+                                                                            <(alInfo as any).icon size={14} strokeWidth={1.5} />
                                                                         )}
                                                                         {alInfo.name}
                                                                     </div>
