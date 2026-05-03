@@ -190,7 +190,7 @@ function CommandeConfirmeeContent() {
                             </div>
                             <div className="h-48 rounded-xl overflow-hidden shadow-inner border border-neutral-200">
                                 <iframe 
-                                    src="https://www.google.com/maps?q=Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique&output=embed" 
+                                    src="https://www.google.com/maps?q=Traiteur+Compere,+Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique&output=embed" 
                                     width="100%" 
                                     height="100%" 
                                     style={{border:0}} 
