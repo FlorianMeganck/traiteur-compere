@@ -15,7 +15,7 @@ export default function Footer() {
                     <div className="flex flex-col items-start gap-6">
                         <div className="text-white relative w-32 h-16 md:w-40 md:h-20">
                             <Image
-                                src="/images/Logo_traiteur.png"
+                                src="public/images/Logo_traiteur.png"
                                 alt="Traiteur Compère"
                                 fill
                                 className="object-contain"
@@ -23,7 +23,7 @@ export default function Footer() {
                         </div>
                         <p className="text-sm leading-relaxed font-light">
                             L&apos;art de recevoir avec passion. <br />
-                            Votre traiteur d&apos;excellence.
+                            Votre traiteur à Saint-Georges-sur-Meuse.
                         </p>
                     </div>
 
@@ -61,10 +61,10 @@ export default function Footer() {
                     <div className="flex flex-col gap-6">
                         <h3 className="font-serif text-white text-lg tracking-widest uppercase">Informations</h3>
                         <div className="flex flex-col gap-3 text-sm">
-                            <FooterLink href="/mentions-legales" label="Mentions Légales" />
-                            <FooterLink href="/legal/confidentialite" label="Politique de Confidentialité" />
+                            <FooterLink href="/mentions-legales" label="Mentions légales" />
+                            <FooterLink href="/legal/confidentialite" label="Politique de confidentialité" />
                             <FooterLink href="/legal/cgv" label="CGV" />
-                            <FooterLink href={`/gestion-cookies?returnTo=${pathname}`} label="Gestion des Cookies" />
+                            <FooterLink href={`/gestion-cookies?returnTo=${pathname}`} label="Gestion des cookies" />
                         </div>
                     </div>
                 </div>
