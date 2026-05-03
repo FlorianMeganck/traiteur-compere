@@ -346,10 +346,10 @@ function ContactForm() {
     const { cartItems, cartTotal, isLoaded, clearCart } = useCart();
 
     useLayoutEffect(() => {
-        if (isPlatPrepare && isLoaded && cartItems.length === 0) {
+        if (isPlatPrepare && isLoaded && cartItems.length === 0 && status !== "success") {
             router.push('/plats-prepares');
         }
-    }, [isPlatPrepare, isLoaded, cartItems.length, router]);
+    }, [isPlatPrepare, isLoaded, cartItems.length, router, status]);
 
     // BBQ Types
     const isBBQClassique = menuParam === 'bbq_classique';
@@ -1144,10 +1144,10 @@ function ContactForm() {
                 const result = await response.json();
                 if (response.ok && result.success) {
                     setStatus("success");
+                    clearCart();
                     setTimeout(() => {
-                        clearCart();
-                        router.push(`/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}`);
-                    }, 1000);
+                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}`;
+                    }, 3000);
                 } else {
                     console.error("Erreur API Commande:", result);
                     alert("Une erreur est survenue lors de l'envoi. Veuillez réessayer.");
@@ -2258,7 +2258,7 @@ function ContactForm() {
                                 <div className="inline-block bg-neutral-100 px-6 py-3 rounded-full border border-neutral-200">
                                     <p className="text-sm text-neutral-500 font-medium animate-pulse flex items-center gap-2">
                                         <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></span>
-                                        Redirection vers l&apos;accueil dans 3 secondes...
+                                        {isPlatPrepare ? "Redirection vers le paiement dans 3 secondes..." : "Redirection vers l'accueil dans 3 secondes..."}
                                     </p>
                                 </div>
                             </div>
