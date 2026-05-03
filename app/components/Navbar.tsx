@@ -250,7 +250,7 @@ export default function Navbar() {
                             animate={{ x: 0 }}
                             exit={{ x: "100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 h-screen w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
+                            className="fixed top-0 right-0 h-[100dvh] w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
                         >
                             <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-50">
                                 <h2 className="text-2xl font-serif text-black flex items-center gap-3">
@@ -262,7 +262,7 @@ export default function Navbar() {
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 pb-12 space-y-6">
                                 {cartItems.length === 0 ? (
                                     <div className="text-center text-neutral-500 py-12">
                                         <ShoppingCart className="mx-auto mb-4 opacity-50" size={48} />
@@ -306,7 +306,7 @@ export default function Navbar() {
                             </div>
 
                             {cartItems.length > 0 && (
-                                <div className="p-6 pb-36 md:pb-6 border-t border-neutral-100 bg-neutral-50">
+                                <div className="p-6 pb-20 md:pb-6 border-t border-neutral-100 bg-neutral-50">
                                     <div className="flex justify-between items-center mb-6">
                                         <span className="text-lg text-neutral-600 uppercase tracking-widest">Total</span>
                                         <span className="text-3xl font-serif text-[#D4AF37]">{cartTotal} €</span>
