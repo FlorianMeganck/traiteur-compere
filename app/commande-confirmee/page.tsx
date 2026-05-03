@@ -13,7 +13,7 @@ function CommandeConfirmeeContent() {
     const prenom = searchParams.get('prenom') || "";
     const orderId = searchParams.get('orderId') || "";
     const jour = searchParams.get('jour') || "";
-    const plat = searchParams.get('plat') || "votre commande";
+    const joursParam = searchParams.get('jours') || "";
     const total = searchParams.get('total') || "0";
 
     const qrRef = useRef<HTMLDivElement>(null);
@@ -24,9 +24,17 @@ function CommandeConfirmeeContent() {
         if (d === 'lundi' || d === 'mardi') return 'Mardi';
         if (d === 'mercredi' || d === 'jeudi') return 'Jeudi';
         if (d === 'vendredi' || d === 'samedi') return 'Samedi';
-        return null;
+        return j;
     };
-    const jourRetrait = getPickupDay(jour);
+    
+    let joursRetraitText = "À confirmer";
+    if (joursParam) {
+        const joursList = joursParam.split(',');
+        const pickupDays = Array.from(new Set(joursList.map(getPickupDay)));
+        joursRetraitText = pickupDays.join(', ');
+    } else if (jour) {
+        joursRetraitText = getPickupDay(jour) || "À confirmer";
+    }
 
     // Informations bancaires pour la génération du QR Code (à adapter)
     const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE22 0689 4683 8447";
@@ -82,10 +90,10 @@ function CommandeConfirmeeContent() {
                         <Check className="w-12 h-12 text-green-600" strokeWidth={4} />
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Commande Confirmée</h1>
+                    <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Commande #{orderId}</h1>
 
                     <p className="text-neutral-600 text-lg mb-8 max-w-2xl mx-auto">
-                        Merci <span className="font-bold text-black">{prenom} {nom}</span>, votre commande pour <strong className="text-[#D4AF37] font-serif">{plat}</strong> a bien été enregistrée.
+                        Merci <span className="font-bold text-black">{prenom} {nom}</span>, votre commande a bien été enregistrée.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch mb-10 text-left">
@@ -113,7 +121,7 @@ function CommandeConfirmeeContent() {
                                         <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Jour de retrait</span>
                                         <span className="font-bold text-black flex items-center gap-2">
                                             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                            {jourRetrait ? `Le ${jourRetrait} après 11h` : "À confirmer"}
+                                            {joursRetraitText !== "À confirmer" ? `Le(s) ${joursRetraitText} après 11h` : "À confirmer"}
                                         </span>
                                     </div>
                                 </div>
@@ -150,6 +158,47 @@ function CommandeConfirmeeContent() {
                                 <Download size={14} />
                                 Télécharger le QR Code
                             </button>
+                        </div>
+                    </div>
+
+                    {/* Bloc Infos Pratiques */}
+                    <div className="mt-10 mb-10 bg-white p-8 rounded-2xl border border-neutral-200 text-left">
+                        <h3 className="text-xl font-bold uppercase tracking-widest text-neutral-800 mb-6 flex items-center gap-2">
+                            <span className="w-6 h-1 bg-black"></span>
+                            Infos pratiques
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center text-[#D4AF37] shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Téléphone</p>
+                                        <p className="font-bold text-black text-lg">0476 86 54 07</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center text-[#D4AF37] shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Adresse de retrait</p>
+                                        <p className="font-medium text-neutral-600">Rue de l'Atelier 27, 1480 Tubize</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="h-48 rounded-xl overflow-hidden shadow-inner border border-neutral-200">
+                                <iframe 
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2524.898492212952!2d4.2084224!3d50.6938531!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c3ca1d2d3ec37b%3A0x6b8bc2138e072b22!2sRue%20de%20l&#39;Atelier%2027%2C%201480%20Tubize!5e0!3m2!1sfr!2sbe!4v1700000000000!5m2!1sfr!2sbe" 
+                                    width="100%" 
+                                    height="100%" 
+                                    style={{border:0}} 
+                                    allowFullScreen={false} 
+                                    loading="lazy" 
+                                    referrerPolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
                         </div>
                     </div>
 

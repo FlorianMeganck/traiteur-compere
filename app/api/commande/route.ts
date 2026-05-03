@@ -177,6 +177,13 @@ export async function POST(req: Request) {
                             ${cartTableHTML}
                             
                             <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #D4AF37; border-radius: 0 8px 8px 0; margin-top: 30px;">
+                                <h3 style="margin-top: 0; color: #000;">Infos pratiques</h3>
+                                <p style="margin: 5px 0;"><strong>📞 Téléphone :</strong> 0476 86 54 07</p>
+                                <p style="margin: 5px 0;"><strong>📍 Adresse de retrait :</strong> Rue de l'Atelier 27, 1480 Tubize</p>
+                                <p style="margin: 5px 0;"><a href="https://maps.google.com/?q=Rue+de+l'Atelier+27,+1480+Tubize" style="color: #D4AF37; text-decoration: none; font-weight: bold;">🗺️ Voir sur Google Maps</a></p>
+                            </div>
+                            
+                            <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #D4AF37; border-radius: 0 8px 8px 0; margin-top: 20px;">
                                 <h3 style="margin-top: 0; color: #000;">Informations de paiement</h3>
                                 <p>Toute commande doit être passée minimum 4 jours à l'avance et le paiement s'effectue par virement bancaire uniquement.</p>
                                 <p style="margin: 5px 0;"><strong>Bénéficiaire :</strong> ${BENEFICIAIRE}</p>

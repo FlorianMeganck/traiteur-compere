@@ -1144,9 +1144,10 @@ function ContactForm() {
                 const result = await response.json();
                 if (response.ok && result.success) {
                     setStatus("success");
+                    const joursUniques = Array.from(new Set(cartItems.map(item => item.jour))).join(',');
                     clearCart();
                     setTimeout(() => {
-                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}`;
+                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}&jours=${encodeURIComponent(joursUniques)}`;
                     }, 3000);
                 } else {
                     console.error("Erreur API Commande:", result);

@@ -149,7 +149,7 @@ export default function PlatsPrepares() {
                         animate={{ scale: 1 }}
                         exit={{ scale: 0 }}
                         onClick={() => setIsCartOpen(true)}
-                        className="fixed bottom-8 right-8 z-40 bg-[#D4AF37] text-white p-4 rounded-full shadow-2xl hover:bg-black transition-colors"
+                        className="fixed top-24 right-8 z-40 bg-[#D4AF37] text-white p-4 rounded-full shadow-2xl hover:bg-black transition-colors"
                     >
                         <div className="relative">
                             <ShoppingCart size={28} />
