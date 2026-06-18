@@ -122,7 +122,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
     id: string;
     description: string;
     composition: string[];
-    basePrice: number;
+    smallPrice: number;
+    mediumPrice: number;
     image: string;
 }> = {
     campagnard: {
@@ -135,7 +136,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Salades de pommes de terre",
             "Crudités variées et œuf dur"
         ],
-        basePrice: 13,
+        smallPrice: 17,
+        mediumPrice: 14,
         image: '/images/buffet_campagnard.jpeg'
     },
     ardenais: {
@@ -148,7 +150,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Rôti de porc froid moutardé",
             "Salades et féculents"
         ],
-        basePrice: 15,
+        smallPrice: 17,
+        mediumPrice: 15,
         image: '/images/buffet_ardennais.jpeg'
     },
     reception: {
@@ -161,7 +164,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Assortiment de viandes froides nobles",
             "Salades raffinées"
         ],
-        basePrice: 18,
+        smallPrice: 20,
+        mediumPrice: 18,
         image: '/images/buffet_reception.jpeg'
     },
     gala: {
@@ -174,7 +178,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Médaillon de saumon en belle-vue",
             "Salades prestige"
         ],
-        basePrice: 22,
+        smallPrice: 24,
+        mediumPrice: 22,
         image: '/images/buffet_gala.jpeg'
     }
 };
@@ -540,7 +545,7 @@ export default function Formules() {
                                             className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                                         >
                                             <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 25 pers.</p>
-                                            <p className="text-xl font-bold text-neutral-800 font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice + 2}€ <span className="text-sm font-normal text-neutral-500 font-sans">/ pers HTVA</span></p>
+                                            <p className="text-xl font-bold text-neutral-800 font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].smallPrice}€ <span className="text-sm font-normal text-neutral-500 font-sans">/ pers HTVA</span></p>
                                         </Link>
 
                                         <Link
@@ -549,7 +554,7 @@ export default function Formules() {
                                         >
                                             <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
                                             <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 250 pers.</p>
-                                            <p className="text-2xl font-bold text-white font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].basePrice}€ <span className="text-sm font-normal text-neutral-300 font-sans">/ pers HTVA</span></p>
+                                            <p className="text-2xl font-bold text-white font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].mediumPrice}€ <span className="text-sm font-normal text-neutral-300 font-sans">/ pers HTVA</span></p>
                                         </Link>
 
                                         <Link

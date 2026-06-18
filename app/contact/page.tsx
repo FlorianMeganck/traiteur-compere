@@ -79,7 +79,7 @@ const SIDES_COLD = ["Salade de Pâtes Pesto", "Salade de Pâtes Curry", "Salade 
 const feculentsBBQ = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Baguette", "Petit pain"];
 
 const BUFFET_FROID_PRICES: Record<string, { small: number; medium: number }> = {
-    buffet_campagnard: { small: 15, medium: 13 },
+    buffet_campagnard: { small: 17, medium: 14 },
     buffet_ardenais: { small: 17, medium: 15 },
     buffet_reception: { small: 20, medium: 18 },
     buffet_gala: { small: 24, medium: 22 }
@@ -301,8 +301,6 @@ const isValidPhone = (phone: string) => {
     return true;
 };
 
-// ... component starts ...
-
 function ContactForm() {
     const router = useRouter();
     const getPickupDayPreview = (j: string | null) => {
@@ -318,6 +316,103 @@ function ContactForm() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const [isStarted, setIsStarted] = useState(false);
+
+    // Initial state setup without referencing TDZ variables
+    const [formData, setFormData] = useState({
+        Prenom: "",
+        Nom: "",
+        Societe: "Non",
+        Nom_Societe: "",
+        Mail: "",
+        Tel: "",
+        Type_Evenement: "Mariage",
+        type_autre: "",
+        Date: "",
+        Nombre_Convives: "", // Set dynamically in useLayoutEffect to prevent TDZ issues
+        details_projet: "",
+        Souhaite_etre_recontacte: "Non",
+
+        // Plats Préparés
+        Plat_Prepare_Potage: "Non merci",
+        Plat_Prepare_Quantite: "1",
+
+        // Dynamic Fields
+        Viande_1: "",
+        Viande_2: "",
+        Viande_3: "",
+        compose_entree_1: "",
+        compose_entree_2: "",
+        dinatoire_service_1: "",
+        dinatoire_service_2: "",
+        Supplement_Viande_1: "",
+        Supplement_Viande_2: "",
+        Supplement_Viande_3: "",
+        Viande_Extra_1: "",
+        Viande_Extra_2: "",
+        Accompagnement_Froid_1: "",
+        Accompagnement_Froid_2: "",
+        Accompagnement_Froid_3: "",
+        Accompagnement_Chaud: "",
+        Accompagnement_Chaud_Supplement: "",
+        Accompagnement_Chaud_Supplement_Check: "Non",
+        Feculent: "",
+        Feculent_Extra: "",
+        Suppl_Crudite_Extra: "",
+        Dessert_Check: "Non",
+        Dessert_Choix: "",
+        Location_Vaisselle_Check: "Non",
+        plat_1: "",
+        plat_2: "",
+        plat_3: "",
+        plat_4: "",
+        plat_5: "",
+        plat_6: "",
+        salade_1: "",
+        salade_2: "",
+        Plat_Associatif: "",
+        Plat_Associatif_Detail: "",
+        Feculent_Froid: "",
+        Crudite_1: "",
+        Crudite_2: "",
+        Crudite_3: "",
+        Crudite_4: "",
+        Crudite_5: "",
+        Crudite_6: "",
+        Suppl_Crudite_1: "",
+        Suppl_Crudite_2: "",
+        Suppl_Crudite_3: "",
+        Categorie_Pains: "",
+        Quantite_Pains: "",
+        Zakouski_Cat_1: "", Zakouski_Item_1: "",
+        Zakouski_Cat_2: "", Zakouski_Item_2: "",
+        Zakouski_Cat_3: "", Zakouski_Item_3: "",
+        Zakouski_Cat_4: "", Zakouski_Item_4: "",
+        Zakouski_Cat_5: "", Zakouski_Item_5: "",
+        Zakouski_Cat_6: "", Zakouski_Item_6: "",
+        Zakouski_Cat_7: "", Zakouski_Item_7: "",
+        Zakouski_Cat_8: "", Zakouski_Item_8: "",
+        Zakouski_Cat_9: "", Zakouski_Item_9: "",
+        Zakouski_Cat_10: "", Zakouski_Item_10: "",
+        Format_Verrines: "",
+        Verrine_Cat_1: "", Verrine_Item_1: "",
+        Verrine_Cat_2: "", Verrine_Item_2: "",
+        Verrine_Cat_3: "", Verrine_Item_3: "",
+        Verrine_Cat_4: "", Verrine_Item_4: "",
+        Verrine_Cat_5: "", Verrine_Item_5: "",
+        Verrine_Cat_6: "", Verrine_Item_6: "",
+        Verrine_Cat_7: "", Verrine_Item_7: "",
+        Verrine_Cat_8: "", Verrine_Item_8: "",
+        Verrine_Cat_9: "", Verrine_Item_9: "",
+        Verrine_Cat_10: "", Verrine_Item_10: "",
+        Plat_Collectivite: "",
+        Buffet_Chaud_Services: "3",
+        Buffet_Chaud_Commentaires: "",
+        Buffet_Chaud_Zakouskis: "",
+        Buffet_Chaud_Entree_1: "",
+        Buffet_Chaud_Entree_2: "",
+        Buffet_Chaud_Plat: "",
+        Buffet_Chaud_Dessert: ""
+    });
 
     const handleFormStart = () => {
         if (!isStarted) {
@@ -339,17 +434,10 @@ function ContactForm() {
         </div>
     );
 
-    // --- MENU CONTEXT ---
+    // --- MENU CONTEXT & PARAMETERS ---
     const menuParam = searchParams.get('menu');
     const typeParam = searchParams.get('type');
-    const isPlatPrepare = typeParam === 'plat_prepare';
     const { cartItems, cartTotal, isLoaded, clearCart } = useCart();
-
-    useLayoutEffect(() => {
-        if (isPlatPrepare && isLoaded && cartItems.length === 0 && status !== "success") {
-            router.push('/plats-prepares');
-        }
-    }, [isPlatPrepare, isLoaded, cartItems.length, router, status]);
 
     // BBQ Types
     const isBBQClassique = menuParam === 'bbq_classique';
@@ -377,14 +465,24 @@ function ContactForm() {
     const isZakouskisMode = menuParam === 'zakouskis';
     const isVerrinesMode = menuParam === 'verrines';
     const isCollectiviteMode = menuParam === 'collectivite' || searchParams.get('formule') === 'collectivite';
+    const isBuffetChaudMode = searchParams.get('formule') === 'buffet-chaud';
+    const isPlatPrepare = typeParam === 'plat_prepare';
 
-    const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || searchParams.get('formule') === 'buffet-chaud';
+    const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || isBuffetChaudMode;
     const showMenuFirst = isCustomMode;
 
-    const getInitialConvivesOptions = () => {
+    // State-dependent booleans
+    const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
+    const isPains = formData.Type_Evenement === 'Petits pains';
+    const isZakouskis = formData.Type_Evenement === 'Zakouskis';
+    const isVerrines = formData.Type_Evenement === 'Verrines';
+    const isCollectivite = formData.Type_Evenement === 'Repas de collectivité';
+    const isBuffetChaud = formData.Type_Evenement === 'Buffet Chaud';
+
+    const getInitialConvivesOptions = (currentType?: string) => {
         if (isCochonOrPorchetta) return OPTIONS_COCHON;
         if (isAnyBBQ || isBuffetFroidMode) return OPTIONS_BBQ;
-        if (isBuffet || isBuffetChaud) return OPTIONS_BUFFET;
+        if (isBuffet || currentType === 'Buffet Chaud' || isBuffetChaudMode) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
         if (isPainsMode || isZakouskisMode || isVerrinesMode) return OPTIONS_PAINS;
@@ -392,138 +490,129 @@ function ContactForm() {
         return OPTIONS_STANDARD;
     };
 
-    const [formData, setFormData] = useState({
-        Prenom: "",
-        Nom: "",
-        Societe: "Non",
-        Nom_Societe: "",
-        Mail: "",
-        Tel: "",
-        Type_Evenement: "Mariage",
-        type_autre: "",
-        Date: "",
-        Nombre_Convives: getInitialConvivesOptions()[0],
-        details_projet: "",
-        Souhaite_etre_recontacte: "Non",
+    // --- HOOKS DEPENDING ON DECLARED MODE VARIABLES ---
+    useLayoutEffect(() => {
+        if (isPlatPrepare && isLoaded && cartItems.length === 0 && status !== "success") {
+            router.push('/plats-prepares');
+        }
+    }, [isPlatPrepare, isLoaded, cartItems.length, router, status]);
 
-        // Plats Préparés
-        Plat_Prepare_Potage: "Non merci",
-        Plat_Prepare_Quantite: "1",
+    // EFFECT: Handle URL params & Default Selection
+    useLayoutEffect(() => {
+        if (typeof window !== 'undefined') window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
-        // Dynamic Fields
-        // BBQ Standard / Nobles / Vege / Mer (3 choices usually)
-        Viande_1: "",
-        Viande_2: "",
-        Viande_3: "",
+        const menuParam = searchParams.get('menu');
+        const convivesParam = searchParams.get('convives');
 
-        // Compose (2 Entrées + 2 Plats)
-        compose_entree_1: "",
-        compose_entree_2: "",
+        setFormData(prev => {
+            const newData = { ...prev };
 
-        // Dinatoire (1 Service + BBQ selection)
-        dinatoire_service_1: "",
-        dinatoire_service_2: "",
-        // dinatoire bbq choices reuse Viande_1 & 2
+            // 1. Pré-sélection du type d'événement / Menu
+            if (menuParam) {
+                if (menuParam.startsWith('bbq_')) {
+                    const type = menuParam.replace('bbq_', '');
+                    newData.Type_Evenement = `Barbecue ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                } else if (menuParam === 'buffet_campagnard') {
+                    newData.Type_Evenement = 'Buffet Froid Campagnard';
+                } else if (menuParam === 'buffet_ardenais') {
+                    newData.Type_Evenement = 'Buffet Froid Ardenais';
+                } else if (menuParam === 'buffet_reception') {
+                    newData.Type_Evenement = 'Buffet Froid Réception';
+                } else if (menuParam === 'buffet_gala') {
+                    newData.Type_Evenement = 'Buffet Froid Gala';
+                } else if (menuParam === 'ardennais') {
+                    newData.Type_Evenement = 'Buffet Ardennais';
+                } else if (menuParam === 'gala') {
+                    newData.Type_Evenement = 'Buffet de Gala';
+                } else if (menuParam === 'associations') {
+                    newData.Type_Evenement = 'Associations';
+                } else if (menuParam === 'plat_unique') {
+                    newData.Type_Evenement = 'Plat Unique / Associatif';
+                } else if (menuParam === 'pains_garnis') {
+                    newData.Type_Evenement = 'Petits pains';
+                } else if (menuParam === 'zakouskis') {
+                    newData.Type_Evenement = 'Zakouskis';
+                } else if (menuParam === 'verrines') {
+                    newData.Type_Evenement = 'Verrines';
+                } else if (menuParam === 'collectivite') {
+                    newData.Type_Evenement = 'Repas de collectivité';
+                }
+            } else if (typeParam === 'plat_prepare') {
+                newData.Type_Evenement = 'Plat Préparé';
+            }
 
-        // Supplements Cascade
-        Supplement_Viande_1: "",
-        Supplement_Viande_2: "",
-        Supplement_Viande_3: "",
-        Viande_Extra_1: "",
-        Viande_Extra_2: "",
+            const formuleParam = searchParams.get('formule');
+            const servicesParam = searchParams.get('services');
 
-        // Accompaniments
-        Accompagnement_Froid_1: "",
-        Accompagnement_Froid_2: "",
-        Accompagnement_Froid_3: "",
-        Accompagnement_Chaud: "",
-        Accompagnement_Chaud_Supplement: "",
-        Accompagnement_Chaud_Supplement_Check: "Non",
-        Feculent: "",
-        Feculent_Extra: "",
-        Suppl_Crudite_Extra: "",
+            if (formuleParam === 'buffet-chaud') {
+                newData.Type_Evenement = 'Buffet Chaud';
+                if (servicesParam) {
+                    newData.Buffet_Chaud_Services = servicesParam;
+                }
+            } else if (formuleParam === 'collectivite') {
+                newData.Type_Evenement = 'Repas de collectivité';
+                const groupeParam = searchParams.get('groupe');
+                if (groupeParam === 'petit') newData.Nombre_Convives = "Moins de 30";
+                else if (groupeParam === 'standard') newData.Nombre_Convives = "30 à 100";
+                else if (groupeParam === 'grand') newData.Nombre_Convives = "Plus de 100";
+            }
 
-        // Desserts
-        Dessert_Check: "Non",
-        Dessert_Choix: "",
+            // 2. Pré-sélection du Nombre de Convives (NOUVEAU)
+            if (convivesParam) {
+                // Nettoyage de la chaîne (ex: "25 à 250 pers." -> "25 a 250")
+                const safeParam = decodeURIComponent(convivesParam).toLowerCase();
 
-        // Vaisselle
-        Location_Vaisselle_Check: "Non",
+                // Détection intelligente selon les mots-clés
+                if (safeParam.includes('moins') && (safeParam.includes('20') || safeParam.includes('25') || safeParam.includes('30') || safeParam.includes('40') || safeParam.includes('50'))) {
+                    // Check specific menus restrictions first
+                    if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
+                    else if (isAnyBBQ || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 25";
+                    else if (isCollectiviteMode) newData.Nombre_Convives = "Moins de 30";
+                    else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
+                    else if (isPainsMode || isZakouskisMode || isVerrinesMode) newData.Nombre_Convives = "Moins de 25";
+                    else if (isBuffet) newData.Nombre_Convives = "Moins de 40";
+                    else newData.Nombre_Convives = "Moins de 20";
+                } else if (safeParam.includes('100') && safeParam.includes('200')) {
+                    newData.Nombre_Convives = "100 à 200";
+                } else if (safeParam.includes('25') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "25 à 100";
+                } else if (safeParam.includes('plus') && safeParam.includes('250')) {
+                    newData.Nombre_Convives = "Plus de 250";
+                } else if (safeParam.includes('plus') && safeParam.includes('200')) {
+                    newData.Nombre_Convives = "Plus de 200";
+                } else if (safeParam.includes('plus') && safeParam.includes('180')) {
+                    newData.Nombre_Convives = "Plus de 180";
+                } else if (safeParam.includes('plus') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "Plus de 100";
+                } else if (safeParam.includes('25') && safeParam.includes('180')) {
+                    newData.Nombre_Convives = "25 à 180";
+                } else if (safeParam.includes('25') && safeParam.includes('250')) {
+                    newData.Nombre_Convives = "25 à 250";
+                } else if (safeParam.includes('50') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "50 à 100";
+                } else if (safeParam.includes('20') && safeParam.includes('50')) {
+                    newData.Nombre_Convives = "20 à 50";
+                } else if (safeParam.includes('50') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "50 à 100";
+                } else if (safeParam.includes('moins') && safeParam.includes('50')) {
+                    newData.Nombre_Convives = "Moins de 50";
+                } else if (safeParam.includes('plus') && safeParam.includes('100')) {
+                    newData.Nombre_Convives = "Plus de 100";
+                } else {
+                    const opts = getInitialConvivesOptions(newData.Type_Evenement);
+                    if (opts.includes(convivesParam)) {
+                        // Direct match fallback
+                        newData.Nombre_Convives = convivesParam;
+                    }
+                }
+            } else {
+                const opts = getInitialConvivesOptions(newData.Type_Evenement);
+                newData.Nombre_Convives = opts[0];
+            }
 
-        // Buffet / Assoc Legacy
-        plat_1: "",
-        plat_2: "",
-        plat_3: "",
-        plat_4: "",
-        plat_5: "",
-        plat_6: "",
-        salade_1: "",
-        salade_2: "",
-
-        // Plat Unique / Associatif
-        Plat_Associatif: "",
-        Plat_Associatif_Detail: "",
-
-        // Buffets Froids
-        Feculent_Froid: "",
-        Crudite_1: "",
-        Crudite_2: "",
-        Crudite_3: "",
-        Crudite_4: "",
-        Crudite_5: "",
-        Crudite_6: "",
-        Suppl_Crudite_1: "",
-        Suppl_Crudite_2: "",
-        Suppl_Crudite_3: "",
-
-        // Petits Pains
-        Categorie_Pains: "",
-        Quantite_Pains: "",
-
-        // Zakouskis
-        Zakouski_Cat_1: "", Zakouski_Item_1: "",
-        Zakouski_Cat_2: "", Zakouski_Item_2: "",
-        Zakouski_Cat_3: "", Zakouski_Item_3: "",
-        Zakouski_Cat_4: "", Zakouski_Item_4: "",
-        Zakouski_Cat_5: "", Zakouski_Item_5: "",
-        Zakouski_Cat_6: "", Zakouski_Item_6: "",
-        Zakouski_Cat_7: "", Zakouski_Item_7: "",
-        Zakouski_Cat_8: "", Zakouski_Item_8: "",
-        Zakouski_Cat_9: "", Zakouski_Item_9: "",
-        Zakouski_Cat_10: "", Zakouski_Item_10: "",
-
-        // Verrines
-        Format_Verrines: "", // "6cl" ou "12cl"
-        Verrine_Cat_1: "", Verrine_Item_1: "",
-        Verrine_Cat_2: "", Verrine_Item_2: "",
-        Verrine_Cat_3: "", Verrine_Item_3: "",
-        Verrine_Cat_4: "", Verrine_Item_4: "",
-        Verrine_Cat_5: "", Verrine_Item_5: "",
-        Verrine_Cat_6: "", Verrine_Item_6: "",
-        Verrine_Cat_7: "", Verrine_Item_7: "",
-        Verrine_Cat_8: "", Verrine_Item_8: "",
-        Verrine_Cat_9: "", Verrine_Item_9: "",
-        Verrine_Cat_10: "", Verrine_Item_10: "",
-
-        // Collectivite
-        Plat_Collectivite: "",
-
-        // Buffet Chaud
-        Buffet_Chaud_Services: "3",
-        Buffet_Chaud_Commentaires: "",
-        Buffet_Chaud_Zakouskis: "",
-        Buffet_Chaud_Entree_1: "",
-        Buffet_Chaud_Entree_2: "",
-        Buffet_Chaud_Plat: "",
-        Buffet_Chaud_Dessert: ""
-    });
-
-    const isBuffetFroid = formData.Type_Evenement.includes('Buffet Froid');
-    const isPains = formData.Type_Evenement === 'Petits pains';
-    const isZakouskis = formData.Type_Evenement === 'Zakouskis';
-    const isVerrines = formData.Type_Evenement === 'Verrines';
-    const isCollectivite = formData.Type_Evenement === 'Repas de collectivité';
-    const isBuffetChaud = formData.Type_Evenement === 'Buffet Chaud';
+            return newData;
+        });
+    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations, isPlatUnique, isBuffetFroidMode, isPainsMode]);
 
     // --- PRICING ENGINE ---
 
@@ -665,8 +754,6 @@ function ContactForm() {
             supplements += 1.5;
         }
 
-
-
         return base + supplements;
     };
 
@@ -786,7 +873,7 @@ function ContactForm() {
                 } else if (safeParam.includes('plus') && safeParam.includes('100')) {
                     newData.Nombre_Convives = "Plus de 100";
                 } else {
-                    const opts = getInitialConvivesOptions();
+                    const opts = getInitialConvivesOptions(newData.Type_Evenement);
                     if (opts.includes(convivesParam)) {
                         // Direct match fallback
                         newData.Nombre_Convives = convivesParam;
@@ -2213,7 +2300,7 @@ function ContactForm() {
                         <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
                         <div className="relative">
                             <select name="Nombre_Convives" value={formData.Nombre_Convives} onChange={handleChange} className={`${getInputStyle("Nombre_Convives")} appearance-none`}>
-                                {getInitialConvivesOptions().map(o => <option key={o} value={o}>{o}</option>)}
+                                {getInitialConvivesOptions(formData.Type_Evenement).map(o => <option key={o} value={o}>{o}</option>)}
                             </select>
                             <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
