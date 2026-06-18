@@ -64,25 +64,25 @@ const dessertsList = [
 
 const NOBLES = ["Tomahawk", "Côte à l'os", "Entrecôte Irlandaise", "Entrecôte Simmental", "Entrecôte Black Angus", "Filet Pur"];
 
-const BBQ_PRICES: Record<string, number> = {
-    classique: 15,
-    compose: 20,
-    dinatoire: 24.50,
-    mer: 30,
-    vegetarien: 11,
-    cochon: 33,
-    porchetta: 24,
-    nobles: 45,
+const BBQ_PRICES: Record<string, { small: number; medium: number }> = {
+    classique: { small: 17, medium: 15 },
+    compose: { small: 22, medium: 20 },
+    dinatoire: { small: 26.50, medium: 24.50 },
+    mer: { small: 33, medium: 30 },
+    vegetarien: { small: 13, medium: 11 },
+    cochon: { small: 36, medium: 33 },
+    porchetta: { small: 26.50, medium: 24 },
+    nobles: { small: 49.50, medium: 45 },
 };
 
 const SIDES_COLD = ["Salade de Pâtes Pesto", "Salade de Pâtes Curry", "Salade Grecque (Feta/Olives)", "Taboulé Oriental", "Tomate Mozza Di Bufala", "Salade de Pomme de Terre (Mayonnaise)", "Salade de Pomme de Terre (Vinaigrette)", "Carottes Râpées (Citron)", "Céleri Râpé & Pommes", "Concombre à la crème", "Salade de chou blanc"];
 const feculentsBBQ = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Baguette", "Petit pain"];
 
-const BUFFET_FROID_PRICES: Record<string, number> = {
-    buffet_campagnard: 13,
-    buffet_ardenais: 15,
-    buffet_reception: 18,
-    buffet_gala: 22
+const BUFFET_FROID_PRICES: Record<string, { small: number; medium: number }> = {
+    buffet_campagnard: { small: 15, medium: 13 },
+    buffet_ardenais: { small: 17, medium: 15 },
+    buffet_reception: { small: 20, medium: 18 },
+    buffet_gala: { small: 24, medium: 22 }
 };
 
 const feculentsFroids = [
@@ -381,6 +381,17 @@ function ContactForm() {
     const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || searchParams.get('formule') === 'buffet-chaud';
     const showMenuFirst = isCustomMode;
 
+    const getInitialConvivesOptions = () => {
+        if (isCochonOrPorchetta) return OPTIONS_COCHON;
+        if (isAnyBBQ || isBuffetFroidMode) return OPTIONS_BBQ;
+        if (isBuffet || isBuffetChaud) return OPTIONS_BUFFET;
+        if (isAssociations) return OPTIONS_ASSOCIATIONS;
+        if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
+        if (isPainsMode || isZakouskisMode || isVerrinesMode) return OPTIONS_PAINS;
+        if (isCollectiviteMode) return OPTIONS_COLLECTIVITE;
+        return OPTIONS_STANDARD;
+    };
+
     const [formData, setFormData] = useState({
         Prenom: "",
         Nom: "",
@@ -391,7 +402,7 @@ function ContactForm() {
         Type_Evenement: "Mariage",
         type_autre: "",
         Date: "",
-        Nombre_Convives: isCochonOrPorchetta ? OPTIONS_COCHON[0] : (isAnyBBQ ? OPTIONS_BBQ[0] : (isBuffet ? OPTIONS_BUFFET[0] : (isAssociations ? OPTIONS_ASSOCIATIONS[0] : (isPainsMode ? OPTIONS_PAINS[0] : OPTIONS_STANDARD[0])))),
+        Nombre_Convives: getInitialConvivesOptions()[0],
         details_projet: "",
         Souhaite_etre_recontacte: "Non",
 
@@ -526,6 +537,7 @@ function ContactForm() {
     };
 
     const calculateTotal = () => {
+        if (isBuffetChaud) return -1;
         if (isPlatUnique) return 14.5;
         if (isPlatPrepare) {
             return cartTotal;
@@ -538,11 +550,22 @@ function ContactForm() {
 
         if (isAnyBBQ) {
             const bbqType = menuParam?.replace('bbq_', '') || 'classique';
-            const basePrice = BBQ_PRICES[bbqType];
-            if (basePrice === undefined) return 0;
-            base = basePrice;
+            const prices = BBQ_PRICES[bbqType];
+            if (prices === undefined) return 0;
+            if (formData.Nombre_Convives === 'Moins de 25') {
+                base = prices.small;
+            } else {
+                base = prices.medium;
+            }
         } else if (isBuffetFroidMode) {
-            base = BUFFET_FROID_PRICES[menuParam || ''] || 0;
+            const prices = BUFFET_FROID_PRICES[menuParam || ''];
+            if (prices) {
+                if (formData.Nombre_Convives === 'Moins de 25') {
+                    base = prices.small;
+                } else {
+                    base = prices.medium;
+                }
+            }
         } else if (isPains && formData.Categorie_Pains && formData.Quantite_Pains) {
             const basePrice = painsData[formData.Categorie_Pains].price;
             let adjustedPrice = basePrice;
@@ -642,10 +665,7 @@ function ContactForm() {
             supplements += 1.5;
         }
 
-        // 5. Majoration pour les petits groupes (Buffets Froids)
-        if (isBuffetFroidMode && formData.Nombre_Convives === 'Moins de 25') {
-            base += 2; // +2€ par personne si moins de 25
-        }
+
 
         return base + supplements;
     };
@@ -662,16 +682,7 @@ function ContactForm() {
         return viandesClassiques;
     };
 
-    const getInitialConvivesOptions = () => {
-        if (isCochonOrPorchetta) return OPTIONS_COCHON;
-        if (isAnyBBQ || isBuffetFroidMode) return OPTIONS_BBQ;
-        if (isBuffet || isBuffetChaud) return OPTIONS_BUFFET;
-        if (isAssociations) return OPTIONS_ASSOCIATIONS;
-        if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
-        if (isPainsMode || isZakouskisMode || isVerrinesMode) return OPTIONS_PAINS;
-        if (isCollectiviteMode) return OPTIONS_COLLECTIVITE;
-        return OPTIONS_STANDARD;
-    };
+
 
     // EFFECT: Handle URL params
     useLayoutEffect(() => {
@@ -742,11 +753,11 @@ function ContactForm() {
                 if (safeParam.includes('moins') && (safeParam.includes('20') || safeParam.includes('25') || safeParam.includes('30') || safeParam.includes('40') || safeParam.includes('50'))) {
                     // Check specific menus restrictions first
                     if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
-                    else if (isAnyBBQ) newData.Nombre_Convives = "Moins de 25";
+                    else if (isAnyBBQ || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 25";
                     else if (isCollectiviteMode) newData.Nombre_Convives = "Moins de 30";
                     else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
                     else if (isPainsMode || isZakouskisMode || isVerrinesMode) newData.Nombre_Convives = "Moins de 25";
-                    else if (isBuffet || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 40";
+                    else if (isBuffet) newData.Nombre_Convives = "Moins de 40";
                     else newData.Nombre_Convives = "Moins de 20";
                 } else if (safeParam.includes('100') && safeParam.includes('200')) {
                     newData.Nombre_Convives = "100 à 200";
@@ -2000,10 +2011,11 @@ function ContactForm() {
                         <select name="Plat_Collectivite" value={formData.Plat_Collectivite} onChange={handleChange} className={getInputStyle("Plat_Collectivite" as any) + " appearance-none"}>
                             <option value="">Faites votre choix parmi nos 21 plats...</option>
                             {sortedDishes.map(dish => {
+                                const showPrice = formData.Nombre_Convives !== 'Plus de 100';
                                 const price = getAdjustedPriceDisplay(collectiviteData[dish]);
                                 return (
                                     <option key={dish} value={dish}>
-                                        {dish} ({price.toFixed(2).replace('.', ',')}€ / pers)
+                                        {dish}{showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}
                                     </option>
                                 );
                             })}
@@ -2016,11 +2028,15 @@ function ContactForm() {
                 </div>
 
                 {/* PRICE INDICATION */}
-                {totalPrice > 0 && totalPrice !== -1 && (
+                {formData.Plat_Collectivite && (
                     <div className={`transition-all duration-300 border-t border-neutral-200 pt-6 mt-6`}>
                         <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
                             <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                            <span className="text-xl font-serif font-bold">{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></span>
+                            {formData.Nombre_Convives === 'Plus de 100' ? (
+                                <span className="bg-[#D4AF37] text-black px-4 py-1 rounded font-bold text-xs tracking-widest uppercase">Sur Devis</span>
+                            ) : (
+                                <span className="text-xl font-serif font-bold">{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></span>
+                            )}
                         </div>
                     </div>
                 )}
