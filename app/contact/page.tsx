@@ -310,6 +310,20 @@ const getConvivesMax = (str: string): number => {
     return Math.max(...matches.map(Number));
 };
 
+const getEstimatedGuestCount = (str: string): number => {
+    if (!str) return 0;
+    const matches = str.match(/\d+/g);
+    if (!matches) return 0;
+    const numbers = matches.map(Number);
+    if (str.includes("Moins de")) {
+        return numbers[0];
+    }
+    if (str.includes("Plus de") || str.includes("et plus")) {
+        return numbers[0];
+    }
+    return numbers[0]; // Range: return the lower bound (e.g. 30 for "30 à 90")
+};
+
 const getMinDate = () => {
     const date = new Date();
     date.setDate(date.getDate() + 7);
@@ -681,21 +695,24 @@ function ContactForm() {
     };
 
     const calculateTotal = () => {
-        if (isBuffetChaud) return -1;
-        if (isPlatUnique) return 14.5;
+        if (isBuffetChaud) return { perPerson: -1, materiel: 0 };
         if (isPlatPrepare) {
-            return cartTotal;
+            return { perPerson: cartTotal, materiel: 0 };
         }
-        if (!isAnyBBQ && !isBuffetFroidMode && !isPains && !isZakouskis && !isVerrines && !isCollectivite) return 0;
+        if (!isPlatUnique && !isAnyBBQ && !isBuffetFroidMode && !isPains && !isZakouskis && !isVerrines && !isCollectivite) {
+            return { perPerson: 0, materiel: 0 };
+        }
 
         // 1. Base Price
         let base = 0;
         let supplements = 0;
 
-        if (isAnyBBQ) {
+        if (isPlatUnique) {
+            base = 14.5;
+        } else if (isAnyBBQ) {
             const bbqType = menuParam?.replace('bbq_', '') || 'classique';
             const prices = BBQ_TIER_PRICES[bbqType];
-            if (prices === undefined) return 0;
+            if (prices === undefined) return { perPerson: 0, materiel: 0 };
 
             const convives = formData.Nombre_Convives;
             const priceVal = prices[convives];
@@ -772,15 +789,15 @@ function ContactForm() {
             base = itemPrice;
         }
 
-        if (base === -1) return -1;
+        if (base === -1) return { perPerson: -1, materiel: 0 };
 
         const tier = getPriceTier(formData.Nombre_Convives);
         if (tier === 'high') {
-            if (isPains && formData.Nombre_Convives === 'Plus de 200') return -1;
-            if (isZakouskis && formData.Nombre_Convives === 'Plus de 200') return -1;
-            if (isVerrines && formData.Nombre_Convives === 'Plus de 200') return -1;
-            if (isCollectivite && formData.Nombre_Convives === 'Plus de 100') return -1;
-            if (!isPains && !isZakouskis && !isVerrines && !isCollectivite) return -1;
+            if (isPains && formData.Nombre_Convives === 'Plus de 200') return { perPerson: -1, materiel: 0 };
+            if (isZakouskis && formData.Nombre_Convives === 'Plus de 200') return { perPerson: -1, materiel: 0 };
+            if (isVerrines && formData.Nombre_Convives === 'Plus de 200') return { perPerson: -1, materiel: 0 };
+            if (isCollectivite && formData.Nombre_Convives === 'Plus de 100') return { perPerson: -1, materiel: 0 };
+            if (!isPains && !isZakouskis && !isVerrines && !isCollectivite) return { perPerson: -1, materiel: 0 };
         }
 
         // 2. Supplements
@@ -815,21 +832,22 @@ function ContactForm() {
             supplements += 6;
         }
 
-        // Location Vaisselle
+        // Location Vaisselle & Verrerie (isolated flat equipment costs)
+        let materiel = 0;
         if (formData.Location_Vaisselle_Check === "Oui") {
-            supplements += 1.5;
+            const guestCount = getEstimatedGuestCount(formData.Nombre_Convives);
+            materiel += guestCount * 1.50;
         }
 
-        // Location Verrerie
         if (formData.Location_Verrerie_Check === "Oui") {
             const vinQty = parseInt(formData.Location_Verrerie_Vin || "0", 10);
             const softQty = parseInt(formData.Location_Verrerie_Soft || "0", 10);
             const fluteQty = parseInt(formData.Location_Verrerie_Flute || "0", 10);
             const glasswareCost = (Math.ceil(vinQty / 5) + Math.ceil(softQty / 5) + Math.ceil(fluteQty / 5)) * 1.50;
-            supplements += glasswareCost;
+            materiel += glasswareCost;
         }
 
-        return base + supplements;
+        return { perPerson: base + supplements, materiel };
     };
 
     const totalPrice = calculateTotal();
@@ -842,6 +860,33 @@ function ContactForm() {
         if (isBBQNobles) return NOBLES;
         if (isBBQDinatoire) return dinatoireViandes;
         return viandesClassiques;
+    };
+    const renderPriceDisplay = (label: string = "Prix par personne") => {
+        if (totalPrice.perPerson === 0 && totalPrice.materiel === 0) return null;
+        return (
+            <div className="transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6">
+                <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
+                    <span className="text-xs font-bold uppercase tracking-wide">{label}</span>
+                    {totalPrice.perPerson === -1 ? (
+                        <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-xs tracking-widest uppercase">SUR DEVIS</span>
+                    ) : (
+                        <span className="text-xl font-serif font-bold">
+                            {totalPrice.perPerson > 0 ? (
+                                <>
+                                    {totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers
+                                    {totalPrice.materiel > 0 && (
+                                        <> + {totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ (Matériel)</>
+                                    )}
+                                    <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span>
+                                </>
+                            ) : (
+                                "---"
+                            )}
+                        </span>
+                    )}
+                </div>
+            </div>
+        );
     };
 
 
@@ -1036,7 +1081,12 @@ function ContactForm() {
         } else {
             isSurDevis = getConvivesMax(formData.Nombre_Convives) > 250;
         }
-        const finalPriceStr = (isSurDevis || totalPrice === -1) ? "SUR DEVIS" : `${totalPrice}€ / pers`;
+        const isSurDevisOrMinusOne = isSurDevis || totalPrice.perPerson === -1;
+        const finalPriceStr = isSurDevisOrMinusOne
+            ? "SUR DEVIS"
+            : totalPrice.materiel > 0
+                ? `${totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers + ${totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ (Matériel)`
+                : `${totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers`;
 
         // Formatage propre du nom de la formule (ex: "bbq_classique" -> "Barbecue Classique")
         const formatFormulaName = (rawName: string | null) => {
@@ -1081,7 +1131,9 @@ function ContactForm() {
             // DÉTAILS ÉVÉNEMENT
             "📋 Formule Choisie": formatFormulaName(menuParam),
             "💰 PRIX ESTIMATIF AFFICHÉ": finalPriceStr,
-            ...(finalPriceStr === "SUR DEVIS" && totalPrice > 0 && { "💡 Prix indicatif de base (Info Interne)": `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` }),
+            "💰 PRIX NOURRITURE / PERS": isSurDevisOrMinusOne ? "SUR DEVIS" : `${totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers`,
+            "📦 TOTAL MATÉRIEL RÉCEPTIF": totalPrice.materiel > 0 ? `${totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€` : "Aucun (0,00€)",
+            ...(isSurDevisOrMinusOne && totalPrice.perPerson > 0 && { "💡 Prix indicatif de base (Info Interne)": `${totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` }),
             "📅 Date de l'événement": formData.Date,
             "👥 Nombre de convives": formData.Nombre_Convives,
             ...(isAnyBBQ && { "🧑‍🍳 Prestation Service": formData.Service_Check === "Oui" ? "Oui (+5€/pers)" : "Non" }),
@@ -1651,18 +1703,30 @@ function ContactForm() {
                 {renderLogisticsOptions()}
 
                 {/* PRICE DISPLAY MOVED TO BOTTOM */}
-                <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-8 mt-8 ${totalPrice !== 0 ? "opacity-100" : "opacity-50"}`}>
+                <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-8 mt-8 ${totalPrice.perPerson !== 0 || totalPrice.materiel !== 0 ? "opacity-100" : "opacity-50"}`}>
                     <div className="bg-black text-[#D4AF37] p-6 rounded-xl shadow-xl flex items-center justify-between border border-[#D4AF37]/50 max-w-lg mx-auto transform hover:scale-[1.02] transition-transform">
                         <span className="text-sm font-bold uppercase tracking-widest">Prix Estimatif</span>
                         <div className="text-right">
-                            {totalPrice === -1 ? (
+                            {totalPrice.perPerson === -1 ? (
                                 <span className="bg-[#D4AF37] text-black px-4 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
                             ) : (
-                                <span className="text-2xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-sm font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
+                                <span className="text-2xl font-serif font-bold">
+                                    {totalPrice.perPerson > 0 ? (
+                                        <>
+                                            {totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers
+                                            {totalPrice.materiel > 0 && (
+                                                <> + {totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ (Matériel)</>
+                                            )}
+                                            <span className="text-sm font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span>
+                                        </>
+                                    ) : (
+                                        "---"
+                                    )}
+                                </span>
                             )}
-                            {totalPrice > 0 && (
+                            {totalPrice.perPerson > 0 && (
                                 <p className="text-xs text-[#D4AF37]/70 mt-1 font-light">
-                                    {formData.Service_Check === "Oui" ? "Hors frais de déplacement (service inclus)" : "Hors frais de déplacement & service"}
+                                    {formData.Service_Check === "Oui" ? "Frais de déplacement et service inclus" : "Hors frais de déplacement et service"}
                                 </p>
                             )}
                         </div>
@@ -1751,14 +1815,7 @@ function ContactForm() {
             {renderLogisticsOptions()}
 
             {/* PRICE INDICATION */}
-            {totalPrice > 0 && totalPrice !== -1 && (
-                <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
-                    <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
-                        <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                        <span className="text-xl font-serif font-bold">14,50€ <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></span>
-                    </div>
-                </div>
-            )}
+            {renderPriceDisplay("Prix par personne")}
         </div>
     );
 
@@ -1836,14 +1893,7 @@ function ContactForm() {
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {totalPrice > 0 && totalPrice !== -1 && (
-                    <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
-                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
-                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                            <span className="text-xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
-                        </div>
-                    </div>
-                )}
+                {renderPriceDisplay("Prix par personne")}
             </div>
         );
     };
@@ -1929,18 +1979,7 @@ function ContactForm() {
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {totalPrice !== 0 && (
-                    <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
-                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
-                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                            {totalPrice === -1 ? (
-                                <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
-                            ) : (
-                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
-                            )}
-                        </div>
-                    </div>
-                )}
+                {renderPriceDisplay("Prix par personne")}
             </div>
         );
     };
@@ -2042,18 +2081,7 @@ function ContactForm() {
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {totalPrice !== 0 && (
-                    <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
-                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
-                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                            {totalPrice === -1 ? (
-                                <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
-                            ) : (
-                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
-                            )}
-                        </div>
-                    </div>
-                )}
+                {renderPriceDisplay("Prix par personne")}
             </div>
         );
     };
@@ -2176,18 +2204,7 @@ function ContactForm() {
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {totalPrice !== 0 && (
-                    <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6`}>
-                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
-                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                            {totalPrice === -1 ? (
-                                <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
-                            ) : (
-                                <span className="text-xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
-                            )}
-                        </div>
-                    </div>
-                )}
+                {renderPriceDisplay("Prix par personne")}
             </div>
         );
     };
@@ -2235,18 +2252,7 @@ function ContactForm() {
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {formData.Plat_Collectivite && (
-                    <div className={`transition-all duration-300 border-t border-neutral-200 pt-6 mt-6`}>
-                        <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
-                            <span className="text-xs font-bold uppercase tracking-widest">Prix par personne</span>
-                            {formData.Nombre_Convives === 'Plus de 100' ? (
-                                <span className="bg-[#D4AF37] text-black px-4 py-1 rounded font-bold text-xs tracking-widest uppercase">Sur Devis</span>
-                            ) : (
-                                <span className="text-xl font-serif font-bold">{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></span>
-                            )}
-                        </div>
-                    </div>
-                )}
+                {formData.Plat_Collectivite && renderPriceDisplay("Prix par personne")}
             </div>
         );
     };
@@ -2431,29 +2437,29 @@ function ContactForm() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="group">
                             <label className={labelStyle}>Date <span className="text-red-500">*</span></label>
-                        <input
-                            type="date"
-                            name="Date"
-                            required
-                            min={getMinDate()}
-                            value={formData.Date}
-                            onChange={handleChange}
-                            onBlur={handleDateBlur}
-                            className={getInputStyle("Date")}
-                        />
-                    </div>
-                    <div className="group">
-                        <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                            <select name="Nombre_Convives" value={formData.Nombre_Convives} onChange={handleChange} className={`${getInputStyle("Nombre_Convives")} appearance-none`}>
-                                {getInitialConvivesOptions(formData.Type_Evenement).map(o => <option key={o} value={o}>{o}</option>)}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            <input
+                                type="date"
+                                name="Date"
+                                required
+                                min={getMinDate()}
+                                value={formData.Date}
+                                onChange={handleChange}
+                                onBlur={handleDateBlur}
+                                className={getInputStyle("Date")}
+                            />
+                        </div>
+                        <div className="group">
+                            <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
+                            <div className="relative">
+                                <select name="Nombre_Convives" value={formData.Nombre_Convives} onChange={handleChange} className={`${getInputStyle("Nombre_Convives")} appearance-none`}>
+                                    {getInitialConvivesOptions(formData.Type_Evenement).map(o => <option key={o} value={o}>{o}</option>)}
+                                </select>
+                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 </>
             )}
 
