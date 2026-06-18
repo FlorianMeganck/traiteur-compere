@@ -261,6 +261,7 @@ const OPTIONS_ASSOCIATIONS = ["Moins de 50", "50 à 100", "Plus de 100"];
 const OPTIONS_PLAT_UNIQUE = ["Moins de 50", "50 à 100", "Plus de 100"];
 const OPTIONS_COLLECTIVITE = ["Moins de 30", "30 à 100", "Plus de 100"];
 const OPTIONS_PAINS = ["Moins de 25", "25 à 100", "100 à 200", "Plus de 200"];
+const glassSteps = Array.from({ length: 51 }, (_, i) => i * 5); // 0, 5, 10, ..., 250
 
 // --- VALIDATION HELPERS ---
 
@@ -361,6 +362,10 @@ function ContactForm() {
         Dessert_Check: "Non",
         Dessert_Choix: "",
         Location_Vaisselle_Check: "Non",
+        Location_Verrerie_Check: "Non",
+        Location_Verrerie_Vin: "0",
+        Location_Verrerie_Soft: "0",
+        Location_Verrerie_Flute: "0",
         plat_1: "",
         plat_2: "",
         plat_3: "",
@@ -754,6 +759,15 @@ function ContactForm() {
             supplements += 1.5;
         }
 
+        // Location Verrerie
+        if (formData.Location_Verrerie_Check === "Oui") {
+            const vinQty = parseInt(formData.Location_Verrerie_Vin || "0", 10);
+            const softQty = parseInt(formData.Location_Verrerie_Soft || "0", 10);
+            const fluteQty = parseInt(formData.Location_Verrerie_Flute || "0", 10);
+            const glasswareCost = (Math.ceil(vinQty / 5) + Math.ceil(softQty / 5) + Math.ceil(fluteQty / 5)) * 1.50;
+            supplements += glasswareCost;
+        }
+
         return base + supplements;
     };
 
@@ -895,7 +909,8 @@ function ContactForm() {
                 [name]: checked ? "Oui" : "Non",
                 ...(name === "Societe" && !checked ? { Nom_Societe: "" } : {}),
                 ...(name === "Accompagnement_Chaud_Supplement_Check" && !checked ? { Accompagnement_Chaud_Supplement: "" } : {}),
-                ...(name === "Dessert_Check" && !checked ? { Dessert_Choix: "" } : {})
+                ...(name === "Dessert_Check" && !checked ? { Dessert_Choix: "" } : {}),
+                ...(name === "Location_Verrerie_Check" && !checked ? { Location_Verrerie_Vin: "0", Location_Verrerie_Soft: "0", Location_Verrerie_Flute: "0" } : {})
             }));
             return;
         }
@@ -1090,6 +1105,24 @@ function ContactForm() {
             return `Barbecue ${name.charAt(0).toUpperCase() + name.slice(1)}`;
         };
 
+        const getVerrerieDetail = () => {
+            if (formData.Location_Verrerie_Check !== "Oui") return "Non";
+            
+            const vinQty = parseInt(formData.Location_Verrerie_Vin || "0", 10);
+            const softQty = parseInt(formData.Location_Verrerie_Soft || "0", 10);
+            const fluteQty = parseInt(formData.Location_Verrerie_Flute || "0", 10);
+            
+            const details: string[] = [];
+            if (vinQty > 0) details.push(`${vinQty}x Verre à vin`);
+            if (softQty > 0) details.push(`${softQty}x Verre à soft (25cl)`);
+            if (fluteQty > 0) details.push(`${fluteQty}x Flûte à champagne`);
+            
+            const cost = (Math.ceil(vinQty / 5) + Math.ceil(softQty / 5) + Math.ceil(fluteQty / 5)) * 1.50;
+            
+            if (details.length === 0) return "Oui (Aucun verre sélectionné - 0,00€)";
+            return `Oui (${details.join(", ")} - Coût: ${cost.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€)`;
+        };
+
         // 3. Construction du Payload Web3Forms (Propre pour le Web, Visuel pour le Mail)
         const payload = {
             access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
@@ -1212,6 +1245,7 @@ function ContactForm() {
 
             // DIVERS
             "🍽️ Location de vaisselle": formData.Location_Vaisselle_Check === "Oui" ? "Oui (+1,50€/pers)" : "Non",
+            "🍷 Location de verrerie": getVerrerieDetail(),
             "💬 Message / Allergies": formData.details_projet || "Aucun message",
             "🔄 Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
         };
@@ -2400,6 +2434,102 @@ function ContactForm() {
                                         </label>
                                     </div>
                                     <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
+                                </div>
+                            )}
+
+                            {!isPlatPrepare && (
+                                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 mt-2 mb-6 max-w-lg mx-auto md:max-w-none">
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <input
+                                            type="checkbox"
+                                            name="Location_Verrerie_Check"
+                                            id="Location_Verrerie_Check"
+                                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                                            checked={formData.Location_Verrerie_Check === "Oui"}
+                                            onChange={handleChange}
+                                        />
+                                        <label htmlFor="Location_Verrerie_Check" className="text-neutral-700 font-bold cursor-pointer select-none text-left leading-tight">
+                                            Je souhaite une proposition pour la location de verrerie (1,50€ / lot de 5 verres, lavage inclus)
+                                        </label>
+                                    </div>
+                                    <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
+
+                                    <AnimatePresence>
+                                        {formData.Location_Verrerie_Check === "Oui" && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{ opacity: 1, height: "auto" }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="overflow-hidden mt-4 pl-8"
+                                            >
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
+                                                            🍷 Verre à vin
+                                                        </label>
+                                                        <div className="relative">
+                                                            <select
+                                                                name="Location_Verrerie_Vin"
+                                                                value={formData.Location_Verrerie_Vin}
+                                                                onChange={handleChange}
+                                                                className={getInputStyle("Location_Verrerie_Vin")}
+                                                            >
+                                                                {glassSteps.map(step => (
+                                                                    <option key={step} value={step}>{step} verres</option>
+                                                                ))}
+                                                            </select>
+                                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
+                                                            🥤 Verre à soft (25cl)
+                                                        </label>
+                                                        <div className="relative">
+                                                            <select
+                                                                name="Location_Verrerie_Soft"
+                                                                value={formData.Location_Verrerie_Soft}
+                                                                onChange={handleChange}
+                                                                className={getInputStyle("Location_Verrerie_Soft")}
+                                                            >
+                                                                {glassSteps.map(step => (
+                                                                    <option key={step} value={step}>{step} verres</option>
+                                                                ))}
+                                                            </select>
+                                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
+                                                            🥂 Flûte à champagne
+                                                        </label>
+                                                        <div className="relative">
+                                                            <select
+                                                                name="Location_Verrerie_Flute"
+                                                                value={formData.Location_Verrerie_Flute}
+                                                                onChange={handleChange}
+                                                                className={getInputStyle("Location_Verrerie_Flute")}
+                                                            >
+                                                                {glassSteps.map(step => (
+                                                                    <option key={step} value={step}>{step} verres</option>
+                                                                ))}
+                                                            </select>
+                                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             )}
 
