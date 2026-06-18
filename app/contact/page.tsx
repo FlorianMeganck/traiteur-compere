@@ -723,9 +723,9 @@ function ContactForm() {
                 base = -1; // "Plus de 250" or "Plus de 180" -> Sur devis
             }
 
-            // Apply Service (+5€/pers)
+            // Apply Service (+2,5€/pers)
             if (base !== -1 && formData.Service_Check === "Oui") {
-                base += 5;
+                base += 2.5;
             }
         } else if (isBuffetFroidMode) {
             const prices = BUFFET_FROID_PRICES[menuParam || ''];
@@ -1136,7 +1136,7 @@ function ContactForm() {
             ...(isSurDevisOrMinusOne && totalPrice.perPerson > 0 && { "💡 Prix indicatif de base (Info Interne)": `${totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` }),
             "📅 Date de l'événement": formData.Date,
             "👥 Nombre de convives": formData.Nombre_Convives,
-            ...(isAnyBBQ && { "🧑‍🍳 Prestation Service": formData.Service_Check === "Oui" ? "Oui (+5€/pers)" : "Non" }),
+            ...(isAnyBBQ && { "🧑‍🍳 Prestation Service": formData.Service_Check === "Oui" ? "Oui (+2,5€/pers)" : "Non" }),
 
             // COORDONNÉES
             "👤 Nom complet": `${formData.Nom} ${formData.Prenom}`,
@@ -2429,7 +2429,7 @@ function ContactForm() {
                                     onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Oui" }))}
                                     className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${formData.Service_Check === "Oui" ? 'bg-black text-[#D4AF37] shadow' : 'text-neutral-500 hover:text-black'}`}
                                 >
-                                    Avec service (+5€/pers)
+                                    Avec service (+2,5€/pers)
                                 </button>
                             </div>
                         </div>

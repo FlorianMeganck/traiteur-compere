@@ -910,7 +910,7 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
             if (!addService) return priceStr;
             const val = parseFloat(priceStr.replace(/[^0-9,.]/g, '').replace(',', '.'));
             if (isNaN(val)) return priceStr;
-            const newVal = val + 5;
+            const newVal = val + 2.5;
             const formattedVal = Number.isInteger(newVal) ? newVal.toString() : newVal.toFixed(2).replace('.', ',');
             return `${formattedVal}€`;
         };
@@ -934,7 +934,7 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
                             onClick={() => setWithService(true)}
                             className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${withService ? 'bg-black text-[#D4AF37] shadow' : 'text-neutral-500 hover:text-black'}`}
                         >
-                            Avec service (+5€/pers)
+                            Avec service (+2,5€/pers)
                         </button>
                     </div>
                 </div>
