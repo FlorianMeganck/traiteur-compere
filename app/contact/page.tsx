@@ -254,7 +254,8 @@ const ITEMS_ASSOCIATIONS = ["Boulets Liégeois (Sauce Lapin)", "Boulets Liégeoi
 
 // OPTIONS
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
-const OPTIONS_BBQ = ["Moins de 25", "25 à 250", "Plus de 250"]; // Matches new Formules logic roughly
+const OPTIONS_BUFFET_FROID = ["Moins de 25", "25 à 250", "Plus de 250"];
+const OPTIONS_BBQ = ["Moins de 30", "30 à 90", "90 à 170", "170 à 250", "Plus de 250"];
 const OPTIONS_COCHON = ["Moins de 25", "25 à 180", "Plus de 180"]; // Specific for Cochon/Porchetta
 const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
 const OPTIONS_ASSOCIATIONS = ["Moins de 50", "50 à 100", "Plus de 100"];
@@ -486,7 +487,8 @@ function ContactForm() {
 
     const getInitialConvivesOptions = (currentType?: string) => {
         if (isCochonOrPorchetta) return OPTIONS_COCHON;
-        if (isAnyBBQ || isBuffetFroidMode) return OPTIONS_BBQ;
+        if (isAnyBBQ) return OPTIONS_BBQ;
+        if (isBuffetFroidMode) return OPTIONS_BUFFET_FROID;
         if (isBuffet || currentType === 'Buffet Chaud' || isBuffetChaudMode) return OPTIONS_BUFFET;
         if (isAssociations) return OPTIONS_ASSOCIATIONS;
         if (isPlatUnique) return OPTIONS_PLAT_UNIQUE;
@@ -562,57 +564,61 @@ function ContactForm() {
                 else if (groupeParam === 'grand') newData.Nombre_Convives = "Plus de 100";
             }
 
-            // 2. Pré-sélection du Nombre de Convives (NOUVEAU)
+            // 2. Pré-sélection du Nombre de Convives
             if (convivesParam) {
-                // Nettoyage de la chaîne (ex: "25 à 250 pers." -> "25 a 250")
                 const safeParam = decodeURIComponent(convivesParam).toLowerCase();
+                const opts = getInitialConvivesOptions(newData.Type_Evenement);
 
-                // Détection intelligente selon les mots-clés
-                if (safeParam.includes('moins') && (safeParam.includes('20') || safeParam.includes('25') || safeParam.includes('30') || safeParam.includes('40') || safeParam.includes('50'))) {
-                    // Check specific menus restrictions first
-                    if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
-                    else if (isAnyBBQ || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 25";
-                    else if (isCollectiviteMode) newData.Nombre_Convives = "Moins de 30";
-                    else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
-                    else if (isPainsMode || isZakouskisMode || isVerrinesMode) newData.Nombre_Convives = "Moins de 25";
-                    else if (isBuffet) newData.Nombre_Convives = "Moins de 40";
-                    else newData.Nombre_Convives = "Moins de 20";
-                } else if (safeParam.includes('100') && safeParam.includes('200')) {
-                    newData.Nombre_Convives = "100 à 200";
-                } else if (safeParam.includes('25') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "25 à 100";
-                } else if (safeParam.includes('plus') && safeParam.includes('250')) {
-                    newData.Nombre_Convives = "Plus de 250";
-                } else if (safeParam.includes('plus') && safeParam.includes('200')) {
-                    newData.Nombre_Convives = "Plus de 200";
-                } else if (safeParam.includes('plus') && safeParam.includes('180')) {
-                    newData.Nombre_Convives = "Plus de 180";
-                } else if (safeParam.includes('plus') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "Plus de 100";
-                } else if (safeParam.includes('25') && safeParam.includes('180')) {
-                    newData.Nombre_Convives = "25 à 180";
-                } else if (safeParam.includes('25') && safeParam.includes('250')) {
-                    newData.Nombre_Convives = "25 à 250";
-                } else if (safeParam.includes('50') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "50 à 100";
-                } else if (safeParam.includes('20') && safeParam.includes('50')) {
-                    newData.Nombre_Convives = "20 à 50";
-                } else if (safeParam.includes('50') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "50 à 100";
-                } else if (safeParam.includes('moins') && safeParam.includes('50')) {
-                    newData.Nombre_Convives = "Moins de 50";
-                } else if (safeParam.includes('plus') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "Plus de 100";
+                const normalizeStr = (str: string) => {
+                    return str
+                        .toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/pers(onnes?)?\.?/g, "")
+                        .replace(/[^a-z0-9]/g, "");
+                };
+
+                const normalizedParam = normalizeStr(safeParam);
+                const matchedOpt = opts.find(opt => normalizeStr(opt) === normalizedParam);
+
+                if (matchedOpt) {
+                    newData.Nombre_Convives = matchedOpt;
                 } else {
-                    const opts = getInitialConvivesOptions(newData.Type_Evenement);
-                    if (opts.includes(convivesParam)) {
-                        // Direct match fallback
-                        newData.Nombre_Convives = convivesParam;
+                    // Keyword/Range fallback detection
+                    let found = "";
+                    if (safeParam.includes("moins")) {
+                        found = opts.find(o => o.startsWith("Moins de")) || "";
+                    } else if (safeParam.includes("plus") || safeParam.includes("plus de") || safeParam.includes("et plus")) {
+                        found = opts.find(o => o.startsWith("Plus de") || o.endsWith("plus")) || "";
+                    } else if (safeParam.includes("30") && safeParam.includes("90")) {
+                        found = opts.find(o => o.includes("30") && o.includes("90")) || "";
+                    } else if (safeParam.includes("90") && safeParam.includes("170")) {
+                        found = opts.find(o => o.includes("90") && o.includes("170")) || "";
+                    } else if (safeParam.includes("170") && safeParam.includes("250")) {
+                        found = opts.find(o => o.includes("170") && o.includes("250")) || "";
+                    } else if (safeParam.includes("25") && safeParam.includes("250")) {
+                        found = opts.find(o => o.includes("25") && o.includes("250")) || "";
+                    } else if (safeParam.includes("25") && safeParam.includes("180")) {
+                        found = opts.find(o => o.includes("25") && o.includes("180")) || "";
+                    } else if (safeParam.includes("30") && safeParam.includes("100")) {
+                        found = opts.find(o => o.includes("30") && o.includes("100")) || "";
+                    } else if (safeParam.includes("50") && safeParam.includes("100")) {
+                        found = opts.find(o => o.includes("50") && o.includes("100")) || "";
+                    } else if (safeParam.includes("100") && safeParam.includes("200")) {
+                        found = opts.find(o => o.includes("100") && o.includes("200")) || "";
+                    } else if (safeParam.includes("20") && safeParam.includes("50")) {
+                        found = opts.find(o => o.includes("20") && o.includes("50")) || "";
+                    }
+
+                    if (found) {
+                        newData.Nombre_Convives = found;
+                    } else {
+                        newData.Nombre_Convives = opts[0] || "";
                     }
                 }
             } else {
                 const opts = getInitialConvivesOptions(newData.Type_Evenement);
-                newData.Nombre_Convives = opts[0];
+                newData.Nombre_Convives = opts[0] || "";
             }
 
             return newData;
@@ -646,10 +652,30 @@ function ContactForm() {
             const bbqType = menuParam?.replace('bbq_', '') || 'classique';
             const prices = BBQ_PRICES[bbqType];
             if (prices === undefined) return 0;
-            if (formData.Nombre_Convives === 'Moins de 25') {
-                base = prices.small;
+            if (isCochonOrPorchetta) {
+                if (formData.Nombre_Convives === 'Moins de 25') {
+                    base = prices.small;
+                } else {
+                    base = prices.medium;
+                }
+            } else if (bbqType === 'classique') {
+                if (formData.Nombre_Convives === 'Moins de 30') {
+                    base = 17;
+                } else if (formData.Nombre_Convives === '30 à 90') {
+                    base = 16;
+                } else if (formData.Nombre_Convives === '90 à 170') {
+                    base = 15;
+                } else if (formData.Nombre_Convives === '170 à 250') {
+                    base = 14;
+                } else {
+                    base = -1; // Plus de 250
+                }
             } else {
-                base = prices.medium;
+                if (formData.Nombre_Convives === 'Moins de 30') {
+                    base = prices.small;
+                } else {
+                    base = prices.medium;
+                }
             }
         } else if (isBuffetFroidMode) {
             const prices = BUFFET_FROID_PRICES[menuParam || ''];
@@ -785,119 +811,7 @@ function ContactForm() {
 
 
 
-    // EFFECT: Handle URL params
-    useLayoutEffect(() => {
-        if (typeof window !== 'undefined') window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
-        const menuParam = searchParams.get('menu');
-        const convivesParam = searchParams.get('convives');
-
-        setFormData(prev => {
-            const newData = { ...prev };
-
-            // 1. Pré-sélection du type d'événement / Menu
-            if (menuParam) {
-                if (menuParam.startsWith('bbq_')) {
-                    const type = menuParam.replace('bbq_', '');
-                    newData.Type_Evenement = `Barbecue ${type.charAt(0).toUpperCase() + type.slice(1)}`;
-                } else if (menuParam === 'buffet_campagnard') {
-                    newData.Type_Evenement = 'Buffet Froid Campagnard';
-                } else if (menuParam === 'buffet_ardenais') {
-                    newData.Type_Evenement = 'Buffet Froid Ardenais';
-                } else if (menuParam === 'buffet_reception') {
-                    newData.Type_Evenement = 'Buffet Froid Réception';
-                } else if (menuParam === 'buffet_gala') {
-                    newData.Type_Evenement = 'Buffet Froid Gala';
-                } else if (menuParam === 'ardennais') {
-                    newData.Type_Evenement = 'Buffet Ardennais';
-                } else if (menuParam === 'gala') {
-                    newData.Type_Evenement = 'Buffet de Gala';
-                } else if (menuParam === 'associations') {
-                    newData.Type_Evenement = 'Associations';
-                } else if (menuParam === 'plat_unique') {
-                    newData.Type_Evenement = 'Plat Unique / Associatif';
-                } else if (menuParam === 'pains_garnis') {
-                    newData.Type_Evenement = 'Petits pains';
-                } else if (menuParam === 'zakouskis') {
-                    newData.Type_Evenement = 'Zakouskis';
-                } else if (menuParam === 'verrines') {
-                    newData.Type_Evenement = 'Verrines';
-                } else if (menuParam === 'collectivite') {
-                    newData.Type_Evenement = 'Repas de collectivité';
-                }
-            } else if (typeParam === 'plat_prepare') {
-                newData.Type_Evenement = 'Plat Préparé';
-            }
-
-            const formuleParam = searchParams.get('formule');
-            const servicesParam = searchParams.get('services');
-
-            if (formuleParam === 'buffet-chaud') {
-                newData.Type_Evenement = 'Buffet Chaud';
-                if (servicesParam) {
-                    newData.Buffet_Chaud_Services = servicesParam;
-                }
-            } else if (formuleParam === 'collectivite') {
-                newData.Type_Evenement = 'Repas de collectivité';
-                const groupeParam = searchParams.get('groupe');
-                if (groupeParam === 'petit') newData.Nombre_Convives = "Moins de 30";
-                else if (groupeParam === 'standard') newData.Nombre_Convives = "30 à 100";
-                else if (groupeParam === 'grand') newData.Nombre_Convives = "Plus de 100";
-            }
-
-            // 2. Pré-sélection du Nombre de Convives (NOUVEAU)
-            if (convivesParam) {
-                // Nettoyage de la chaîne (ex: "25 à 250 pers." -> "25 a 250")
-                const safeParam = decodeURIComponent(convivesParam).toLowerCase();
-
-                // Détection intelligente selon les mots-clés
-                if (safeParam.includes('moins') && (safeParam.includes('20') || safeParam.includes('25') || safeParam.includes('30') || safeParam.includes('40') || safeParam.includes('50'))) {
-                    // Check specific menus restrictions first
-                    if (isCochonOrPorchetta) newData.Nombre_Convives = "Moins de 25";
-                    else if (isAnyBBQ || isBuffetFroidMode) newData.Nombre_Convives = "Moins de 25";
-                    else if (isCollectiviteMode) newData.Nombre_Convives = "Moins de 30";
-                    else if (isAssociations) newData.Nombre_Convives = "Moins de 50"; // Fallback to lowest
-                    else if (isPainsMode || isZakouskisMode || isVerrinesMode) newData.Nombre_Convives = "Moins de 25";
-                    else if (isBuffet) newData.Nombre_Convives = "Moins de 40";
-                    else newData.Nombre_Convives = "Moins de 20";
-                } else if (safeParam.includes('100') && safeParam.includes('200')) {
-                    newData.Nombre_Convives = "100 à 200";
-                } else if (safeParam.includes('25') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "25 à 100";
-                } else if (safeParam.includes('plus') && safeParam.includes('250')) {
-                    newData.Nombre_Convives = "Plus de 250";
-                } else if (safeParam.includes('plus') && safeParam.includes('200')) {
-                    newData.Nombre_Convives = "Plus de 200";
-                } else if (safeParam.includes('plus') && safeParam.includes('180')) {
-                    newData.Nombre_Convives = "Plus de 180";
-                } else if (safeParam.includes('plus') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "Plus de 100";
-                } else if (safeParam.includes('25') && safeParam.includes('180')) {
-                    newData.Nombre_Convives = "25 à 180";
-                } else if (safeParam.includes('25') && safeParam.includes('250')) {
-                    newData.Nombre_Convives = "25 à 250";
-                } else if (safeParam.includes('50') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "50 à 100";
-                } else if (safeParam.includes('20') && safeParam.includes('50')) {
-                    newData.Nombre_Convives = "20 à 50";
-                } else if (safeParam.includes('50') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "50 à 100";
-                } else if (safeParam.includes('moins') && safeParam.includes('50')) {
-                    newData.Nombre_Convives = "Moins de 50";
-                } else if (safeParam.includes('plus') && safeParam.includes('100')) {
-                    newData.Nombre_Convives = "Plus de 100";
-                } else {
-                    const opts = getInitialConvivesOptions(newData.Type_Evenement);
-                    if (opts.includes(convivesParam)) {
-                        // Direct match fallback
-                        newData.Nombre_Convives = convivesParam;
-                    }
-                }
-            }
-
-            return newData;
-        });
-    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations, isPlatUnique, isBuffetFroidMode, isPainsMode]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -1107,18 +1021,18 @@ function ContactForm() {
 
         const getVerrerieDetail = () => {
             if (formData.Location_Verrerie_Check !== "Oui") return "Non";
-            
+
             const vinQty = parseInt(formData.Location_Verrerie_Vin || "0", 10);
             const softQty = parseInt(formData.Location_Verrerie_Soft || "0", 10);
             const fluteQty = parseInt(formData.Location_Verrerie_Flute || "0", 10);
-            
+
             const details: string[] = [];
             if (vinQty > 0) details.push(`${vinQty}x Verre à vin`);
             if (softQty > 0) details.push(`${softQty}x Verre à soft (25cl)`);
             if (fluteQty > 0) details.push(`${fluteQty}x Flûte à champagne`);
-            
+
             const cost = (Math.ceil(vinQty / 5) + Math.ceil(softQty / 5) + Math.ceil(fluteQty / 5)) * 1.50;
-            
+
             if (details.length === 0) return "Oui (Aucun verre sélectionné - 0,00€)";
             return `Oui (${details.join(", ")} - Coût: ${cost.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€)`;
         };
@@ -1399,7 +1313,7 @@ function ContactForm() {
                             onChange={handleChange}
                         />
                         <label htmlFor="Location_Verrerie_Check" className="text-neutral-700 font-bold cursor-pointer select-none text-left leading-tight">
-                            Je souhaite une proposition pour la location de verrerie (1,50€ / lot de 5 verres, lavage inclus)
+                            Location de verrerie (1,50€ / lot de 5 verres)
                         </label>
                     </div>
                     <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
