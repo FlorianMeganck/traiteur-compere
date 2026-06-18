@@ -64,15 +64,51 @@ const dessertsList = [
 
 const NOBLES = ["Tomahawk", "Côte à l'os", "Entrecôte Irlandaise", "Entrecôte Simmental", "Entrecôte Black Angus", "Filet Pur"];
 
-const BBQ_PRICES: Record<string, { small: number; medium: number }> = {
-    classique: { small: 17, medium: 15 },
-    compose: { small: 22, medium: 20 },
-    dinatoire: { small: 26.50, medium: 24.50 },
-    mer: { small: 33, medium: 30 },
-    vegetarien: { small: 13, medium: 11 },
-    cochon: { small: 36, medium: 33 },
-    porchetta: { small: 26.50, medium: 24 },
-    nobles: { small: 49.50, medium: 45 },
+const BBQ_TIER_PRICES: Record<string, Record<string, number>> = {
+    classique: {
+        "Moins de 30": 17,
+        "30 à 90": 16,
+        "90 à 170": 15,
+        "170 à 250": 14,
+    },
+    compose: {
+        "Moins de 30": 23,
+        "30 à 90": 22,
+        "90 à 170": 21,
+        "170 à 250": 20,
+    },
+    dinatoire: {
+        "Moins de 30": 27,
+        "30 à 90": 25.50,
+        "90 à 170": 24,
+        "170 à 250": 22.50,
+    },
+    mer: {
+        "Moins de 30": 33,
+        "30 à 90": 31.50,
+        "90 à 170": 30.50,
+        "170 à 250": 29.50,
+    },
+    vegetarien: {
+        "Moins de 30": 13,
+        "30 à 90": 12.50,
+        "90 à 170": 12,
+        "170 à 250": 11,
+    },
+    nobles: {
+        "Moins de 30": 49.50,
+        "30 à 90": 47.50,
+        "90 à 170": 46,
+        "170 à 250": 44.50,
+    },
+    cochon: {
+        "Moins de 25": 36,
+        "25 à 180": 33,
+    },
+    porchetta: {
+        "Moins de 25": 26.50,
+        "25 à 180": 24,
+    }
 };
 
 const SIDES_COLD = ["Salade de Pâtes Pesto", "Salade de Pâtes Curry", "Salade Grecque (Feta/Olives)", "Taboulé Oriental", "Tomate Mozza Di Bufala", "Salade de Pomme de Terre (Mayonnaise)", "Salade de Pomme de Terre (Vinaigrette)", "Carottes Râpées (Citron)", "Céleri Râpé & Pommes", "Concombre à la crème", "Salade de chou blanc"];
@@ -362,6 +398,7 @@ function ContactForm() {
         Suppl_Crudite_Extra: "",
         Dessert_Check: "Non",
         Dessert_Choix: "",
+        Service_Check: "Non",
         Location_Vaisselle_Check: "Non",
         Location_Verrerie_Check: "Non",
         Location_Verrerie_Vin: "0",
@@ -510,9 +547,16 @@ function ContactForm() {
 
         const menuParam = searchParams.get('menu');
         const convivesParam = searchParams.get('convives');
+        const serviceParam = searchParams.get('service');
 
         setFormData(prev => {
             const newData = { ...prev };
+
+            if (serviceParam === 'oui') {
+                newData.Service_Check = "Oui";
+            } else if (serviceParam === 'non') {
+                newData.Service_Check = "Non";
+            }
 
             // 1. Pré-sélection du type d'événement / Menu
             if (menuParam) {
@@ -650,32 +694,21 @@ function ContactForm() {
 
         if (isAnyBBQ) {
             const bbqType = menuParam?.replace('bbq_', '') || 'classique';
-            const prices = BBQ_PRICES[bbqType];
+            const prices = BBQ_TIER_PRICES[bbqType];
             if (prices === undefined) return 0;
-            if (isCochonOrPorchetta) {
-                if (formData.Nombre_Convives === 'Moins de 25') {
-                    base = prices.small;
-                } else {
-                    base = prices.medium;
-                }
-            } else if (bbqType === 'classique') {
-                if (formData.Nombre_Convives === 'Moins de 30') {
-                    base = 17;
-                } else if (formData.Nombre_Convives === '30 à 90') {
-                    base = 16;
-                } else if (formData.Nombre_Convives === '90 à 170') {
-                    base = 15;
-                } else if (formData.Nombre_Convives === '170 à 250') {
-                    base = 14;
-                } else {
-                    base = -1; // Plus de 250
-                }
+
+            const convives = formData.Nombre_Convives;
+            const priceVal = prices[convives];
+
+            if (priceVal !== undefined) {
+                base = priceVal;
             } else {
-                if (formData.Nombre_Convives === 'Moins de 30') {
-                    base = prices.small;
-                } else {
-                    base = prices.medium;
-                }
+                base = -1; // "Plus de 250" or "Plus de 180" -> Sur devis
+            }
+
+            // Apply Service (+5€/pers)
+            if (base !== -1 && formData.Service_Check === "Oui") {
+                base += 5;
             }
         } else if (isBuffetFroidMode) {
             const prices = BUFFET_FROID_PRICES[menuParam || ''];
@@ -738,6 +771,8 @@ function ContactForm() {
             }
             base = itemPrice;
         }
+
+        if (base === -1) return -1;
 
         const tier = getPriceTier(formData.Nombre_Convives);
         if (tier === 'high') {
@@ -1049,6 +1084,7 @@ function ContactForm() {
             ...(finalPriceStr === "SUR DEVIS" && totalPrice > 0 && { "💡 Prix indicatif de base (Info Interne)": `${totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` }),
             "📅 Date de l'événement": formData.Date,
             "👥 Nombre de convives": formData.Nombre_Convives,
+            ...(isAnyBBQ && { "🧑‍🍳 Prestation Service": formData.Service_Check === "Oui" ? "Oui (+5€/pers)" : "Non" }),
 
             // COORDONNÉES
             "👤 Nom complet": `${formData.Nom} ${formData.Prenom}`,
@@ -1624,7 +1660,11 @@ function ContactForm() {
                             ) : (
                                 <span className="text-2xl font-serif font-bold">{totalPrice > 0 ? <>{totalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers <span className="text-sm font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span></> : "---"}</span>
                             )}
-                            {totalPrice > 0 && <p className="text-xs text-[#D4AF37]/70 mt-1 font-light">Hors frais de déplacement & service</p>}
+                            {totalPrice > 0 && (
+                                <p className="text-xs text-[#D4AF37]/70 mt-1 font-light">
+                                    {formData.Service_Check === "Oui" ? "Hors frais de déplacement (service inclus)" : "Hors frais de déplacement & service"}
+                                </p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -2363,9 +2403,34 @@ function ContactForm() {
             </div>
 
             {!isPlatPrepare && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="group">
-                        <label className={labelStyle}>Date <span className="text-red-500">*</span></label>
+                <>
+                    {isAnyBBQ && (
+                        <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                            <div>
+                                <label className="block text-sm font-bold text-neutral-700 uppercase tracking-wide">Prestation Service</label>
+                                <p className="text-xs text-neutral-500 mt-1 italic">Maîtres du feu, découpe & service à table sur place.</p>
+                            </div>
+                            <div className="flex bg-neutral-200/60 p-1 rounded-xl w-fit border border-neutral-200/40">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Non" }))}
+                                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${formData.Service_Check !== "Oui" ? 'bg-white text-black shadow' : 'text-neutral-500 hover:text-black'}`}
+                                >
+                                    Sans service
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Oui" }))}
+                                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${formData.Service_Check === "Oui" ? 'bg-black text-[#D4AF37] shadow' : 'text-neutral-500 hover:text-black'}`}
+                                >
+                                    Avec service (+5€/pers)
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="group">
+                            <label className={labelStyle}>Date <span className="text-red-500">*</span></label>
                         <input
                             type="date"
                             name="Date"
@@ -2389,6 +2454,7 @@ function ContactForm() {
                         </div>
                     </div>
                 </div>
+                </>
             )}
 
         </>

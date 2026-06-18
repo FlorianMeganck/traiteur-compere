@@ -47,12 +47,12 @@ const BBQ_OPTIONS: Record<BBQType, {
             "2 Plats au choix (Côte d'agneau, Contrefilet...)",
             "Accompagnements chauds & froids à volonté"
         ],
-        prices: { small: "22€", medium: "20€", large: "Sur devis" },
-        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." },
+        prices: { small: "23€", medium: "22€", large: "Sur devis" },
+        counts: { small: "Moins de 30 pers.", medium: "30 à 250 pers.", large: "Plus de 250 pers." },
         tiers: [
-            { count: "Moins de 30 pers.", price: "22€" },
-            { count: "30 à 90 pers.", price: "20€" },
-            { count: "90 à 170 pers.", price: "20€" },
+            { count: "Moins de 30 pers.", price: "23€" },
+            { count: "30 à 90 pers.", price: "22€" },
+            { count: "90 à 170 pers.", price: "21€" },
             { count: "170 à 250 pers.", price: "20€" },
             { count: "Plus de 250 pers.", price: "Sur devis" }
         ]
@@ -65,13 +65,13 @@ const BBQ_OPTIONS: Record<BBQType, {
             "2ème Service : Barbecue varié à volonté",
             "Buffet de salades & féculents"
         ],
-        prices: { small: "26,50€", medium: "24,50€", large: "Sur devis" },
-        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." },
+        prices: { small: "27€", medium: "25,50€", large: "Sur devis" },
+        counts: { small: "Moins de 30 pers.", medium: "30 à 250 pers.", large: "Plus de 250 pers." },
         tiers: [
-            { count: "Moins de 30 pers.", price: "26,50€" },
-            { count: "30 à 90 pers.", price: "24,50€" },
-            { count: "90 à 170 pers.", price: "24,50€" },
-            { count: "170 à 250 pers.", price: "24,50€" },
+            { count: "Moins de 30 pers.", price: "27€" },
+            { count: "30 à 90 pers.", price: "25,50€" },
+            { count: "90 à 170 pers.", price: "24€" },
+            { count: "170 à 250 pers.", price: "22,50€" },
             { count: "Plus de 250 pers.", price: "Sur devis" }
         ]
     },
@@ -84,13 +84,13 @@ const BBQ_OPTIONS: Record<BBQType, {
             "Pavé de Saumon papilloté",
             "Salades fraîcheur & Sauces citronnées"
         ],
-        prices: { small: "33€", medium: "30€", large: "Sur devis" },
-        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." },
+        prices: { small: "33€", medium: "31,50€", large: "Sur devis" },
+        counts: { small: "Moins de 30 pers.", medium: "30 à 250 pers.", large: "Plus de 250 pers." },
         tiers: [
             { count: "Moins de 30 pers.", price: "33€" },
-            { count: "30 à 90 pers.", price: "30€" },
-            { count: "90 à 170 pers.", price: "30€" },
-            { count: "170 à 250 pers.", price: "30€" },
+            { count: "30 à 90 pers.", price: "31,50€" },
+            { count: "90 à 170 pers.", price: "30,50€" },
+            { count: "170 à 250 pers.", price: "29,50€" },
             { count: "Plus de 250 pers.", price: "Sur devis" }
         ]
     },
@@ -103,12 +103,12 @@ const BBQ_OPTIONS: Record<BBQType, {
             "Grand buffet de salades composées",
             "Pommes de terre & Sauces végétales"
         ],
-        prices: { small: "13€", medium: "11€", large: "Sur devis" },
-        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." },
+        prices: { small: "13€", medium: "12,50€", large: "Sur devis" },
+        counts: { small: "Moins de 30 pers.", medium: "30 à 250 pers.", large: "Plus de 250 pers." },
         tiers: [
             { count: "Moins de 30 pers.", price: "13€" },
-            { count: "30 à 90 pers.", price: "11€" },
-            { count: "90 à 170 pers.", price: "11€" },
+            { count: "30 à 90 pers.", price: "12,50€" },
+            { count: "90 à 170 pers.", price: "12€" },
             { count: "170 à 250 pers.", price: "11€" },
             { count: "Plus de 250 pers.", price: "Sur devis" }
         ]
@@ -156,13 +156,13 @@ const BBQ_OPTIONS: Record<BBQType, {
             "Filet pur et viandes d'exception",
             "Accompagnements premium & Sauces truffées"
         ],
-        prices: { small: "49,50€", medium: "45€", large: "Sur devis" },
-        counts: { small: "Moins de 25 pers.", medium: "25 à 250 pers.", large: "Plus de 250 pers." },
+        prices: { small: "49,50€", medium: "47,50€", large: "Sur devis" },
+        counts: { small: "Moins de 30 pers.", medium: "30 à 250 pers.", large: "Plus de 250 pers." },
         tiers: [
             { count: "Moins de 30 pers.", price: "49,50€" },
-            { count: "30 à 90 pers.", price: "45€" },
-            { count: "90 à 170 pers.", price: "45€" },
-            { count: "170 à 250 pers.", price: "45€" },
+            { count: "30 à 90 pers.", price: "47,50€" },
+            { count: "90 à 170 pers.", price: "46€" },
+            { count: "170 à 250 pers.", price: "44,50€" },
             { count: "Plus de 250 pers.", price: "Sur devis" }
         ]
     }
@@ -898,40 +898,80 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
 }
 
 function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string, selectedBBQ?: BBQType }) {
+    const [withService, setWithService] = useState(false);
+
     // If it's the BBQ menu, show the specific options with dynamic prices
     if (tag === "BBQ & Feu de bois" && selectedBBQ) {
         const data = BBQ_OPTIONS[selectedBBQ];
         const menuParam = `bbq_${selectedBBQ}`;
 
+        const getDisplayPrice = (priceStr: string, addService: boolean) => {
+            if (priceStr.toLowerCase().includes("devis")) return priceStr;
+            if (!addService) return priceStr;
+            const val = parseFloat(priceStr.replace(/[^0-9,.]/g, '').replace(',', '.'));
+            if (isNaN(val)) return priceStr;
+            const newVal = val + 5;
+            const formattedVal = Number.isInteger(newVal) ? newVal.toString() : newVal.toFixed(2).replace('.', ',');
+            return `${formattedVal}€`;
+        };
+
         return (
-            <div className="flex flex-wrap gap-4 mt-8">
-                {data.tiers.map((tier, idx) => {
-                    const isHighlighted = idx === 1; // Highlight the second tier (30 à 90 or 25 à 180)
-                    if (isHighlighted) {
-                        return (
-                            <Link
-                                key={idx}
-                                href={`/contact?menu=${menuParam}&convives=${encodeURIComponent(tier.count)}`}
-                                className="flex-1 min-w-[140px] bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
-                            >
-                                <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                                <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">{tier.count}</p>
-                                <p className="text-xl font-bold text-white font-serif">{tier.price} {tier.price.includes('€') && <span className="text-xs font-sans text-neutral-300 font-normal ml-1">HTVA</span>}</p>
-                            </Link>
-                        );
-                    } else {
-                        return (
-                            <Link
-                                key={idx}
-                                href={`/contact?menu=${menuParam}&convives=${encodeURIComponent(tier.count)}`}
-                                className="flex-1 min-w-[140px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
-                            >
-                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">{tier.count}</p>
-                                <p className="text-xl font-bold text-neutral-800 font-serif">{tier.price} {tier.price.includes('€') && <span className="text-xs font-sans text-neutral-500 font-normal ml-1">HTVA</span>}</p>
-                            </Link>
-                        );
-                    }
-                })}
+            <div className="flex flex-col mt-4">
+                {/* Toggle Service */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 bg-neutral-50 p-4 rounded-2xl border border-neutral-200">
+                    <div>
+                        <span className="block text-sm font-bold text-neutral-800 uppercase tracking-wider">Option Service</span>
+                        <span className="block text-xs text-neutral-500 mt-0.5">Maîtres du feu, découpe & service à table</span>
+                    </div>
+                    <div className="flex bg-neutral-200/60 p-1 rounded-xl w-fit border border-neutral-200/40">
+                        <button
+                            onClick={() => setWithService(false)}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${!withService ? 'bg-white text-black shadow' : 'text-neutral-500 hover:text-black'}`}
+                        >
+                            Sans service
+                        </button>
+                        <button
+                            onClick={() => setWithService(true)}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${withService ? 'bg-black text-[#D4AF37] shadow' : 'text-neutral-500 hover:text-black'}`}
+                        >
+                            Avec service (+5€/pers)
+                        </button>
+                    </div>
+                </div>
+
+                {/* Tiers Grid */}
+                <div className="flex flex-wrap gap-4">
+                    {data.tiers.map((tier, idx) => {
+                        const isHighlighted = idx === 1; // Highlight the second tier (30 à 90 or 25 à 180)
+                        const displayPrice = getDisplayPrice(tier.price, withService);
+                        const contactUrl = `/contact?menu=${menuParam}&convives=${encodeURIComponent(tier.count)}${withService ? '&service=oui' : ''}`;
+
+                        if (isHighlighted) {
+                            return (
+                                <Link
+                                    key={idx}
+                                    href={contactUrl}
+                                    className="flex-1 min-w-[140px] bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
+                                >
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
+                                    <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">{tier.count}</p>
+                                    <p className="text-xl font-bold text-white font-serif">{displayPrice} {displayPrice.includes('€') && <span className="text-xs font-sans text-neutral-300 font-normal ml-1">HTVA</span>}</p>
+                                </Link>
+                            );
+                        } else {
+                            return (
+                                <Link
+                                    key={idx}
+                                    href={contactUrl}
+                                    className="flex-1 min-w-[140px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                                >
+                                    <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">{tier.count}</p>
+                                    <p className="text-xl font-bold text-neutral-800 font-serif">{displayPrice} {displayPrice.includes('€') && <span className="text-xs font-sans text-neutral-500 font-normal ml-1">HTVA</span>}</p>
+                                </Link>
+                            );
+                        }
+                    })}
+                </div>
             </div>
         );
     }
