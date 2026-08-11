@@ -44,16 +44,16 @@ export default function MenuFetesPage() {
       {/* Hero Section */}
       <section className="relative bg-[#0F0F0F] text-white py-20 px-6 overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[radial-[#D4AF37]_1px,transparent_1px] [background-size:24px_24px]"></div>
-        
+
         <div className="relative max-w-4xl mx-auto text-center space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] text-xs uppercase tracking-widest font-semibold">
             <Gift size={14} /> Saison des Fêtes 2026
           </div>
-          
+
           <h1 className="text-4xl md:text-6xl font-serif text-white leading-tight">
             Menus d'Exception pour vos Fêtes
           </h1>
-          
+
           <p className="text-lg md:text-xl text-neutral-300 max-w-2xl mx-auto font-light leading-relaxed">
             Découvrez nos compositions gastronomiques exclusives conçues pour illuminer vos réveillons et célébrations de fin d'année.
           </p>

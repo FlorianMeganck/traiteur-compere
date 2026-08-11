@@ -72,11 +72,11 @@ export default function Navbar() {
 
     return (
         <>
-        <nav
-            className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
-                }`}
-        >
-            {/* 
+            <nav
+                className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
+                    }`}
+            >
+                {/* 
                background logic: 
                - transparent => transparent
                - NOT transparent => white
@@ -86,19 +86,66 @@ export default function Navbar() {
                Let's make navbar transparent if menu is open, so black overlay shines through.
             */}
 
-            <div className="w-full max-w-7xl mx-auto px-6 relative">
+                <div className="w-full max-w-7xl mx-auto px-6 relative">
 
-                {/* --- DESKTOP LAYOUT (Grid 3 Cols) --- */}
-                <div className="hidden md:grid grid-cols-3 items-center w-full relative">
+                    {/* --- DESKTOP LAYOUT (Grid 3 Cols) --- */}
+                    <div className="hidden md:grid grid-cols-3 items-center w-full relative">
 
-                    {/* LEFT ZONE: À Propos & Services (Aligned Right -> Center) */}
-                    <div className="flex justify-end items-center gap-6 pr-4">
-                        <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
-                        <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
+                        {/* LEFT ZONE: À Propos & Services (Aligned Right -> Center) */}
+                        <div className="flex justify-end items-center gap-6 pr-4">
+                            <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
+                            <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
+                        </div>
+
+                        {/* CENTER ZONE: Logo */}
+                        <div className="flex justify-center items-center">
+                            <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
+                                <Image
+                                    src="/images/Logo_traiteur.png"
+                                    alt="Traiteur Compère"
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                />
+                            </Link>
+                        </div>
+
+                        {/* RIGHT ZONE: Plats Préparés, Formules, Menus de Fêtes & Contact (Aligned Left -> Center) */}
+                        <div className="flex justify-start items-center gap-5 pl-4">
+                            <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
+                            <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
+                            <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} isFestive={true} />
+                            <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
+
+                            {/* Desktop Cart Button */}
+                            <button onClick={() => setIsCartOpen(true)} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37]`}>
+                                <ShoppingCart size={24} />
+                                {totalItems > 0 && (
+                                    <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                                        {totalItems}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+
+                        {/* SOCIALS (Absolute left) */}
+                        <div className="absolute left-0 flex items-center gap-4">
+                            <SocialLink
+                                href="https://www.facebook.com/profile.php?id=61582940090708"
+                                icon={<FacebookIcon />}
+                                className={desktopTextColor}
+                            />
+                            <SocialLink
+                                href="https://www.instagram.com/traiteurcompere8/"
+                                icon={<InstagramIcon />}
+                                className={desktopTextColor}
+                            />
+                        </div>
                     </div>
 
-                    {/* CENTER ZONE: Logo */}
-                    <div className="flex justify-center items-center">
+                    {/* --- MOBILE LAYOUT (Flex Between) --- */}
+                    <div className="md:hidden flex justify-between items-center w-full">
+                        {/* LOGO */}
                         <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
                             <Image
                                 src="/images/Logo_traiteur.png"
@@ -108,133 +155,86 @@ export default function Navbar() {
                                 priority
                             />
                         </Link>
-                    </div>
 
-                    {/* RIGHT ZONE: Plats Préparés, Formules, Menus de Fêtes & Contact (Aligned Left -> Center) */}
-                    <div className="flex justify-start items-center gap-5 pl-4">
-                        <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
-                        <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
-                        <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} isFestive={true} />
-                        <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
-                        
-                        {/* Desktop Cart Button */}
-                        <button onClick={() => setIsCartOpen(true)} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37]`}>
-                            <ShoppingCart size={24} />
-                            {totalItems > 0 && (
-                                <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                                    {totalItems}
-                                </span>
-                            )}
-                        </button>
-                    </div>
+                        <div className="flex items-center gap-4">
+                            {/* Mobile Cart Button */}
+                            <button onClick={() => { setIsMenuOpen(false); setIsCartOpen(true); }} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-50`}>
+                                <ShoppingCart size={24} />
+                                {totalItems > 0 && (
+                                    <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                                        {totalItems}
+                                    </span>
+                                )}
+                            </button>
 
-                    {/* SOCIALS (Absolute left) */}
-                    <div className="absolute left-0 flex items-center gap-4">
-                        <SocialLink
-                            href="https://www.facebook.com/profile.php?id=61582940090708"
-                            icon={<FacebookIcon />}
-                            className={desktopTextColor}
-                        />
-                        <SocialLink
-                            href="https://www.instagram.com/traiteurcompere8/"
-                            icon={<InstagramIcon />}
-                            className={desktopTextColor}
-                        />
-                    </div>
-                </div>
-
-                {/* --- MOBILE LAYOUT (Flex Between) --- */}
-                <div className="md:hidden flex justify-between items-center w-full">
-                    {/* LOGO */}
-                    <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
-                        <Image
-                            src="/images/Logo_traiteur.png"
-                            alt="Traiteur Compère"
-                            fill
-                            className="object-contain"
-                            priority
-                        />
-                    </Link>
-
-                    <div className="flex items-center gap-4">
-                        {/* Mobile Cart Button */}
-                        <button onClick={() => { setIsMenuOpen(false); setIsCartOpen(true); }} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-50`}>
-                            <ShoppingCart size={24} />
-                            {totalItems > 0 && (
-                                <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                                    {totalItems}
-                                </span>
-                            )}
-                        </button>
-
-                        {/* BURGER */}
-                        <div className="relative z-50">
-                            <button
-                                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 focus:outline-none"
-                            >
-                            {/* Top Line */}
-                            <motion.span
-                                animate={isMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-                                className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
-                            />
-                            {/* Middle Line */}
-                            <motion.span
-                                animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                                className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
-                            />
-                            {/* Bottom Line */}
-                            <motion.span
-                                animate={isMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-                                className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
-                            />
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-                {/* MOBILE OVERLAY */}
-                <AnimatePresence>
-                    {isMenuOpen && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="fixed inset-0 bg-black/95 backdrop-blur-md z-40 flex flex-col items-center justify-center text-center"
-                        >
-                            <div className="flex flex-col gap-8 mb-12">
-                                {NAV_LINKS.map((link) => (
-                                    <MobileLink
-                                        key={link.href}
-                                        href={link.href}
-                                        label={link.label}
-                                        isActive={pathname === link.href}
-                                        onClick={() => setIsMenuOpen(false)}
+                            {/* BURGER */}
+                            <div className="relative z-50">
+                                <button
+                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                    className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 focus:outline-none"
+                                >
+                                    {/* Top Line */}
+                                    <motion.span
+                                        animate={isMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+                                        className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
                                     />
-                                ))}
+                                    {/* Middle Line */}
+                                    <motion.span
+                                        animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
+                                        className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
+                                    />
+                                    {/* Bottom Line */}
+                                    <motion.span
+                                        animate={isMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+                                        className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
+                                    />
+                                </button>
                             </div>
+                        </div>
+                    </div>
 
-                            <div className="w-16 h-[1px] bg-white/20 mb-8"></div>
+                    {/* MOBILE OVERLAY */}
+                    <AnimatePresence>
+                        {isMenuOpen && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.4 }}
+                                className="fixed inset-0 bg-black/95 backdrop-blur-md z-40 flex flex-col items-center justify-center text-center"
+                            >
+                                <div className="flex flex-col gap-8 mb-12">
+                                    {NAV_LINKS.map((link) => (
+                                        <MobileLink
+                                            key={link.href}
+                                            href={link.href}
+                                            label={link.label}
+                                            isActive={pathname === link.href}
+                                            onClick={() => setIsMenuOpen(false)}
+                                        />
+                                    ))}
+                                </div>
 
-                            {/* Mobile Socials */}
-                            <div className="flex items-center gap-8">
-                                <SocialLink
-                                    href="https://www.facebook.com/profile.php?id=61582940090708"
-                                    icon={<FacebookIcon size={32} />}
-                                    className="text-white"
-                                />
-                                <SocialLink
-                                    href="https://www.instagram.com/traiteurcompere8/"
-                                    icon={<InstagramIcon size={32} />}
-                                    className="text-white"
-                                />
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-        </nav>
+                                <div className="w-16 h-[1px] bg-white/20 mb-8"></div>
+
+                                {/* Mobile Socials */}
+                                <div className="flex items-center gap-8">
+                                    <SocialLink
+                                        href="https://www.facebook.com/profile.php?id=61582940090708"
+                                        icon={<FacebookIcon size={32} />}
+                                        className="text-white"
+                                    />
+                                    <SocialLink
+                                        href="https://www.instagram.com/traiteurcompere8/"
+                                        icon={<InstagramIcon size={32} />}
+                                        className="text-white"
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            </nav>
 
             {/* Cart Side Drawer */}
             <AnimatePresence>
@@ -273,7 +273,7 @@ export default function Navbar() {
                                 ) : (
                                     cartItems.map((item) => (
                                         <div key={item.id} className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm relative">
-                                            <button 
+                                            <button
                                                 onClick={() => removeFromCart(item.id)}
                                                 className="absolute top-4 right-4 text-neutral-300 hover:text-red-500 transition-colors"
                                             >
@@ -284,7 +284,7 @@ export default function Navbar() {
                                                 <p className="text-sm text-[#D4AF37] font-medium capitalize mb-3">
                                                     {item.jour} ({MENU_DATA.find(m => m.id === item.semaineId)?.week.split(' :')[0]})
                                                 </p>
-                                                
+
                                                 <div className="flex justify-between items-center text-sm mb-2">
                                                     <span className="text-neutral-600">Quantité plat : <strong className="text-black">{item.quantitePlat}</strong></span>
                                                     <span className="font-semibold">{item.prixUnitairePlat * item.quantitePlat} €</span>
@@ -296,7 +296,7 @@ export default function Navbar() {
                                                         <span>{qty * item.prixUnitaireSoupe} €</span>
                                                     </div>
                                                 ))}
-                                                
+
                                                 <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between items-center">
                                                     <span className="text-xs uppercase tracking-widest text-neutral-400">Total ligne</span>
                                                     <span className="font-bold text-lg text-black">{item.prixTotalLigne} €</span>
@@ -313,8 +313,8 @@ export default function Navbar() {
                                         <span className="text-lg text-neutral-600 uppercase tracking-widest">Total</span>
                                         <span className="text-3xl font-serif text-[#D4AF37]">{cartTotal} €</span>
                                     </div>
-                                    <Link 
-                                        href="/contact?type=plat_prepare" 
+                                    <Link
+                                        href="/contact?type=plat_prepare"
                                         onClick={() => setIsCartOpen(false)}
                                         className="w-full bg-black text-white font-bold text-center py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-[#D4AF37] transition-colors"
                                     >
