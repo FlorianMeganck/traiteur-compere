@@ -15,6 +15,7 @@ const NAV_LINKS = [
     { href: "/services", label: "Services" },
     { href: "/plats-prepares", label: "Plats Préparés" },
     { href: "/formules", label: "Formules" },
+    { href: "/menu-fetes", label: "Menus de Fêtes" },
     { href: "/contact", label: "Contact" },
 ];
 
@@ -109,11 +110,12 @@ export default function Navbar() {
                         </Link>
                     </div>
 
-                    {/* RIGHT ZONE: Plats Préparés, Formules & Contact (Aligned Left -> Center) */}
-                    <div className="flex justify-start items-center gap-6 pl-4">
+                    {/* RIGHT ZONE: Plats Préparés, Formules, Menus de Fêtes & Contact (Aligned Left -> Center) */}
+                    <div className="flex justify-start items-center gap-5 pl-4">
                         <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
                         <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
-                        <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} />
+                        <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} isFestive={true} />
+                        <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
                         
                         {/* Desktop Cart Button */}
                         <button onClick={() => setIsCartOpen(true)} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37]`}>
@@ -330,13 +332,14 @@ export default function Navbar() {
 
 // --- SUB-COMPONENTS ---
 
-function NavLink({ href, label, textColor, isActive }: { href: string; label: string; textColor: string; isActive: boolean }) {
+function NavLink({ href, label, textColor, isActive, isFestive }: { href: string; label: string; textColor: string; isActive: boolean; isFestive?: boolean }) {
     return (
         <Link
             href={href}
-            className={`relative py-1 text-sm font-bold tracking-widest uppercase whitespace-nowrap transition-all duration-300 group ${textColor} ${isActive ? "opacity-70 border-b-2 border-[#D4AF37]" : "opacity-100 hover:text-[#D4AF37]"
+            className={`relative py-1 text-sm font-bold tracking-widest uppercase whitespace-nowrap transition-all duration-300 group flex items-center gap-1.5 ${textColor} ${isActive ? "opacity-70 border-b-2 border-[#D4AF37]" : "opacity-100 hover:text-[#D4AF37]"
                 }`}
         >
+            {isFestive && <span className="text-[#D4AF37] animate-pulse">✨</span>}
             {label}
             {/* Golden Underline Animation (Only for inactive state hover) */}
             {!isActive && (
