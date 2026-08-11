@@ -72,29 +72,30 @@ export default function Navbar() {
 
     return (
         <>
+        <header className="fixed inset-x-0 top-0 z-50">
+            {/* Top-Bar Bandeau d'Annonce (Festive Preview) */}
+            <div className="bg-[#111111] text-white py-3 px-4 text-center text-xs md:text-sm font-medium tracking-wide flex items-center justify-center gap-2 border-b border-[#D4AF37]/30 shadow-sm">
+                <span className="text-[#D4AF37]">✨</span>
+                <span>Nouveau : Découvrez nos premiers essais pour les <strong>Menus de Fêtes 2026</strong> !</span>
+                <Link href="/menu-fetes" className="underline text-[#D4AF37] hover:text-white ml-1 font-bold transition-colors">
+                    Voir la section Fêtes →
+                </Link>
+            </div>
+
             <nav
-                className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
+                className={`w-full transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
                     }`}
             >
-                {/* 
-               background logic: 
-               - transparent => transparent
-               - NOT transparent => white
-               - BUT if Menu is Open => transparent (because overlay is black/95, we don't want white bar on top)
-               Actually, usually the overlay is fixed inset-0 z-40, and navbar is z-50.
-               If navbar is white z-50, it covers the top of the black overlay.
-               Let's make navbar transparent if menu is open, so black overlay shines through.
-            */}
-
                 <div className="w-full max-w-7xl mx-auto px-6 relative">
 
                     {/* --- DESKTOP LAYOUT (Grid 3 Cols) --- */}
                     <div className="hidden md:grid grid-cols-3 items-center w-full relative">
 
-                        {/* LEFT ZONE: À Propos & Services (Aligned Right -> Center) */}
-                        <div className="flex justify-end items-center gap-6 pr-4">
+                        {/* LEFT ZONE: À Propos, Services & Plats Préparés (Aligned Right -> Center) */}
+                        <div className="flex justify-end items-center gap-5 pr-4">
                             <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
                             <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
+                            <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
                         </div>
 
                         {/* CENTER ZONE: Logo */}
@@ -110,9 +111,8 @@ export default function Navbar() {
                             </Link>
                         </div>
 
-                        {/* RIGHT ZONE: Plats Préparés, Formules, Menus de Fêtes & Contact (Aligned Left -> Center) */}
+                        {/* RIGHT ZONE: Formules, Menus de Fêtes & Contact (Aligned Left -> Center) */}
                         <div className="flex justify-start items-center gap-5 pl-4">
-                            <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
                             <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
                             <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} isFestive={true} />
                             <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
@@ -235,8 +235,8 @@ export default function Navbar() {
                     </AnimatePresence>
                 </div>
             </nav>
-
-            {/* Cart Side Drawer */}
+        </header>
+        {/* Cart Side Drawer */}
             <AnimatePresence>
                 {isCartOpen && (
                     <>

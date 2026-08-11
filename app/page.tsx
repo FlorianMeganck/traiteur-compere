@@ -9,15 +9,6 @@ export default function Home() {
   return (
     <main className="bg-white text-gray-800 font-sans selection:bg-[#D4AF37] selection:text-white overflow-hidden">
 
-      {/* Banner Menus de Fêtes (Preview) */}
-      <div className="bg-[#111111] text-white pt-24 pb-3 px-4 text-center text-xs md:text-sm font-medium tracking-wide flex items-center justify-center gap-2 border-b border-[#D4AF37]/30">
-        <span className="text-[#D4AF37]">✨</span>
-        <span>Nouveau : Découvrez nos premiers essais pour les <strong>Menus de Fêtes 2026</strong> !</span>
-        <Link href="/menu-fetes" className="underline text-[#D4AF37] hover:text-white ml-1 font-bold">
-          Voir la section Fêtes →
-        </Link>
-      </div>
-
       <section className="relative w-full h-[80vh] md:h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
         {/* Image d'arrière-plan */}
         <div className="absolute inset-0 z-0">

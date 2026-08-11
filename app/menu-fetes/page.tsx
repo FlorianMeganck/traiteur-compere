@@ -33,13 +33,7 @@ export default function MenuFetesPage() {
   ];
 
   return (
-    <main className="bg-white text-gray-800 font-sans min-h-screen pt-24 pb-20 selection:bg-[#D4AF37] selection:text-white">
-      {/* Top Banner Notice - Branch Preview */}
-      <div className="bg-[#111111] text-white py-3 px-4 text-center text-xs md:text-sm font-medium tracking-wide flex items-center justify-center gap-2 border-b border-[#D4AF37]/30">
-        <Sparkles size={16} className="text-[#D4AF37] animate-pulse" />
-        <span>Espace de test - Chantier <strong>Menus de Fêtes</strong> (Preview)</span>
-        <Sparkles size={16} className="text-[#D4AF37] animate-pulse" />
-      </div>
+    <main className="bg-white text-gray-800 font-sans min-h-screen pt-36 pb-20 selection:bg-[#D4AF37] selection:text-white">
 
       {/* Hero Section */}
       <section className="relative bg-[#0F0F0F] text-white py-20 px-6 overflow-hidden">
