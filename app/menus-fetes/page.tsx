@@ -116,7 +116,7 @@ export default function MenusFetes() {
     };
 
     return (
-        <main className="min-h-screen bg-[#FAF9F6] text-neutral-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-36 md:pt-44 pb-24 relative overflow-hidden">
+        <main className="min-h-screen bg-[#FAF9F6] text-neutral-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-28 md:pt-36 pb-20 relative overflow-hidden">
 
             {/* Toast Notification */}
             <AnimatePresence>
@@ -133,66 +133,66 @@ export default function MenusFetes() {
                 )}
             </AnimatePresence>
 
-            {/* --- HERO SECTION FESTIVE --- */}
-            <section className="relative bg-[#0F0F0F] text-white py-20 md:py-28 px-6 overflow-hidden rounded-b-[2.5rem] md:rounded-b-[4rem] shadow-2xl">
+            {/* --- HERO SECTION FESTIVE (COMPACT) --- */}
+            <section className="relative bg-[#0F0F0F] text-white py-12 md:py-16 px-6 overflow-hidden rounded-b-[2rem] md:rounded-b-[3rem] shadow-2xl">
                 {/* Texture dorée d'arrière-plan */}
                 <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#D4AF37_1px,transparent_1px)] [background-size:24px_24px]"></div>
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D4AF37]/10 rounded-full blur-[140px] pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
 
-                <div className="relative max-w-5xl mx-auto text-center space-y-6">
+                <div className="relative max-w-4xl mx-auto text-center space-y-4">
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] text-xs md:text-sm uppercase tracking-widest font-semibold"
+                        transition={{ duration: 0.5 }}
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] text-xs uppercase tracking-widest font-semibold"
                     >
-                        <Gift size={16} /> Menus Gastronomiques de Réveillon 2026
+                        <Gift size={15} /> Menus Gastronomiques de Réveillon 2026
                     </motion.div>
 
                     <motion.h1
-                        initial={{ opacity: 0, y: 25 }}
+                        initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.1 }}
-                        className="text-4xl md:text-6xl lg:text-7xl font-serif text-white leading-tight"
+                        transition={{ duration: 0.6, delay: 0.1 }}
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white leading-tight"
                     >
                         La Magie des Fêtes <br />
                         <span className="text-[#D4AF37] italic">signée Traiteur Compère</span>
                     </motion.h1>
 
                     <motion.p
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.2 }}
-                        className="text-lg md:text-2xl text-neutral-300 max-w-3xl mx-auto font-light leading-relaxed"
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="text-sm sm:text-base md:text-lg text-neutral-300 max-w-2xl mx-auto font-light leading-relaxed"
                     >
                         Composez votre repas de réveillon sur mesure selon vos envies. Notre brigade élabore des créations d'exception prêtes à réchauffer et déguster en toute sérénité.
                     </motion.p>
 
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.3 }}
-                        className="pt-4 flex flex-wrap justify-center gap-4"
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                        className="pt-2 flex flex-wrap justify-center gap-3.5"
                     >
                         <a
                             href="#menus"
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#D4AF37] text-black font-bold uppercase tracking-wider text-sm hover:bg-[#c29f2e] transition-all shadow-xl hover:scale-105"
+                            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#D4AF37] text-black font-bold uppercase tracking-wider text-xs sm:text-sm hover:bg-[#c29f2e] transition-all shadow-xl hover:scale-105"
                         >
                             Composer nos menus
-                            <ChevronRight size={18} />
+                            <ChevronRight size={16} />
                         </a>
                         <a
                             href="#retraits"
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-white/40 text-white font-bold uppercase tracking-wider text-sm hover:border-[#D4AF37] hover:text-[#D4AF37] hover:bg-white/5 transition-all shadow-md"
+                            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border-2 border-white/40 text-white font-bold uppercase tracking-wider text-xs sm:text-sm hover:border-[#D4AF37] hover:text-[#D4AF37] hover:bg-white/5 transition-all shadow-md"
                         >
-                            <Clock size={16} className="text-[#D4AF37]" />
+                            <Clock size={15} className="text-[#D4AF37]" />
                             Dates &amp; Modalités de retrait
                         </a>
                     </motion.div>
                 </div>
             </section>
 
-            <div className="max-w-7xl mx-auto px-6 mt-16 relative z-20">
+            <div className="max-w-7xl mx-auto px-6 mt-10 md:mt-14 relative z-20">
 
                 {/* --- COMMENT ÇA FONCTIONNE (4 ÉTAPES) --- */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
@@ -532,11 +532,11 @@ export default function MenusFetes() {
                 </div>
 
                 {/* --- CONSEILS DU CHEF & RÉCHAUFFAGE --- */}
-                <div className="bg-white rounded-3xl p-8 md:p-14 border border-neutral-200 shadow-md mb-24">
+                <div className="bg-white rounded-3xl p-8 md:p-14 border border-neutral-200 shadow-md">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
                         <div className="md:col-span-2 space-y-4">
                             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
-                                <Flame size={16} /> Service & Dégustation sans stress
+                                <Flame size={16} /> Service &amp; Dégustation sans stress
                             </div>
                             <h3 className="text-2xl md:text-4xl font-serif text-black">
                                 Prêt à réchauffer, facile à dresser
@@ -547,32 +547,11 @@ export default function MenusFetes() {
                         </div>
                         <div className="bg-[#FAF9F6] p-6 rounded-2xl border border-neutral-200 flex flex-col justify-center text-center space-y-3">
                             <ShieldCheck size={36} className="mx-auto text-[#D4AF37]" />
-                            <h4 className="font-bold text-black text-sm uppercase tracking-wider">Fraîcheur & DLC Garantie</h4>
+                            <h4 className="font-bold text-black text-sm uppercase tracking-wider">Fraîcheur &amp; DLC Garantie</h4>
                             <p className="text-neutral-500 text-xs leading-normal">
-                                Préparé le jour même du retrait, conservation garantie jusqu'à 48h au réfrigérateur.
+                                Préparé le jour même du retrait, conservation garantie jusqu&apos;à 48h au réfrigérateur.
                             </p>
                         </div>
-                    </div>
-                </div>
-
-                {/* --- BANNIÈRE DE CONTACT PERSONNALISÉ --- */}
-                <div className="bg-[#111111] text-white rounded-3xl p-8 md:p-14 text-center space-y-6 border border-[#D4AF37]/30 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-
-                    <Sparkles className="mx-auto text-[#D4AF37]" size={36} />
-                    <h3 className="text-3xl md:text-4xl font-serif text-white">
-                        Vous organisez une grande réception ou un repas sur-mesure ?
-                    </h3>
-                    <p className="text-neutral-300 max-w-2xl mx-auto font-light text-base md:text-lg">
-                        Notre équipe s'adapte à vos envies : menus végétariens, sélection de vins d'exception ou service à table par notre maître d'hôtel.
-                    </p>
-                    <div className="pt-2">
-                        <Link
-                            href="/contact"
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black font-bold uppercase tracking-wider text-sm transition-all"
-                        >
-                            Contactez notre service traiteur
-                        </Link>
                     </div>
                 </div>
             </div>
