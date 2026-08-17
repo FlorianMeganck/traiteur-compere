@@ -33,7 +33,7 @@ export default function MenuFetesPage() {
   ];
 
   return (
-    <main className="bg-white text-gray-800 font-sans min-h-screen pt-36 pb-20 selection:bg-[#D4AF37] selection:text-white">
+    <main className="bg-white text-gray-800 font-sans min-h-screen pt-36 md:pt-40 pb-20 selection:bg-[#D4AF37] selection:text-white">
 
       {/* Hero Section */}
       <section className="relative bg-[#0F0F0F] text-white py-20 px-6 overflow-hidden">

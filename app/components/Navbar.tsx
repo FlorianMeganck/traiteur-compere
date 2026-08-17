@@ -74,8 +74,8 @@ export default function Navbar() {
         <>
             <header className="fixed inset-x-0 top-0 z-50">
                 {/* Top-Bar Bandeau d'Annonce (Festive Preview) */}
-                <div className="bg-[#111111] text-white py-3 px-4 text-center text-xs md:text-sm font-medium tracking-wide flex items-center justify-center gap-2 border-b border-[#D4AF37]/30 shadow-sm">
-                    <span className="text-[#D4AF37]">✨</span>
+                <div className="bg-[#111111] text-white py-3.5 md:py-4 px-4 text-center text-xs sm:text-sm md:text-base font-medium tracking-wide flex flex-wrap items-center justify-center gap-2 border-b border-[#D4AF37]/30 shadow-sm">
+                    <span className="text-[#D4AF37] text-sm md:text-base animate-pulse">✨</span>
                     <span>Nouveau : Découvrez nos premiers essais pour les <strong>Menus de Fêtes 2026</strong> !</span>
                     <Link href="/menu-fetes" className="underline text-[#D4AF37] hover:text-white ml-1 font-bold transition-colors">
                         Voir la section Fêtes →
@@ -86,21 +86,21 @@ export default function Navbar() {
                     className={`w-full transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
                         }`}
                 >
-                    <div className="w-full max-w-7xl mx-auto px-6 relative">
+                    <div className="w-full max-w-7xl mx-auto px-4 lg:px-8 relative">
 
-                        {/* --- DESKTOP LAYOUT (Grid 3 Cols) --- */}
-                        <div className="hidden md:grid grid-cols-3 items-center w-full relative">
+                        {/* --- DESKTOP LAYOUT (Grid 3 Cols: Left links / Logo / Right links) --- */}
+                        <div className="hidden md:grid grid-cols-[1fr_auto_1fr] items-center w-full relative">
 
-                            {/* LEFT ZONE: À Propos, Services & Plats Préparés (Aligned Right -> Center) */}
-                            <div className="flex justify-end items-center gap-5 pr-4">
+                            {/* LEFT ZONE: À Propos, Services & Plats Préparés (Aligned Right -> Center Logo) */}
+                            <div className="flex justify-end items-center gap-3 lg:gap-6 pr-3 lg:pr-6">
                                 <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
                                 <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
                                 <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
                             </div>
 
                             {/* CENTER ZONE: Logo */}
-                            <div className="flex justify-center items-center">
-                                <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
+                            <div className="flex justify-center items-center px-2">
+                                <Link href="/" className="relative block w-32 h-16 md:w-44 md:h-22 lg:w-48 lg:h-24 transition-transform hover:scale-105 z-50">
                                     <Image
                                         src="/images/Logo_traiteur.png"
                                         alt="Traiteur Compère"
@@ -111,15 +111,15 @@ export default function Navbar() {
                                 </Link>
                             </div>
 
-                            {/* RIGHT ZONE: Formules, Menus de Fêtes & Contact (Aligned Left -> Center) */}
-                            <div className="flex justify-start items-center gap-5 pl-4">
+                            {/* RIGHT ZONE: Formules, Menus de Fêtes & Contact (Aligned Left -> Center Logo) */}
+                            <div className="flex justify-start items-center gap-3 lg:gap-6 pl-3 lg:pl-6">
                                 <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
                                 <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} isFestive={true} />
                                 <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
 
                                 {/* Desktop Cart Button */}
-                                <button onClick={() => setIsCartOpen(true)} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37]`}>
-                                    <ShoppingCart size={24} />
+                                <button onClick={() => setIsCartOpen(true)} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37] ml-1`}>
+                                    <ShoppingCart size={22} />
                                     {totalItems > 0 && (
                                         <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
                                             {totalItems}
@@ -128,8 +128,8 @@ export default function Navbar() {
                                 </button>
                             </div>
 
-                            {/* SOCIALS (Absolute left) */}
-                            <div className="absolute left-0 flex items-center gap-4">
+                            {/* SOCIALS (Absolute left on wide screens) */}
+                            <div className="hidden xl:flex absolute left-0 items-center gap-4">
                                 <SocialLink
                                     href="https://www.facebook.com/profile.php?id=61582940090708"
                                     icon={<FacebookIcon />}
@@ -336,7 +336,7 @@ function NavLink({ href, label, textColor, isActive, isFestive }: { href: string
     return (
         <Link
             href={href}
-            className={`relative py-1 text-sm font-bold tracking-widest uppercase whitespace-nowrap transition-all duration-300 group flex items-center gap-1.5 ${textColor} ${isActive ? "opacity-70 border-b-2 border-[#D4AF37]" : "opacity-100 hover:text-[#D4AF37]"
+            className={`relative py-1 text-xs lg:text-sm font-bold tracking-wider lg:tracking-widest uppercase whitespace-nowrap transition-all duration-300 group flex items-center gap-1.5 ${textColor} ${isActive ? "opacity-70 border-b-2 border-[#D4AF37]" : "opacity-100 hover:text-[#D4AF37]"
                 }`}
         >
             {isFestive && <span className="text-[#D4AF37] animate-pulse">✨</span>}
