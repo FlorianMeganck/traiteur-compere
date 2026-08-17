@@ -181,12 +181,13 @@ export default function MenusFetes() {
                             Composer nos menus
                             <ChevronRight size={18} />
                         </a>
-                        <Link
-                            href="/contact?type=menus_fetes"
-                            className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-white/40 text-white font-bold uppercase tracking-wider text-sm hover:bg-white hover:text-black transition-all"
+                        <a
+                            href="#retraits"
+                            className="inline-flex items-center gap-2 px-8 py-4 rounded-full border-2 border-white/40 text-white font-bold uppercase tracking-wider text-sm hover:border-[#D4AF37] hover:text-[#D4AF37] hover:bg-white/5 transition-all shadow-md"
                         >
-                            Demande personnalisée
-                        </Link>
+                            <Clock size={16} className="text-[#D4AF37]" />
+                            Dates &amp; Modalités de retrait
+                        </a>
                     </motion.div>
                 </div>
             </section>
@@ -455,6 +456,78 @@ export default function MenusFetes() {
                                 </motion.div>
                             );
                         })}
+                    </div>
+                </div>
+
+                {/* --- SECTION DATES & MODALITÉS DE RETRAIT --- */}
+                <div id="retraits" className="scroll-mt-36 bg-white rounded-3xl p-8 md:p-14 border border-neutral-200 shadow-lg mb-24 space-y-8">
+                    <div className="text-center space-y-3 max-w-2xl mx-auto">
+                        <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#D4AF37] bg-[#D4AF37]/10 px-3.5 py-1.5 rounded-full">
+                            <Clock size={14} /> Organisation des Retraits
+                        </div>
+                        <h3 className="text-3xl md:text-4xl font-serif text-black">
+                            Dates &amp; Horaires de Retrait à l&apos;Atelier
+                        </h3>
+                        <p className="text-neutral-500 font-light text-sm md:text-base">
+                            Pour vous garantir une fraîcheur optimale et une fluidité maximale, les commandes de fête sont à retirer directement à notre atelier :
+                        </p>
+                        <p className="text-xs md:text-sm font-semibold text-neutral-800 flex items-center justify-center gap-1.5">
+                            <span>📍</span> Rue Potay 3, 4470 Saint-Georges-sur-Meuse
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Encart Noël */}
+                        <div className="bg-amber-50/50 border border-amber-200/80 rounded-2xl p-6 space-y-4">
+                            <div className="flex items-center justify-between border-b border-amber-200/60 pb-3">
+                                <h4 className="font-serif font-bold text-lg text-neutral-900 flex items-center gap-2">
+                                    <span>🎄</span> Repas de Noël (24 &amp; 25 Décembre)
+                                </h4>
+                                <span className="text-[11px] bg-[#D4AF37] text-white font-bold px-2.5 py-1 rounded-full uppercase">Noël</span>
+                            </div>
+                            <div className="space-y-3 text-xs md:text-sm text-neutral-700">
+                                <div className="bg-white p-3.5 rounded-xl border border-amber-100 flex items-start gap-2.5 shadow-2xs">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">•</span>
+                                    <div>
+                                        <strong className="text-neutral-900">Pour le Réveillon (Mercredi 24 Décembre) :</strong><br/>
+                                        Retrait possible le 23 Décembre (13h - 18h) OU le 24 Décembre (8h - 13h).
+                                    </div>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-xl border border-amber-100 flex items-start gap-2.5 shadow-2xs">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">•</span>
+                                    <div>
+                                        <strong className="text-neutral-900">Pour le Jour de Noël (Jeudi 25 Décembre) :</strong><br/>
+                                        Retrait possible le 24 Décembre (10h - 18h) OU le 25 Décembre (8h - 13h).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Encart Nouvel An */}
+                        <div className="bg-amber-50/50 border border-amber-200/80 rounded-2xl p-6 space-y-4">
+                            <div className="flex items-center justify-between border-b border-amber-200/60 pb-3">
+                                <h4 className="font-serif font-bold text-lg text-neutral-900 flex items-center gap-2">
+                                    <span>🍾</span> Repas de Nouvel An (31 Déc. &amp; 1er Janv.)
+                                </h4>
+                                <span className="text-[11px] bg-black text-white font-bold px-2.5 py-1 rounded-full uppercase">Nouvel An</span>
+                            </div>
+                            <div className="space-y-3 text-xs md:text-sm text-neutral-700">
+                                <div className="bg-white p-3.5 rounded-xl border border-amber-100 flex items-start gap-2.5 shadow-2xs">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">•</span>
+                                    <div>
+                                        <strong className="text-neutral-900">Pour le Réveillon (Mercredi 31 Décembre) :</strong><br/>
+                                        Retrait possible le 30 Décembre (13h - 18h) OU le 31 Décembre (8h - 13h).
+                                    </div>
+                                </div>
+                                <div className="bg-white p-3.5 rounded-xl border border-amber-100 flex items-start gap-2.5 shadow-2xs">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">•</span>
+                                    <div>
+                                        <strong className="text-neutral-900">Pour le Jour de l&apos;An (Jeudi 1er Janvier) :</strong><br/>
+                                        Retrait possible le 31 Décembre (13h - 18h) OU le 1er Janvier (8h - 11h).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
