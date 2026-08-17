@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useLayoutEffect, Suspense } from "react";
+import { useState, useEffect, useMemo, useLayoutEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Leaf, Check, ShoppingCart, Clock, Calendar } from "lucide-react";
+import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { MENU_DATA } from "../data/plats-prepares";
-import { FESTIVE_DATE_OPTIONS } from "../data/menus-fetes";
+import { FESTIVE_DATE_OPTIONS, getFestiveMenuDateRestrictions } from "../data/menus-fetes";
 import { useCart } from "../hooks/useCart";
 
 export default function Contact() {
@@ -529,6 +529,21 @@ function ContactForm() {
     const isMenusFetes = typeParam === 'menus_fetes' || typeParam === 'menu_fetes' || (isLoaded && cartItems.some(i => i.itemType === 'menu_fete' || i.semaineId?.startsWith('menu') || i.semaineId?.startsWith('fetes') || i.semaineId === 'menus-fetes'));
     const isPlatPrepare = typeParam === 'plat_prepare' || isMenusFetes;
 
+    // Matrice des restrictions de dates Fêtes
+    const festiveRestrictions = useMemo(() => getFestiveMenuDateRestrictions(cartItems), [cartItems]);
+
+    // Auto-désélection de la date si elle devient incompatible suite à une modification du panier
+    useEffect(() => {
+        if (isMenusFetes && formData.Date_Fete && !festiveRestrictions.allowedOptionIds.includes(formData.Date_Fete)) {
+            setFormData(prev => ({
+                ...prev,
+                Date_Fete: "",
+                Date: "",
+                Creneau_Retrait: ""
+            }));
+        }
+    }, [isMenusFetes, festiveRestrictions.allowedOptionIds, formData.Date_Fete]);
+
     const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || isBuffetChaudMode;
     const showMenuFirst = isCustomMode;
 
@@ -981,7 +996,13 @@ function ContactForm() {
 
         // Dynamic Validation
         if (isMenusFetes) {
-            if (!formData.Date_Fete && !formData.Date) newErrors.Date_Fete = "Veuillez sélectionner la date de votre repas de fête";
+            if (festiveRestrictions.isConflict) {
+                newErrors.Date_Fete = "Les menus de Noël et de Nouvel An ne peuvent pas être commandés pour la même date. Veuillez passer deux commandes distinctes.";
+            } else if (!formData.Date_Fete && !formData.Date) {
+                newErrors.Date_Fete = "Veuillez sélectionner la date de votre repas de fête.";
+            } else if (!festiveRestrictions.allowedOptionIds.includes(formData.Date_Fete)) {
+                newErrors.Date_Fete = "Cette date n'est pas compatible avec les menus sélectionnés dans votre panier.";
+            }
         } else if (isPlatPrepare) {
             if (!formData.Plat_Prepare_Quantite || parseInt(formData.Plat_Prepare_Quantite) < 1) newErrors.Plat_Prepare_Quantite = "Requis";
         } else if (isPlatUnique) {
@@ -2540,12 +2561,25 @@ function ContactForm() {
                                                 Date de votre repas de fête <span className="text-red-500">*</span>
                                             </h3>
                                             <p className="text-xs md:text-sm text-neutral-500 font-light mt-0.5">
-                                                Sélectionnez la date de votre réveillon ou repas pour déterminer votre créneau de retrait à l'atelier.
+                                                {festiveRestrictions.allowedPeriodLabel || "Sélectionnez la date de votre réveillon ou repas pour déterminer votre créneau de retrait à l'atelier."}
                                             </p>
                                         </div>
                                     </div>
 
-                                    {errors.Date_Fete && (
+                                    {/* Alerte Conflit de Dates (Noël + Nouvel An dans le même panier) */}
+                                    {festiveRestrictions.isConflict && (
+                                        <div className="bg-red-50 text-red-800 p-5 rounded-2xl border-2 border-red-300 flex items-start gap-3.5 shadow-sm">
+                                            <AlertCircle className="text-red-600 shrink-0 mt-0.5" size={24} />
+                                            <div className="space-y-1 text-sm">
+                                                <h4 className="font-bold text-red-900 text-base">Incompatibilité de dates dans votre panier</h4>
+                                                <p className="leading-relaxed font-medium">
+                                                    Les menus de Noël et de Nouvel An ne peuvent pas être commandés pour la même date. Veuillez passer deux commandes distinctes.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {errors.Date_Fete && !festiveRestrictions.isConflict && (
                                         <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
                                             <span>⚠️</span> {errors.Date_Fete}
                                         </div>
@@ -2553,12 +2587,16 @@ function ContactForm() {
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                                         {FESTIVE_DATE_OPTIONS.map((option) => {
+                                            const isAllowed = festiveRestrictions.allowedOptionIds.includes(option.id);
                                             const isSelected = formData.Date_Fete === option.id || formData.Date_Fete === option.dayFormatted;
+
                                             return (
                                                 <button
                                                     key={option.id}
                                                     type="button"
+                                                    disabled={!isAllowed}
                                                     onClick={() => {
+                                                        if (!isAllowed) return;
                                                         setFormData(prev => ({
                                                             ...prev,
                                                             Date_Fete: option.id,
@@ -2573,23 +2611,34 @@ function ContactForm() {
                                                             });
                                                         }
                                                     }}
-                                                    className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${isSelected
-                                                        ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
-                                                        : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
-                                                        }`}
+                                                    className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${
+                                                        !isAllowed
+                                                            ? "border-neutral-200 bg-neutral-100/70 opacity-40 cursor-not-allowed"
+                                                            : isSelected
+                                                            ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
+                                                            : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
+                                                    }`}
                                                 >
                                                     <div className="flex justify-between items-start">
-                                                        <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-[#D4AF37]">
-                                                            {option.badge}
-                                                        </span>
-                                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
+                                                        <div className="flex items-center gap-2">
+                                                            <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                                                                !isAllowed ? "bg-neutral-300 text-neutral-600" : "bg-black text-[#D4AF37]"
                                                             }`}>
+                                                                {option.badge}
+                                                            </span>
+                                                            {!isAllowed && (
+                                                                <span className="text-[10px] text-neutral-500 font-medium italic">Incompatible panier</span>
+                                                            )}
+                                                        </div>
+                                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                                                            !isAllowed ? "border-neutral-300 bg-neutral-200" : isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
+                                                        }`}>
                                                             {isSelected && <Check size={12} strokeWidth={3} />}
                                                         </div>
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-serif font-bold text-neutral-900 text-base">{option.label}</h4>
-                                                        <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">{option.dayFormatted}</p>
+                                                        <h4 className={`font-serif font-bold text-base ${!isAllowed ? "text-neutral-400" : "text-neutral-900"}`}>{option.label}</h4>
+                                                        <p className={`text-xs font-semibold mt-0.5 ${!isAllowed ? "text-neutral-400" : "text-[#D4AF37]"}`}>{option.dayFormatted}</p>
                                                     </div>
                                                 </button>
                                             );
@@ -2597,7 +2646,7 @@ function ContactForm() {
                                     </div>
 
                                     {/* Encart dynamique du créneau de retrait */}
-                                    {formData.Date_Fete && (
+                                    {formData.Date_Fete && !festiveRestrictions.isConflict && (
                                         <div className="bg-[#FAF9F6] border border-[#D4AF37]/40 p-4 md:p-5 rounded-2xl flex items-start gap-3.5 shadow-sm">
                                             <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={22} />
                                             <div className="space-y-1 text-sm">
@@ -2726,8 +2775,20 @@ function ContactForm() {
                                 )}
                             </div>
 
-                            <button type="submit" disabled={status === "submitting"} className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all">
-                                {status === "submitting" ? "Envoi en cours..." : "Envoyer la demande"}
+                            <button
+                                type="submit"
+                                disabled={status === "submitting" || (isMenusFetes && festiveRestrictions.isConflict)}
+                                className={`w-full py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg transition-all ${
+                                    isMenusFetes && festiveRestrictions.isConflict
+                                        ? "bg-neutral-300 text-neutral-500 cursor-not-allowed shadow-none"
+                                        : "bg-black text-white hover:bg-[#D4AF37]"
+                                }`}
+                            >
+                                {status === "submitting"
+                                    ? "Envoi en cours..."
+                                    : isMenusFetes && festiveRestrictions.isConflict
+                                    ? "Commande bloquée (Dates incompatibles)"
+                                    : "Envoyer la demande"}
                             </button>
                         </form>
                     )}

@@ -174,6 +174,7 @@ export type FestiveDateOption = {
     dayFormatted: string;
     pickupWindow: string;
     badge: string;
+    period: 'noel' | 'nouvel_an';
 };
 
 export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
@@ -183,7 +184,8 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
         label: "Réveillon de Noël",
         dayFormatted: "Mercredi 24 Décembre",
         pickupWindow: "Retrait le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
-        badge: "Noël"
+        badge: "Noël",
+        period: "noel"
     },
     {
         id: "noel-25",
@@ -191,7 +193,8 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
         label: "Jour de Noël",
         dayFormatted: "Jeudi 25 Décembre",
         pickupWindow: "Retrait le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
-        badge: "Noël"
+        badge: "Noël",
+        period: "noel"
     },
     {
         id: "nouvel-an-31",
@@ -199,7 +202,8 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
         label: "Réveillon de Nouvel An",
         dayFormatted: "Mercredi 31 Décembre",
         pickupWindow: "Retrait le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
-        badge: "Nouvel An"
+        badge: "Nouvel An",
+        period: "nouvel_an"
     },
     {
         id: "nouvel-an-01",
@@ -207,7 +211,59 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
         label: "Jour de l'An",
         dayFormatted: "Jeudi 1er Janvier",
         pickupWindow: "Retrait le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
-        badge: "Nouvel An"
+        badge: "Nouvel An",
+        period: "nouvel_an"
     }
 ];
+
+/**
+ * Matrice des restrictions de dates par menu :
+ * - Menu Noël (Réveillon) : 24 et 25 Décembre uniquement
+ * - Menu Prestige : 24 et 25 Décembre uniquement
+ * - Menu Nouvel An (Saint-Sylvestre) : 31 Décembre et 1er Janvier uniquement
+ * - Menu Enfant : 24, 25, 31 Décembre et 1er Janvier
+ */
+export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; nomPlat?: string; itemType?: string }>) {
+    let hasNoel = false;
+    let hasNouvelAn = false;
+    let hasEnfant = false;
+
+    cartItems.forEach(item => {
+        const id = (item.id || "").toLowerCase();
+        const nom = (item.nomPlat || "").toLowerCase();
+
+        if (id === 'menu-reveillon-noel' || id === 'menu-prestige-fetes' || nom.includes('noël') || nom.includes('noel') || nom.includes('prestige')) {
+            hasNoel = true;
+        } else if (id === 'menu-saint-sylvestre' || nom.includes('sylvestre') || nom.includes('nouvel an')) {
+            hasNouvelAn = true;
+        } else if (id === 'menu-enfant-fetes' || nom.includes('enfant')) {
+            hasEnfant = true;
+        }
+    });
+
+    const isConflict = hasNoel && hasNouvelAn;
+
+    let allowedOptionIds: string[] = ["noel-24", "noel-25", "nouvel-an-31", "nouvel-an-01"];
+    let allowedPeriodLabel = "";
+
+    if (isConflict) {
+        allowedOptionIds = [];
+    } else if (hasNoel) {
+        allowedOptionIds = ["noel-24", "noel-25"];
+        allowedPeriodLabel = "Menus de Noël : réservations limitées aux 24 & 25 Décembre.";
+    } else if (hasNouvelAn) {
+        allowedOptionIds = ["nouvel-an-31", "nouvel-an-01"];
+        allowedPeriodLabel = "Menus de Nouvel An : réservations limitées aux 31 Décembre & 1er Janvier.";
+    }
+
+    return {
+        hasNoel,
+        hasNouvelAn,
+        hasEnfant,
+        isConflict,
+        allowedOptionIds,
+        allowedPeriodLabel
+    };
+}
+
 
