@@ -89,7 +89,7 @@ export default function Navbar() {
                     <span className="text-[#D4AF37] text-sm md:text-base">✨</span>
                     <span><strong>Menus de Fêtes 2026</strong> : Les réservations sont ouvertes !</span>
                     <Link href="/menus-fetes" className="underline text-[#D4AF37] hover:text-white ml-1 font-bold transition-colors">
-                        Voir la section Fêtes →
+                        Découvrez notre sélection →
                     </Link>
                 </div>
 
