@@ -66,18 +66,53 @@ export async function POST(req: Request) {
                     ? festiveMenu.courses.map(c => `<strong>${c.courseName}:</strong> ${c.title}`).join('<br/>')
                     : (item.coursesSummary?.join('<br/>') || '-');
 
-                const pickupNotice = creneauRetrait || (festiveMenu ? festiveMenu.badge : (item.badge || item.jour || '24 ou 31 Décembre'));
+                const itemId = (item.id || '').toLowerCase();
+                const itemNom = (item.nomPlat || '').toLowerCase();
+                const isNoel = itemId === 'menu-reveillon-noel' || itemId === 'menu-prestige-fetes' || itemNom.includes('noël') || itemNom.includes('noel') || itemNom.includes('prestige');
+                const isNouvelAn = itemId === 'menu-saint-sylvestre' || itemNom.includes('sylvestre') || itemNom.includes('nouvel an');
+                const isEnfant = itemId === 'menu-enfant-fetes' || itemNom.includes('enfant');
+
+                let itemPickupNotice = '';
+
+                if (creneauRetrait && creneauRetrait.includes(' | ')) {
+                    const parts = creneauRetrait.split(' | ');
+                    const noelPart = parts.find((p: string) => p.toLowerCase().includes('noël') || p.toLowerCase().includes('noel')) || parts[0];
+                    const naPart = parts.find((p: string) => p.toLowerCase().includes('nouvel an')) || parts[1];
+
+                    const cleanNoel = noelPart.replace(/^(Retrait\s+)?Noël\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '');
+                    const cleanNa = naPart.replace(/^(Retrait\s+)?Nouvel An\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '');
+
+                    if (isNoel) {
+                        itemPickupNotice = cleanNoel;
+                    } else if (isNouvelAn) {
+                        itemPickupNotice = cleanNa;
+                    } else if (isEnfant) {
+                        if (dateEvenement && dateEvenement.includes('pour Noël') && dateEvenement.includes('pour Nouvel An')) {
+                            itemPickupNotice = `Noël : ${cleanNoel}<br/><br/>Nouvel An : ${cleanNa}`;
+                        } else if (dateEvenement && dateEvenement.includes('pour Nouvel An')) {
+                            itemPickupNotice = cleanNa;
+                        } else {
+                            itemPickupNotice = cleanNoel;
+                        }
+                    } else {
+                        itemPickupNotice = cleanNoel;
+                    }
+                } else if (creneauRetrait) {
+                    itemPickupNotice = creneauRetrait.replace(/^Retrait possible\s*:\s*/i, '');
+                } else {
+                    itemPickupNotice = festiveMenu ? festiveMenu.badge : (item.badge || item.jour || '24 ou 31 Décembre');
+                }
 
                 htmlCartDetails += `
                     <tr>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-                            <strong style="color: #000; font-size: 14px;">${item.nomPlat}</strong><br/>
-                            <span style="color: #D4AF37; font-size: 12px; font-weight: bold;">Menu de Fêtes</span>
+                        <td style="width: 20%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
+                            <strong style="color: #000; font-size: 13px;">${item.nomPlat}</strong><br/>
+                            <span style="color: #D4AF37; font-size: 11px; font-weight: bold;">Menu de Fêtes</span>
                         </td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold;">${item.quantitePlat}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.4;">${coursesList}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; color: #D4AF37;"><strong>${pickupNotice}</strong></td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;"><strong>${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
+                        <td style="width: 7%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${item.quantitePlat}</td>
+                        <td style="width: 48%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${coursesList}</td>
+                        <td style="width: 15%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 11px; color: #333; line-height: 1.35; vertical-align: top; word-break: break-word;"><strong>${itemPickupNotice}</strong></td>
+                        <td style="width: 10%; padding: 10px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
                 `;
             } else {
@@ -121,14 +156,14 @@ export async function POST(req: Request) {
 
                 htmlCartDetails += `
                     <tr>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-                            <strong>${dayData.meal}</strong><br/>
-                            <span style="color: #666; font-size: 12px;">${dayData.day} - ${weekData.week.split(' :')[0]}</span>
+                        <td style="width: 20%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
+                            <strong style="color: #000; font-size: 13px;">${dayData.meal}</strong><br/>
+                            <span style="color: #666; font-size: 11px;">${dayData.day} - ${weekData.week.split(' :')[0]}</span>
                         </td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold;">${item.quantitePlat}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px;">${soupesList || '-'}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px; color: #D4AF37;"><strong>${jourRetrait}</strong></td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;"><strong>${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
+                        <td style="width: 7%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${item.quantitePlat}</td>
+                        <td style="width: 48%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${soupesList || '-'}</td>
+                        <td style="width: 15%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; color: #D4AF37; font-weight: bold; vertical-align: top;">${jourRetrait}</td>
+                        <td style="width: 10%; padding: 10px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
                 `;
             }
@@ -148,14 +183,14 @@ export async function POST(req: Request) {
         const orderTitle = isFestiveOrder ? 'Menus de Fêtes 2026' : 'Plats Préparés';
 
         const cartTableHTML = `
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-family: sans-serif;">
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-family: sans-serif; table-layout: fixed;">
                 <thead>
                     <tr style="background-color: #f9f9f9;">
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Article / Menu</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: center;">Qté</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Détails</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Retrait</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: right;">S/Total</th>
+                        <th style="width: 20%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Article</th>
+                        <th style="width: 7%; padding: 10px; border-bottom: 2px solid #ddd; text-align: center; font-size: 13px;">Qté</th>
+                        <th style="width: 48%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Détails (Composition)</th>
+                        <th style="width: 15%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Retrait</th>
+                        <th style="width: 10%; padding: 10px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -163,8 +198,8 @@ export async function POST(req: Request) {
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="4" style="padding: 15px 10px; text-align: right; font-size: 16px;"><strong>TOTAL À PAYER :</strong></td>
-                        <td style="padding: 15px 10px; text-align: right; font-size: 18px; color: #D4AF37;"><strong>${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
+                        <td colspan="4" style="padding: 15px 10px; text-align: right; font-size: 15px;"><strong>TOTAL À PAYER :</strong></td>
+                        <td style="padding: 15px 10px; text-align: right; font-size: 17px; color: #D4AF37; white-space: nowrap;"><strong>${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
                     </tr>
                 </tfoot>
             </table>
