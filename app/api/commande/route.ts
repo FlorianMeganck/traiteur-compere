@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
         const {
             Nom, Prenom, Mail, Tel, Societe, Nom_Societe, Date,
-            details_projet, captchaToken, cartItems, typeCommande
+            dateEvenement, creneauRetrait, details_projet, captchaToken, cartItems, typeCommande
         } = data;
 
         // 1. Validation de base
@@ -66,17 +66,17 @@ export async function POST(req: Request) {
                     ? festiveMenu.courses.map(c => `<strong>${c.courseName}:</strong> ${c.title}`).join('<br/>')
                     : (item.coursesSummary?.join('<br/>') || '-');
 
-                const pickupNotice = festiveMenu ? festiveMenu.badge : (item.badge || item.jour || '24 ou 31 Décembre');
+                const pickupNotice = creneauRetrait || (festiveMenu ? festiveMenu.badge : (item.badge || item.jour || '24 ou 31 Décembre'));
 
                 htmlCartDetails += `
                     <tr>
                         <td style="padding: 10px; border-bottom: 1px solid #ddd;">
                             <strong style="color: #000; font-size: 14px;">${item.nomPlat}</strong><br/>
-                            <span style="color: #D4AF37; font-size: 12px; font-weight: bold;">Menu de Fêtes (${pickupNotice})</span>
+                            <span style="color: #D4AF37; font-size: 12px; font-weight: bold;">Menu de Fêtes</span>
                         </td>
                         <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold;">${item.quantitePlat}</td>
                         <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.4;">${coursesList}</td>
-                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px; color: #D4AF37;"><strong>${pickupNotice}</strong></td>
+                        <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; color: #D4AF37;"><strong>${pickupNotice}</strong></td>
                         <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;"><strong>${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
                     </tr>
                 `;
@@ -186,7 +186,9 @@ export async function POST(req: Request) {
                                 <p style="margin: 5px 0;"><strong>Email :</strong> ${Mail}</p>
                                 <p style="margin: 5px 0;"><strong>Téléphone :</strong> ${Tel}</p>
                                 <p style="margin: 5px 0;"><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
-                                <p style="margin: 5px 0;"><strong>Date de soumission :</strong> ${Date}</p>
+                                ${dateEvenement ? `<p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>🎉 Date du repas :</strong> ${dateEvenement}</p>` : ''}
+                                ${creneauRetrait ? `<p style="margin: 5px 0;"><strong>⏰ Créneau de retrait :</strong> ${creneauRetrait}</p>` : ''}
+                                <p style="margin: 5px 0;"><strong>Date de saisie :</strong> ${Date}</p>
                             </div>
                             
                             <h3>Détail du panier</h3>
@@ -210,6 +212,13 @@ export async function POST(req: Request) {
                             <h2 style="color: #000;">Merci pour votre commande, ${Prenom} !</h2>
                             <p>Votre commande de <strong>${orderTitle}</strong> a bien été enregistrée. Voici votre récapitulatif (<strong>N° ${formattedOrderNumber}</strong>) :</p>
                             
+                            ${dateEvenement ? `
+                            <div style="background-color: #fff8e1; padding: 15px; border-left: 4px solid #D4AF37; border-radius: 4px; margin: 20px 0;">
+                                <p style="margin: 4px 0; font-size: 15px;"><strong>🎉 Date de votre repas :</strong> ${dateEvenement}</p>
+                                <p style="margin: 4px 0; font-size: 14px;"><strong>⏰ Créneau de retrait à l'atelier :</strong> ${creneauRetrait || 'Selon créneau sélectionné'}</p>
+                                <p style="margin: 4px 0; font-size: 12px; color: #666;">📍 Rue Potay 3, 4470 Saint-Georges-sur-Meuse</p>
+                            </div>` : ''}
+
                             ${cartTableHTML}
                             
                             <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #D4AF37; border-radius: 0 8px 8px 0; margin-top: 30px;">

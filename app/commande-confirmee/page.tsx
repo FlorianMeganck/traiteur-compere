@@ -14,6 +14,7 @@ function CommandeConfirmeeContent() {
     const orderId = searchParams.get('orderId') || "";
     const jour = searchParams.get('jour') || "";
     const joursParam = searchParams.get('jours') || "";
+    const creneauParam = searchParams.get('creneau') || "";
     const total = searchParams.get('total') || "0";
 
     const qrRef = useRef<HTMLDivElement>(null);
@@ -22,7 +23,9 @@ function CommandeConfirmeeContent() {
     const getPickupDay = (j: string) => {
         const d = j.toLowerCase();
         if (d.includes('24') || d.includes('noël') || d.includes('noel')) return '24 Décembre';
+        if (d.includes('25')) return '25 Décembre';
         if (d.includes('31') || d.includes('nouvel') || d.includes('sylvestre')) return '31 Décembre';
+        if (d.includes('01') || d.includes('1er')) return '1er Janvier';
         if (d === 'lundi' || d === 'mardi') return 'Mardi';
         if (d === 'mercredi' || d === 'jeudi') return 'Jeudi';
         if (d === 'vendredi' || d === 'samedi') return 'Samedi';
@@ -31,11 +34,9 @@ function CommandeConfirmeeContent() {
 
     let joursRetraitText = "À confirmer";
     if (joursParam) {
-        const joursList = joursParam.split(',');
-        const pickupDays = Array.from(new Set(joursList.map(getPickupDay)));
-        joursRetraitText = pickupDays.join(', ');
+        joursRetraitText = joursParam;
     } else if (jour) {
-        joursRetraitText = getPickupDay(jour) || "À confirmer";
+        joursRetraitText = jour;
     }
 
     // Informations bancaires pour la génération du QR Code (à adapter)
@@ -120,11 +121,20 @@ function CommandeConfirmeeContent() {
                                         <span className="font-medium text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1 rounded inline-block w-fit mt-1">{COMMUNICATION}</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Jour de retrait</span>
-                                        <span className="font-bold text-black flex items-center gap-2">
-                                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                            {joursRetraitText !== "À confirmer" ? `Le(s) ${joursRetraitText} après 11h` : "À confirmer"}
+                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">
+                                            {creneauParam ? "Date de l'événement & Retrait" : "Jour de retrait"}
                                         </span>
+                                        <div className="space-y-1">
+                                            <span className="font-bold text-black flex items-center gap-2">
+                                                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                                {joursRetraitText !== "À confirmer" ? (creneauParam ? joursRetraitText : `Le(s) ${joursRetraitText} après 11h`) : "À confirmer"}
+                                            </span>
+                                            {creneauParam && (
+                                                <p className="text-xs text-[#D4AF37] font-semibold">
+                                                    ⏰ {creneauParam}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

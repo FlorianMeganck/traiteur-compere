@@ -166,3 +166,48 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
         allergens: ["Gluten", "Lactose", "Œufs"]
     }
 ];
+
+export type FestiveDateOption = {
+    id: string;
+    dateValue: string;
+    label: string;
+    dayFormatted: string;
+    pickupWindow: string;
+    badge: string;
+};
+
+export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
+    {
+        id: "noel-24",
+        dateValue: "2026-12-24",
+        label: "Réveillon de Noël",
+        dayFormatted: "Mercredi 24 Décembre",
+        pickupWindow: "Retrait à l'atelier le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
+        badge: "Noël"
+    },
+    {
+        id: "noel-25",
+        dateValue: "2026-12-25",
+        label: "Jour de Noël",
+        dayFormatted: "Jeudi 25 Décembre",
+        pickupWindow: "Retrait à l'atelier le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
+        badge: "Noël"
+    },
+    {
+        id: "nouvel-an-31",
+        dateValue: "2026-12-31",
+        label: "Réveillon de Nouvel An",
+        dayFormatted: "Mercredi 31 Décembre",
+        pickupWindow: "Retrait à l'atelier le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
+        badge: "Nouvel An"
+    },
+    {
+        id: "nouvel-an-01",
+        dateValue: "2027-01-01",
+        label: "Jour de l'An",
+        dayFormatted: "Jeudi 1er Janvier",
+        pickupWindow: "Retrait à l'atelier le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
+        badge: "Nouvel An"
+    }
+];
+

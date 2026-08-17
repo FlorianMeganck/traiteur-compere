@@ -4,9 +4,10 @@ import { useState, useLayoutEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Leaf, Check, ShoppingCart } from "lucide-react";
+import { Users, Leaf, Check, ShoppingCart, Clock, Calendar } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { MENU_DATA } from "../data/plats-prepares";
+import { FESTIVE_DATE_OPTIONS } from "../data/menus-fetes";
 import { useCart } from "../hooks/useCart";
 
 export default function Contact() {
@@ -468,7 +469,9 @@ function ContactForm() {
         Buffet_Chaud_Entree_1: "",
         Buffet_Chaud_Entree_2: "",
         Buffet_Chaud_Plat: "",
-        Buffet_Chaud_Dessert: ""
+        Buffet_Chaud_Dessert: "",
+        Date_Fete: "",
+        Creneau_Retrait: ""
     });
 
     const handleFormStart = () => {
@@ -977,7 +980,9 @@ function ContactForm() {
         if (!isPlatPrepare && !formData.Nombre_Convives.trim()) newErrors.Nombre_Convives = "Requis";
 
         // Dynamic Validation
-        if (isPlatPrepare) {
+        if (isMenusFetes) {
+            if (!formData.Date_Fete && !formData.Date) newErrors.Date_Fete = "Veuillez sélectionner la date de votre repas de fête";
+        } else if (isPlatPrepare) {
             if (!formData.Plat_Prepare_Quantite || parseInt(formData.Plat_Prepare_Quantite) < 1) newErrors.Plat_Prepare_Quantite = "Requis";
         } else if (isPlatUnique) {
             if (!formData.Plat_Associatif) newErrors.Plat_Associatif = "Requis";
@@ -1260,6 +1265,10 @@ function ContactForm() {
         // 4. Envoi à Web3Forms ou API Interne
         try {
             if (isPlatPrepare) {
+                const selectedOption = FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete);
+                const dateEvenementFormatted = selectedOption ? `${selectedOption.label} (${selectedOption.dayFormatted})` : (formData.Date_Fete || formData.Date);
+                const creneauRetraitFormatted = selectedOption ? selectedOption.pickupWindow : formData.Creneau_Retrait;
+
                 const apiPayload = {
                     Nom: formData.Nom,
                     Prenom: formData.Prenom,
@@ -1267,7 +1276,9 @@ function ContactForm() {
                     Tel: formData.Tel,
                     Societe: formData.Societe,
                     Nom_Societe: formData.Nom_Societe,
-                    Date: new Date().toLocaleDateString('fr-BE'),
+                    Date: isMenusFetes ? (dateEvenementFormatted || new Date().toLocaleDateString('fr-BE')) : new Date().toLocaleDateString('fr-BE'),
+                    dateEvenement: isMenusFetes ? dateEvenementFormatted : undefined,
+                    creneauRetrait: isMenusFetes ? creneauRetraitFormatted : undefined,
                     details_projet: formData.details_projet,
                     totalPrice: cartTotal,
                     cartItems: cartItems,
@@ -1285,9 +1296,11 @@ function ContactForm() {
                 if (response.ok && result.success) {
                     setStatus("success");
                     const joursUniques = Array.from(new Set(cartItems.map(item => item.badge || item.jour))).join(',');
+                    const redirectJours = isMenusFetes ? (dateEvenementFormatted || '24 Décembre') : joursUniques;
+                    const redirectCreneau = creneauRetraitFormatted ? `&creneau=${encodeURIComponent(creneauRetraitFormatted)}` : '';
                     clearCart();
                     setTimeout(() => {
-                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}&jours=${encodeURIComponent(joursUniques)}`;
+                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}&jours=${encodeURIComponent(redirectJours)}${redirectCreneau}`;
                     }, 3000);
                 } else {
                     console.error("Erreur API Commande:", result);
@@ -2535,6 +2548,94 @@ function ContactForm() {
                                 </>
                             ) : (
                                 <>
+                                    {isMenusFetes && (
+                                        <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-[#D4AF37]/40 shadow-sm mb-10 space-y-6">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center shrink-0 mt-0.5">
+                                                    <Calendar size={20} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-serif font-bold text-xl md:text-2xl text-black">
+                                                        Date de votre repas de fête <span className="text-red-500">*</span>
+                                                    </h3>
+                                                    <p className="text-xs md:text-sm text-neutral-500 font-light mt-0.5">
+                                                        Sélectionnez la date de votre réveillon ou repas pour déterminer votre créneau de retrait à l'atelier.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {errors.Date_Fete && (
+                                                <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
+                                                    <span>⚠️</span> {errors.Date_Fete}
+                                                </div>
+                                            )}
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                                {FESTIVE_DATE_OPTIONS.map((option) => {
+                                                    const isSelected = formData.Date_Fete === option.id || formData.Date_Fete === option.dayFormatted;
+                                                    return (
+                                                        <button
+                                                            key={option.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    Date_Fete: option.id,
+                                                                    Date: option.dayFormatted,
+                                                                    Creneau_Retrait: option.pickupWindow
+                                                                }));
+                                                                if (errors.Date_Fete) {
+                                                                    setErrors(prev => {
+                                                                        const newErr = { ...prev };
+                                                                        delete newErr.Date_Fete;
+                                                                        return newErr;
+                                                                    });
+                                                                }
+                                                            }}
+                                                            className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${isSelected
+                                                                    ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
+                                                                    : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
+                                                                }`}
+                                                        >
+                                                            <div className="flex justify-between items-start">
+                                                                <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-[#D4AF37]">
+                                                                    {option.badge}
+                                                                </span>
+                                                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
+                                                                    }`}>
+                                                                    {isSelected && <Check size={12} strokeWidth={3} />}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="font-serif font-bold text-neutral-900 text-base">{option.label}</h4>
+                                                                <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">{option.dayFormatted}</p>
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {/* Encart dynamique du créneau de retrait */}
+                                            {formData.Date_Fete && (
+                                                <div className="bg-[#FAF9F6] border border-[#D4AF37]/40 p-4 md:p-5 rounded-2xl flex items-start gap-3.5 shadow-sm">
+                                                    <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={22} />
+                                                    <div className="space-y-1 text-sm">
+                                                        <p className="font-bold text-neutral-900">
+                                                            Créneau de retrait à l'atelier :
+                                                        </p>
+                                                        <p className="text-neutral-700 font-medium leading-relaxed">
+                                                            {FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete)?.pickupWindow || formData.Creneau_Retrait}
+                                                        </p>
+                                                        <p className="text-xs text-neutral-500 pt-0.5">
+                                                            📍 Atelier Traiteur Compère : Rue Potay 3, 4470 Saint-Georges-sur-Meuse
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <h3 className="text-xl font-serif text-neutral-800 mt-2 mb-6 border-b border-neutral-200 pb-2">Vos coordonnées</h3>
                                     {renderContactFields()}
                                 </>
                             )}
