@@ -292,10 +292,10 @@ export default function Navbar() {
                             animate={{ x: 0 }}
                             exit={{ x: "100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 h-[100dvh] w-full sm:max-w-md lg:max-w-lg bg-white z-[70] shadow-2xl flex flex-col"
+                            className="fixed top-0 right-0 h-[100dvh] w-full sm:w-[500px] md:w-[530px] lg:w-[560px] max-w-full bg-white z-[70] shadow-2xl flex flex-col sm:rounded-l-3xl overflow-hidden"
                         >
                             {/* 1. HEADER COMPACT */}
-                            <div className="px-6 py-4 border-b border-neutral-100 flex justify-between items-center bg-[#FAF9F6] shrink-0">
+                            <div className="px-6 py-4.5 border-b border-neutral-100 flex justify-between items-center bg-[#FAF9F6] shrink-0">
                                 <div className="flex items-center gap-2.5">
                                     <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center">
                                         <ShoppingCart size={17} />
@@ -304,7 +304,7 @@ export default function Navbar() {
                                         <h2 className="font-serif font-bold text-lg text-neutral-900">
                                             Panier
                                         </h2>
-                                        <span className="text-xs bg-neutral-200/80 text-neutral-700 font-medium px-2 py-0.5 rounded-full">
+                                        <span className="text-xs bg-neutral-200/80 text-neutral-700 font-medium px-2.5 py-0.5 rounded-full">
                                             {totalItems} {totalItems > 1 ? 'articles' : 'article'}
                                         </span>
                                     </div>
@@ -338,12 +338,12 @@ export default function Navbar() {
                                         return (
                                             <div
                                                 key={item.id}
-                                                className="bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-5 shadow-xs relative transition-shadow hover:shadow-sm"
+                                                className="bg-white border border-neutral-200/80 rounded-3xl p-5 shadow-xs relative transition-shadow hover:shadow-sm"
                                             >
                                                 {/* Bouton supprimer discret */}
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}
-                                                    className="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                                    className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                                                     title="Supprimer l'article"
                                                 >
                                                     <Trash2 size={16} />
@@ -372,16 +372,16 @@ export default function Navbar() {
 
                                                     {/* Zone de composition avec étiquettes claires */}
                                                     {isFestive && item.coursesSummary && item.coursesSummary.length > 0 && (
-                                                        <div className="bg-[#FAF9F6] border border-neutral-200/80 rounded-xl p-3 mb-3.5 space-y-2 text-xs">
+                                                        <div className="bg-[#FAF9F6] border border-neutral-200/80 rounded-2xl p-3.5 mb-3.5 space-y-2 text-xs">
                                                             {item.coursesSummary.map((course, cIdx) => {
                                                                 const [label, ...valParts] = course.split(':');
                                                                 const value = valParts.join(':').trim();
                                                                 return (
-                                                                    <div key={cIdx} className="grid grid-cols-[68px_1fr] items-start gap-2 leading-snug">
-                                                                        <span className="font-bold text-[9px] uppercase tracking-wider text-[#927116] bg-[#D4AF37]/15 px-1 py-0.5 rounded text-center shrink-0">
+                                                                    <div key={cIdx} className="grid grid-cols-[70px_1fr] items-start gap-2 leading-snug">
+                                                                        <span className="font-bold text-[9px] uppercase tracking-wider text-[#927116] bg-[#D4AF37]/15 px-1.5 py-0.5 rounded text-center shrink-0">
                                                                             {label.trim()}
                                                                         </span>
-                                                                        <span className="text-neutral-850 font-medium">
+                                                                        <span className="text-neutral-850 font-medium leading-relaxed">
                                                                             {value}
                                                                         </span>
                                                                     </div>
