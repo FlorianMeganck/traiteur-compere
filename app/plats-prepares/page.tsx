@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
+import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Trash2, Check } from "lucide-react";
 
 import { MENU_DATA } from "../data/plats-prepares";
 import { useCart, CartItem } from "../hooks/useCart";
@@ -13,6 +13,7 @@ export default function PlatsPrepares() {
     const { cartItems, addToCart, removeFromCart, cartTotal, totalItems } = useCart();
     
     const [toastMessage, setToastMessage] = useState("");
+    const [isAdding, setIsAdding] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
     useEffect(() => {
@@ -118,8 +119,13 @@ export default function PlatsPrepares() {
             prixTotalLigne: (pricePlat * quantitePlat) + (totalSoupes * priceSoupe)
         };
         addToCart(item);
-        setSelectedMeal(null);
-        window.dispatchEvent(new Event('open-cart-drawer'));
+        setIsAdding(true);
+        setTimeout(() => {
+            setIsAdding(false);
+            setSelectedMeal(null);
+            setToastMessage(`${quantitePlat}x "${dayData.meal}" ajouté(s) à votre panier !`);
+            setTimeout(() => setToastMessage(""), 3500);
+        }, 350);
     };
 
     return (
@@ -131,11 +137,11 @@ export default function PlatsPrepares() {
                         initial={{ opacity: 0, y: -50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -50 }}
-                        className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-3"
+                        className="fixed top-28 left-1/2 -translate-x-1/2 z-50 bg-[#111111] text-white border border-[#D4AF37] px-6 py-3.5 rounded-full shadow-2xl text-sm font-medium flex items-center gap-3"
                     >
-                        <UtensilsCrossed size={18} />
+                        <span className="text-[#D4AF37] text-base">✨</span>
                         {toastMessage}
-                        <button onClick={() => setToastMessage("")} className="ml-2 hover:text-red-200">
+                        <button onClick={() => setToastMessage("")} className="ml-2 hover:text-[#D4AF37] transition-colors">
                             <X size={16} />
                         </button>
                     </motion.div>
@@ -248,10 +254,25 @@ export default function PlatsPrepares() {
                                         <div className="p-6 md:p-8 bg-white border-t border-neutral-100">
                                             <button 
                                                 onClick={handleAddToCart}
-                                                className="w-full bg-black text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-[#D4AF37] transition-colors"
+                                                className={`w-full font-bold py-4 rounded-xl flex justify-center items-center gap-2 transition-all duration-300 shadow-md ${
+                                                    isAdding
+                                                        ? 'bg-emerald-600 text-white scale-[1.02]'
+                                                        : 'bg-black text-white hover:bg-[#D4AF37]'
+                                                }`}
                                             >
-                                                <ShoppingCart size={20} />
-                                                Ajouter au panier - {((parseFloat(dayData.price.replace(',', '.').replace(' €', '')) * quantitePlat) + (totalSoupes * 4)).toLocaleString('fr-BE')} €
+                                                {isAdding ? (
+                                                    <>
+                                                        <Check size={20} className="text-white" strokeWidth={3} />
+                                                        <span>Ajouté au panier ! ✓</span>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <ShoppingCart size={20} />
+                                                        <span>
+                                                            Ajouter au panier - {((parseFloat(dayData.price.replace(',', '.').replace(' €', '')) * quantitePlat) + (totalSoupes * 4)).toLocaleString('fr-BE')} €
+                                                        </span>
+                                                    </>
+                                                )}
                                             </button>
                                         </div>
                                     </>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, X, Trash2, Plus, Minus } from "lucide-react";
@@ -24,7 +24,18 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [isCartBouncing, setIsCartBouncing] = useState(false);
     const { cartItems, removeFromCart, updateQuantity, cartTotal, totalItems } = useCart();
+    const prevTotalItems = useRef(totalItems);
+
+    useEffect(() => {
+        if (totalItems > prevTotalItems.current) {
+            setIsCartBouncing(true);
+            const timer = setTimeout(() => setIsCartBouncing(false), 800);
+            return () => clearTimeout(timer);
+        }
+        prevTotalItems.current = totalItems;
+    }, [totalItems]);
 
     // --- LOGIC ---
     // 1. Desktop / Base Logic
@@ -132,20 +143,30 @@ export default function Navbar() {
                                 <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
                             </div>
 
-                            {/* DESKTOP CART (Pushed to the absolute far right) */}
+                            {/* DESKTOP CART (Pushed to the absolute far right with Bounce animation) */}
                             <div className="hidden md:flex absolute right-0 items-center">
-                                <button
+                                <motion.button
                                     onClick={() => setIsCartOpen(true)}
-                                    className={`relative flex items-center justify-center p-2 rounded-full transition-all ${desktopTextColor} hover:text-[#D4AF37] hover:bg-black/5`}
+                                    animate={isCartBouncing ? {
+                                        scale: [1, 1.28, 0.92, 1.15, 1],
+                                        rotate: [0, -8, 8, -4, 4, 0],
+                                    } : { scale: 1, rotate: 0 }}
+                                    transition={{ duration: 0.55, ease: "easeInOut" }}
+                                    className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37] hover:bg-black/5`}
                                     aria-label="Panier de commande"
                                 >
-                                    <ShoppingCart size={23} />
+                                    <ShoppingCart size={23} className={isCartBouncing ? "text-[#D4AF37]" : ""} />
                                     {totalItems > 0 && (
-                                        <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
+                                        <motion.span
+                                            key={totalItems}
+                                            initial={{ scale: 0.3 }}
+                                            animate={{ scale: 1 }}
+                                            className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white"
+                                        >
                                             {totalItems}
-                                        </span>
+                                        </motion.span>
                                     )}
-                                </button>
+                                </motion.button>
                             </div>
                         </div>
 
@@ -163,15 +184,28 @@ export default function Navbar() {
                             </Link>
 
                             <div className="flex items-center gap-4">
-                                {/* Mobile Cart Button */}
-                                <button onClick={() => { setIsMenuOpen(false); setIsCartOpen(true); }} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-50`}>
-                                    <ShoppingCart size={24} />
+                                {/* Mobile Cart Button with Bounce */}
+                                <motion.button
+                                    onClick={() => { setIsMenuOpen(false); setIsCartOpen(true); }}
+                                    animate={isCartBouncing ? {
+                                        scale: [1, 1.25, 0.95, 1.15, 1],
+                                        rotate: [0, -8, 8, -4, 4, 0],
+                                    } : { scale: 1, rotate: 0 }}
+                                    transition={{ duration: 0.55, ease: "easeInOut" }}
+                                    className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-50`}
+                                >
+                                    <ShoppingCart size={24} className={isCartBouncing ? "text-[#D4AF37]" : ""} />
                                     {totalItems > 0 && (
-                                        <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                                        <motion.span
+                                            key={totalItems}
+                                            initial={{ scale: 0.3 }}
+                                            animate={{ scale: 1 }}
+                                            className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm ring-2 ring-black"
+                                        >
                                             {totalItems}
-                                        </span>
+                                        </motion.span>
                                     )}
-                                </button>
+                                </motion.button>
 
                                 {/* BURGER */}
                                 <div className="relative z-50">

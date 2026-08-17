@@ -45,6 +45,8 @@ export default function MenusFetes() {
         return initial;
     });
 
+    // État du menu récemment ajouté pour l'animation de confirmation
+    const [addedMenuId, setAddedMenuId] = useState<string | null>(null);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
 
     const handleQuantityChange = (menuId: string, delta: number) => {
@@ -106,13 +108,10 @@ export default function MenusFetes() {
         };
 
         addToCart(item);
-        setToastMessage(`${qty}x "${menu.title}" personnalisé ajouté(s) à votre panier !`);
-        setTimeout(() => setToastMessage(null), 4000);
-
-        // Ouvre automatiquement le panier latéral
-        if (typeof window !== "undefined") {
-            window.dispatchEvent(new Event("open-cart-drawer"));
-        }
+        setAddedMenuId(menu.id);
+        setTimeout(() => setAddedMenuId(null), 2000);
+        setToastMessage(`${qty}x "${menu.title}" ajouté(s) à votre panier !`);
+        setTimeout(() => setToastMessage(null), 3500);
     };
 
     return (
@@ -434,18 +433,31 @@ export default function MenusFetes() {
                                             </div>
                                         </div>
 
-                                        {/* Bouton Ajouter au Panier */}
+                                        {/* Bouton Ajouter au Panier avec micro-interaction de confirmation */}
                                         <button
                                             onClick={() => handleAddMenuToCart(menu)}
                                             disabled={!isMenuComplete}
-                                            className="w-full bg-black hover:bg-[#D4AF37] disabled:bg-neutral-300 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 uppercase tracking-wider text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:scale-100"
+                                            className={`w-full font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 uppercase tracking-wider text-sm transition-all duration-300 shadow-lg ${
+                                                addedMenuId === menu.id
+                                                    ? 'bg-emerald-600 text-white scale-[1.02] shadow-emerald-600/30'
+                                                    : 'bg-black hover:bg-[#D4AF37] disabled:bg-neutral-300 disabled:cursor-not-allowed text-white hover:shadow-xl hover:scale-[1.02] disabled:scale-100'
+                                            }`}
                                         >
-                                            <ShoppingCart size={18} />
-                                            <span>
-                                                {isMenuComplete
-                                                    ? `Ajouter au panier • ${totalLinePrice.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €`
-                                                    : "Veuillez choisir vos services"}
-                                            </span>
+                                            {addedMenuId === menu.id ? (
+                                                <>
+                                                    <Check size={20} className="text-white" strokeWidth={3} />
+                                                    <span>Ajouté au panier ! ✓</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <ShoppingCart size={18} />
+                                                    <span>
+                                                        {isMenuComplete
+                                                            ? `Ajouter au panier • ${totalLinePrice.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €`
+                                                            : "Veuillez choisir vos services"}
+                                                    </span>
+                                                </>
+                                            )}
                                         </button>
                                     </div>
                                 </motion.div>
