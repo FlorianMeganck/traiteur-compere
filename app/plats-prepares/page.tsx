@@ -275,7 +275,7 @@ export default function PlatsPrepares() {
                     <div className="absolute inset-0 bg-black/60" />
                 </div>
 
-                <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-16">
+                <div className="relative z-10 text-center px-4 max-w-4xl mx-auto mt-28 md:mt-36">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}

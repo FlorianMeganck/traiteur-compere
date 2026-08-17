@@ -51,7 +51,7 @@ function GestionCookiesContent() {
     };
 
     return (
-        <main className="min-h-screen bg-neutral-50 py-32 px-6 font-sans">
+        <main className="min-h-screen bg-neutral-50 pt-40 md:pt-48 pb-20 px-6 font-sans">
             <div className="max-w-4xl mx-auto">
                 {/* --- Header --- */}
                 <div className="text-center mb-16">

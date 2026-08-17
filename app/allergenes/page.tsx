@@ -161,7 +161,7 @@ function AllergenesContent() {
     };
 
     return (
-        <main className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative">
+        <main className="min-h-screen pt-40 md:pt-48 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative">
             <div className="max-w-4xl mx-auto px-6 relative z-10">
 
                 {/* En-tête de page */}

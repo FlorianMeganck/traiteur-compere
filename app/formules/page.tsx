@@ -431,7 +431,7 @@ export default function Formules() {
     const [activeBuffetTab, setActiveBuffetTab] = useState<BuffetFroidType>('campagnard');
 
     return (
-        <main className="min-h-screen pt-32 pb-20 bg-gray-50">
+        <main className="min-h-screen pt-40 md:pt-48 pb-20 bg-gray-50">
             <div className="max-w-7xl mx-auto px-6">
 
                 {/* HEADER */}

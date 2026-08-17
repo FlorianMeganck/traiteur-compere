@@ -8,7 +8,7 @@ import { motion, useScroll, useTransform, useInView, animate } from "framer-moti
 // --- MAIN COMPONENT ---
 export default function Services() {
     return (
-        <main className="bg-white text-gray-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-32 pb-20 overflow-hidden relative">
+        <main className="bg-white text-gray-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-40 md:pt-48 pb-20 overflow-hidden relative">
 
             {/* 1. INTRO & TITLE */}
             <section className="px-6 mb-16 max-w-7xl mx-auto text-center relative z-10">

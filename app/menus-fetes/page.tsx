@@ -59,7 +59,7 @@ export default function MenusFetes() {
     };
 
     return (
-        <main className="min-h-screen bg-[#FAF9F6] text-neutral-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-28 md:pt-36 pb-24 relative overflow-hidden">
+        <main className="min-h-screen bg-[#FAF9F6] text-neutral-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-36 md:pt-44 pb-24 relative overflow-hidden">
 
             {/* Toast Notification */}
             <AnimatePresence>

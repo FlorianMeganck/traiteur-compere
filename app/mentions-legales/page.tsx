@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function MentionsLegales() {
     return (
-        <main className="min-h-screen pt-32 pb-20 bg-white">
+        <main className="min-h-screen pt-40 md:pt-48 pb-20 bg-white">
             <div className="max-w-3xl mx-auto px-6">
                 <header className="mb-12 text-center">
                     <h1 className="text-4xl font-serif text-black mb-4">Mentions Légales</h1>

@@ -72,7 +72,7 @@ export default function Navbar() {
 
     return (
         <>
-            <header className="fixed inset-x-0 top-0 z-50">
+            <header className="fixed top-0 left-0 w-full z-50">
                 {/* Top-Bar Bandeau d'Annonce (Festive Preview) */}
                 <div className="bg-[#111111] text-white py-3.5 md:py-4 px-4 text-center text-xs sm:text-sm md:text-base font-medium tracking-wide flex flex-wrap items-center justify-center gap-2 border-b border-[#D4AF37]/30 shadow-sm">
                     <span className="text-[#D4AF37] text-sm md:text-base animate-pulse"></span>

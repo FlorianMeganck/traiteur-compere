@@ -24,7 +24,7 @@ export default function Home() {
         </div>
 
         {/* Contenu centré */}
-        <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-4xl mx-auto mt-16">
+        <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-4xl mx-auto mt-28 md:mt-36">
 
           {/* Titre principal (Police Serif élégante) */}
           <h1 className="text-5xl md:text-7xl font-serif text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
