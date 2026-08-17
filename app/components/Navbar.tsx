@@ -292,30 +292,34 @@ export default function Navbar() {
                             animate={{ x: 0 }}
                             exit={{ x: "100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 h-[100dvh] w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
+                            className="fixed top-0 right-0 h-[100dvh] w-full sm:max-w-md lg:max-w-lg bg-white z-[70] shadow-2xl flex flex-col"
                         >
-                            <div className="p-5 sm:p-6 border-b border-neutral-100/80 flex justify-between items-center bg-[#FAF9F6]">
-                                <div>
-                                    <h2 className="text-xl sm:text-2xl font-serif font-bold text-neutral-900 flex items-center gap-2.5">
-                                        <ShoppingCart className="text-[#D4AF37]" size={22} />
-                                        <span>Votre Panier</span>
-                                    </h2>
-                                    <p className="text-xs text-neutral-500 font-light mt-0.5">
-                                        {totalItems === 0
-                                            ? "Votre sélection est actuellement vide"
-                                            : `${totalItems} ${totalItems > 1 ? 'articles sélectionnés' : 'article sélectionné'}`}
-                                    </p>
+                            {/* 1. HEADER COMPACT */}
+                            <div className="px-6 py-4 border-b border-neutral-100 flex justify-between items-center bg-[#FAF9F6] shrink-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center">
+                                        <ShoppingCart size={17} />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="font-serif font-bold text-lg text-neutral-900">
+                                            Panier
+                                        </h2>
+                                        <span className="text-xs bg-neutral-200/80 text-neutral-700 font-medium px-2 py-0.5 rounded-full">
+                                            {totalItems} {totalItems > 1 ? 'articles' : 'article'}
+                                        </span>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => setIsCartOpen(false)}
-                                    className="w-9 h-9 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-900 hover:bg-neutral-200/60 transition-all duration-200"
+                                    className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-black flex items-center justify-center transition-all duration-200"
                                     aria-label="Fermer le panier"
                                 >
-                                    <X size={20} />
+                                    <X size={16} />
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-5 sm:p-6 space-y-4 bg-[#FBFBFA]">
+                            {/* 2. CORPS DÉFILABLE */}
+                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 space-y-4 bg-[#FBFBFA]">
                                 {cartItems.length === 0 ? (
                                     <div className="text-center text-neutral-400 py-16 px-4 space-y-3">
                                         <div className="w-16 h-16 rounded-full bg-neutral-100 text-neutral-300 flex items-center justify-center mx-auto mb-2">
@@ -339,25 +343,25 @@ export default function Navbar() {
                                                 {/* Bouton supprimer discret */}
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}
-                                                    className="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-full text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                    className="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                                                     title="Supprimer l'article"
                                                 >
                                                     <Trash2 size={16} />
                                                 </button>
 
                                                 <div className="pr-7">
-                                                    {/* Tags & Nom du plat */}
-                                                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                                    {/* En-tête de carte : Tag & Nom */}
+                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                                                         {isFestive ? (
-                                                            <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200/80 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                                            <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                                                                 Fêtes
                                                             </span>
                                                         ) : (
-                                                            <span className="text-[10px] bg-neutral-100 text-neutral-600 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                                            <span className="text-[10px] bg-neutral-100 text-neutral-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
                                                                 Semaine
                                                             </span>
                                                         )}
-                                                        <h4 className="font-serif font-bold text-neutral-900 text-sm sm:text-base leading-snug">
+                                                        <h4 className="font-serif font-bold text-neutral-900 text-base leading-snug">
                                                             {item.nomPlat}
                                                         </h4>
                                                     </div>
@@ -366,31 +370,37 @@ export default function Navbar() {
                                                         {item.badge || (weekData ? `${item.jour} (${weekData.week.split(' :')[0]})` : item.jour)}
                                                     </p>
 
-                                                    {/* Composition détaillée du Menu de Fêtes avec micro-puces dorées */}
+                                                    {/* Zone de composition avec étiquettes claires */}
                                                     {isFestive && item.coursesSummary && item.coursesSummary.length > 0 && (
-                                                        <div className="bg-[#FAF9F6] border border-amber-100/80 rounded-xl p-3 mb-3 space-y-1.5 text-xs text-neutral-700">
-                                                            {item.coursesSummary.map((course, cIdx) => (
-                                                                <div key={cIdx} className="flex items-start gap-2 leading-snug">
-                                                                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] mt-1.5 shrink-0" />
-                                                                    <span>
-                                                                        <strong className="text-neutral-900 font-semibold">{course.split(':')[0]} :</strong> {course.split(':').slice(1).join(':')}
-                                                                    </span>
-                                                                </div>
-                                                            ))}
+                                                        <div className="bg-[#FAF9F6] border border-neutral-200/80 rounded-xl p-3 mb-3.5 space-y-2 text-xs">
+                                                            {item.coursesSummary.map((course, cIdx) => {
+                                                                const [label, ...valParts] = course.split(':');
+                                                                const value = valParts.join(':').trim();
+                                                                return (
+                                                                    <div key={cIdx} className="grid grid-cols-[68px_1fr] items-start gap-2 leading-snug">
+                                                                        <span className="font-bold text-[9px] uppercase tracking-wider text-[#927116] bg-[#D4AF37]/15 px-1 py-0.5 rounded text-center shrink-0">
+                                                                            {label.trim()}
+                                                                        </span>
+                                                                        <span className="text-neutral-850 font-medium">
+                                                                            {value}
+                                                                        </span>
+                                                                    </div>
+                                                                );
+                                                            })}
                                                         </div>
                                                     )}
 
                                                     {/* Soupes associées (Plats préparés) */}
                                                     {item.soupes && Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
-                                                        <div key={soupe} className="flex justify-between items-center text-xs text-neutral-600 mb-2 pl-3 border-l-2 border-[#D4AF37]/50 py-0.5">
+                                                        <div key={soupe} className="flex justify-between items-center text-xs text-neutral-600 mb-2 pl-2.5 border-l-2 border-[#D4AF37]/50 py-0.5">
                                                             <span>+ {qty}x {soupe}</span>
-                                                            <span className="font-semibold text-neutral-800">{qty * (item.prixUnitaireSoupe || 0)} €</span>
+                                                            <span className="font-semibold text-neutral-900">{qty * (item.prixUnitaireSoupe || 0)} €</span>
                                                         </div>
                                                     ))}
 
-                                                    {/* Contrôleur de Quantité Capsule & Prix Total */}
+                                                    {/* Ligne d'action inférieure : Sélecteur quantité compact & Prix total */}
                                                     <div className="flex justify-between items-center pt-2 mt-2 border-t border-neutral-100">
-                                                        {/* Capsule +/- */}
+                                                        {/* Sélecteur de quantité compact */}
                                                         <div className="inline-flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/80 p-1 rounded-full shadow-2xs">
                                                             <button
                                                                 onClick={() => updateQuantity(item.id, -1)}
@@ -411,9 +421,9 @@ export default function Navbar() {
                                                             </button>
                                                         </div>
 
-                                                        {/* Prix Ligne */}
+                                                        {/* Prix total de la ligne */}
                                                         <div className="text-right">
-                                                            <span className="text-sm sm:text-base font-bold text-neutral-900">
+                                                            <span className="text-base font-bold text-neutral-900 font-serif">
                                                                 {item.prixTotalLigne.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                             </span>
                                                         </div>
@@ -425,20 +435,24 @@ export default function Navbar() {
                                 )}
                             </div>
 
+                            {/* 3. FOOTER COLLÉ EN BAS */}
                             {cartItems.length > 0 && (
-                                <div className="p-6 border-t border-neutral-200/80 bg-white space-y-4 shadow-lg">
+                                <div className="sticky bottom-0 bg-white border-t border-neutral-100 p-6 space-y-4 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] shrink-0">
                                     <div className="flex justify-between items-baseline">
-                                        <span className="text-xs uppercase tracking-widest text-neutral-500 font-semibold">Sous-total estimé</span>
-                                        <span className="text-2xl sm:text-3xl font-serif font-bold text-[#D4AF37]">
+                                        <div>
+                                            <span className="text-sm font-bold text-neutral-900 block">Total TTC</span>
+                                            <span className="text-[11px] text-neutral-400">TVA incluse</span>
+                                        </div>
+                                        <span className="text-3xl font-serif font-bold text-[#D4AF37]">
                                             {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                         </span>
                                     </div>
                                     <Link
                                         href={cartItems.some(i => i.itemType === 'menu_fete' || i.semaineId.startsWith('menu') || i.semaineId.startsWith('fetes')) ? "/contact?type=menus_fetes" : "/contact?type=plat_prepare"}
                                         onClick={() => setIsCartOpen(false)}
-                                        className="w-full bg-black hover:bg-[#D4AF37] text-white font-bold text-center py-4 px-6 rounded-2xl flex justify-center items-center gap-2.5 uppercase tracking-wider text-xs sm:text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.01]"
+                                        className="w-full bg-black hover:bg-[#D4AF37] text-white font-bold text-center py-4 px-6 rounded-xl flex justify-center items-center gap-2.5 uppercase tracking-wider text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.01]"
                                     >
-                                        <span>Passer commande</span>
+                                        <span>Valider ma commande</span>
                                         <ArrowRight size={16} />
                                     </Link>
                                 </div>
