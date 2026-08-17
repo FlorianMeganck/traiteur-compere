@@ -84,10 +84,10 @@ export default function Navbar() {
     return (
         <>
             <header className="fixed top-0 left-0 w-full z-50">
-                {/* Top-Bar Bandeau d'Annonce (Festive Preview) */}
+                {/* Top-Bar Bandeau d'Annonce (Festive) */}
                 <div className="bg-[#111111] text-white py-3.5 md:py-4 px-4 text-center text-xs sm:text-sm md:text-base font-medium tracking-wide flex flex-wrap items-center justify-center gap-2 border-b border-[#D4AF37]/30 shadow-sm">
-                    <span className="text-[#D4AF37] text-sm md:text-base animate-pulse"></span>
-                    <span>Nouveau : Découvrez nos premiers essais pour les <strong>Menus de Fêtes 2026</strong> !</span>
+                    <span className="text-[#D4AF37] text-sm md:text-base">✨</span>
+                    <span><strong>Menus de Fêtes 2026</strong> : Les réservations sont ouvertes !</span>
                     <Link href="/menus-fetes" className="underline text-[#D4AF37] hover:text-white ml-1 font-bold transition-colors">
                         Voir la section Fêtes →
                     </Link>
