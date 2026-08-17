@@ -86,20 +86,34 @@ export default function Navbar() {
                     className={`w-full transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
                         }`}
                 >
-                    <div className="w-full max-w-7xl mx-auto px-4 lg:px-8 relative">
+                    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12 relative">
 
-                        {/* --- DESKTOP LAYOUT (Grid 3 Cols: Left links / Logo / Right links) --- */}
+                        {/* --- DESKTOP LAYOUT (Grid 3 Cols: Left links / Logo / Right links + Extremities) --- */}
                         <div className="hidden md:grid grid-cols-[1fr_auto_1fr] items-center w-full relative">
 
-                            {/* LEFT ZONE: À Propos, Services & Plats Préparés (Aligned Right -> Center Logo) */}
-                            <div className="flex justify-end items-center gap-3 lg:gap-6 pr-3 lg:pr-6">
+                            {/* SOCIALS (Pushed to the absolute far left) */}
+                            <div className="hidden lg:flex absolute left-0 items-center gap-3.5">
+                                <SocialLink
+                                    href="https://www.facebook.com/profile.php?id=61582940090708"
+                                    icon={<FacebookIcon />}
+                                    className={desktopTextColor}
+                                />
+                                <SocialLink
+                                    href="https://www.instagram.com/traiteurcompere8/"
+                                    icon={<InstagramIcon />}
+                                    className={desktopTextColor}
+                                />
+                            </div>
+
+                            {/* LEFT ZONE: À Propos, Services & Plats Préparés (Spaced out to the left of the logo) */}
+                            <div className="flex justify-end items-center gap-4 lg:gap-6 xl:gap-8 pr-6 lg:pr-10 xl:pr-14">
                                 <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
                                 <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
                                 <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
                             </div>
 
-                            {/* CENTER ZONE: Logo */}
-                            <div className="flex justify-center items-center px-2">
+                            {/* CENTER ZONE: Logo avec respiration */}
+                            <div className="flex justify-center items-center px-4 lg:px-8">
                                 <Link href="/" className="relative block w-32 h-16 md:w-44 md:h-22 lg:w-48 lg:h-24 transition-transform hover:scale-105 z-50">
                                     <Image
                                         src="/images/Logo_traiteur.png"
@@ -111,35 +125,27 @@ export default function Navbar() {
                                 </Link>
                             </div>
 
-                            {/* RIGHT ZONE: Formules, Menus de Fêtes & Contact (Aligned Left -> Center Logo) */}
-                            <div className="flex justify-start items-center gap-3 lg:gap-6 pl-3 lg:pl-6">
+                            {/* RIGHT ZONE: Formules, Menus de Fêtes & Contact (Spaced out to the right of the logo) */}
+                            <div className="flex justify-start items-center gap-4 lg:gap-6 xl:gap-8 pl-6 lg:pl-10 xl:pl-14">
                                 <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
                                 <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} isFestive={true} />
                                 <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
+                            </div>
 
-                                {/* Desktop Cart Button */}
-                                <button onClick={() => setIsCartOpen(true)} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37] ml-1`}>
-                                    <ShoppingCart size={22} />
+                            {/* DESKTOP CART (Pushed to the absolute far right) */}
+                            <div className="hidden md:flex absolute right-0 items-center">
+                                <button
+                                    onClick={() => setIsCartOpen(true)}
+                                    className={`relative flex items-center justify-center p-2 rounded-full transition-all ${desktopTextColor} hover:text-[#D4AF37] hover:bg-black/5`}
+                                    aria-label="Panier de commande"
+                                >
+                                    <ShoppingCart size={23} />
                                     {totalItems > 0 && (
-                                        <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                                        <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm">
                                             {totalItems}
                                         </span>
                                     )}
                                 </button>
-                            </div>
-
-                            {/* SOCIALS (Absolute left on wide screens) */}
-                            <div className="hidden xl:flex absolute left-0 items-center gap-4">
-                                <SocialLink
-                                    href="https://www.facebook.com/profile.php?id=61582940090708"
-                                    icon={<FacebookIcon />}
-                                    className={desktopTextColor}
-                                />
-                                <SocialLink
-                                    href="https://www.instagram.com/traiteurcompere8/"
-                                    icon={<InstagramIcon />}
-                                    className={desktopTextColor}
-                                />
                             </div>
                         </div>
 
