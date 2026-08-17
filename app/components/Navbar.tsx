@@ -289,9 +289,23 @@ export default function Navbar() {
                                                         {isFestive && <span className="text-[10px] bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Fêtes</span>}
                                                         <h4 className="font-bold text-neutral-900 leading-tight">{item.nomPlat}</h4>
                                                     </div>
-                                                    <p className="text-xs md:text-sm text-[#D4AF37] font-medium capitalize mb-3">
+                                                    <p className="text-xs md:text-sm text-[#D4AF37] font-medium capitalize mb-2">
                                                         {item.badge || (weekData ? `${item.jour} (${weekData.week.split(' :')[0]})` : item.jour)}
                                                     </p>
+
+                                                    {/* Composition détaillée du Menu de Fêtes */}
+                                                    {isFestive && item.coursesSummary && item.coursesSummary.length > 0 && (
+                                                        <div className="bg-[#FAF9F6] border border-neutral-200/80 rounded-xl p-2.5 mb-3 space-y-1 text-xs text-neutral-700">
+                                                            {item.coursesSummary.map((course, cIdx) => (
+                                                                <div key={cIdx} className="flex items-start gap-1.5 leading-snug">
+                                                                    <span className="text-[#D4AF37] font-bold shrink-0">•</span>
+                                                                    <span>
+                                                                        <strong className="text-neutral-900 font-semibold">{course.split(':')[0]} :</strong> {course.split(':').slice(1).join(':')}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
 
                                                     {/* Quantity Selector +/- */}
                                                     <div className="flex justify-between items-center bg-neutral-50 p-2 rounded-xl border border-neutral-200/70 mb-3">

@@ -1,10 +1,17 @@
-export type FestiveCourse = {
-    courseName: "Entrée" | "Potage" | "Plat Principal" | "Dessert" | "Mignardises" | "Amuse-bouche";
+export interface MenuOption {
+    id: string;
     title: string;
     description?: string;
-};
+}
 
-export type FestiveMenu = {
+export interface FestiveMenuCourses {
+    entrees: MenuOption[];
+    potages?: MenuOption[];
+    plats: MenuOption[];
+    desserts: MenuOption[];
+}
+
+export interface FestiveMenu {
     id: string;
     title: string;
     subtitle: string;
@@ -12,13 +19,14 @@ export type FestiveMenu = {
     price: number; // Prix par personne en euros (ex: 49)
     priceFormatted: string; // "49,00 €"
     image: string;
-    pickupDates: string[]; // ex: ["Mardi 24 Décembre après 11h", "Mercredi 31 Décembre après 11h"]
-    deadlineNotice: string; // ex: "Commandes avant le 18 Décembre"
+    pickupDates: string[];
+    deadlineNotice: string;
     description: string;
-    courses: FestiveCourse[];
+    category: 'noel' | 'nouvel_an' | 'enfant';
+    courses: FestiveMenuCourses;
     allergens?: string[];
     isPopular?: boolean;
-};
+}
 
 export const MENUS_FETES_DATA: FestiveMenu[] = [
     {
@@ -32,29 +40,68 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
         pickupDates: ["Mardi 24 Décembre après 11h", "Mercredi 25 Décembre avant 12h"],
         deadlineNotice: "Réservation souhaitée avant le 19 Décembre",
         description: "Une composition festive 4 services alliant produits nobles et savoir-faire bicentenaire de la maison Compère.",
+        category: "noel",
         isPopular: true,
-        courses: [
-            {
-                courseName: "Entrée",
-                title: "Terrine de Foie Gras de Canard Maison",
-                description: "Chutney de figues moelleuses au Porto rouge & brioche dorée toastée"
-            },
-            {
-                courseName: "Potage",
-                title: "Velouté de Châtaignes & Brisures de Truffe",
-                description: "Émulsion crémeuse et éclats de noisettes torréfiées"
-            },
-            {
-                courseName: "Plat Principal",
-                title: "Filet de Biche Sauce Grand Veneur",
-                description: "Mousseline de potimarron, airelles sauvages & poire pochée aux épices douces"
-            },
-            {
-                courseName: "Dessert",
-                title: "Bûche Signature Chocolat Valrhona & Praliné Croustillant",
-                description: "Cœur coulant caramel fleur de sel et biscuit dacquoise"
-            }
-        ],
+        courses: {
+            entrees: [
+                {
+                    id: "noel-entree-1",
+                    title: "Terrine de Foie Gras de Canard Maison",
+                    description: "Chutney de figues moelleuses au Porto rouge & brioche dorée toastée"
+                },
+                {
+                    id: "noel-entree-2",
+                    title: "Saumon Fumé d'Écosse Artisanal & Blinis Maison",
+                    description: "Crème acidulée à l'aneth frais, zeste de citron et baies roses"
+                }
+            ],
+            potages: [
+                {
+                    id: "noel-potage-1",
+                    title: "Velouté de Châtaignes & Brisures de Truffe",
+                    description: "Émulsion crémeuse et éclats de noisettes torréfiées"
+                },
+                {
+                    id: "noel-potage-2",
+                    title: "Crème de Butternut au Lait de Coco & Épices Douces",
+                    description: "Graines de courge torréfiées et pointe de gingembre"
+                }
+            ],
+            plats: [
+                {
+                    id: "noel-plat-1",
+                    title: "Filet de Biche Sauce Grand Veneur",
+                    description: "Mousseline de potimarron, airelles sauvages & poire pochée aux épices"
+                },
+                {
+                    id: "noel-plat-2",
+                    title: "Suprême de Pintade Fermière aux Morilles",
+                    description: "Gratin dauphinois onctueux à la crème et petits légumes glacés"
+                },
+                {
+                    id: "noel-plat-3",
+                    title: "Pavé de Dos de Cabillaud Rôti aux Agrumes",
+                    description: "Risotto crémeux au parmesan et émulsion légère au safran"
+                }
+            ],
+            desserts: [
+                {
+                    id: "noel-dessert-1",
+                    title: "Bûche Signature Chocolat Valrhona & Praliné Croustillant",
+                    description: "Cœur coulant caramel fleur de sel et biscuit dacquoise"
+                },
+                {
+                    id: "noel-dessert-2",
+                    title: "Bûche Féerie Exotique Mangue & Fruit de la Passion",
+                    description: "Mousse légère vanille bourbon et biscuit génoise imbibé"
+                },
+                {
+                    id: "noel-dessert-3",
+                    title: "Pavlova d'Hiver aux Marrons & Myrtilles Sauvages",
+                    description: "Meringue croquante, crème fouettée vanillée et marrons glacés"
+                }
+            ]
+        },
         allergens: ["Gluten", "Lactose", "Fruits à coque", "Œufs"]
     },
     {
@@ -68,70 +115,143 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
         pickupDates: ["Mercredi 31 Décembre après 11h", "Jeudi 1er Janvier avant 12h"],
         deadlineNotice: "Réservation souhaitée avant le 26 Décembre",
         description: "Un voyage culinaire festif pour sublimer votre réveillon du Nouvel An entre amis ou en famille.",
+        category: "nouvel_an",
         isPopular: true,
-        courses: [
-            {
-                courseName: "Entrée",
-                title: "Carpaccio de Noix de Saint-Jacques & Émulsion Agrumes",
-                description: "Perles de yuzu, huile vierge à l'aneth et jeunes pousses croquantes"
-            },
-            {
-                courseName: "Potage",
-                title: "Bisque Onctueuse de Homard & Croûtons Dorés",
-                description: "Parfumée à l'estragon frais et pointe de cognac fine champagne"
-            },
-            {
-                courseName: "Plat Principal",
-                title: "Suprême de Chapon Farci aux Morilles",
-                description: "Gratin dauphinois à la crème d'Isigny et tombée de champignons des bois"
-            },
-            {
-                courseName: "Dessert",
-                title: "Sphère Scintillante Mangue-Passion & Vanille de Madagascar",
-                description: "Sablé breton pur beurre et coulis exotique acidulé"
-            }
-        ],
+        courses: {
+            entrees: [
+                {
+                    id: "sylvestre-entree-1",
+                    title: "Carpaccio de Noix de Saint-Jacques & Émulsion Agrumes",
+                    description: "Perles de yuzu, huile vierge à l'aneth et jeunes pousses croquantes"
+                },
+                {
+                    id: "sylvestre-entree-2",
+                    title: "Médaillon de Foie Gras Poêlé & Pain d'Épices Artisanal",
+                    description: "Compotée de coings au miel d'acacia et réduction balsamique"
+                }
+            ],
+            potages: [
+                {
+                    id: "sylvestre-potage-1",
+                    title: "Bisque Onctueuse de Homard & Croûtons Dorés",
+                    description: "Parfumée à l'estragon frais et pointe de cognac fine champagne"
+                },
+                {
+                    id: "sylvestre-potage-2",
+                    title: "Cappuccino de Cèpes & Noisettes Grillées",
+                    description: "Mousse de lait truffée et brisures croustillantes de châtaigne"
+                }
+            ],
+            plats: [
+                {
+                    id: "sylvestre-plat-1",
+                    title: "Suprême de Chapon Farci aux Morilles & Vin Jaune",
+                    description: "Gratin dauphinois à la crème d'Isigny et tombée de sous-bois"
+                },
+                {
+                    id: "sylvestre-plat-2",
+                    title: "Filet de Bœuf Simmental Sauce Périgourdine",
+                    description: "Pommes grenailles confites au romarin et fagot de haricots fins"
+                },
+                {
+                    id: "sylvestre-plat-3",
+                    title: "Dos de Bar Sauvage Rôti au Beurre Blanc Citronné",
+                    description: "Purée onctueuse de panais vanillée et tombée de jeunes épinards"
+                }
+            ],
+            desserts: [
+                {
+                    id: "sylvestre-dessert-1",
+                    title: "Sphère Scintillante Mangue-Passion & Vanille Intense",
+                    description: "Sablé breton pur beurre et coulis exotique acidulé"
+                },
+                {
+                    id: "sylvestre-dessert-2",
+                    title: "Entremets Royal Chocolat Noir Intense & Feuillantine",
+                    description: "Glaçage miroir étincelant et poudre d'or scintillante"
+                },
+                {
+                    id: "sylvestre-dessert-3",
+                    title: "Tartelette Sablée aux Noix de Pécan & Sirop d'Érable",
+                    description: "Glace artisanale vanille bourbon de Madagascar"
+                }
+            ]
+        },
         allergens: ["Gluten", "Lactose", "Crustacés", "Mollusques", "Œufs"]
     },
     {
         id: "menu-prestige-fetes",
         title: "Menu Dégustation Prestige",
-        subtitle: "L'excellence gastronomique absolue en 5 services",
+        subtitle: "L'excellence gastronomique absolue pour les tables d'exception",
         badge: "Édition Limitée",
         price: 65.00,
         priceFormatted: "65,00 €",
         image: "/images/wedding_table.png",
         pickupDates: ["24 Décembre après 11h", "31 Décembre après 11h"],
         deadlineNotice: "Série limitée - Réservation anticipée requise",
-        description: "Une expérience d'exception mettant à l'honneur les trésors les plus précieux de la gastronomie de fête.",
+        description: "Une expérience gastronomique d'exception mettant à l'honneur les trésors les plus précieux des fêtes.",
+        category: "noel",
         isPopular: false,
-        courses: [
-            {
-                courseName: "Amuse-bouche",
-                title: "Trilogie de Bouchées Festives du Chef",
-                description: "Cuillère de tataki de thon rouge, tartare de bœuf truffé & cromesquis de foie gras"
-            },
-            {
-                courseName: "Entrée",
-                title: "Médaillon de Homard Bleu & Mousseline d'Avocat",
-                description: "Vinaigrette passion au poivre de Timut & tuile de corail croustillante"
-            },
-            {
-                courseName: "Potage",
-                title: "Consommé Double de Faisan aux Cèpes & Truffe Noire",
-                description: "Infusion lente aux herbes aromatiques et quenelle de volaille fine"
-            },
-            {
-                courseName: "Plat Principal",
-                title: "Pavé de Veau de Lait Cuit Basse Température",
-                description: "Jus corsé au vin de Madère, grenailles confites et légumes glacés au miel"
-            },
-            {
-                courseName: "Dessert",
-                title: "Création Impériale : Dôme Royal Or & Chocolat Grand Cru",
-                description: "Feuillantine pralinée, ganache intense 70% et éclat de feuille d'or comestible"
-            }
-        ],
+        courses: {
+            entrees: [
+                {
+                    id: "prestige-entree-1",
+                    title: "Médaillon de Homard Bleu & Mousseline d'Avocat",
+                    description: "Vinaigrette passion au poivre de Timut & tuile de corail croustillante"
+                },
+                {
+                    id: "prestige-entree-2",
+                    title: "Duo Festif : Foie Gras Mi-Cuit & Tartare de Saint-Jacques Truffé",
+                    description: "Gelée de Sauternes millésimé et toasts briochés maison"
+                }
+            ],
+            potages: [
+                {
+                    id: "prestige-potage-1",
+                    title: "Consommé Double de Faisan aux Cèpes & Truffe Noire",
+                    description: "Infusion lente aux herbes aromatiques et quenelle de volaille fine"
+                },
+                {
+                    id: "prestige-potage-2",
+                    title: "Velouté Parfumé de Châtaignes & Noix de Saint-Jacques Rôties",
+                    description: "Huile de truffe blanche et jeunes pousses d'aneth"
+                }
+            ],
+            plats: [
+                {
+                    id: "prestige-plat-1",
+                    title: "Pavé de Veau de Lait Cuit Basse Température",
+                    description: "Jus corsé au vin de Madère, grenailles confites et légumes glacés au miel"
+                },
+                {
+                    id: "prestige-plat-2",
+                    title: "Filet de Chevreuil Grand Veneur aux Airelles",
+                    description: "Mousseline de céleri-rave et poire au vin chaud d'Alsace"
+                },
+                {
+                    id: "prestige-plat-3",
+                    title: "Lotte Rôtie au Lardo di Colonnata & Jus de Crustacés",
+                    description: "Risotto carnaroli aux morilles et asperges vertes croquantes"
+                }
+            ],
+            desserts: [
+                {
+                    id: "prestige-dessert-1",
+                    title: "Création Impériale : Dôme Royal Or & Chocolat Grand Cru",
+                    description: "Feuillantine pralinée, ganache intense 70% et éclat de feuille d'or"
+                },
+                {
+                    id: "prestige-dessert-2",
+                    title: "Lingot Croustillant Praliné Noisette du Piémont & Yuzu",
+                    description: "Mousse ivoire vanille et cœur caramel coulant"
+                },
+                {
+                    id: "prestige-dessert-3",
+                    title: "Symphonie Glacée Champagne Rosé & Fruits Rouges Flambés",
+                    description: "Crumble sablé amande et coulis de framboises sauvages"
+                }
+            ]
+        },
         allergens: ["Gluten", "Lactose", "Crustacés", "Poissons", "Œufs", "Fruits à coque"]
     },
     {
@@ -145,24 +265,68 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
         pickupDates: ["24 Décembre après 11h", "31 Décembre après 11h"],
         deadlineNotice: "Disponible pour les réveillons de Noël et Nouvel An",
         description: "Des saveurs douces et gourmandes préparées maison pour régaler les petits convives.",
+        category: "enfant",
         isPopular: false,
-        courses: [
-            {
-                courseName: "Entrée",
-                title: "Mini Feuilleté Croustillant au Jambon Artisanal & Fromage Doré",
-                description: "Petite sauce veloutée légère"
-            },
-            {
-                courseName: "Plat Principal",
-                title: "Filet de Poulet Fermier Braisé & Pommes Noisettes Maison",
-                description: "Sauce crème douce et compote de pommes fraîches"
-            },
-            {
-                courseName: "Dessert",
-                title: "Mini Bûchette Gourmande Chocolat au Lait & Guimauve",
-                description: "Décoration lutin de Noël en sucre"
-            }
-        ],
+        courses: {
+            entrees: [
+                {
+                    id: "enfant-entree-1",
+                    title: "Mini Feuilleté Croustillant au Jambon Artisanal & Fromage Doré",
+                    description: "Petite sauce veloutée douce"
+                },
+                {
+                    id: "enfant-entree-2",
+                    title: "Petit Roulé de Saumon Doux & Cream Cheese",
+                    description: "Mini toasts dorés croustillants"
+                }
+            ],
+            potages: [
+                {
+                    id: "enfant-potage-1",
+                    title: "Petit Velouté Doux de Potiron au Beurre Fermier",
+                    description: "Mini croûtons croustillants dorés"
+                },
+                {
+                    id: "enfant-potage-2",
+                    title: "Bouillon Gourmand aux Petites Pâtes Étoiles",
+                    description: "Petites boulettes de volaille fondantes"
+                }
+            ],
+            plats: [
+                {
+                    id: "enfant-plat-1",
+                    title: "Filet de Poulet Fermier Braisé & Pommes Noisettes Maison",
+                    description: "Sauce crème douce et compote de pommes fraîches"
+                },
+                {
+                    id: "enfant-plat-2",
+                    title: "Mini Pavé de Saumon Doré & Écrasé de Pommes de Terre",
+                    description: "Légère crème citronnée douce"
+                },
+                {
+                    id: "enfant-plat-3",
+                    title: "Émincé de Veau Fondant & Gratin Dauphinois Doux",
+                    description: "Jus gourmand aux carottes glacées"
+                }
+            ],
+            desserts: [
+                {
+                    id: "enfant-dessert-1",
+                    title: "Mini Bûchette Gourmande Chocolat au Lait & Guimauve",
+                    description: "Décoration lutin de Noël en sucre"
+                },
+                {
+                    id: "enfant-dessert-2",
+                    title: "Mousse Fondante au Chocolat Blanc & Coulis Fraise",
+                    description: "Étoiles en chocolat pétillant"
+                },
+                {
+                    id: "enfant-dessert-3",
+                    title: "Duo de Glaces Artisanales (Vanille & Fraise) & Biscuit Sablé",
+                    description: "Mini pépites festives croustillantes"
+                }
+            ]
+        },
         allergens: ["Gluten", "Lactose", "Œufs"]
     }
 ];
@@ -240,11 +404,11 @@ export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; n
         const id = (item.id || "").toLowerCase();
         const nom = (item.nomPlat || "").toLowerCase();
 
-        if (id === 'menu-reveillon-noel' || id === 'menu-prestige-fetes' || nom.includes('noël') || nom.includes('noel') || nom.includes('prestige')) {
+        if (id === 'menu-reveillon-noel' || id === 'menu-prestige-fetes' || id.startsWith('menu-reveillon-noel') || id.startsWith('menu-prestige-fetes') || nom.includes('noël') || nom.includes('noel') || nom.includes('prestige')) {
             hasNoel = true;
-        } else if (id === 'menu-saint-sylvestre' || nom.includes('sylvestre') || nom.includes('nouvel an')) {
+        } else if (id === 'menu-saint-sylvestre' || id.startsWith('menu-saint-sylvestre') || nom.includes('sylvestre') || nom.includes('nouvel an')) {
             hasNouvelAn = true;
-        } else if (id === 'menu-enfant-fetes' || nom.includes('enfant')) {
+        } else if (id === 'menu-enfant-fetes' || id.startsWith('menu-enfant-fetes') || nom.includes('enfant')) {
             hasEnfant = true;
         }
     });
@@ -279,5 +443,3 @@ export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; n
         allowedPeriodLabel
     };
 }
-
-

@@ -5,20 +5,43 @@ import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Sparkles, Calendar, Gift, ShoppingCart, Plus, Minus, Check,
-    UtensilsCrossed, Clock, CreditCard, ChevronRight, ShieldCheck, Flame
+    Sparkles, Gift, ShoppingCart, Plus, Minus, Check,
+    Clock, ChevronRight, ShieldCheck, Flame, Utensils
 } from "lucide-react";
 
-import { MENUS_FETES_DATA, FestiveMenu } from "../data/menus-fetes";
+import { MENUS_FETES_DATA, FestiveMenu, MenuOption } from "../data/menus-fetes";
 import { useCart, CartItem } from "../hooks/useCart";
 
+type CourseKey = 'entrees' | 'potages' | 'plats' | 'desserts';
+
+interface MenuSelections {
+    entrees?: string;
+    potages?: string;
+    plats?: string;
+    desserts?: string;
+}
+
 export default function MenusFetes() {
-    const { addToCart, cartItems, cartTotal, totalItems } = useCart();
+    const { addToCart } = useCart();
 
     // État local des quantités pour chaque carte de menu
     const [quantities, setQuantities] = useState<Record<string, number>>(() => {
         const initial: Record<string, number> = {};
         MENUS_FETES_DATA.forEach(m => initial[m.id] = 1);
+        return initial;
+    });
+
+    // État des options sélectionnées pour chaque menu (pré-sélectionnées par défaut sur le 1er choix)
+    const [selectedOptions, setSelectedOptions] = useState<Record<string, MenuSelections>>(() => {
+        const initial: Record<string, MenuSelections> = {};
+        MENUS_FETES_DATA.forEach(menu => {
+            initial[menu.id] = {
+                entrees: menu.courses.entrees[0]?.id,
+                potages: menu.courses.potages?.[0]?.id,
+                plats: menu.courses.plats[0]?.id,
+                desserts: menu.courses.desserts[0]?.id,
+            };
+        });
         return initial;
     });
 
@@ -31,10 +54,44 @@ export default function MenusFetes() {
         }));
     };
 
+    const handleSelectOption = (menuId: string, courseKey: CourseKey, optionId: string) => {
+        setSelectedOptions(prev => ({
+            ...prev,
+            [menuId]: {
+                ...(prev[menuId] || {}),
+                [courseKey]: optionId
+            }
+        }));
+    };
+
     const handleAddMenuToCart = (menu: FestiveMenu) => {
+        const selections = selectedOptions[menu.id] || {};
+        const selectedEntree = menu.courses.entrees.find(o => o.id === selections.entrees);
+        const selectedPotage = menu.courses.potages?.find(o => o.id === selections.potages);
+        const selectedPlat = menu.courses.plats.find(o => o.id === selections.plats);
+        const selectedDessert = menu.courses.desserts.find(o => o.id === selections.desserts);
+
+        const hasPotageRequired = !!menu.courses.potages && menu.courses.potages.length > 0;
+        const isComplete = !!selectedEntree && !!selectedPlat && !!selectedDessert && (!hasPotageRequired || !!selectedPotage);
+
+        if (!isComplete) {
+            setToastMessage("Veuillez sélectionner l'ensemble des services de votre menu.");
+            setTimeout(() => setToastMessage(null), 3000);
+            return;
+        }
+
+        const coursesSummary: string[] = [
+            `Entrée: ${selectedEntree.title}`,
+            selectedPotage ? `Potage: ${selectedPotage.title}` : '',
+            `Plat: ${selectedPlat.title}`,
+            `Dessert: ${selectedDessert.title}`
+        ].filter(Boolean);
+
+        const uniqueCompositionId = `${menu.id}-${selectedEntree.id}-${selectedPotage?.id || 'none'}-${selectedPlat.id}-${selectedDessert.id}`;
         const qty = quantities[menu.id] || 1;
+
         const item: CartItem = {
-            id: menu.id,
+            id: uniqueCompositionId,
             semaineId: "menus-fetes",
             jour: menu.badge,
             nomPlat: menu.title,
@@ -45,11 +102,11 @@ export default function MenusFetes() {
             prixTotalLigne: menu.price * qty,
             itemType: "menu_fete",
             badge: menu.badge,
-            coursesSummary: menu.courses.map(c => `${c.courseName}: ${c.title}`)
+            coursesSummary: coursesSummary
         };
 
         addToCart(item);
-        setToastMessage(`${qty}x "${menu.title}" ajouté(s) à votre panier !`);
+        setToastMessage(`${qty}x "${menu.title}" personnalisé ajouté(s) à votre panier !`);
         setTimeout(() => setToastMessage(null), 4000);
 
         // Ouvre automatiquement le panier latéral
@@ -108,7 +165,7 @@ export default function MenusFetes() {
                         transition={{ duration: 0.7, delay: 0.2 }}
                         className="text-lg md:text-2xl text-neutral-300 max-w-3xl mx-auto font-light leading-relaxed"
                     >
-                        Profitez pleinement de vos convives. Notre brigade élabore pour vos réveillons de Noël et Nouvel An des menus d'exception à emporter et réchauffer en toute simplicité.
+                        Composez votre repas de réveillon sur mesure selon vos envies. Notre brigade élabore des créations d'exception prêtes à réchauffer et déguster en toute sérénité.
                     </motion.p>
 
                     <motion.div
@@ -121,7 +178,7 @@ export default function MenusFetes() {
                             href="#menus"
                             className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#D4AF37] text-black font-bold uppercase tracking-wider text-sm hover:bg-[#c29f2e] transition-all shadow-xl hover:scale-105"
                         >
-                            Découvrir nos menus
+                            Composer nos menus
                             <ChevronRight size={18} />
                         </a>
                         <Link
@@ -143,9 +200,9 @@ export default function MenusFetes() {
                             <div className="w-12 h-12 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center font-bold font-serif text-xl mb-4">
                                 1
                             </div>
-                            <h3 className="font-serif font-bold text-xl text-black mb-2">Composez votre table</h3>
+                            <h3 className="font-serif font-bold text-xl text-black mb-2">Composez sur mesure</h3>
                             <p className="text-neutral-600 text-sm leading-relaxed">
-                                Choisissez parmi nos compositions festives (Noël, Saint-Sylvestre, Prestige ou Enfant).
+                                Choisissez votre entrée, potage, plat principal et dessert parmi nos suggestions de fête.
                             </p>
                         </div>
                     </div>
@@ -157,7 +214,7 @@ export default function MenusFetes() {
                             </div>
                             <h3 className="font-serif font-bold text-xl text-black mb-2">Validation en ligne</h3>
                             <p className="text-neutral-600 text-sm leading-relaxed">
-                                Ajoutez au panier, indiquez vos coordonnées et vos éventuelles allergies alimentaires.
+                                Ajoutez au panier, choisissez vos dates de repas (Noël et/ou Nouvel An) et vos coordonnées.
                             </p>
                         </div>
                     </div>
@@ -169,7 +226,7 @@ export default function MenusFetes() {
                             </div>
                             <h3 className="font-serif font-bold text-xl text-black mb-2">Paiement & Confirmation</h3>
                             <p className="text-neutral-600 text-sm leading-relaxed">
-                                Virement SEPA sécurisé (QR code instantané). Commande validée dès réception du paiement.
+                                Règlement sous 24h par virement SEPA ou QR code sécurisé pour valider votre réservation.
                             </p>
                         </div>
                     </div>
@@ -181,7 +238,7 @@ export default function MenusFetes() {
                             </div>
                             <h3 className="font-serif font-bold text-xl text-black mb-2">Retrait & Dégustation</h3>
                             <p className="text-neutral-600 text-sm leading-relaxed">
-                                Retrait le 24 ou 31 décembre à l'atelier avec fiche d'instructions de réchauffage pas-à-pas.
+                                Retrait à l'atelier à Saint-Georges avec livret d'instructions de réchauffage pas-à-pas.
                             </p>
                         </div>
                     </div>
@@ -194,11 +251,11 @@ export default function MenusFetes() {
                             CARTE DES RÉVEILLONS 2026
                         </span>
                         <h2 className="text-3xl md:text-5xl font-serif text-black">
-                            Nos Menus Festifs à la Carte
+                            Nos Menus Festifs à Composer
                         </h2>
                         <div className="w-20 h-1 bg-[#D4AF37] mx-auto rounded-full mt-4"></div>
                         <p className="text-neutral-500 max-w-xl mx-auto font-light text-base">
-                            Tous nos plats sont préparés artisanalement dans notre atelier avec des matières premières d'exception.
+                            Sélectionnez vos options pour chaque service (Entrée, Potage, Plat, Dessert) et composez votre menu d&apos;exception.
                         </p>
                     </div>
 
@@ -207,6 +264,22 @@ export default function MenusFetes() {
                         {MENUS_FETES_DATA.map((menu) => {
                             const qty = quantities[menu.id] || 1;
                             const totalLinePrice = menu.price * qty;
+                            const currentSelections = selectedOptions[menu.id] || {};
+
+                            const allGroups: {
+                                key: CourseKey;
+                                name: string;
+                                badgeNumber: string;
+                                options: MenuOption[];
+                            }[] = [
+                                { key: 'entrees', name: 'Entrée', badgeNumber: '1er Service', options: menu.courses.entrees },
+                                { key: 'potages', name: 'Potage', badgeNumber: '2ème Service', options: menu.courses.potages || [] },
+                                { key: 'plats', name: 'Plat Principal', badgeNumber: '3ème Service', options: menu.courses.plats },
+                                { key: 'desserts', name: 'Dessert', badgeNumber: '4ème Service', options: menu.courses.desserts },
+                            ];
+                            const courseGroups = allGroups.filter((g): g is { key: CourseKey; name: string; badgeNumber: string; options: MenuOption[] } => g.options.length > 0);
+
+                            const isMenuComplete = courseGroups.every(g => !!currentSelections[g.key]);
 
                             return (
                                 <motion.div
@@ -247,26 +320,83 @@ export default function MenusFetes() {
                                         </div>
                                     </div>
 
-                                    {/* Corps de la carte : Déroulé du menu */}
-                                    <div className="p-6 sm:p-8 space-y-6 flex-1 bg-white">
-                                        <div className="space-y-4">
-                                            {menu.courses.map((course, idx) => (
-                                                <div key={idx} className="border-b border-neutral-100 last:border-0 pb-3.5 last:pb-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className="text-[11px] uppercase tracking-widest font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-2.5 py-0.5 rounded-md">
-                                                            {course.courseName}
-                                                        </span>
-                                                        <h4 className="font-serif font-bold text-neutral-900 text-base sm:text-lg">
-                                                            {course.title}
-                                                        </h4>
+                                    {/* Corps de la carte : Sélecteur d'options par service */}
+                                    <div className="p-6 sm:p-8 space-y-7 flex-1 bg-white">
+                                        <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
+                                            <span className="text-xs uppercase tracking-widest font-bold text-neutral-800 flex items-center gap-2">
+                                                <Utensils size={15} className="text-[#D4AF37]" /> Composition de votre menu :
+                                            </span>
+                                            <span className="text-xs text-[#D4AF37] font-semibold">
+                                                {courseGroups.length} services inclus
+                                            </span>
+                                        </div>
+
+                                        {/* Liste des groupes de services */}
+                                        <div className="space-y-6">
+                                            {courseGroups.map((group) => {
+                                                const selectedOptionId = currentSelections[group.key];
+
+                                                return (
+                                                    <div key={group.key} className="space-y-2.5">
+                                                        <div className="flex items-center justify-between">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="text-[10px] uppercase tracking-widest font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-md">
+                                                                    {group.badgeNumber}
+                                                                </span>
+                                                                <h4 className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
+                                                                    {group.name}
+                                                                </h4>
+                                                            </div>
+                                                            <span className="text-[11px] text-neutral-400 font-medium">
+                                                                1 choix parmi {group.options.length}
+                                                            </span>
+                                                        </div>
+
+                                                        {/* Choix des options */}
+                                                        <div className="grid grid-cols-1 gap-2.5">
+                                                            {group.options.map((option) => {
+                                                                const isSelected = selectedOptionId === option.id;
+
+                                                                return (
+                                                                    <div
+                                                                        key={option.id}
+                                                                        onClick={() => handleSelectOption(menu.id, group.key, option.id)}
+                                                                        className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 ${
+                                                                            isSelected
+                                                                                ? 'border-[#D4AF37] bg-amber-50/70 ring-1 ring-[#D4AF37]/50 shadow-2xs'
+                                                                                : 'border-neutral-200 bg-white hover:border-[#D4AF37]/60 hover:bg-neutral-50/60'
+                                                                        }`}
+                                                                    >
+                                                                        {/* Radio indicator */}
+                                                                        <div className="mt-0.5 shrink-0">
+                                                                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                                                                                isSelected
+                                                                                    ? 'border-[#D4AF37] bg-[#D4AF37]'
+                                                                                    : 'border-neutral-300 bg-white'
+                                                                            }`}>
+                                                                                {isSelected && <Check size={10} className="text-white" strokeWidth={3} />}
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <h5 className={`text-xs sm:text-sm font-semibold leading-tight ${
+                                                                                isSelected ? 'text-neutral-950 font-bold' : 'text-neutral-800'
+                                                                            }`}>
+                                                                                {option.title}
+                                                                            </h5>
+                                                                            {option.description && (
+                                                                                <p className="text-[11px] sm:text-xs text-neutral-500 font-light italic mt-1 leading-snug">
+                                                                                    {option.description}
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
                                                     </div>
-                                                    {course.description && (
-                                                        <p className="text-neutral-500 text-xs sm:text-sm pl-2 italic">
-                                                            {course.description}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
 
                                         {/* Notice de retrait */}
@@ -311,10 +441,15 @@ export default function MenusFetes() {
                                         {/* Bouton Ajouter au Panier */}
                                         <button
                                             onClick={() => handleAddMenuToCart(menu)}
-                                            className="w-full bg-black hover:bg-[#D4AF37] text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 uppercase tracking-wider text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                                            disabled={!isMenuComplete}
+                                            className="w-full bg-black hover:bg-[#D4AF37] disabled:bg-neutral-300 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-2xl flex items-center justify-center gap-3 uppercase tracking-wider text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] disabled:scale-100"
                                         >
                                             <ShoppingCart size={18} />
-                                            <span>Ajouter au panier • {totalLinePrice.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €</span>
+                                            <span>
+                                                {isMenuComplete
+                                                    ? `Ajouter au panier • ${totalLinePrice.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €`
+                                                    : "Veuillez choisir vos services"}
+                                            </span>
                                         </button>
                                     </div>
                                 </motion.div>

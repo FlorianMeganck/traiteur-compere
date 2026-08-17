@@ -56,15 +56,25 @@ export async function POST(req: Request) {
 
             if (isFestive) {
                 hasFestiveItem = true;
-                const festiveMenu = MENUS_FETES_DATA.find(m => m.id === item.id || m.title.toLowerCase() === item.nomPlat.toLowerCase());
+                const festiveMenu = MENUS_FETES_DATA.find(m => m.id === item.id || item.id.startsWith(m.id) || m.title.toLowerCase() === item.nomPlat.toLowerCase());
 
                 const unitPrice = festiveMenu ? festiveMenu.price : (item.prixUnitairePlat || 49);
                 const itemTotal = unitPrice * item.quantitePlat;
                 finalTotalPrice += itemTotal;
 
-                const coursesList = festiveMenu
-                    ? festiveMenu.courses.map(c => `<strong>${c.courseName}:</strong> ${c.title}`).join('<br/>')
-                    : (item.coursesSummary?.join('<br/>') || '-');
+                const coursesList = item.coursesSummary && item.coursesSummary.length > 0
+                    ? item.coursesSummary.map((c: string) => {
+                        const parts = c.split(':');
+                        return `<strong>${parts[0].trim()} :</strong>${parts.slice(1).join(':')}`;
+                    }).join('<br/>')
+                    : (festiveMenu
+                        ? [
+                            `<strong>Entrée :</strong> ${festiveMenu.courses.entrees[0]?.title}`,
+                            festiveMenu.courses.potages?.[0] ? `<strong>Potage :</strong> ${festiveMenu.courses.potages[0]?.title}` : '',
+                            `<strong>Plat :</strong> ${festiveMenu.courses.plats[0]?.title}`,
+                            `<strong>Dessert :</strong> ${festiveMenu.courses.desserts[0]?.title}`
+                        ].filter(Boolean).join('<br/>')
+                        : '-');
 
                 const itemId = (item.id || '').toLowerCase();
                 const itemNom = (item.nomPlat || '').toLowerCase();
