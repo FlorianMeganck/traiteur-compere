@@ -110,7 +110,7 @@ function CommandeConfirmeeContent() {
                                     ⚠️ Important – Validation de votre réservation :
                                 </h4>
                                 <p className="text-neutral-700 leading-relaxed">
-                                    Merci de bien vouloir procéder au règlement de votre commande <strong>sous 24 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).
+                                    Merci de bien vouloir procéder au règlement du paiement <strong>sous 24 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).
                                 </p>
                                 <p className="text-red-600 font-bold text-xs md:text-sm pt-0.5">
                                     Passé ce délai de 24h sans confirmation de paiement, votre réservation sera automatiquement annulée.

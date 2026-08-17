@@ -253,7 +253,7 @@ export async function POST(req: Request) {
                                     ⚠️ Important – Validation de votre réservation :
                                 </p>
                                 <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #444;">
-                                    Merci de bien vouloir procéder au règlement de votre commande <strong>sous 24 heures</strong> (via le QR Code présent sur le site ou par virement bancaire avec les informations ci-dessous).
+                                    Merci de bien vouloir procéder au règlement du paiement <strong>sous 24 heures</strong> (via le QR Code présent sur le site ou par virement bancaire avec les informations ci-dessous).
                                 </p>
                                 <p style="margin: 0; font-size: 13px; font-weight: bold; color: #b71c1c; line-height: 1.4;">
                                     Passé ce délai de 24h sans confirmation de paiement, votre réservation sera automatiquement annulée.
