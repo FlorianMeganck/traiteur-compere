@@ -6,8 +6,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
-import { MENU_DATA } from "../data/plats-prepares";
-import { FESTIVE_DATE_OPTIONS, getFestiveMenuDateRestrictions } from "../data/menus-fetes";
+import { FESTIVE_DATE_OPTIONS, NOEL_DATE_OPTIONS, NOUVEL_AN_DATE_OPTIONS, getFestiveMenuDateRestrictions } from "../data/menus-fetes";
 import { useCart } from "../hooks/useCart";
 
 export default function Contact() {
@@ -471,7 +470,11 @@ function ContactForm() {
         Buffet_Chaud_Plat: "",
         Buffet_Chaud_Dessert: "",
         Date_Fete: "",
-        Creneau_Retrait: ""
+        Creneau_Retrait: "",
+        Date_Fete_Noel: "",
+        Creneau_Retrait_Noel: "",
+        Date_Fete_NouvelAn: "",
+        Creneau_Retrait_NouvelAn: ""
     });
 
     const handleFormStart = () => {
@@ -996,12 +999,19 @@ function ContactForm() {
 
         // Dynamic Validation
         if (isMenusFetes) {
-            if (festiveRestrictions.isConflict) {
-                newErrors.Date_Fete = "Les menus de Noël et de Nouvel An ne peuvent pas être commandés pour la même date. Veuillez passer deux commandes distinctes.";
-            } else if (!formData.Date_Fete && !formData.Date) {
-                newErrors.Date_Fete = "Veuillez sélectionner la date de votre repas de fête.";
-            } else if (!festiveRestrictions.allowedOptionIds.includes(formData.Date_Fete)) {
-                newErrors.Date_Fete = "Cette date n'est pas compatible avec les menus sélectionnés dans votre panier.";
+            if (festiveRestrictions.isMixed) {
+                if (!formData.Date_Fete_Noel) {
+                    newErrors.Date_Fete_Noel = "Veuillez sélectionner la date pour vos repas de Noël (24 ou 25 Décembre)";
+                }
+                if (!formData.Date_Fete_NouvelAn) {
+                    newErrors.Date_Fete_NouvelAn = "Veuillez sélectionner la date pour vos repas de Nouvel An (31 Décembre ou 1er Janvier)";
+                }
+            } else {
+                if (!formData.Date_Fete && !formData.Date) {
+                    newErrors.Date_Fete = "Veuillez sélectionner la date de votre repas de fête";
+                } else if (!festiveRestrictions.allowedOptionIds.includes(formData.Date_Fete)) {
+                    newErrors.Date_Fete = "Cette date n'est pas compatible avec les menus sélectionnés dans votre panier";
+                }
             }
         } else if (isPlatPrepare) {
             if (!formData.Plat_Prepare_Quantite || parseInt(formData.Plat_Prepare_Quantite) < 1) newErrors.Plat_Prepare_Quantite = "Requis";
@@ -1286,9 +1296,27 @@ function ContactForm() {
         // 4. Envoi à Web3Forms ou API Interne
         try {
             if (isPlatPrepare) {
-                const selectedOption = FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete);
-                const dateEvenementFormatted = selectedOption ? `${selectedOption.label} (${selectedOption.dayFormatted})` : (formData.Date_Fete || formData.Date);
-                const creneauRetraitFormatted = selectedOption ? selectedOption.pickupWindow : formData.Creneau_Retrait;
+                let dateEvenementFormatted = "";
+                let creneauRetraitFormatted = "";
+
+                if (isMenusFetes) {
+                    if (festiveRestrictions.isMixed) {
+                        const noelOpt = NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel || o.dayFormatted === formData.Date_Fete_Noel);
+                        const naOpt = NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn);
+
+                        const noelDay = noelOpt?.dayFormatted || formData.Date_Fete_Noel;
+                        const naDay = naOpt?.dayFormatted || formData.Date_Fete_NouvelAn;
+                        const noelPickup = noelOpt?.pickupWindow || formData.Creneau_Retrait_Noel || "Retrait le 23 ou 24 Décembre";
+                        const naPickup = naOpt?.pickupWindow || formData.Creneau_Retrait_NouvelAn || "Retrait le 30 ou 31 Décembre";
+
+                        dateEvenementFormatted = `Noël : ${noelDay} | Nouvel An : ${naDay}`;
+                        creneauRetraitFormatted = `Noël : ${noelPickup} | Nouvel An : ${naPickup}`;
+                    } else {
+                        const selectedOption = FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete);
+                        dateEvenementFormatted = selectedOption ? `${selectedOption.label} (${selectedOption.dayFormatted})` : (formData.Date_Fete || formData.Date);
+                        creneauRetraitFormatted = selectedOption ? selectedOption.pickupWindow : formData.Creneau_Retrait;
+                    }
+                }
 
                 const apiPayload = {
                     Nom: formData.Nom,
@@ -2549,16 +2577,16 @@ function ContactForm() {
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-8">
-                            {/* 1. Sélecteur de date obligatoire pour les Menus de Fêtes */}
+                            {/* 1. Sélecteur de date pour les Menus de Fêtes */}
                             {isMenusFetes && (
-                                <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-[#D4AF37]/40 shadow-sm mb-10 space-y-6">
-                                    <div className="flex items-start gap-3">
+                                <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-[#D4AF37]/40 shadow-sm mb-10 space-y-8">
+                                    <div className="flex items-start gap-3 border-b border-neutral-100 pb-4">
                                         <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center shrink-0 mt-0.5">
                                             <Calendar size={20} />
                                         </div>
                                         <div>
                                             <h3 className="font-serif font-bold text-xl md:text-2xl text-black">
-                                                Date de votre repas de fête <span className="text-red-500">*</span>
+                                                {festiveRestrictions.isMixed ? "Dates de vos repas de fêtes" : "Date de votre repas de fête"} <span className="text-red-500">*</span>
                                             </h3>
                                             <p className="text-xs md:text-sm text-neutral-500 font-light mt-0.5">
                                                 {festiveRestrictions.allowedPeriodLabel || "Sélectionnez la date de votre réveillon ou repas pour déterminer votre créneau de retrait à l'atelier."}
@@ -2566,100 +2594,247 @@ function ContactForm() {
                                         </div>
                                     </div>
 
-                                    {/* Alerte Conflit de Dates (Noël + Nouvel An dans le même panier) */}
-                                    {festiveRestrictions.isConflict && (
-                                        <div className="bg-red-50 text-red-800 p-5 rounded-2xl border-2 border-red-300 flex items-start gap-3.5 shadow-sm">
-                                            <AlertCircle className="text-red-600 shrink-0 mt-0.5" size={24} />
-                                            <div className="space-y-1 text-sm">
-                                                <h4 className="font-bold text-red-900 text-base">Incompatibilité de dates dans votre panier</h4>
-                                                <p className="leading-relaxed font-medium">
-                                                    Les menus de Noël et de Nouvel An ne peuvent pas être commandés pour la même date. Veuillez passer deux commandes distinctes.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    )}
+                                    {festiveRestrictions.isMixed ? (
+                                        <div className="space-y-8">
+                                            {/* --- BLOC 1 : NOËL --- */}
+                                            <div className="space-y-4 bg-[#FAF9F6] p-5 md:p-6 rounded-2xl border border-[#D4AF37]/30">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-black text-[#D4AF37]">
+                                                            🎄 Menus de Noël
+                                                        </span>
+                                                        <span className="text-xs font-medium text-neutral-600">
+                                                            (Noël / Prestige)
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-xs text-neutral-400 font-medium italic">Choix obligatoire</span>
+                                                </div>
 
-                                    {errors.Date_Fete && !festiveRestrictions.isConflict && (
-                                        <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
-                                            <span>⚠️</span> {errors.Date_Fete}
-                                        </div>
-                                    )}
+                                                {errors.Date_Fete_Noel && (
+                                                    <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3 rounded-xl border border-red-200 flex items-center gap-2">
+                                                        <span>⚠️</span> {errors.Date_Fete_Noel}
+                                                    </div>
+                                                )}
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                        {FESTIVE_DATE_OPTIONS.map((option) => {
-                                            const isAllowed = festiveRestrictions.allowedOptionIds.includes(option.id);
-                                            const isSelected = formData.Date_Fete === option.id || formData.Date_Fete === option.dayFormatted;
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                                    {NOEL_DATE_OPTIONS.map((option) => {
+                                                        const isSelected = formData.Date_Fete_Noel === option.id || formData.Date_Fete_Noel === option.dayFormatted;
+                                                        return (
+                                                            <button
+                                                                key={option.id}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        Date_Fete_Noel: option.id,
+                                                                        Creneau_Retrait_Noel: option.pickupWindow
+                                                                    }));
+                                                                    if (errors.Date_Fete_Noel) {
+                                                                        setErrors(prev => {
+                                                                            const newErr = { ...prev };
+                                                                            delete newErr.Date_Fete_Noel;
+                                                                            return newErr;
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${
+                                                                    isSelected
+                                                                        ? "border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/50 shadow-md"
+                                                                        : "border-neutral-200 bg-white/70 hover:bg-white hover:border-neutral-300"
+                                                                }`}
+                                                            >
+                                                                <div className="flex justify-between items-start">
+                                                                    <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37]">
+                                                                        {option.badge}
+                                                                    </span>
+                                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                                                                        isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
+                                                                    }`}>
+                                                                        {isSelected && <Check size={12} strokeWidth={3} />}
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <h4 className="font-serif font-bold text-neutral-900 text-base">{option.label}</h4>
+                                                                    <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">{option.dayFormatted}</p>
+                                                                </div>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
 
-                                            return (
-                                                <button
-                                                    key={option.id}
-                                                    type="button"
-                                                    disabled={!isAllowed}
-                                                    onClick={() => {
-                                                        if (!isAllowed) return;
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            Date_Fete: option.id,
-                                                            Date: option.dayFormatted,
-                                                            Creneau_Retrait: option.pickupWindow
-                                                        }));
-                                                        if (errors.Date_Fete) {
-                                                            setErrors(prev => {
-                                                                const newErr = { ...prev };
-                                                                delete newErr.Date_Fete;
-                                                                return newErr;
-                                                            });
-                                                        }
-                                                    }}
-                                                    className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${
-                                                        !isAllowed
-                                                            ? "border-neutral-200 bg-neutral-100/70 opacity-40 cursor-not-allowed"
-                                                            : isSelected
-                                                            ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
-                                                            : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
-                                                    }`}
-                                                >
-                                                    <div className="flex justify-between items-start">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                                                                !isAllowed ? "bg-neutral-300 text-neutral-600" : "bg-black text-[#D4AF37]"
-                                                            }`}>
-                                                                {option.badge}
-                                                            </span>
-                                                            {!isAllowed && (
-                                                                <span className="text-[10px] text-neutral-500 font-medium italic">Incompatible panier</span>
-                                                            )}
-                                                        </div>
-                                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                                            !isAllowed ? "border-neutral-300 bg-neutral-200" : isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
-                                                        }`}>
-                                                            {isSelected && <Check size={12} strokeWidth={3} />}
+                                                {formData.Date_Fete_Noel && (
+                                                    <div className="bg-white border border-[#D4AF37]/30 p-3.5 rounded-xl flex items-start gap-3 shadow-2xs">
+                                                        <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={18} />
+                                                        <div className="text-xs text-neutral-700">
+                                                            <span className="font-bold text-neutral-900">Retrait Noël : </span>
+                                                            {NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel || o.dayFormatted === formData.Date_Fete_Noel)?.pickupWindow || formData.Creneau_Retrait_Noel}
                                                         </div>
                                                     </div>
-                                                    <div>
-                                                        <h4 className={`font-serif font-bold text-base ${!isAllowed ? "text-neutral-400" : "text-neutral-900"}`}>{option.label}</h4>
-                                                        <p className={`text-xs font-semibold mt-0.5 ${!isAllowed ? "text-neutral-400" : "text-[#D4AF37]"}`}>{option.dayFormatted}</p>
-                                                    </div>
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Encart dynamique du créneau de retrait */}
-                                    {formData.Date_Fete && !festiveRestrictions.isConflict && (
-                                        <div className="bg-[#FAF9F6] border border-[#D4AF37]/40 p-4 md:p-5 rounded-2xl flex items-start gap-3.5 shadow-sm">
-                                            <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={22} />
-                                            <div className="space-y-1 text-sm">
-                                                <p className="font-bold text-neutral-900">
-                                                    Créneau de retrait à l'atelier :
-                                                </p>
-                                                <p className="text-neutral-700 font-medium leading-relaxed">
-                                                    {FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete)?.pickupWindow || formData.Creneau_Retrait}
-                                                </p>
-                                                <p className="text-xs text-neutral-500 pt-0.5">
-                                                    📍 Atelier Traiteur Compère : Rue Potay 3, 4470 Saint-Georges-sur-Meuse
-                                                </p>
+                                                )}
                                             </div>
+
+                                            {/* --- BLOC 2 : NOUVEL AN --- */}
+                                            <div className="space-y-4 bg-[#FAF9F6] p-5 md:p-6 rounded-2xl border border-[#D4AF37]/30">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-black text-[#D4AF37]">
+                                                            🍾 Menus de Nouvel An
+                                                        </span>
+                                                        <span className="text-xs font-medium text-neutral-600">
+                                                            (Saint-Sylvestre)
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-xs text-neutral-400 font-medium italic">Choix obligatoire</span>
+                                                </div>
+
+                                                {errors.Date_Fete_NouvelAn && (
+                                                    <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3 rounded-xl border border-red-200 flex items-center gap-2">
+                                                        <span>⚠️</span> {errors.Date_Fete_NouvelAn}
+                                                    </div>
+                                                )}
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                                    {NOUVEL_AN_DATE_OPTIONS.map((option) => {
+                                                        const isSelected = formData.Date_Fete_NouvelAn === option.id || formData.Date_Fete_NouvelAn === option.dayFormatted;
+                                                        return (
+                                                            <button
+                                                                key={option.id}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setFormData(prev => ({
+                                                                        ...prev,
+                                                                        Date_Fete_NouvelAn: option.id,
+                                                                        Creneau_Retrait_NouvelAn: option.pickupWindow
+                                                                    }));
+                                                                    if (errors.Date_Fete_NouvelAn) {
+                                                                        setErrors(prev => {
+                                                                            const newErr = { ...prev };
+                                                                            delete newErr.Date_Fete_NouvelAn;
+                                                                            return newErr;
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${
+                                                                    isSelected
+                                                                        ? "border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/50 shadow-md"
+                                                                        : "border-neutral-200 bg-white/70 hover:bg-white hover:border-neutral-300"
+                                                                }`}
+                                                            >
+                                                                <div className="flex justify-between items-start">
+                                                                    <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37]">
+                                                                        {option.badge}
+                                                                    </span>
+                                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                                                                        isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
+                                                                    }`}>
+                                                                        {isSelected && <Check size={12} strokeWidth={3} />}
+                                                                    </div>
+                                                                </div>
+                                                                <div>
+                                                                    <h4 className="font-serif font-bold text-neutral-900 text-base">{option.label}</h4>
+                                                                    <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">{option.dayFormatted}</p>
+                                                                </div>
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                {formData.Date_Fete_NouvelAn && (
+                                                    <div className="bg-white border border-[#D4AF37]/30 p-3.5 rounded-xl flex items-start gap-3 shadow-2xs">
+                                                        <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={18} />
+                                                        <div className="text-xs text-neutral-700">
+                                                            <span className="font-bold text-neutral-900">Retrait Nouvel An : </span>
+                                                            {NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn)?.pickupWindow || formData.Creneau_Retrait_NouvelAn}
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        // --- CAS STANDARD (UN SEUL EVENEMENT) ---
+                                        <div className="space-y-6">
+                                            {errors.Date_Fete && (
+                                                <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
+                                                    <span>⚠️</span> {errors.Date_Fete}
+                                                </div>
+                                            )}
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                                {FESTIVE_DATE_OPTIONS.map((option) => {
+                                                    const isAllowed = festiveRestrictions.allowedOptionIds.includes(option.id);
+                                                    const isSelected = formData.Date_Fete === option.id || formData.Date_Fete === option.dayFormatted;
+
+                                                    return (
+                                                        <button
+                                                            key={option.id}
+                                                            type="button"
+                                                            disabled={!isAllowed}
+                                                            onClick={() => {
+                                                                if (!isAllowed) return;
+                                                                setFormData(prev => ({
+                                                                    ...prev,
+                                                                    Date_Fete: option.id,
+                                                                    Date: option.dayFormatted,
+                                                                    Creneau_Retrait: option.pickupWindow
+                                                                }));
+                                                                if (errors.Date_Fete) {
+                                                                    setErrors(prev => {
+                                                                        const newErr = { ...prev };
+                                                                        delete newErr.Date_Fete;
+                                                                        return newErr;
+                                                                    });
+                                                                }
+                                                            }}
+                                                            className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${
+                                                                !isAllowed
+                                                                    ? "border-neutral-200 bg-neutral-100/70 opacity-40 cursor-not-allowed"
+                                                                    : isSelected
+                                                                    ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
+                                                                    : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
+                                                            }`}
+                                                        >
+                                                            <div className="flex justify-between items-start">
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                                                                        !isAllowed ? "bg-neutral-300 text-neutral-600" : "bg-black text-[#D4AF37]"
+                                                                    }`}>
+                                                                        {option.badge}
+                                                                    </span>
+                                                                    {!isAllowed && (
+                                                                        <span className="text-[10px] text-neutral-500 font-medium italic">Incompatible</span>
+                                                                    )}
+                                                                </div>
+                                                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                                                                    !isAllowed ? "border-neutral-300 bg-neutral-200" : isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
+                                                                }`}>
+                                                                    {isSelected && <Check size={12} strokeWidth={3} />}
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <h4 className={`font-serif font-bold text-base ${!isAllowed ? "text-neutral-400" : "text-neutral-900"}`}>{option.label}</h4>
+                                                                <p className={`text-xs font-semibold mt-0.5 ${!isAllowed ? "text-neutral-400" : "text-[#D4AF37]"}`}>{option.dayFormatted}</p>
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {formData.Date_Fete && (
+                                                <div className="bg-[#FAF9F6] border border-[#D4AF37]/40 p-4 md:p-5 rounded-2xl flex items-start gap-3.5 shadow-sm">
+                                                    <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={22} />
+                                                    <div className="space-y-1 text-sm">
+                                                        <p className="font-bold text-neutral-900">
+                                                            Créneau de retrait à l'atelier :
+                                                        </p>
+                                                        <p className="text-neutral-700 font-medium leading-relaxed">
+                                                            {FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete)?.pickupWindow || formData.Creneau_Retrait}
+                                                        </p>
+                                                        <p className="text-xs text-neutral-500 pt-0.5">
+                                                            📍 Atelier Traiteur Compère : Rue Potay 3, 4470 Saint-Georges-sur-Meuse
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -2777,18 +2952,10 @@ function ContactForm() {
 
                             <button
                                 type="submit"
-                                disabled={status === "submitting" || (isMenusFetes && festiveRestrictions.isConflict)}
-                                className={`w-full py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg transition-all ${
-                                    isMenusFetes && festiveRestrictions.isConflict
-                                        ? "bg-neutral-300 text-neutral-500 cursor-not-allowed shadow-none"
-                                        : "bg-black text-white hover:bg-[#D4AF37]"
-                                }`}
+                                disabled={status === "submitting"}
+                                className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all"
                             >
-                                {status === "submitting"
-                                    ? "Envoi en cours..."
-                                    : isMenusFetes && festiveRestrictions.isConflict
-                                    ? "Commande bloquée (Dates incompatibles)"
-                                    : "Envoyer la demande"}
+                                {status === "submitting" ? "Envoi en cours..." : "Envoyer la demande"}
                             </button>
                         </form>
                     )}

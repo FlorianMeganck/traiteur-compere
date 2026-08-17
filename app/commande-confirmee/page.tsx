@@ -122,17 +122,38 @@ function CommandeConfirmeeContent() {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">
-                                            {creneauParam ? "Date de l'événement & Retrait" : "Jour de retrait"}
+                                            {creneauParam ? "Dates de vos repas & Retrait" : "Jour de retrait"}
                                         </span>
-                                        <div className="space-y-1">
-                                            <span className="font-bold text-black flex items-center gap-2">
-                                                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                                {joursRetraitText !== "À confirmer" ? (creneauParam ? joursRetraitText : `Le(s) ${joursRetraitText} après 11h`) : "À confirmer"}
-                                            </span>
-                                            {creneauParam && (
-                                                <p className="text-xs text-[#D4AF37] font-semibold">
-                                                    ⏰ {creneauParam}
-                                                </p>
+                                        <div className="space-y-2">
+                                            {joursRetraitText.includes(" | ") ? (
+                                                joursRetraitText.split(" | ").map((evt, idx) => {
+                                                    const creneaux = creneauParam ? creneauParam.split(" | ") : [];
+                                                    return (
+                                                        <div key={idx} className="bg-neutral-50 p-2.5 rounded-xl border border-neutral-200">
+                                                            <span className="font-bold text-black flex items-center gap-2 text-sm">
+                                                                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                                                {evt}
+                                                            </span>
+                                                            {creneaux[idx] && (
+                                                                <p className="text-xs text-[#D4AF37] font-semibold mt-0.5 ml-4">
+                                                                    ⏰ {creneaux[idx]}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                <>
+                                                    <span className="font-bold text-black flex items-center gap-2">
+                                                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                                        {joursRetraitText !== "À confirmer" ? (creneauParam ? joursRetraitText : `Le(s) ${joursRetraitText} après 11h`) : "À confirmer"}
+                                                    </span>
+                                                    {creneauParam && (
+                                                        <p className="text-xs text-[#D4AF37] font-semibold">
+                                                            ⏰ {creneauParam}
+                                                        </p>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                     </div>

@@ -177,7 +177,7 @@ export type FestiveDateOption = {
     period: 'noel' | 'nouvel_an';
 };
 
-export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
+export const NOEL_DATE_OPTIONS: FestiveDateOption[] = [
     {
         id: "noel-24",
         dateValue: "2026-12-24",
@@ -195,7 +195,10 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
         pickupWindow: "Retrait le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
         badge: "Noël",
         period: "noel"
-    },
+    }
+];
+
+export const NOUVEL_AN_DATE_OPTIONS: FestiveDateOption[] = [
     {
         id: "nouvel-an-31",
         dateValue: "2026-12-31",
@@ -216,12 +219,17 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
     }
 ];
 
+export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
+    ...NOEL_DATE_OPTIONS,
+    ...NOUVEL_AN_DATE_OPTIONS
+];
+
 /**
  * Matrice des restrictions de dates par menu :
- * - Menu Noël (Réveillon) : 24 et 25 Décembre uniquement
- * - Menu Prestige : 24 et 25 Décembre uniquement
- * - Menu Nouvel An (Saint-Sylvestre) : 31 Décembre et 1er Janvier uniquement
- * - Menu Enfant : 24, 25, 31 Décembre et 1er Janvier
+ * - Menu Noël (Réveillon & Prestige) : 24 et 25 Décembre
+ * - Menu Nouvel An (Saint-Sylvestre) : 31 Décembre et 1er Janvier
+ * - Menu Enfant : s'adapte aux menus choisis ou permet toutes les dates
+ * - Si le panier contient à la fois Noël et Nouvel An : mode mixte (sélection de 2 dates distinctes)
  */
 export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; nomPlat?: string; itemType?: string }>) {
     let hasNoel = false;
@@ -241,26 +249,27 @@ export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; n
         }
     });
 
-    const isConflict = hasNoel && hasNouvelAn;
+    const isMixed = hasNoel && hasNouvelAn;
 
     let allowedOptionIds: string[] = ["noel-24", "noel-25", "nouvel-an-31", "nouvel-an-01"];
     let allowedPeriodLabel = "";
 
-    if (isConflict) {
-        allowedOptionIds = [];
+    if (isMixed) {
+        allowedOptionIds = ["noel-24", "noel-25", "nouvel-an-31", "nouvel-an-01"];
+        allowedPeriodLabel = "Votre commande comprend des repas pour Noël et pour Nouvel An. Veuillez choisir une date pour chaque événement.";
     } else if (hasNoel) {
         allowedOptionIds = ["noel-24", "noel-25"];
-        allowedPeriodLabel = "Menus de Noël : réservations limitées aux 24 & 25 Décembre.";
+        allowedPeriodLabel = "Menus de Noël : réservations pour les 24 & 25 Décembre.";
     } else if (hasNouvelAn) {
         allowedOptionIds = ["nouvel-an-31", "nouvel-an-01"];
-        allowedPeriodLabel = "Menus de Nouvel An : réservations limitées aux 31 Décembre & 1er Janvier.";
+        allowedPeriodLabel = "Menus de Nouvel An : réservations pour les 31 Décembre & 1er Janvier.";
     }
 
     return {
         hasNoel,
         hasNouvelAn,
         hasEnfant,
-        isConflict,
+        isMixed,
         allowedOptionIds,
         allowedPeriodLabel
     };
