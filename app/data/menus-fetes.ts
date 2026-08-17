@@ -32,7 +32,7 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
     {
         id: "menu-reveillon-noel",
         title: "Menu Réveillon de Noël",
-        subtitle: "L'élégance gastronomique traditionnelle pour vos tables de Noël",
+        subtitle: "Un menu festif et raffiné pour célébrer Noël en famille.",
         badge: "24 & 25 Décembre",
         price: 49.00,
         priceFormatted: "49,00 €",
@@ -107,7 +107,7 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
     {
         id: "menu-saint-sylvestre",
         title: "Menu Saint-Sylvestre",
-        subtitle: "Passez le cap de la nouvelle année sous le signe du raffinement",
+        subtitle: "Une sélection gourmande pour fêter le passage à la nouvelle année.",
         badge: "31 Décembre & 1er Janvier",
         price: 55.00,
         priceFormatted: "55,00 €",
@@ -182,7 +182,7 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
     {
         id: "menu-prestige-fetes",
         title: "Menu Dégustation Prestige",
-        subtitle: "L'excellence gastronomique absolue pour les tables d'exception",
+        subtitle: "Une composition gastronomique d'exception pour les grandes occasions.",
         badge: "Édition Limitée",
         price: 65.00,
         priceFormatted: "65,00 €",
@@ -257,7 +257,7 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
     {
         id: "menu-enfant-fetes",
         title: "Menu Enfant Festif",
-        subtitle: "Les plaisirs de la fête spécialement adaptés pour les plus jeunes",
+        subtitle: "Des saveurs douces et gourmandes adaptées aux enfants.",
         badge: "Spécial Enfants (jusqu'à 12 ans)",
         price: 22.00,
         priceFormatted: "22,00 €",

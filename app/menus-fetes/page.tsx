@@ -303,11 +303,6 @@ export default function MenusFetes() {
                                                 <span className="bg-[#D4AF37] text-black font-bold text-xs uppercase tracking-widest px-3.5 py-1.5 rounded-full shadow-md">
                                                     {menu.badge}
                                                 </span>
-                                                {menu.isPopular && (
-                                                    <span className="bg-white/90 backdrop-blur-md text-black font-bold text-xs uppercase tracking-widest px-3 py-1 rounded-full flex items-center gap-1 shadow">
-                                                        <Sparkles size={12} className="text-[#D4AF37]" /> Coup de cœur
-                                                    </span>
-                                                )}
                                             </div>
 
                                             <div>
@@ -386,7 +381,7 @@ export default function MenusFetes() {
                                                                                 {option.title}
                                                                             </h5>
                                                                             {option.description && (
-                                                                                <p className="text-[11px] sm:text-xs text-neutral-500 font-light italic mt-1 leading-snug">
+                                                                                <p className="text-xs sm:text-[13px] text-zinc-700 font-normal italic mt-1 leading-snug">
                                                                                     {option.description}
                                                                                 </p>
                                                                             )}
