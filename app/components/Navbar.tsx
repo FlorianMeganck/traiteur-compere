@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, X, Trash2, Plus, Minus } from "lucide-react";
+import { ShoppingCart, X, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 import Logo from "./Logo";
 import { useCart } from "../hooks/useCart";
 import { MENU_DATA } from "../data/plats-prepares";
@@ -294,21 +294,37 @@ export default function Navbar() {
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
                             className="fixed top-0 right-0 h-[100dvh] w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
                         >
-                            <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-50">
-                                <h2 className="text-2xl font-serif text-black flex items-center gap-3">
-                                    <ShoppingCart className="text-[#D4AF37]" />
-                                    Votre Panier
-                                </h2>
-                                <button onClick={() => setIsCartOpen(false)} className="text-neutral-400 hover:text-black transition-colors">
-                                    <X size={24} />
+                            <div className="p-5 sm:p-6 border-b border-neutral-100/80 flex justify-between items-center bg-[#FAF9F6]">
+                                <div>
+                                    <h2 className="text-xl sm:text-2xl font-serif font-bold text-neutral-900 flex items-center gap-2.5">
+                                        <ShoppingCart className="text-[#D4AF37]" size={22} />
+                                        <span>Votre Panier</span>
+                                    </h2>
+                                    <p className="text-xs text-neutral-500 font-light mt-0.5">
+                                        {totalItems === 0
+                                            ? "Votre sélection est actuellement vide"
+                                            : `${totalItems} ${totalItems > 1 ? 'articles sélectionnés' : 'article sélectionné'}`}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setIsCartOpen(false)}
+                                    className="w-9 h-9 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-900 hover:bg-neutral-200/60 transition-all duration-200"
+                                    aria-label="Fermer le panier"
+                                >
+                                    <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 pb-12 space-y-4">
+                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-5 sm:p-6 space-y-4 bg-[#FBFBFA]">
                                 {cartItems.length === 0 ? (
-                                    <div className="text-center text-neutral-500 py-12">
-                                        <ShoppingCart className="mx-auto mb-4 opacity-50" size={48} />
-                                        <p>Votre panier est vide.</p>
+                                    <div className="text-center text-neutral-400 py-16 px-4 space-y-3">
+                                        <div className="w-16 h-16 rounded-full bg-neutral-100 text-neutral-300 flex items-center justify-center mx-auto mb-2">
+                                            <ShoppingCart size={28} />
+                                        </div>
+                                        <h3 className="font-serif text-lg text-neutral-700">Votre panier est vide</h3>
+                                        <p className="text-xs text-neutral-400 max-w-xs mx-auto">
+                                            Explorez nos menus de fêtes et nos plats préparés pour commencer votre commande.
+                                        </p>
                                     </div>
                                 ) : (
                                     cartItems.map((item) => {
@@ -316,29 +332,46 @@ export default function Navbar() {
                                         const weekData = MENU_DATA.find(m => m.id === item.semaineId);
 
                                         return (
-                                            <div key={item.id} className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm relative">
+                                            <div
+                                                key={item.id}
+                                                className="bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-5 shadow-xs relative transition-shadow hover:shadow-sm"
+                                            >
+                                                {/* Bouton supprimer discret */}
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}
-                                                    className="absolute top-4 right-4 text-neutral-300 hover:text-red-500 transition-colors p-1"
-                                                    title="Supprimer"
+                                                    className="absolute top-3.5 right-3.5 w-7 h-7 flex items-center justify-center rounded-full text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                                    title="Supprimer l'article"
                                                 >
-                                                    <Trash2 size={18} />
+                                                    <Trash2 size={16} />
                                                 </button>
-                                                <div className="pr-8">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        {isFestive && <span className="text-[10px] bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Fêtes</span>}
-                                                        <h4 className="font-bold text-neutral-900 leading-tight">{item.nomPlat}</h4>
+
+                                                <div className="pr-7">
+                                                    {/* Tags & Nom du plat */}
+                                                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                                        {isFestive ? (
+                                                            <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200/80 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                                                Fêtes
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[10px] bg-neutral-100 text-neutral-600 font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                                                Semaine
+                                                            </span>
+                                                        )}
+                                                        <h4 className="font-serif font-bold text-neutral-900 text-sm sm:text-base leading-snug">
+                                                            {item.nomPlat}
+                                                        </h4>
                                                     </div>
-                                                    <p className="text-xs md:text-sm text-[#D4AF37] font-medium capitalize mb-2">
+
+                                                    <p className="text-xs text-[#D4AF37] font-semibold capitalize mb-3">
                                                         {item.badge || (weekData ? `${item.jour} (${weekData.week.split(' :')[0]})` : item.jour)}
                                                     </p>
 
-                                                    {/* Composition détaillée du Menu de Fêtes */}
+                                                    {/* Composition détaillée du Menu de Fêtes avec micro-puces dorées */}
                                                     {isFestive && item.coursesSummary && item.coursesSummary.length > 0 && (
-                                                        <div className="bg-[#FAF9F6] border border-neutral-200/80 rounded-xl p-2.5 mb-3 space-y-1 text-xs text-neutral-700">
+                                                        <div className="bg-[#FAF9F6] border border-amber-100/80 rounded-xl p-3 mb-3 space-y-1.5 text-xs text-neutral-700">
                                                             {item.coursesSummary.map((course, cIdx) => (
-                                                                <div key={cIdx} className="flex items-start gap-1.5 leading-snug">
-                                                                    <span className="text-[#D4AF37] font-bold shrink-0">•</span>
+                                                                <div key={cIdx} className="flex items-start gap-2 leading-snug">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] mt-1.5 shrink-0" />
                                                                     <span>
                                                                         <strong className="text-neutral-900 font-semibold">{course.split(':')[0]} :</strong> {course.split(':').slice(1).join(':')}
                                                                     </span>
@@ -347,39 +380,43 @@ export default function Navbar() {
                                                         </div>
                                                     )}
 
-                                                    {/* Quantity Selector +/- */}
-                                                    <div className="flex justify-between items-center bg-neutral-50 p-2 rounded-xl border border-neutral-200/70 mb-3">
-                                                        <span className="text-xs text-neutral-600 font-medium">Quantité :</span>
-                                                        <div className="flex items-center gap-2">
-                                                            <button
-                                                                onClick={() => updateQuantity(item.id, -1)}
-                                                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:text-red-600 hover:border-red-300 shadow-sm transition-colors"
-                                                                title={item.quantitePlat === 1 ? "Retirer du panier" : "Diminuer la quantité"}
-                                                                aria-label="Diminuer"
-                                                            >
-                                                                <Minus size={13} />
-                                                            </button>
-                                                            <span className="w-6 text-center font-bold text-sm text-black">{item.quantitePlat}</span>
-                                                            <button
-                                                                onClick={() => updateQuantity(item.id, 1)}
-                                                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:text-black hover:border-black shadow-sm"
-                                                            >
-                                                                <Plus size={13} />
-                                                            </button>
-                                                        </div>
-                                                        <span className="font-semibold text-sm text-neutral-900">{item.prixUnitairePlat * item.quantitePlat} €</span>
-                                                    </div>
-
+                                                    {/* Soupes associées (Plats préparés) */}
                                                     {item.soupes && Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
-                                                        <div key={soupe} className="flex justify-between items-center text-xs text-neutral-500 mb-1 pl-3 border-l-2 border-[#D4AF37]/30">
+                                                        <div key={soupe} className="flex justify-between items-center text-xs text-neutral-600 mb-2 pl-3 border-l-2 border-[#D4AF37]/50 py-0.5">
                                                             <span>+ {qty}x {soupe}</span>
-                                                            <span>{qty * (item.prixUnitaireSoupe || 0)} €</span>
+                                                            <span className="font-semibold text-neutral-800">{qty * (item.prixUnitaireSoupe || 0)} €</span>
                                                         </div>
                                                     ))}
 
-                                                    <div className="mt-3 pt-2 border-t border-neutral-100 flex justify-between items-center">
-                                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium">Total</span>
-                                                        <span className="font-bold text-base text-black">{item.prixTotalLigne} €</span>
+                                                    {/* Contrôleur de Quantité Capsule & Prix Total */}
+                                                    <div className="flex justify-between items-center pt-2 mt-2 border-t border-neutral-100">
+                                                        {/* Capsule +/- */}
+                                                        <div className="inline-flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/80 p-1 rounded-full shadow-2xs">
+                                                            <button
+                                                                onClick={() => updateQuantity(item.id, -1)}
+                                                                className="w-6 h-6 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:text-red-600 hover:bg-neutral-100 shadow-2xs transition-colors"
+                                                                title={item.quantitePlat === 1 ? "Supprimer" : "Diminuer"}
+                                                                aria-label="Diminuer"
+                                                            >
+                                                                <Minus size={11} />
+                                                            </button>
+                                                            <span className="w-6 text-center font-bold text-xs text-neutral-900">{item.quantitePlat}</span>
+                                                            <button
+                                                                onClick={() => updateQuantity(item.id, 1)}
+                                                                className="w-6 h-6 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:text-black hover:bg-neutral-100 shadow-2xs transition-colors"
+                                                                title="Augmenter"
+                                                                aria-label="Augmenter"
+                                                            >
+                                                                <Plus size={11} />
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Prix Ligne */}
+                                                        <div className="text-right">
+                                                            <span className="text-sm sm:text-base font-bold text-neutral-900">
+                                                                {item.prixTotalLigne.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -389,17 +426,20 @@ export default function Navbar() {
                             </div>
 
                             {cartItems.length > 0 && (
-                                <div className="p-6 pb-10 md:pb-6 border-t border-neutral-100 bg-neutral-50">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <span className="text-lg text-neutral-600 uppercase tracking-widest">Total</span>
-                                        <span className="text-3xl font-serif text-[#D4AF37]">{cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                <div className="p-6 border-t border-neutral-200/80 bg-white space-y-4 shadow-lg">
+                                    <div className="flex justify-between items-baseline">
+                                        <span className="text-xs uppercase tracking-widest text-neutral-500 font-semibold">Sous-total estimé</span>
+                                        <span className="text-2xl sm:text-3xl font-serif font-bold text-[#D4AF37]">
+                                            {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                        </span>
                                     </div>
                                     <Link
                                         href={cartItems.some(i => i.itemType === 'menu_fete' || i.semaineId.startsWith('menu') || i.semaineId.startsWith('fetes')) ? "/contact?type=menus_fetes" : "/contact?type=plat_prepare"}
                                         onClick={() => setIsCartOpen(false)}
-                                        className="w-full bg-black text-white font-bold text-center py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-[#D4AF37] transition-colors"
+                                        className="w-full bg-black hover:bg-[#D4AF37] text-white font-bold text-center py-4 px-6 rounded-2xl flex justify-center items-center gap-2.5 uppercase tracking-wider text-xs sm:text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.01]"
                                     >
-                                        Passer commande
+                                        <span>Passer commande</span>
+                                        <ArrowRight size={16} />
                                     </Link>
                                 </div>
                             )}
