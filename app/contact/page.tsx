@@ -526,7 +526,7 @@ function ContactForm() {
     const isVerrinesMode = menuParam === 'verrines';
     const isCollectiviteMode = menuParam === 'collectivite' || searchParams.get('formule') === 'collectivite';
     const isBuffetChaudMode = searchParams.get('formule') === 'buffet-chaud';
-    const isMenusFetes = typeParam === 'menus_fetes' || typeParam === 'menu_fetes';
+    const isMenusFetes = typeParam === 'menus_fetes' || typeParam === 'menu_fetes' || (isLoaded && cartItems.some(i => i.itemType === 'menu_fete' || i.semaineId?.startsWith('menu') || i.semaineId?.startsWith('fetes') || i.semaineId === 'menus-fetes'));
     const isPlatPrepare = typeParam === 'plat_prepare' || isMenusFetes;
 
     const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || isBuffetChaudMode;
@@ -2496,8 +2496,12 @@ function ContactForm() {
             <div className="max-w-4xl mx-auto px-6 relative z-10">
                 <div className="bg-white shadow-2xl p-8 md:p-14 rounded-[2rem] border-t-4 border-[#D4AF37]">
                     <header className="text-center mb-10">
-                        <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Contactez-nous</h1>
-                        <p className="text-gray-500 font-light text-lg">Parlons de votre prochain événement.</p>
+                        <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">
+                            {isMenusFetes ? "Menus de Fêtes 2026" : (isPlatPrepare ? "Finaliser votre Commande" : "Contactez-nous")}
+                        </h1>
+                        <p className="text-gray-500 font-light text-lg">
+                            {isMenusFetes ? "Réveillon de Noël & Nouvel An — Réservation de votre repas" : (isPlatPrepare ? "Renseignez vos coordonnées pour valider votre commande." : "Parlons de votre prochain événement.")}
+                        </p>
                     </header>
 
                     {status === "success" ? (
@@ -2524,7 +2528,96 @@ function ContactForm() {
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-8">
-                            {showMenuFirst ? (
+                            {/* 1. Sélecteur de date obligatoire pour les Menus de Fêtes */}
+                            {isMenusFetes && (
+                                <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-[#D4AF37]/40 shadow-sm mb-10 space-y-6">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center shrink-0 mt-0.5">
+                                            <Calendar size={20} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-serif font-bold text-xl md:text-2xl text-black">
+                                                Date de votre repas de fête <span className="text-red-500">*</span>
+                                            </h3>
+                                            <p className="text-xs md:text-sm text-neutral-500 font-light mt-0.5">
+                                                Sélectionnez la date de votre réveillon ou repas pour déterminer votre créneau de retrait à l'atelier.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {errors.Date_Fete && (
+                                        <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
+                                            <span>⚠️</span> {errors.Date_Fete}
+                                        </div>
+                                    )}
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                        {FESTIVE_DATE_OPTIONS.map((option) => {
+                                            const isSelected = formData.Date_Fete === option.id || formData.Date_Fete === option.dayFormatted;
+                                            return (
+                                                <button
+                                                    key={option.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            Date_Fete: option.id,
+                                                            Date: option.dayFormatted,
+                                                            Creneau_Retrait: option.pickupWindow
+                                                        }));
+                                                        if (errors.Date_Fete) {
+                                                            setErrors(prev => {
+                                                                const newErr = { ...prev };
+                                                                delete newErr.Date_Fete;
+                                                                return newErr;
+                                                            });
+                                                        }
+                                                    }}
+                                                    className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${isSelected
+                                                        ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
+                                                        : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
+                                                        }`}
+                                                >
+                                                    <div className="flex justify-between items-start">
+                                                        <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-[#D4AF37]">
+                                                            {option.badge}
+                                                        </span>
+                                                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
+                                                            }`}>
+                                                            {isSelected && <Check size={12} strokeWidth={3} />}
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-serif font-bold text-neutral-900 text-base">{option.label}</h4>
+                                                        <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">{option.dayFormatted}</p>
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+
+                                    {/* Encart dynamique du créneau de retrait */}
+                                    {formData.Date_Fete && (
+                                        <div className="bg-[#FAF9F6] border border-[#D4AF37]/40 p-4 md:p-5 rounded-2xl flex items-start gap-3.5 shadow-sm">
+                                            <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={22} />
+                                            <div className="space-y-1 text-sm">
+                                                <p className="font-bold text-neutral-900">
+                                                    Créneau de retrait à l'atelier :
+                                                </p>
+                                                <p className="text-neutral-700 font-medium leading-relaxed">
+                                                    {FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete)?.pickupWindow || formData.Creneau_Retrait}
+                                                </p>
+                                                <p className="text-xs text-neutral-500 pt-0.5">
+                                                    📍 Atelier Traiteur Compère : Rue Potay 3, 4470 Saint-Georges-sur-Meuse
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 2. Autres Formules personnalisées (BBQ, Buffets, etc.) */}
+                            {showMenuFirst && !isPlatPrepare && (
                                 <>
                                     {isAnyBBQ && renderBBQComposition()}
                                     {isPlatUnique && renderPlatUniqueFields()}
@@ -2542,103 +2635,13 @@ function ContactForm() {
                                             {renderLogisticsOptions()}
                                         </>
                                     )}
-
-                                    <h3 className="text-xl font-serif text-neutral-800 mt-10 mb-6 border-b border-neutral-200 pb-2">Vos informations</h3>
-                                    {renderContactFields()}
-                                </>
-                            ) : (
-                                <>
-                                    {isMenusFetes && (
-                                        <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-[#D4AF37]/40 shadow-sm mb-10 space-y-6">
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center shrink-0 mt-0.5">
-                                                    <Calendar size={20} />
-                                                </div>
-                                                <div>
-                                                    <h3 className="font-serif font-bold text-xl md:text-2xl text-black">
-                                                        Date de votre repas de fête <span className="text-red-500">*</span>
-                                                    </h3>
-                                                    <p className="text-xs md:text-sm text-neutral-500 font-light mt-0.5">
-                                                        Sélectionnez la date de votre réveillon ou repas pour déterminer votre créneau de retrait à l'atelier.
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {errors.Date_Fete && (
-                                                <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
-                                                    <span>⚠️</span> {errors.Date_Fete}
-                                                </div>
-                                            )}
-
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                                {FESTIVE_DATE_OPTIONS.map((option) => {
-                                                    const isSelected = formData.Date_Fete === option.id || formData.Date_Fete === option.dayFormatted;
-                                                    return (
-                                                        <button
-                                                            key={option.id}
-                                                            type="button"
-                                                            onClick={() => {
-                                                                setFormData(prev => ({
-                                                                    ...prev,
-                                                                    Date_Fete: option.id,
-                                                                    Date: option.dayFormatted,
-                                                                    Creneau_Retrait: option.pickupWindow
-                                                                }));
-                                                                if (errors.Date_Fete) {
-                                                                    setErrors(prev => {
-                                                                        const newErr = { ...prev };
-                                                                        delete newErr.Date_Fete;
-                                                                        return newErr;
-                                                                    });
-                                                                }
-                                                            }}
-                                                            className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${isSelected
-                                                                ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
-                                                                : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
-                                                                }`}
-                                                        >
-                                                            <div className="flex justify-between items-start">
-                                                                <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-black text-[#D4AF37]">
-                                                                    {option.badge}
-                                                                </span>
-                                                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
-                                                                    }`}>
-                                                                    {isSelected && <Check size={12} strokeWidth={3} />}
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <h4 className="font-serif font-bold text-neutral-900 text-base">{option.label}</h4>
-                                                                <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">{option.dayFormatted}</p>
-                                                            </div>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-
-                                            {/* Encart dynamique du créneau de retrait */}
-                                            {formData.Date_Fete && (
-                                                <div className="bg-[#FAF9F6] border border-[#D4AF37]/40 p-4 md:p-5 rounded-2xl flex items-start gap-3.5 shadow-sm">
-                                                    <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={22} />
-                                                    <div className="space-y-1 text-sm">
-                                                        <p className="font-bold text-neutral-900">
-                                                            Créneau de retrait à l'atelier :
-                                                        </p>
-                                                        <p className="text-neutral-700 font-medium leading-relaxed">
-                                                            {FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete)?.pickupWindow || formData.Creneau_Retrait}
-                                                        </p>
-                                                        <p className="text-xs text-neutral-500 pt-0.5">
-                                                            📍 Atelier Traiteur Compère : Rue Potay 3, 4470 Saint-Georges-sur-Meuse
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    <h3 className="text-xl font-serif text-neutral-800 mt-2 mb-6 border-b border-neutral-200 pb-2">Vos coordonnées</h3>
-                                    {renderContactFields()}
                                 </>
                             )}
+
+                            <h3 className="text-xl font-serif text-neutral-800 mt-2 mb-6 border-b border-neutral-200 pb-2">
+                                {isPlatPrepare ? "Vos coordonnées" : "Vos informations"}
+                            </h3>
+                            {renderContactFields()}
 
                             {!isPlatPrepare && (
                                 <div className="group">
