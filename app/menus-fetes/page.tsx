@@ -538,25 +538,25 @@ export default function MenusFetes() {
                     </div>
                 </div>
 
-                {/* --- CONSEILS DU CHEF & RÉCHAUFFAGE --- */}
+                {/* --- CONSEILS DE RÉCHAUFFAGE & CONSERVATION --- */}
                 <div className="bg-white rounded-3xl p-8 md:p-14 border border-neutral-200 shadow-md">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
                         <div className="md:col-span-2 space-y-4">
                             <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#D4AF37]">
-                                <Flame size={16} /> Service &amp; Dégustation sans stress
+                                <Flame size={16} /> Organisation simple &amp; sérénité
                             </div>
                             <h3 className="text-2xl md:text-4xl font-serif text-black">
                                 Prêt à réchauffer, facile à dresser
                             </h3>
-                            <p className="text-neutral-600 leading-relaxed font-light">
-                                Tous nos plats sont conditionnés dans des contenants adaptés, accompagnés d&apos;une notice explicative claire (temps de réchauffage au four et conseils simples de dressage pour profiter pleinement de votre soirée et de vos invités).
+                            <p className="text-neutral-600 leading-relaxed font-light text-sm sm:text-base">
+                                Tous nos plats sont conditionnés dans des contenants adaptés, avec nos conseils de réchauffage et de présentation pour profiter pleinement de votre soirée et de vos invités.
                             </p>
                         </div>
                         <div className="bg-[#FAF9F6] p-6 rounded-2xl border border-neutral-200 flex flex-col justify-center text-center space-y-3">
                             <ShieldCheck size={36} className="mx-auto text-[#D4AF37]" />
-                            <h4 className="font-bold text-black text-sm uppercase tracking-wider">Fraîcheur &amp; DLC Garantie</h4>
+                            <h4 className="font-bold text-black text-sm uppercase tracking-wider">Fraîcheur &amp; Conservation</h4>
                             <p className="text-neutral-500 text-xs leading-normal">
-                                Préparé le jour même du retrait, conservation garantie jusqu&apos;à 48h au réfrigérateur.
+                                Plats cuisinés le jour même du retrait, à conserver au réfrigérateur et à déguster sous 48h.
                             </p>
                         </div>
                     </div>
