@@ -57,12 +57,12 @@ export async function POST(req: Request) {
             if (isFestive) {
                 hasFestiveItem = true;
                 const festiveMenu = MENUS_FETES_DATA.find(m => m.id === item.id || m.title.toLowerCase() === item.nomPlat.toLowerCase());
-                
+
                 const unitPrice = festiveMenu ? festiveMenu.price : (item.prixUnitairePlat || 49);
                 const itemTotal = unitPrice * item.quantitePlat;
                 finalTotalPrice += itemTotal;
 
-                const coursesList = festiveMenu 
+                const coursesList = festiveMenu
                     ? festiveMenu.courses.map(c => `<strong>${c.courseName}:</strong> ${c.title}`).join('<br/>')
                     : (item.coursesSummary?.join('<br/>') || '-');
 
@@ -91,10 +91,10 @@ export async function POST(req: Request) {
 
                 const pricePlat = parseFloat(dayData.price.replace(',', '.').replace(' €', ''));
                 const pricePotage = 4;
-                
+
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const totalSoupes = Object.values(item.soupes || {}).reduce((a: any, b: any) => a + (b as number), 0) as number;
-                
+
                 // Vérification de sécurité: totalSoupes <= quantitePlat
                 if (totalSoupes > item.quantitePlat) {
                     return NextResponse.json({ success: false, error: 'Quantité de soupes invalide' }, { status: 400 });

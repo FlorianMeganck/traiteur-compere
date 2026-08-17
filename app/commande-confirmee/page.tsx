@@ -28,7 +28,7 @@ function CommandeConfirmeeContent() {
         if (d === 'vendredi' || d === 'samedi') return 'Samedi';
         return j;
     };
-    
+
     let joursRetraitText = "À confirmer";
     if (joursParam) {
         const joursList = joursParam.split(',');
@@ -186,18 +186,18 @@ function CommandeConfirmeeContent() {
                                     </div>
                                     <div>
                                         <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Adresse de retrait</p>
-                                        <p className="font-medium text-neutral-600">Rue Potay 3, 4470 Saint-Georges-sur-Meuse<br/>Belgique</p>
+                                        <p className="font-medium text-neutral-600">Rue Potay 3, 4470 Saint-Georges-sur-Meuse<br />Belgique</p>
                                     </div>
                                 </div>
                             </div>
                             <div className="h-48 rounded-xl overflow-hidden shadow-inner border border-neutral-200">
-                                <iframe 
-                                    src="https://www.google.com/maps?q=Traiteur+Compere,+Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique&output=embed" 
-                                    width="100%" 
-                                    height="100%" 
-                                    style={{border:0}} 
-                                    allowFullScreen={false} 
-                                    loading="lazy" 
+                                <iframe
+                                    src="https://www.google.com/maps?q=Traiteur+Compere,+Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique&output=embed"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen={false}
+                                    loading="lazy"
                                     referrerPolicy="no-referrer-when-downgrade">
                                 </iframe>
                             </div>

@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-    Sparkles, Calendar, Gift, ShoppingCart, Plus, Minus, Check, 
+import {
+    Sparkles, Calendar, Gift, ShoppingCart, Plus, Minus, Check,
     UtensilsCrossed, Clock, CreditCard, ChevronRight, ShieldCheck, Flame
 } from "lucide-react";
 
@@ -14,7 +14,7 @@ import { useCart, CartItem } from "../hooks/useCart";
 
 export default function MenusFetes() {
     const { addToCart, cartItems, cartTotal, totalItems } = useCart();
-    
+
     // État local des quantités pour chaque carte de menu
     const [quantities, setQuantities] = useState<Record<string, number>>(() => {
         const initial: Record<string, number> = {};
@@ -60,7 +60,7 @@ export default function MenusFetes() {
 
     return (
         <main className="min-h-screen bg-[#FAF9F6] text-neutral-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-28 md:pt-36 pb-24 relative overflow-hidden">
-            
+
             {/* Toast Notification */}
             <AnimatePresence>
                 {toastMessage && (
