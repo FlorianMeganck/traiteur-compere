@@ -250,6 +250,7 @@ export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; n
     });
 
     const isMixed = hasNoel && hasNouvelAn;
+    const onlyEnfant = hasEnfant && !hasNoel && !hasNouvelAn;
 
     let allowedOptionIds: string[] = ["noel-24", "noel-25", "nouvel-an-31", "nouvel-an-01"];
     let allowedPeriodLabel = "";
@@ -263,12 +264,16 @@ export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; n
     } else if (hasNouvelAn) {
         allowedOptionIds = ["nouvel-an-31", "nouvel-an-01"];
         allowedPeriodLabel = "Menus de Nouvel An : réservations pour les 31 Décembre & 1er Janvier.";
+    } else if (onlyEnfant) {
+        allowedOptionIds = ["noel-24", "noel-25", "nouvel-an-31", "nouvel-an-01"];
+        allowedPeriodLabel = "Menus Enfants : réservations disponibles pour le 24, 25, 31 Décembre & 1er Janvier.";
     }
 
     return {
         hasNoel,
         hasNouvelAn,
         hasEnfant,
+        onlyEnfant,
         isMixed,
         allowedOptionIds,
         allowedPeriodLabel

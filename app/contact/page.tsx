@@ -474,7 +474,8 @@ function ContactForm() {
         Date_Fete_Noel: "",
         Creneau_Retrait_Noel: "",
         Date_Fete_NouvelAn: "",
-        Creneau_Retrait_NouvelAn: ""
+        Creneau_Retrait_NouvelAn: "",
+        Menu_Enfant_Attribution: "noel"
     });
 
     const handleFormStart = () => {
@@ -534,6 +535,9 @@ function ContactForm() {
 
     // Matrice des restrictions de dates Fêtes
     const festiveRestrictions = useMemo(() => getFestiveMenuDateRestrictions(cartItems), [cartItems]);
+    const hasEnfant = festiveRestrictions.hasEnfant;
+    const enfantItem = cartItems.find(i => i.id === 'menu-enfant-fetes' || i.nomPlat.toLowerCase().includes('enfant'));
+    const enfantQty = enfantItem ? enfantItem.quantitePlat : 0;
 
     // Auto-désélection de la date si elle devient incompatible suite à une modification du panier
     useEffect(() => {
@@ -1006,6 +1010,9 @@ function ContactForm() {
                 if (!formData.Date_Fete_NouvelAn) {
                     newErrors.Date_Fete_NouvelAn = "Veuillez sélectionner la date pour vos repas de Nouvel An (31 Décembre ou 1er Janvier)";
                 }
+                if (hasEnfant && !formData.Menu_Enfant_Attribution) {
+                    newErrors.Menu_Enfant_Attribution = "Veuillez préciser à quel repas associer le(s) menu(s) enfant";
+                }
             } else {
                 if (!formData.Date_Fete && !formData.Date) {
                     newErrors.Date_Fete = "Veuillez sélectionner la date de votre repas de fête";
@@ -1309,7 +1316,17 @@ function ContactForm() {
                         const noelPickup = noelOpt?.pickupWindow || formData.Creneau_Retrait_Noel || "Retrait le 23 ou 24 Décembre";
                         const naPickup = naOpt?.pickupWindow || formData.Creneau_Retrait_NouvelAn || "Retrait le 30 ou 31 Décembre";
 
-                        dateEvenementFormatted = `Noël : ${noelDay} | Nouvel An : ${naDay}`;
+                        let enfantNotice = "";
+                        if (hasEnfant) {
+                            const attributionLabel = formData.Menu_Enfant_Attribution === 'noel'
+                                ? 'Repas de Noël'
+                                : formData.Menu_Enfant_Attribution === 'nouvel_an'
+                                ? 'Repas de Nouvel An'
+                                : 'Réparti sur les deux repas (Noël & Nouvel An)';
+                            enfantNotice = ` (Menu Enfant : ${attributionLabel})`;
+                        }
+
+                        dateEvenementFormatted = `Noël : ${noelDay} | Nouvel An : ${naDay}${enfantNotice}`;
                         creneauRetraitFormatted = `Noël : ${noelPickup} | Nouvel An : ${naPickup}`;
                     } else {
                         const selectedOption = FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete);
@@ -2749,6 +2766,110 @@ function ContactForm() {
                                                     </div>
                                                 )}
                                             </div>
+
+                                            {/* --- MINI-SÉLECTEUR ATTRIBUTION MENU ENFANT --- */}
+                                            {hasEnfant && (
+                                                <div className="space-y-4 bg-amber-50/70 border border-amber-200/90 p-5 md:p-6 rounded-2xl shadow-xs">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#D4AF37] text-white">
+                                                                👶 Menu(s) Enfant ({enfantQty})
+                                                            </span>
+                                                            <span className="text-sm font-bold text-neutral-900">
+                                                                À quel repas associer le(s) menu(s) enfant ? <span className="text-red-500">*</span>
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-xs text-neutral-400 font-medium italic">Choix d&apos;attribution</span>
+                                                    </div>
+
+                                                    <p className="text-xs text-neutral-600 leading-relaxed">
+                                                        Votre panier contenant à la fois des menus de Noël et de Nouvel An, veuillez préciser à quelle date vous souhaitez retirer le(s) menu(s) enfant.
+                                                    </p>
+
+                                                    {errors.Menu_Enfant_Attribution && (
+                                                        <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3 rounded-xl border border-red-200 flex items-center gap-2">
+                                                            <span>⚠️</span> {errors.Menu_Enfant_Attribution}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                                        <label className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                                                            formData.Menu_Enfant_Attribution === 'noel'
+                                                                ? 'border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/40 shadow-xs'
+                                                                : 'border-neutral-200 bg-white/70 hover:bg-white'
+                                                        }`}>
+                                                            <input
+                                                                type="radio"
+                                                                name="Menu_Enfant_Attribution"
+                                                                value="noel"
+                                                                checked={formData.Menu_Enfant_Attribution === 'noel'}
+                                                                onChange={() => {
+                                                                    setFormData(prev => ({ ...prev, Menu_Enfant_Attribution: 'noel' }));
+                                                                    if (errors.Menu_Enfant_Attribution) {
+                                                                        setErrors(prev => {
+                                                                            const newErr = { ...prev };
+                                                                            delete newErr.Menu_Enfant_Attribution;
+                                                                            return newErr;
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                className="text-[#D4AF37] focus:ring-[#D4AF37]"
+                                                            />
+                                                            <span className="text-xs font-bold text-neutral-800">🎄 Repas de Noël</span>
+                                                        </label>
+
+                                                        <label className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                                                            formData.Menu_Enfant_Attribution === 'nouvel_an'
+                                                                ? 'border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/40 shadow-xs'
+                                                                : 'border-neutral-200 bg-white/70 hover:bg-white'
+                                                        }`}>
+                                                            <input
+                                                                type="radio"
+                                                                name="Menu_Enfant_Attribution"
+                                                                value="nouvel_an"
+                                                                checked={formData.Menu_Enfant_Attribution === 'nouvel_an'}
+                                                                onChange={() => {
+                                                                    setFormData(prev => ({ ...prev, Menu_Enfant_Attribution: 'nouvel_an' }));
+                                                                    if (errors.Menu_Enfant_Attribution) {
+                                                                        setErrors(prev => {
+                                                                            const newErr = { ...prev };
+                                                                            delete newErr.Menu_Enfant_Attribution;
+                                                                            return newErr;
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                className="text-[#D4AF37] focus:ring-[#D4AF37]"
+                                                            />
+                                                            <span className="text-xs font-bold text-neutral-800">🍾 Repas de Nouvel An</span>
+                                                        </label>
+
+                                                        <label className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
+                                                            formData.Menu_Enfant_Attribution === 'les_deux'
+                                                                ? 'border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/40 shadow-xs'
+                                                                : 'border-neutral-200 bg-white/70 hover:bg-white'
+                                                        }`}>
+                                                            <input
+                                                                type="radio"
+                                                                name="Menu_Enfant_Attribution"
+                                                                value="les_deux"
+                                                                checked={formData.Menu_Enfant_Attribution === 'les_deux'}
+                                                                onChange={() => {
+                                                                    setFormData(prev => ({ ...prev, Menu_Enfant_Attribution: 'les_deux' }));
+                                                                    if (errors.Menu_Enfant_Attribution) {
+                                                                        setErrors(prev => {
+                                                                            const newErr = { ...prev };
+                                                                            delete newErr.Menu_Enfant_Attribution;
+                                                                            return newErr;
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                className="text-[#D4AF37] focus:ring-[#D4AF37]"
+                                                            />
+                                                            <span className="text-xs font-bold text-neutral-800">✨ Les deux repas</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ) : (
                                         // --- CAS STANDARD (UN SEUL EVENEMENT) ---
@@ -2906,13 +3027,45 @@ function ContactForm() {
                                             <tbody>
                                                 {cartItems.map((item, idx) => {
                                                     const isFestive = item.itemType === 'menu_fete' || item.semaineId.startsWith('menu') || item.semaineId.startsWith('fetes');
+                                                    const itemId = (item.id || "").toLowerCase();
+                                                    const itemNom = (item.nomPlat || "").toLowerCase();
+                                                    const isNoelMenu = itemId === 'menu-reveillon-noel' || itemId === 'menu-prestige-fetes' || itemNom.includes('noël') || itemNom.includes('noel') || itemNom.includes('prestige');
+                                                    const isNouvelAnMenu = itemId === 'menu-saint-sylvestre' || itemNom.includes('sylvestre') || itemNom.includes('nouvel an');
+                                                    const isEnfantMenu = itemId === 'menu-enfant-fetes' || itemNom.includes('enfant');
+
+                                                    let displayDate = item.badge || item.jour;
+                                                    if (isFestive) {
+                                                        if (festiveRestrictions.isMixed) {
+                                                            if (isNoelMenu) {
+                                                                const noelOpt = NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel || o.dayFormatted === formData.Date_Fete_Noel);
+                                                                displayDate = `🎄 ${noelOpt ? noelOpt.dayFormatted : 'Noël (24/25 Déc)'}`;
+                                                            } else if (isNouvelAnMenu) {
+                                                                const naOpt = NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn);
+                                                                displayDate = `🍾 ${naOpt ? naOpt.dayFormatted : 'Nouvel An (31 Déc/1er Janv)'}`;
+                                                            } else if (isEnfantMenu) {
+                                                                if (formData.Menu_Enfant_Attribution === 'noel') {
+                                                                    const noelOpt = NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel || o.dayFormatted === formData.Date_Fete_Noel);
+                                                                    displayDate = `🎄 Noël (${noelOpt ? noelOpt.dayFormatted : '24/25 Déc'})`;
+                                                                } else if (formData.Menu_Enfant_Attribution === 'nouvel_an') {
+                                                                    const naOpt = NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn);
+                                                                    displayDate = `🍾 Nouvel An (${naOpt ? naOpt.dayFormatted : '31 Déc/1er Janv'})`;
+                                                                } else {
+                                                                    displayDate = `✨ Les deux repas`;
+                                                                }
+                                                            }
+                                                        } else if (formData.Date_Fete) {
+                                                            const opt = FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete);
+                                                            displayDate = opt ? opt.dayFormatted : formData.Date_Fete;
+                                                        }
+                                                    }
+
                                                     return (
                                                         <tr key={idx} className="border-b border-neutral-100 last:border-0">
                                                             <td className="px-4 py-3 font-medium text-black max-w-[220px]" title={item.nomPlat}>
                                                                 {isFestive && <span className="text-[10px] bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold px-1.5 py-0.5 rounded mr-1.5 uppercase">Fêtes</span>}
                                                                 {item.nomPlat}
                                                             </td>
-                                                            <td className="px-4 py-3 capitalize text-xs md:text-sm text-[#D4AF37] font-medium">{item.badge || item.jour}</td>
+                                                            <td className="px-4 py-3 capitalize text-xs md:text-sm text-[#D4AF37] font-medium">{displayDate}</td>
                                                             <td className="px-4 py-3 text-center font-bold text-black">{item.quantitePlat}</td>
                                                             <td className="px-4 py-3 text-xs text-neutral-500">
                                                                 {isFestive ? (
