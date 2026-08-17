@@ -2593,8 +2593,8 @@ function ContactForm() {
                                                                 }
                                                             }}
                                                             className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${isSelected
-                                                                    ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
-                                                                    : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
+                                                                ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
+                                                                : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
                                                                 }`}
                                                         >
                                                             <div className="flex justify-between items-start">

@@ -182,7 +182,7 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
         dateValue: "2026-12-24",
         label: "Réveillon de Noël",
         dayFormatted: "Mercredi 24 Décembre",
-        pickupWindow: "Retrait à l'atelier le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
+        pickupWindow: "Retrait le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
         badge: "Noël"
     },
     {
@@ -190,7 +190,7 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
         dateValue: "2026-12-25",
         label: "Jour de Noël",
         dayFormatted: "Jeudi 25 Décembre",
-        pickupWindow: "Retrait à l'atelier le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
+        pickupWindow: "Retrait le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
         badge: "Noël"
     },
     {
@@ -198,7 +198,7 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
         dateValue: "2026-12-31",
         label: "Réveillon de Nouvel An",
         dayFormatted: "Mercredi 31 Décembre",
-        pickupWindow: "Retrait à l'atelier le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
+        pickupWindow: "Retrait le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
         badge: "Nouvel An"
     },
     {
@@ -206,7 +206,7 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
         dateValue: "2027-01-01",
         label: "Jour de l'An",
         dayFormatted: "Jeudi 1er Janvier",
-        pickupWindow: "Retrait à l'atelier le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
+        pickupWindow: "Retrait le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
         badge: "Nouvel An"
     }
 ];
