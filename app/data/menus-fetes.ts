@@ -183,7 +183,7 @@ export const NOEL_DATE_OPTIONS: FestiveDateOption[] = [
         dateValue: "2026-12-24",
         label: "Réveillon de Noël",
         dayFormatted: "Mercredi 24 Décembre",
-        pickupWindow: "Retrait le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
+        pickupWindow: "Retrait possible : Le 23 Décembre (13h - 18h) OU le 24 Décembre (8h - 13h)",
         badge: "Noël",
         period: "noel"
     },
@@ -192,7 +192,7 @@ export const NOEL_DATE_OPTIONS: FestiveDateOption[] = [
         dateValue: "2026-12-25",
         label: "Jour de Noël",
         dayFormatted: "Jeudi 25 Décembre",
-        pickupWindow: "Retrait le 23 Décembre (14h - 18h) ou le 24 Décembre (9h - 13h)",
+        pickupWindow: "Retrait possible : Le 24 Décembre (10h - 18h) OU le 25 Décembre (8h - 13h)",
         badge: "Noël",
         period: "noel"
     }
@@ -204,7 +204,7 @@ export const NOUVEL_AN_DATE_OPTIONS: FestiveDateOption[] = [
         dateValue: "2026-12-31",
         label: "Réveillon de Nouvel An",
         dayFormatted: "Mercredi 31 Décembre",
-        pickupWindow: "Retrait le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
+        pickupWindow: "Retrait possible : Le 30 Décembre (13h - 18h) OU le 31 Décembre (8h - 13h)",
         badge: "Nouvel An",
         period: "nouvel_an"
     },
@@ -213,7 +213,7 @@ export const NOUVEL_AN_DATE_OPTIONS: FestiveDateOption[] = [
         dateValue: "2027-01-01",
         label: "Jour de l'An",
         dayFormatted: "Jeudi 1er Janvier",
-        pickupWindow: "Retrait le 30 Décembre (14h - 18h) ou le 31 Décembre (9h - 13h)",
+        pickupWindow: "Retrait possible : Le 31 Décembre (13h - 18h) OU le 1er Janvier (8h - 11h)",
         badge: "Nouvel An",
         period: "nouvel_an"
     }

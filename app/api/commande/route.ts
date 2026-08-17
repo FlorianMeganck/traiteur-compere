@@ -186,8 +186,8 @@ export async function POST(req: Request) {
                                 <p style="margin: 5px 0;"><strong>Email :</strong> ${Mail}</p>
                                 <p style="margin: 5px 0;"><strong>Téléphone :</strong> ${Tel}</p>
                                 <p style="margin: 5px 0;"><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
-                                ${dateEvenement ? `<p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>🎉 Date du repas :</strong> ${dateEvenement}</p>` : ''}
-                                ${creneauRetrait ? `<p style="margin: 5px 0;"><strong>⏰ Créneau de retrait :</strong> ${creneauRetrait}</p>` : ''}
+                                ${dateEvenement ? `<p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>🎉 Date(s) du repas :</strong> ${dateEvenement}</p>` : ''}
+                                ${creneauRetrait ? `<p style="margin: 5px 0; line-height: 1.4;"><strong>⏰ Créneau(x) de retrait :</strong><br/>${creneauRetrait.split(' | ').join('<br/>')}</p>` : ''}
                                 <p style="margin: 5px 0;"><strong>Date de saisie :</strong> ${Date}</p>
                             </div>
                             
@@ -214,9 +214,9 @@ export async function POST(req: Request) {
                             
                             ${dateEvenement ? `
                             <div style="background-color: #fff8e1; padding: 15px; border-left: 4px solid #D4AF37; border-radius: 4px; margin: 20px 0;">
-                                <p style="margin: 4px 0; font-size: 15px;"><strong>🎉 Date de votre repas :</strong> ${dateEvenement}</p>
-                                <p style="margin: 4px 0; font-size: 14px;"><strong>⏰ Créneau de retrait à l'atelier :</strong> ${creneauRetrait || 'Selon créneau sélectionné'}</p>
-                                <p style="margin: 4px 0; font-size: 12px; color: #666;">📍 Rue Potay 3, 4470 Saint-Georges-sur-Meuse</p>
+                                <p style="margin: 4px 0; font-size: 15px;"><strong>🎉 Date(s) de votre repas :</strong> ${dateEvenement}</p>
+                                <p style="margin: 4px 0; font-size: 14px; line-height: 1.4;"><strong>⏰ Créneau(x) de retrait à l'atelier :</strong><br/>${creneauRetrait ? creneauRetrait.split(' | ').join('<br/>') : 'Selon créneau sélectionné'}</p>
+                                <p style="margin: 6px 0 0 0; font-size: 12px; color: #666;">📍 Rue Potay 3, 4470 Saint-Georges-sur-Meuse</p>
                             </div>` : ''}
 
                             ${cartTableHTML}
