@@ -255,7 +255,7 @@ export default function MenusFetes() {
                         </h2>
                         <div className="w-20 h-1 bg-[#D4AF37] mx-auto rounded-full mt-4"></div>
                         <p className="text-neutral-500 max-w-xl mx-auto font-light text-base">
-                            Sélectionnez vos options pour chaque service (Entrée, Potage, Plat, Dessert) et composez votre menu d&apos;exception.
+                            Composez votre repas sur mesure (Entrée, Potage, Plat, Dessert) selon vos envies pour un réveillon sans stress.
                         </p>
                     </div>
 
@@ -549,7 +549,7 @@ export default function MenusFetes() {
                                 Prêt à réchauffer, facile à dresser
                             </h3>
                             <p className="text-neutral-600 leading-relaxed font-light">
-                                Tous les menus sont conditionnés dans des contenants adaptés avec une notice explicative claire détaillée par notre chef (températures et temps de four, astuces de dressage pour épater vos invités).
+                                Tous nos plats sont conditionnés dans des contenants adaptés, accompagnés d&apos;une notice explicative claire (temps de réchauffage au four et conseils simples de dressage pour profiter pleinement de votre soirée et de vos invités).
                             </p>
                         </div>
                         <div className="bg-[#FAF9F6] p-6 rounded-2xl border border-neutral-200 flex flex-col justify-center text-center space-y-3">

@@ -32,14 +32,14 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
     {
         id: "menu-reveillon-noel",
         title: "Menu Réveillon de Noël",
-        subtitle: "Un menu festif et raffiné pour célébrer Noël en famille.",
+        subtitle: "Un menu festif et gourmand pour célébrer Noël en famille.",
         badge: "24 & 25 Décembre",
         price: 49.00,
         priceFormatted: "49,00 €",
         image: "/images/hero-traiteur.png",
         pickupDates: ["Mardi 24 Décembre après 11h", "Mercredi 25 Décembre avant 12h"],
         deadlineNotice: "Réservation souhaitée avant le 19 Décembre",
-        description: "Une composition festive 4 services alliant produits nobles et savoir-faire bicentenaire de la maison Compère.",
+        description: "Un menu 4 services cuisiné maison avec des produits de saison, préparé dans notre atelier à Saint-Georges.",
         category: "noel",
         isPopular: true,
         courses: {
@@ -87,17 +87,17 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
             desserts: [
                 {
                     id: "noel-dessert-1",
-                    title: "Bûche Signature Chocolat Valrhona & Praliné Croustillant",
+                    title: "Bûche Chocolat Valrhona & Praliné Croustillant",
                     description: "Cœur coulant caramel fleur de sel et biscuit dacquoise"
                 },
                 {
                     id: "noel-dessert-2",
-                    title: "Bûche Féerie Exotique Mangue & Fruit de la Passion",
+                    title: "Bûche Légère Mangue & Fruit de la Passion",
                     description: "Mousse légère vanille bourbon et biscuit génoise imbibé"
                 },
                 {
                     id: "noel-dessert-3",
-                    title: "Pavlova d'Hiver aux Marrons & Myrtilles Sauvages",
+                    title: "Pavlova d'Hiver aux Marrons & Myrtilles",
                     description: "Meringue croquante, crème fouettée vanillée et marrons glacés"
                 }
             ]
@@ -114,7 +114,7 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
         image: "/images/banquet.png",
         pickupDates: ["Mercredi 31 Décembre après 11h", "Jeudi 1er Janvier avant 12h"],
         deadlineNotice: "Réservation souhaitée avant le 26 Décembre",
-        description: "Un voyage culinaire festif pour sublimer votre réveillon du Nouvel An entre amis ou en famille.",
+        description: "Un repas chaleureux et festif pour passer le réveillon du Nouvel An en toute convivialité.",
         category: "nouvel_an",
         isPopular: true,
         courses: {
@@ -134,7 +134,7 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
                 {
                     id: "sylvestre-potage-1",
                     title: "Bisque Onctueuse de Homard & Croûtons Dorés",
-                    description: "Parfumée à l'estragon frais et pointe de cognac fine champagne"
+                    description: "Parfumée à l'estragon frais et pointe de cognac"
                 },
                 {
                     id: "sylvestre-potage-2",
@@ -146,7 +146,7 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
                 {
                     id: "sylvestre-plat-1",
                     title: "Suprême de Chapon Farci aux Morilles & Vin Jaune",
-                    description: "Gratin dauphinois à la crème d'Isigny et tombée de sous-bois"
+                    description: "Gratin dauphinois à la crème et poêlée de champignons"
                 },
                 {
                     id: "sylvestre-plat-2",
@@ -162,13 +162,13 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
             desserts: [
                 {
                     id: "sylvestre-dessert-1",
-                    title: "Sphère Scintillante Mangue-Passion & Vanille Intense",
+                    title: "Dôme Mangue-Passion & Vanille",
                     description: "Sablé breton pur beurre et coulis exotique acidulé"
                 },
                 {
                     id: "sylvestre-dessert-2",
-                    title: "Entremets Royal Chocolat Noir Intense & Feuillantine",
-                    description: "Glaçage miroir étincelant et poudre d'or scintillante"
+                    title: "Entremets Chocolat Noir & Feuillantine Pralinée",
+                    description: "Mousse chocolat noir fondante et biscuit croustillant"
                 },
                 {
                     id: "sylvestre-dessert-3",
@@ -182,14 +182,14 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
     {
         id: "menu-prestige-fetes",
         title: "Menu Dégustation Prestige",
-        subtitle: "Une composition gastronomique d'exception pour les grandes occasions.",
+        subtitle: "Une formule complète avec des produits nobles pour une table de fête soignée.",
         badge: "Édition Limitée",
         price: 65.00,
         priceFormatted: "65,00 €",
         image: "/images/wedding_table.png",
         pickupDates: ["24 Décembre après 11h", "31 Décembre après 11h"],
         deadlineNotice: "Série limitée - Réservation anticipée requise",
-        description: "Une expérience gastronomique d'exception mettant à l'honneur les trésors les plus précieux des fêtes.",
+        description: "Des recettes soignées mettant à l'honneur des produits de choix comme le homard, le foie gras et le veau de lait.",
         category: "noel",
         isPopular: false,
         courses: {
@@ -197,58 +197,58 @@ export const MENUS_FETES_DATA: FestiveMenu[] = [
                 {
                     id: "prestige-entree-1",
                     title: "Médaillon de Homard Bleu & Mousseline d'Avocat",
-                    description: "Vinaigrette passion au poivre de Timut & tuile de corail croustillante"
+                    description: "Vinaigrette passion au poivre de Timut & tuile croustillante"
                 },
                 {
                     id: "prestige-entree-2",
-                    title: "Duo Festif : Foie Gras Mi-Cuit & Tartare de Saint-Jacques Truffé",
-                    description: "Gelée de Sauternes millésimé et toasts briochés maison"
+                    title: "Duo Festif : Foie Gras Maison & Tartare de Saint-Jacques Truffé",
+                    description: "Gelée au vin doux et toasts briochés maison"
                 }
             ],
             potages: [
                 {
                     id: "prestige-potage-1",
-                    title: "Consommé Double de Faisan aux Cèpes & Truffe Noire",
-                    description: "Infusion lente aux herbes aromatiques et quenelle de volaille fine"
+                    title: "Consommé de Faisan aux Cèpes & Truffe Noire",
+                    description: "Infusion parfumée aux herbes et quenelle de volaille fine"
                 },
                 {
                     id: "prestige-potage-2",
-                    title: "Velouté Parfumé de Châtaignes & Noix de Saint-Jacques Rôties",
+                    title: "Velouté de Châtaignes & Noix de Saint-Jacques Rôties",
                     description: "Huile de truffe blanche et jeunes pousses d'aneth"
                 }
             ],
             plats: [
                 {
                     id: "prestige-plat-1",
-                    title: "Pavé de Veau de Lait Cuit Basse Température",
-                    description: "Jus corsé au vin de Madère, grenailles confites et légumes glacés au miel"
+                    title: "Pavé de Veau Cuit Basse Température",
+                    description: "Jus corsé au vin de Madère, grenailles confites et légumes glacés"
                 },
                 {
                     id: "prestige-plat-2",
                     title: "Filet de Chevreuil Grand Veneur aux Airelles",
-                    description: "Mousseline de céleri-rave et poire au vin chaud d'Alsace"
+                    description: "Mousseline de céleri-rave et poire pochée aux épices"
                 },
                 {
                     id: "prestige-plat-3",
-                    title: "Lotte Rôtie au Lardo di Colonnata & Jus de Crustacés",
-                    description: "Risotto carnaroli aux morilles et asperges vertes croquantes"
+                    title: "Lotte Rôtie & Jus de Crustacés",
+                    description: "Risotto carnaroli aux morilles et asperges vertes"
                 }
             ],
             desserts: [
                 {
                     id: "prestige-dessert-1",
-                    title: "Création Impériale : Dôme Royal Or & Chocolat Grand Cru",
-                    description: "Feuillantine pralinée, ganache intense 70% et éclat de feuille d'or"
+                    title: "Dôme Chocolat Noir Grand Cru & Praliné",
+                    description: "Feuillantine pralinée et ganache intense au chocolat"
                 },
                 {
                     id: "prestige-dessert-2",
-                    title: "Lingot Croustillant Praliné Noisette du Piémont & Yuzu",
-                    description: "Mousse ivoire vanille et cœur caramel coulant"
+                    title: "Lingot Croustillant Praliné Noisette & Yuzu",
+                    description: "Mousse légère à la vanille et cœur caramel coulant"
                 },
                 {
                     id: "prestige-dessert-3",
-                    title: "Symphonie Glacée Champagne Rosé & Fruits Rouges Flambés",
-                    description: "Crumble sablé amande et coulis de framboises sauvages"
+                    title: "Coupe Glacée au Champagne & Fruits Rouges",
+                    description: "Crumble sablé amande et coulis de framboises"
                 }
             ]
         },
