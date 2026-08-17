@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
 export type CartItem = {
-    id: string; // ex: semaine-1-mardi
+    id: string; // ex: semaine-1-mardi ou menu-reveillon-noel
     semaineId: string;
     jour: string;
     nomPlat: string;
@@ -12,14 +12,22 @@ export type CartItem = {
     soupes: Record<string, number>;
     prixUnitaireSoupe: number;
     prixTotalLigne: number;
+    itemType?: 'plat_prepare' | 'menu_fete';
+    badge?: string;
+    coursesSummary?: string[];
 };
 
 export function useCart() {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Fonction de vérification 48h (identique à celle de page.tsx)
+    // Fonction de vérification 48h (pour les plats préparés uniquement)
     const isVisible = (dayName: string, weekId: string) => {
+        // Les Menus de Fêtes sont toujours valides et ne dépendent pas des semaines classiques
+        if (weekId.startsWith('menu') || weekId.startsWith('fetes') || weekId === 'menus-fetes') {
+            return true;
+        }
+
         const today = new Date();
         const pickupDates: Record<string, Record<string, Date>> = {
             "semaine-1": { "mardi": new Date(2026, 4, 5), "jeudi": new Date(2026, 4, 7), "samedi": new Date(2026, 4, 9) },
@@ -48,8 +56,14 @@ export function useCart() {
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved) as CartItem[];
-                    // Vérifier la validité des plats (48h)
-                    const validItems = parsed.filter(item => isVisible(item.jour, item.semaineId));
+                    // Vérifier la validité des plats (48h) sans purger les menus de fêtes
+                    const validItems = parsed.filter(item => {
+                        if (item.itemType === 'menu_fete' || item.semaineId.startsWith('menu') || item.semaineId.startsWith('fetes')) {
+                            return true;
+                        }
+                        return isVisible(item.jour, item.semaineId);
+                    });
+
                     if (validItems.length !== parsed.length) {
                         localStorage.setItem('traiteurCart', JSON.stringify(validItems));
                         // Emettre un événement custom pour notifier qu'un nettoyage a eu lieu
@@ -105,6 +119,25 @@ export function useCart() {
         saveCart(newCart);
     };
 
+    const updateQuantity = (id: string, delta: number) => {
+        const newCart = cartItems.map(item => {
+            if (item.id === id) {
+                const newQty = Math.max(1, item.quantitePlat + delta);
+                // Si l'item a des soupes, recalculer les soupes
+                const totalSoupes = Object.values(item.soupes || {}).reduce((a, b) => a + b, 0);
+                const soupesTotalCost = totalSoupes * (item.prixUnitaireSoupe || 0);
+                const newTotal = (item.prixUnitairePlat * newQty) + soupesTotalCost;
+                return {
+                    ...item,
+                    quantitePlat: newQty,
+                    prixTotalLigne: newTotal
+                };
+            }
+            return item;
+        });
+        saveCart(newCart);
+    };
+
     const removeFromCart = (id: string) => {
         const newCart = cartItems.filter(i => i.id !== id);
         saveCart(newCart);
@@ -123,6 +156,7 @@ export function useCart() {
         cartItems,
         isLoaded,
         addToCart,
+        updateQuantity,
         removeFromCart,
         clearCart,
         cartTotal,

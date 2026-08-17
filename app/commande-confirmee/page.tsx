@@ -21,6 +21,8 @@ function CommandeConfirmeeContent() {
     // Logique pour déterminer le jour de retrait
     const getPickupDay = (j: string) => {
         const d = j.toLowerCase();
+        if (d.includes('24') || d.includes('noël') || d.includes('noel')) return '24 Décembre';
+        if (d.includes('31') || d.includes('nouvel') || d.includes('sylvestre')) return '31 Décembre';
         if (d === 'lundi' || d === 'mardi') return 'Mardi';
         if (d === 'mercredi' || d === 'jeudi') return 'Jeudi';
         if (d === 'vendredi' || d === 'samedi') return 'Samedi';

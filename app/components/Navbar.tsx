@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, X, Trash2 } from "lucide-react";
+import { ShoppingCart, X, Trash2, Plus, Minus } from "lucide-react";
 import Logo from "./Logo";
 import { useCart } from "../hooks/useCart";
 import { MENU_DATA } from "../data/plats-prepares";
@@ -15,7 +15,7 @@ const NAV_LINKS = [
     { href: "/services", label: "Services" },
     { href: "/plats-prepares", label: "Plats Préparés" },
     { href: "/formules", label: "Formules" },
-    { href: "/menu-fetes", label: "Menus de Fêtes" },
+    { href: "/menus-fetes", label: "Menus de Fêtes" },
     { href: "/contact", label: "Contact" },
 ];
 
@@ -24,7 +24,7 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const { cartItems, removeFromCart, cartTotal, totalItems } = useCart();
+    const { cartItems, removeFromCart, updateQuantity, cartTotal, totalItems } = useCart();
 
     // --- LOGIC ---
     // 1. Desktop / Base Logic
@@ -77,7 +77,7 @@ export default function Navbar() {
                 <div className="bg-[#111111] text-white py-3.5 md:py-4 px-4 text-center text-xs sm:text-sm md:text-base font-medium tracking-wide flex flex-wrap items-center justify-center gap-2 border-b border-[#D4AF37]/30 shadow-sm">
                     <span className="text-[#D4AF37] text-sm md:text-base animate-pulse"></span>
                     <span>Nouveau : Découvrez nos premiers essais pour les <strong>Menus de Fêtes 2026</strong> !</span>
-                    <Link href="/menu-fetes" className="underline text-[#D4AF37] hover:text-white ml-1 font-bold transition-colors">
+                    <Link href="/menus-fetes" className="underline text-[#D4AF37] hover:text-white ml-1 font-bold transition-colors">
                         Voir la section Fêtes →
                     </Link>
                 </div>
@@ -264,46 +264,72 @@ export default function Navbar() {
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 pb-12 space-y-6">
+                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 pb-12 space-y-4">
                                 {cartItems.length === 0 ? (
                                     <div className="text-center text-neutral-500 py-12">
                                         <ShoppingCart className="mx-auto mb-4 opacity-50" size={48} />
                                         <p>Votre panier est vide.</p>
                                     </div>
                                 ) : (
-                                    cartItems.map((item) => (
-                                        <div key={item.id} className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm relative">
-                                            <button
-                                                onClick={() => removeFromCart(item.id)}
-                                                className="absolute top-4 right-4 text-neutral-300 hover:text-red-500 transition-colors"
-                                            >
-                                                <Trash2 size={18} />
-                                            </button>
-                                            <div className="pr-8">
-                                                <h4 className="font-bold text-neutral-900 mb-1">{item.nomPlat}</h4>
-                                                <p className="text-sm text-[#D4AF37] font-medium capitalize mb-3">
-                                                    {item.jour} ({MENU_DATA.find(m => m.id === item.semaineId)?.week.split(' :')[0]})
-                                                </p>
+                                    cartItems.map((item) => {
+                                        const isFestive = item.itemType === 'menu_fete' || item.semaineId.startsWith('menu') || item.semaineId.startsWith('fetes');
+                                        const weekData = MENU_DATA.find(m => m.id === item.semaineId);
 
-                                                <div className="flex justify-between items-center text-sm mb-2">
-                                                    <span className="text-neutral-600">Quantité plat : <strong className="text-black">{item.quantitePlat}</strong></span>
-                                                    <span className="font-semibold">{item.prixUnitairePlat * item.quantitePlat} €</span>
-                                                </div>
-
-                                                {Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
-                                                    <div key={soupe} className="flex justify-between items-center text-sm text-neutral-500 mb-1 pl-4 border-l-2 border-[#D4AF37]/30">
-                                                        <span>+ {qty}x {soupe}</span>
-                                                        <span>{qty * item.prixUnitaireSoupe} €</span>
+                                        return (
+                                            <div key={item.id} className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm relative">
+                                                <button
+                                                    onClick={() => removeFromCart(item.id)}
+                                                    className="absolute top-4 right-4 text-neutral-300 hover:text-red-500 transition-colors p-1"
+                                                    title="Supprimer"
+                                                >
+                                                    <Trash2 size={18} />
+                                                </button>
+                                                <div className="pr-8">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        {isFestive && <span className="text-[10px] bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Fêtes</span>}
+                                                        <h4 className="font-bold text-neutral-900 leading-tight">{item.nomPlat}</h4>
                                                     </div>
-                                                ))}
+                                                    <p className="text-xs md:text-sm text-[#D4AF37] font-medium capitalize mb-3">
+                                                        {item.badge || (weekData ? `${item.jour} (${weekData.week.split(' :')[0]})` : item.jour)}
+                                                    </p>
 
-                                                <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between items-center">
-                                                    <span className="text-xs uppercase tracking-widest text-neutral-400">Total ligne</span>
-                                                    <span className="font-bold text-lg text-black">{item.prixTotalLigne} €</span>
+                                                    {/* Quantity Selector +/- */}
+                                                    <div className="flex justify-between items-center bg-neutral-50 p-2 rounded-xl border border-neutral-200/70 mb-3">
+                                                        <span className="text-xs text-neutral-600 font-medium">Quantité :</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => updateQuantity(item.id, -1)}
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:text-black hover:border-black shadow-sm disabled:opacity-40"
+                                                                disabled={item.quantitePlat <= 1}
+                                                            >
+                                                                <Minus size={13} />
+                                                            </button>
+                                                            <span className="w-6 text-center font-bold text-sm text-black">{item.quantitePlat}</span>
+                                                            <button
+                                                                onClick={() => updateQuantity(item.id, 1)}
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:text-black hover:border-black shadow-sm"
+                                                            >
+                                                                <Plus size={13} />
+                                                            </button>
+                                                        </div>
+                                                        <span className="font-semibold text-sm text-neutral-900">{item.prixUnitairePlat * item.quantitePlat} €</span>
+                                                    </div>
+
+                                                    {item.soupes && Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
+                                                        <div key={soupe} className="flex justify-between items-center text-xs text-neutral-500 mb-1 pl-3 border-l-2 border-[#D4AF37]/30">
+                                                            <span>+ {qty}x {soupe}</span>
+                                                            <span>{qty * (item.prixUnitaireSoupe || 0)} €</span>
+                                                        </div>
+                                                    ))}
+
+                                                    <div className="mt-3 pt-2 border-t border-neutral-100 flex justify-between items-center">
+                                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-medium">Total</span>
+                                                        <span className="font-bold text-base text-black">{item.prixTotalLigne} €</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 )}
                             </div>
 
@@ -311,14 +337,14 @@ export default function Navbar() {
                                 <div className="p-6 pb-10 md:pb-6 border-t border-neutral-100 bg-neutral-50">
                                     <div className="flex justify-between items-center mb-6">
                                         <span className="text-lg text-neutral-600 uppercase tracking-widest">Total</span>
-                                        <span className="text-3xl font-serif text-[#D4AF37]">{cartTotal} €</span>
+                                        <span className="text-3xl font-serif text-[#D4AF37]">{cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
                                     </div>
                                     <Link
-                                        href="/contact?type=plat_prepare"
+                                        href={cartItems.some(i => i.itemType === 'menu_fete' || i.semaineId.startsWith('menu') || i.semaineId.startsWith('fetes')) ? "/contact?type=menus_fetes" : "/contact?type=plat_prepare"}
                                         onClick={() => setIsCartOpen(false)}
                                         className="w-full bg-black text-white font-bold text-center py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-[#D4AF37] transition-colors"
                                     >
-                                        Finaliser ma commande
+                                        Passer commande
                                     </Link>
                                 </div>
                             )}

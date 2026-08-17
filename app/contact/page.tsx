@@ -523,7 +523,8 @@ function ContactForm() {
     const isVerrinesMode = menuParam === 'verrines';
     const isCollectiviteMode = menuParam === 'collectivite' || searchParams.get('formule') === 'collectivite';
     const isBuffetChaudMode = searchParams.get('formule') === 'buffet-chaud';
-    const isPlatPrepare = typeParam === 'plat_prepare';
+    const isMenusFetes = typeParam === 'menus_fetes' || typeParam === 'menu_fetes';
+    const isPlatPrepare = typeParam === 'plat_prepare' || isMenusFetes;
 
     const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || isBuffetChaudMode;
     const showMenuFirst = isCustomMode;
@@ -551,9 +552,13 @@ function ContactForm() {
     // --- HOOKS DEPENDING ON DECLARED MODE VARIABLES ---
     useLayoutEffect(() => {
         if (isPlatPrepare && isLoaded && cartItems.length === 0 && status !== "success") {
-            router.push('/plats-prepares');
+            if (isMenusFetes) {
+                router.push('/menus-fetes');
+            } else {
+                router.push('/plats-prepares');
+            }
         }
-    }, [isPlatPrepare, isLoaded, cartItems.length, router, status]);
+    }, [isPlatPrepare, isMenusFetes, isLoaded, cartItems.length, router, status]);
 
     // EFFECT: Handle URL params & Default Selection
     useLayoutEffect(() => {
@@ -602,8 +607,8 @@ function ContactForm() {
                 } else if (menuParam === 'collectivite') {
                     newData.Type_Evenement = 'Repas de collectivité';
                 }
-            } else if (typeParam === 'plat_prepare') {
-                newData.Type_Evenement = 'Plat Préparé';
+            } else if (typeParam === 'plat_prepare' || isMenusFetes) {
+                newData.Type_Evenement = isMenusFetes ? 'Menus de Fêtes' : 'Plat Préparé';
             }
 
             const formuleParam = searchParams.get('formule');
@@ -1266,7 +1271,8 @@ function ContactForm() {
                     details_projet: formData.details_projet,
                     totalPrice: cartTotal,
                     cartItems: cartItems,
-                    captchaToken: captchaToken
+                    captchaToken: captchaToken,
+                    typeCommande: isMenusFetes ? 'menus_fetes' : 'plat_prepare'
                 };
 
                 const response = await fetch("/api/commande", {
@@ -1278,7 +1284,7 @@ function ContactForm() {
                 const result = await response.json();
                 if (response.ok && result.success) {
                     setStatus("success");
-                    const joursUniques = Array.from(new Set(cartItems.map(item => item.jour))).join(',');
+                    const joursUniques = Array.from(new Set(cartItems.map(item => item.badge || item.jour))).join(',');
                     clearCart();
                     setTimeout(() => {
                         window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}&jours=${encodeURIComponent(joursUniques)}`;
@@ -2562,31 +2568,45 @@ function ContactForm() {
                                         <table className="w-full text-left text-sm text-neutral-600">
                                             <thead className="bg-neutral-50 text-xs uppercase text-neutral-400">
                                                 <tr>
-                                                    <th className="px-4 py-3 rounded-tl-lg">Plat</th>
-                                                    <th className="px-4 py-3">Jour</th>
-                                                    <th className="px-4 py-3 text-center">Qte</th>
-                                                    <th className="px-4 py-3">Soupes</th>
+                                                    <th className="px-4 py-3 rounded-tl-lg">Article / Menu</th>
+                                                    <th className="px-4 py-3">Date / Service</th>
+                                                    <th className="px-4 py-3 text-center">Qté</th>
+                                                    <th className="px-4 py-3">Détails</th>
                                                     <th className="px-4 py-3 text-right rounded-tr-lg">S/Total</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {cartItems.map((item, idx) => (
-                                                    <tr key={idx} className="border-b border-neutral-100 last:border-0">
-                                                        <td className="px-4 py-3 font-medium text-black max-w-[200px] truncate" title={item.nomPlat}>{item.nomPlat}</td>
-                                                        <td className="px-4 py-3 capitalize">{item.jour}</td>
-                                                        <td className="px-4 py-3 text-center">{item.quantitePlat}</td>
-                                                        <td className="px-4 py-3">
-                                                            {Object.entries(item.soupes).map(([s, q]) => q > 0 ? <div key={s} className="text-xs">{q}x {s}</div> : null)}
-                                                        </td>
-                                                        <td className="px-4 py-3 text-right font-bold whitespace-nowrap">{item.prixTotalLigne} €</td>
-                                                    </tr>
-                                                ))}
+                                                {cartItems.map((item, idx) => {
+                                                    const isFestive = item.itemType === 'menu_fete' || item.semaineId.startsWith('menu') || item.semaineId.startsWith('fetes');
+                                                    return (
+                                                        <tr key={idx} className="border-b border-neutral-100 last:border-0">
+                                                            <td className="px-4 py-3 font-medium text-black max-w-[220px]" title={item.nomPlat}>
+                                                                {isFestive && <span className="text-[10px] bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold px-1.5 py-0.5 rounded mr-1.5 uppercase">Fêtes</span>}
+                                                                {item.nomPlat}
+                                                            </td>
+                                                            <td className="px-4 py-3 capitalize text-xs md:text-sm text-[#D4AF37] font-medium">{item.badge || item.jour}</td>
+                                                            <td className="px-4 py-3 text-center font-bold text-black">{item.quantitePlat}</td>
+                                                            <td className="px-4 py-3 text-xs text-neutral-500">
+                                                                {isFestive ? (
+                                                                    item.coursesSummary && item.coursesSummary.length > 0 ? (
+                                                                        <div className="space-y-0.5 max-w-[200px]">
+                                                                            {item.coursesSummary.map((c, cIdx) => <div key={cIdx} className="truncate text-[11px]">• {c}</div>)}
+                                                                        </div>
+                                                                    ) : '-'
+                                                                ) : (
+                                                                    item.soupes && Object.entries(item.soupes).map(([s, q]) => q > 0 ? <div key={s} className="text-xs">{q}x {s}</div> : null)
+                                                                )}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right font-bold whitespace-nowrap text-black">{item.prixTotalLigne.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>
                                     <div className="bg-[#D4AF37]/10 p-4 rounded-xl border border-[#D4AF37]/30 text-center flex flex-col justify-center items-center gap-2">
                                         <p className="text-neutral-800 font-bold text-lg">Total de votre commande : {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</p>
-                                        <p className="text-xs text-neutral-500 uppercase tracking-widest">Paiement par virement bancaire uniquement.</p>
+                                        <p className="text-xs text-neutral-500 uppercase tracking-widest">Paiement par virement bancaire uniquement (QR Code sur la page suivante).</p>
                                     </div>
                                 </div>
                             )}
