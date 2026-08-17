@@ -475,7 +475,8 @@ function ContactForm() {
         Creneau_Retrait_Noel: "",
         Date_Fete_NouvelAn: "",
         Creneau_Retrait_NouvelAn: "",
-        Menu_Enfant_Attribution: "noel"
+        Menu_Enfant_Qty_Noel: -1,
+        Menu_Enfant_Qty_NouvelAn: 0
     });
 
     const handleFormStart = () => {
@@ -538,6 +539,59 @@ function ContactForm() {
     const hasEnfant = festiveRestrictions.hasEnfant;
     const enfantItem = cartItems.find(i => i.id === 'menu-enfant-fetes' || i.nomPlat.toLowerCase().includes('enfant'));
     const enfantQty = enfantItem ? enfantItem.quantitePlat : 0;
+
+    // Synchronisation automatique des quantités de menus enfants (Noël vs Nouvel An)
+    useEffect(() => {
+        if (hasEnfant && enfantQty > 0) {
+            setFormData(prev => {
+                const currentNoel = prev.Menu_Enfant_Qty_Noel;
+                const currentNouvelAn = prev.Menu_Enfant_Qty_NouvelAn;
+
+                if (currentNoel === -1 || (currentNoel + currentNouvelAn !== enfantQty)) {
+                    return {
+                        ...prev,
+                        Menu_Enfant_Qty_Noel: enfantQty,
+                        Menu_Enfant_Qty_NouvelAn: 0
+                    };
+                }
+                return prev;
+            });
+        }
+    }, [hasEnfant, enfantQty]);
+
+    const enfantQtyNoel = formData.Menu_Enfant_Qty_Noel === -1 ? enfantQty : formData.Menu_Enfant_Qty_Noel;
+    const enfantQtyNouvelAn = formData.Menu_Enfant_Qty_NouvelAn;
+
+    const handleEnfantQtyChange = (target: 'noel' | 'nouvel_an', delta: number) => {
+        setFormData(prev => {
+            let noel = prev.Menu_Enfant_Qty_Noel === -1 ? enfantQty : prev.Menu_Enfant_Qty_Noel;
+            let nouvelAn = prev.Menu_Enfant_Qty_NouvelAn;
+
+            if (target === 'noel') {
+                if (delta > 0 && nouvelAn > 0) {
+                    noel = Math.min(enfantQty, noel + 1);
+                    nouvelAn = enfantQty - noel;
+                } else if (delta < 0 && noel > 0) {
+                    noel = Math.max(0, noel - 1);
+                    nouvelAn = enfantQty - noel;
+                }
+            } else {
+                if (delta > 0 && noel > 0) {
+                    nouvelAn = Math.min(enfantQty, nouvelAn + 1);
+                    noel = enfantQty - nouvelAn;
+                } else if (delta < 0 && nouvelAn > 0) {
+                    nouvelAn = Math.max(0, nouvelAn - 1);
+                    noel = enfantQty - nouvelAn;
+                }
+            }
+
+            return {
+                ...prev,
+                Menu_Enfant_Qty_Noel: noel,
+                Menu_Enfant_Qty_NouvelAn: nouvelAn
+            };
+        });
+    };
 
     // Auto-désélection de la date si elle devient incompatible suite à une modification du panier
     useEffect(() => {
@@ -1010,8 +1064,8 @@ function ContactForm() {
                 if (!formData.Date_Fete_NouvelAn) {
                     newErrors.Date_Fete_NouvelAn = "Veuillez sélectionner la date pour vos repas de Nouvel An (31 Décembre ou 1er Janvier)";
                 }
-                if (hasEnfant && !formData.Menu_Enfant_Attribution) {
-                    newErrors.Menu_Enfant_Attribution = "Veuillez préciser à quel repas associer le(s) menu(s) enfant";
+                if (hasEnfant && (enfantQtyNoel + enfantQtyNouvelAn !== enfantQty)) {
+                    newErrors.Menu_Enfant_Ventilation = "Veuillez ventiler la totalité des menus enfants de votre panier";
                 }
             } else {
                 if (!formData.Date_Fete && !formData.Date) {
@@ -1318,12 +1372,16 @@ function ContactForm() {
 
                         let enfantNotice = "";
                         if (hasEnfant) {
-                            const attributionLabel = formData.Menu_Enfant_Attribution === 'noel'
-                                ? 'Repas de Noël'
-                                : formData.Menu_Enfant_Attribution === 'nouvel_an'
-                                ? 'Repas de Nouvel An'
-                                : 'Réparti sur les deux repas (Noël & Nouvel An)';
-                            enfantNotice = ` (Menu Enfant : ${attributionLabel})`;
+                            const noelQty = formData.Menu_Enfant_Qty_Noel === -1 ? enfantQty : formData.Menu_Enfant_Qty_Noel;
+                            const naQty = formData.Menu_Enfant_Qty_NouvelAn;
+
+                            if (noelQty > 0 && naQty > 0) {
+                                enfantNotice = ` (Menu Enfant : ${noelQty} pour Noël, ${naQty} pour Nouvel An)`;
+                            } else if (noelQty > 0) {
+                                enfantNotice = ` (Menu Enfant : ${noelQty} pour Noël)`;
+                            } else if (naQty > 0) {
+                                enfantNotice = ` (Menu Enfant : ${naQty} pour Nouvel An)`;
+                            }
                         }
 
                         dateEvenementFormatted = `Noël : ${noelDay} | Nouvel An : ${naDay}${enfantNotice}`;
@@ -1430,7 +1488,7 @@ function ContactForm() {
 
     const renderDropdown = (label: string, name: string, options: string[], excludeValues: string[] = [], req = false) => {
         // Filter options: remove if in excludeValues AND not the current value
-        const currentVal = (formData as Record<string, string>)[name];
+        const currentVal = (formData as any)[name];
         const filteredOptions = options.filter(opt => !excludeValues.includes(opt) || opt === currentVal);
 
         return (
@@ -2767,106 +2825,101 @@ function ContactForm() {
                                                 )}
                                             </div>
 
-                                            {/* --- MINI-SÉLECTEUR ATTRIBUTION MENU ENFANT --- */}
+                                            {/* --- VENTILATION DYNAMIQUE MENU ENFANT --- */}
                                             {hasEnfant && (
                                                 <div className="space-y-4 bg-amber-50/70 border border-amber-200/90 p-5 md:p-6 rounded-2xl shadow-xs">
-                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 pb-3">
                                                         <div className="flex items-center gap-2">
-                                                            <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#D4AF37] text-white">
-                                                                👶 Menu(s) Enfant ({enfantQty})
+                                                            <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#D4AF37] text-white shadow-2xs">
+                                                                👶 Menu(s) Enfant : {enfantQty} au total
                                                             </span>
                                                             <span className="text-sm font-bold text-neutral-900">
-                                                                À quel repas associer le(s) menu(s) enfant ? <span className="text-red-500">*</span>
+                                                                Répartition des menus enfants par repas <span className="text-red-500">*</span>
                                                             </span>
                                                         </div>
-                                                        <span className="text-xs text-neutral-400 font-medium italic">Choix d&apos;attribution</span>
+                                                        <span className="text-xs text-neutral-500 font-medium">
+                                                            Total à ventiler : <strong className="text-black font-bold">{enfantQty}</strong>
+                                                        </span>
                                                     </div>
 
                                                     <p className="text-xs text-neutral-600 leading-relaxed">
-                                                        Votre panier contenant à la fois des menus de Noël et de Nouvel An, veuillez préciser à quelle date vous souhaitez retirer le(s) menu(s) enfant.
+                                                        Votre commande comprend des menus pour Noël et pour Nouvel An. Veuillez ventiler le nombre de menus enfants souhaités pour chaque repas :
                                                     </p>
 
-                                                    {errors.Menu_Enfant_Attribution && (
+                                                    {errors.Menu_Enfant_Ventilation && (
                                                         <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3 rounded-xl border border-red-200 flex items-center gap-2">
-                                                            <span>⚠️</span> {errors.Menu_Enfant_Attribution}
+                                                            <span>⚠️</span> {errors.Menu_Enfant_Ventilation}
                                                         </div>
                                                     )}
 
-                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                                                        <label className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
-                                                            formData.Menu_Enfant_Attribution === 'noel'
-                                                                ? 'border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/40 shadow-xs'
-                                                                : 'border-neutral-200 bg-white/70 hover:bg-white'
-                                                        }`}>
-                                                            <input
-                                                                type="radio"
-                                                                name="Menu_Enfant_Attribution"
-                                                                value="noel"
-                                                                checked={formData.Menu_Enfant_Attribution === 'noel'}
-                                                                onChange={() => {
-                                                                    setFormData(prev => ({ ...prev, Menu_Enfant_Attribution: 'noel' }));
-                                                                    if (errors.Menu_Enfant_Attribution) {
-                                                                        setErrors(prev => {
-                                                                            const newErr = { ...prev };
-                                                                            delete newErr.Menu_Enfant_Attribution;
-                                                                            return newErr;
-                                                                        });
-                                                                    }
-                                                                }}
-                                                                className="text-[#D4AF37] focus:ring-[#D4AF37]"
-                                                            />
-                                                            <span className="text-xs font-bold text-neutral-800">🎄 Repas de Noël</span>
-                                                        </label>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                                                        {/* Compteur Noël */}
+                                                        <div className="p-4 rounded-xl border border-neutral-200 bg-white shadow-2xs flex items-center justify-between">
+                                                            <div>
+                                                                <h5 className="font-bold text-neutral-900 text-sm flex items-center gap-1.5">
+                                                                    <span>🎄</span> Pour le repas de Noël
+                                                                </h5>
+                                                                <p className="text-[11px] text-[#D4AF37] font-semibold mt-0.5">
+                                                                    {formData.Date_Fete_Noel ? (NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel)?.dayFormatted || formData.Date_Fete_Noel) : 'Date de Noël sélectionnée'}
+                                                                </p>
+                                                            </div>
 
-                                                        <label className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
-                                                            formData.Menu_Enfant_Attribution === 'nouvel_an'
-                                                                ? 'border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/40 shadow-xs'
-                                                                : 'border-neutral-200 bg-white/70 hover:bg-white'
-                                                        }`}>
-                                                            <input
-                                                                type="radio"
-                                                                name="Menu_Enfant_Attribution"
-                                                                value="nouvel_an"
-                                                                checked={formData.Menu_Enfant_Attribution === 'nouvel_an'}
-                                                                onChange={() => {
-                                                                    setFormData(prev => ({ ...prev, Menu_Enfant_Attribution: 'nouvel_an' }));
-                                                                    if (errors.Menu_Enfant_Attribution) {
-                                                                        setErrors(prev => {
-                                                                            const newErr = { ...prev };
-                                                                            delete newErr.Menu_Enfant_Attribution;
-                                                                            return newErr;
-                                                                        });
-                                                                    }
-                                                                }}
-                                                                className="text-[#D4AF37] focus:ring-[#D4AF37]"
-                                                            />
-                                                            <span className="text-xs font-bold text-neutral-800">🍾 Repas de Nouvel An</span>
-                                                        </label>
+                                                            <div className="flex items-center gap-2.5 bg-neutral-50 p-1.5 rounded-xl border border-neutral-200">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleEnfantQtyChange('noel', -1)}
+                                                                    disabled={enfantQtyNoel <= 0}
+                                                                    className="w-8 h-8 rounded-lg bg-white border border-neutral-200 text-black font-bold flex items-center justify-center hover:bg-[#D4AF37] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-2xs"
+                                                                >
+                                                                    -
+                                                                </button>
+                                                                <span className="font-bold text-base min-w-[20px] text-center text-black">
+                                                                    {enfantQtyNoel}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleEnfantQtyChange('noel', 1)}
+                                                                    disabled={enfantQtyNoel >= enfantQty}
+                                                                    className="w-8 h-8 rounded-lg bg-white border border-neutral-200 text-black font-bold flex items-center justify-center hover:bg-[#D4AF37] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-2xs"
+                                                                >
+                                                                    +
+                                                                </button>
+                                                            </div>
+                                                        </div>
 
-                                                        <label className={`p-3.5 rounded-xl border flex items-center gap-3 cursor-pointer transition-all ${
-                                                            formData.Menu_Enfant_Attribution === 'les_deux'
-                                                                ? 'border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/40 shadow-xs'
-                                                                : 'border-neutral-200 bg-white/70 hover:bg-white'
-                                                        }`}>
-                                                            <input
-                                                                type="radio"
-                                                                name="Menu_Enfant_Attribution"
-                                                                value="les_deux"
-                                                                checked={formData.Menu_Enfant_Attribution === 'les_deux'}
-                                                                onChange={() => {
-                                                                    setFormData(prev => ({ ...prev, Menu_Enfant_Attribution: 'les_deux' }));
-                                                                    if (errors.Menu_Enfant_Attribution) {
-                                                                        setErrors(prev => {
-                                                                            const newErr = { ...prev };
-                                                                            delete newErr.Menu_Enfant_Attribution;
-                                                                            return newErr;
-                                                                        });
-                                                                    }
-                                                                }}
-                                                                className="text-[#D4AF37] focus:ring-[#D4AF37]"
-                                                            />
-                                                            <span className="text-xs font-bold text-neutral-800">✨ Les deux repas</span>
-                                                        </label>
+                                                        {/* Compteur Nouvel An */}
+                                                        <div className="p-4 rounded-xl border border-neutral-200 bg-white shadow-2xs flex items-center justify-between">
+                                                            <div>
+                                                                <h5 className="font-bold text-neutral-900 text-sm flex items-center gap-1.5">
+                                                                    <span>🍾</span> Pour le repas de Nouvel An
+                                                                </h5>
+                                                                <p className="text-[11px] text-[#D4AF37] font-semibold mt-0.5">
+                                                                    {formData.Date_Fete_NouvelAn ? (NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn)?.dayFormatted || formData.Date_Fete_NouvelAn) : 'Date de Nouvel An sélectionnée'}
+                                                                </p>
+                                                            </div>
+
+                                                            <div className="flex items-center gap-2.5 bg-neutral-50 p-1.5 rounded-xl border border-neutral-200">
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleEnfantQtyChange('nouvel_an', -1)}
+                                                                    disabled={enfantQtyNouvelAn <= 0}
+                                                                    className="w-8 h-8 rounded-lg bg-white border border-neutral-200 text-black font-bold flex items-center justify-center hover:bg-[#D4AF37] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-2xs"
+                                                                >
+                                                                    -
+                                                                </button>
+                                                                <span className="font-bold text-base min-w-[20px] text-center text-black">
+                                                                    {enfantQtyNouvelAn}
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => handleEnfantQtyChange('nouvel_an', 1)}
+                                                                    disabled={enfantQtyNouvelAn >= enfantQty}
+                                                                    className="w-8 h-8 rounded-lg bg-white border border-neutral-200 text-black font-bold flex items-center justify-center hover:bg-[#D4AF37] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-2xs"
+                                                                >
+                                                                    +
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
@@ -3043,14 +3096,17 @@ function ContactForm() {
                                                                 const naOpt = NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn);
                                                                 displayDate = `🍾 ${naOpt ? naOpt.dayFormatted : 'Nouvel An (31 Déc/1er Janv)'}`;
                                                             } else if (isEnfantMenu) {
-                                                                if (formData.Menu_Enfant_Attribution === 'noel') {
+                                                                const noelQty = formData.Menu_Enfant_Qty_Noel === -1 ? enfantQty : formData.Menu_Enfant_Qty_Noel;
+                                                                const naQty = formData.Menu_Enfant_Qty_NouvelAn;
+
+                                                                if (noelQty > 0 && naQty > 0) {
+                                                                    displayDate = `🎄 ${noelQty}x Noël & 🍾 ${naQty}x Nouvel An`;
+                                                                } else if (noelQty > 0) {
                                                                     const noelOpt = NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel || o.dayFormatted === formData.Date_Fete_Noel);
                                                                     displayDate = `🎄 Noël (${noelOpt ? noelOpt.dayFormatted : '24/25 Déc'})`;
-                                                                } else if (formData.Menu_Enfant_Attribution === 'nouvel_an') {
+                                                                } else {
                                                                     const naOpt = NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn);
                                                                     displayDate = `🍾 Nouvel An (${naOpt ? naOpt.dayFormatted : '31 Déc/1er Janv'})`;
-                                                                } else {
-                                                                    displayDate = `✨ Les deux repas`;
                                                                 }
                                                             }
                                                         } else if (formData.Date_Fete) {
