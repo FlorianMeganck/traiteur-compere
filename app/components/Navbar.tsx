@@ -353,8 +353,9 @@ export default function Navbar() {
                                                         <div className="flex items-center gap-2">
                                                             <button
                                                                 onClick={() => updateQuantity(item.id, -1)}
-                                                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:text-black hover:border-black shadow-sm disabled:opacity-40"
-                                                                disabled={item.quantitePlat <= 1}
+                                                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-white border border-neutral-200 text-neutral-700 hover:text-red-600 hover:border-red-300 shadow-sm transition-colors"
+                                                                title={item.quantitePlat === 1 ? "Retirer du panier" : "Diminuer la quantité"}
+                                                                aria-label="Diminuer"
                                                             >
                                                                 <Minus size={13} />
                                                             </button>

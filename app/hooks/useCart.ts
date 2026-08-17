@@ -111,8 +111,18 @@ export function useCart() {
         const newCart = [...cartItems];
 
         if (existingIndex >= 0) {
-            // Mettre à jour la ligne existante
-            newCart[existingIndex] = item;
+            // Cumul de la quantité pour le même plat / même configuration
+            const existing = newCart[existingIndex];
+            const newQty = existing.quantitePlat + item.quantitePlat;
+            const totalSoupes = Object.values(existing.soupes || {}).reduce((a, b) => a + b, 0);
+            const soupesTotalCost = totalSoupes * (existing.prixUnitaireSoupe || 0);
+            const newTotal = (existing.prixUnitairePlat * newQty) + soupesTotalCost;
+
+            newCart[existingIndex] = {
+                ...existing,
+                quantitePlat: newQty,
+                prixTotalLigne: newTotal
+            };
         } else {
             newCart.push(item);
         }
@@ -120,10 +130,18 @@ export function useCart() {
     };
 
     const updateQuantity = (id: string, delta: number) => {
+        const targetItem = cartItems.find(i => i.id === id);
+        if (!targetItem) return;
+
+        // Si la quantité passe à 0 ou moins, retirer directement l'article du panier
+        if (targetItem.quantitePlat + delta <= 0) {
+            removeFromCart(id);
+            return;
+        }
+
         const newCart = cartItems.map(item => {
             if (item.id === id) {
-                const newQty = Math.max(1, item.quantitePlat + delta);
-                // Si l'item a des soupes, recalculer les soupes
+                const newQty = item.quantitePlat + delta;
                 const totalSoupes = Object.values(item.soupes || {}).reduce((a, b) => a + b, 0);
                 const soupesTotalCost = totalSoupes * (item.prixUnitaireSoupe || 0);
                 const newTotal = (item.prixUnitairePlat * newQty) + soupesTotalCost;
