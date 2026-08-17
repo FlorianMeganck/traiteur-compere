@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Check, ArrowLeft, Download } from "lucide-react";
+import { Check, ArrowLeft, Download, AlertCircle } from "lucide-react";
 import { Suspense, useRef } from "react";
 import QRCode from "react-qr-code";
 
@@ -98,6 +98,26 @@ function CommandeConfirmeeContent() {
                     <p className="text-neutral-600 text-lg mb-8 max-w-2xl mx-auto">
                         Merci <span className="font-bold text-black">{prenom} {nom}</span>, votre commande a bien été enregistrée.
                     </p>
+
+                    {/* Bandeau d'alerte Paiement 24h */}
+                    <div className="bg-amber-50/90 border-2 border-amber-300 rounded-2xl p-5 md:p-6 mb-10 text-left shadow-sm">
+                        <div className="flex items-start gap-3.5">
+                            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                                <AlertCircle size={22} className="text-amber-800" />
+                            </div>
+                            <div className="space-y-1.5 text-sm md:text-base">
+                                <h4 className="font-bold text-amber-950 font-serif text-base md:text-lg">
+                                    ⚠️ Important – Validation de votre réservation :
+                                </h4>
+                                <p className="text-neutral-700 leading-relaxed">
+                                    Merci de bien vouloir procéder au règlement de votre commande <strong>sous 24 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).
+                                </p>
+                                <p className="text-red-600 font-bold text-xs md:text-sm pt-0.5">
+                                    Passé ce délai de 24h sans confirmation de paiement, votre réservation sera automatiquement annulée.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch mb-10 text-left">
                         {/* Bloc Récapitulatif Paiement */}

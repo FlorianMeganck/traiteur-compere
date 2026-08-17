@@ -212,6 +212,19 @@ export async function POST(req: Request) {
                             <h2 style="color: #000;">Merci pour votre commande, ${Prenom} !</h2>
                             <p>Votre commande de <strong>${orderTitle}</strong> a bien été enregistrée. Voici votre récapitulatif (<strong>N° ${formattedOrderNumber}</strong>) :</p>
                             
+                            <!-- Bandeau d'alerte Paiement 24h -->
+                            <div style="background-color: #fff9e6; border: 2px solid #D4AF37; border-left: 6px solid #D4AF37; border-radius: 8px; padding: 16px 18px; margin: 20px 0; color: #333;">
+                                <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #856404;">
+                                    ⚠️ Important – Validation de votre réservation :
+                                </p>
+                                <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #444;">
+                                    Merci de bien vouloir procéder au règlement de votre commande <strong>sous 24 heures</strong> (via le QR Code présent sur le site ou par virement bancaire avec les informations ci-dessous).
+                                </p>
+                                <p style="margin: 0; font-size: 13px; font-weight: bold; color: #b71c1c; line-height: 1.4;">
+                                    Passé ce délai de 24h sans confirmation de paiement, votre réservation sera automatiquement annulée.
+                                </p>
+                            </div>
+
                             ${dateEvenement ? `
                             <div style="background-color: #fff8e1; padding: 15px; border-left: 4px solid #D4AF37; border-radius: 4px; margin: 20px 0;">
                                 <p style="margin: 4px 0; font-size: 15px;"><strong>🎉 Date(s) de votre repas :</strong> ${dateEvenement}</p>
