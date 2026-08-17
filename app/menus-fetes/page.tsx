@@ -145,7 +145,7 @@ export default function MenusFetes() {
                         transition={{ duration: 0.5 }}
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#D4AF37]/40 bg-[#D4AF37]/10 text-[#D4AF37] text-xs uppercase tracking-widest font-semibold"
                     >
-                        <Gift size={15} /> Menus Gastronomiques de Réveillon 2026
+                        <Gift size={15} /> Réveillons de Noël & Nouvel An 2026
                     </motion.div>
 
                     <motion.h1
@@ -154,8 +154,8 @@ export default function MenusFetes() {
                         transition={{ duration: 0.6, delay: 0.1 }}
                         className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif text-white leading-tight"
                     >
-                        La Magie des Fêtes <br />
-                        <span className="text-[#D4AF37] italic">signée Traiteur Compère</span>
+                        Célébrez les Fêtes <br />
+                        <span className="text-[#D4AF37] italic">avec Traiteur Compère</span>
                     </motion.h1>
 
                     <motion.p
@@ -164,7 +164,7 @@ export default function MenusFetes() {
                         transition={{ duration: 0.6, delay: 0.2 }}
                         className="text-sm sm:text-base md:text-lg text-neutral-300 max-w-2xl mx-auto font-light leading-relaxed"
                     >
-                        Composez votre repas de réveillon sur mesure selon vos envies. Notre brigade élabore des créations d'exception prêtes à réchauffer et déguster en toute sérénité.
+                        Composez votre menu de réveillon selon vos envies. Des plats gourmands et festifs préparés avec soin, prêts à réchauffer et à partager en famille ou entre amis.
                     </motion.p>
 
                     <motion.div
