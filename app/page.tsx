@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <main className="bg-white text-gray-800 font-sans selection:bg-[#D4AF37] selection:text-white overflow-hidden">
 
-      <section className="relative w-full h-[80vh] md:h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
+      <section className="relative w-full min-h-[660px] md:min-h-[740px] h-auto md:h-screen flex items-center justify-center overflow-hidden pb-16 md:pb-24">
         {/* Image d'arrière-plan */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -24,7 +24,7 @@ export default function Home() {
         </div>
 
         {/* Contenu centré */}
-        <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-4xl mx-auto mt-28 md:mt-36">
+        <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-4xl mx-auto pt-32 md:pt-40 pb-8">
 
           {/* Titre principal (Police Serif élégante) */}
           <h1 className="text-5xl md:text-7xl font-serif text-white mb-4 drop-shadow-lg" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -37,12 +37,12 @@ export default function Home() {
           </h2>
 
           {/* Paragraphe court */}
-          <p className="text-lg md:text-xl text-neutral-100 mb-10 max-w-2xl font-light drop-shadow">
+          <p className="text-lg md:text-xl text-neutral-100 mb-8 max-w-2xl font-light drop-shadow">
             Savoir-faire bicentenaire d&apos;exception au service de vos événements les plus précieux.
           </p>
 
           {/* Container des boutons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-12">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
 
             {/* Bouton 1 : Qui sommes-nous ? (Ghost Doré) */}
             <Link
@@ -182,7 +182,7 @@ function ServicesSection() {
   ];
 
   return (
-    <section className="relative z-30 -mt-12 md:-mt-32 pt-16 pb-24 bg-white rounded-t-[2rem] md:rounded-t-[3rem] shadow-2xl mx-4 md:mx-12 lg:mx-24">
+    <section className="relative z-30 -mt-6 md:-mt-12 pt-16 pb-24 bg-white rounded-t-[2rem] md:rounded-t-[3rem] shadow-2xl mx-4 md:mx-12 lg:mx-24">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
