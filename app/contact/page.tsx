@@ -1815,6 +1815,38 @@ function ContactForm() {
                     </div>
                 </div>
 
+                {/* PRESTATION SERVICE OPTION */}
+                <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <label className="block text-sm font-bold text-neutral-800 uppercase tracking-wide">
+                            🔥 Prestation Service
+                        </label>
+                        <p className="text-xs text-neutral-500 mt-1 italic">
+                            Maîtres du feu, découpe & service à table sur place.
+                        </p>
+                    </div>
+                    <div className="flex bg-neutral-100 p-1 rounded-xl w-fit border border-neutral-200">
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Non" }))}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                                formData.Service_Check !== "Oui" ? 'bg-black text-white shadow-sm' : 'text-neutral-500 hover:text-black'
+                            }`}
+                        >
+                            Sans service
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Oui" }))}
+                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                                formData.Service_Check === "Oui" ? 'bg-[#D4AF37] text-black shadow-sm font-bold' : 'text-neutral-500 hover:text-black'
+                            }`}
+                        >
+                            Avec service (+2,50€ / pers)
+                        </button>
+                    </div>
+                </div>
+
                 {/* MAIN CHOICES */}
                 <div className="space-y-6">
                     <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2">Votre Sélection Principale (Inclus)</h3>
@@ -2604,26 +2636,20 @@ function ContactForm() {
     };
 
     const renderContactFields = () => (
-        <>
-
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="group">
-                    <label className={labelStyle}>Prénom <span className="text-red-500">*</span></label>
-                    <input type="text" name="Prenom" required value={formData.Prenom} onChange={handleChange} onFocus={handleFormStart} className={getInputStyle("Prenom")} placeholder="Votre prénom" />
-                    {errors.Prenom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Prenom}</p>}
-                </div>
-                <div className="group">
-                    <label className={labelStyle}>Nom <span className="text-red-500">*</span></label>
-                    <input type="text" name="Nom" required value={formData.Nom} onChange={handleChange} className={getInputStyle("Nom")} placeholder="Votre nom" />
-                    {errors.Nom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Nom}</p>}
-                </div>
-            </div>
-
+        <div className="space-y-6">
             <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
                 <div className="flex items-center gap-3 mb-2">
-                    <input type="checkbox" name="Societe" id="Societe" className="w-5 h-5 text-[#D4AF37] rounded" checked={formData.Societe === "Oui"} onChange={handleChange} />
-                    <label htmlFor="Societe" className="text-neutral-700 font-medium cursor-pointer">Je représente une société</label>
+                    <input
+                        type="checkbox"
+                        name="Societe"
+                        id="Societe"
+                        className="w-5 h-5 text-[#D4AF37] rounded cursor-pointer"
+                        checked={formData.Societe === "Oui"}
+                        onChange={handleChange}
+                    />
+                    <label htmlFor="Societe" className="text-neutral-700 font-medium cursor-pointer select-none">
+                        Je représente une société
+                    </label>
                 </div>
                 <AnimatePresence>
                     {formData.Societe === "Oui" && (
@@ -2634,13 +2660,50 @@ function ContactForm() {
                             transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                             className="overflow-hidden"
                         >
-                            <input type="text" name="Nom_Societe" className={getInputStyle("Nom_Societe")} placeholder="Ex : Colruyt Group" value={formData.Nom_Societe} onChange={handleChange} />
+                            <input
+                                type="text"
+                                name="Nom_Societe"
+                                className={getInputStyle("Nom_Societe")}
+                                placeholder="Ex : Colruyt Group, ASBL..."
+                                value={formData.Nom_Societe}
+                                onChange={handleChange}
+                            />
                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="group">
+                    <label className={labelStyle}>Prénom <span className="text-red-500">*</span></label>
+                    <input
+                        type="text"
+                        name="Prenom"
+                        required
+                        value={formData.Prenom}
+                        onChange={handleChange}
+                        onFocus={handleFormStart}
+                        className={getInputStyle("Prenom")}
+                        placeholder="Votre prénom"
+                    />
+                    {errors.Prenom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Prenom}</p>}
+                </div>
+                <div className="group">
+                    <label className={labelStyle}>Nom <span className="text-red-500">*</span></label>
+                    <input
+                        type="text"
+                        name="Nom"
+                        required
+                        value={formData.Nom}
+                        onChange={handleChange}
+                        className={getInputStyle("Nom")}
+                        placeholder="Votre nom"
+                    />
+                    {errors.Nom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Nom}</p>}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="group">
                     <label className={labelStyle}>Email <span className="text-red-500">*</span></label>
                     <input
@@ -2670,61 +2733,39 @@ function ContactForm() {
             </div>
 
             {!isPlatPrepare && (
-                <>
-                    {isAnyBBQ && (
-                        <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                            <div>
-                                <label className="block text-sm font-bold text-neutral-700 uppercase tracking-wide">Prestation Service</label>
-                                <p className="text-xs text-neutral-500 mt-1 italic">Maîtres du feu, découpe & service à table sur place.</p>
-                            </div>
-                            <div className="flex bg-neutral-200/60 p-1 rounded-xl w-fit border border-neutral-200/40">
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Non" }))}
-                                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${formData.Service_Check !== "Oui" ? 'bg-white text-black shadow' : 'text-neutral-500 hover:text-black'}`}
-                                >
-                                    Sans service
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Oui" }))}
-                                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${formData.Service_Check === "Oui" ? 'bg-black text-[#D4AF37] shadow' : 'text-neutral-500 hover:text-black'}`}
-                                >
-                                    Avec service (+2,5€/pers)
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="group">
-                            <label className={labelStyle}>Date <span className="text-red-500">*</span></label>
-                            <input
-                                type="date"
-                                name="Date"
-                                required
-                                min={getMinDate()}
-                                value={formData.Date}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                        <label className={labelStyle}>Date de l&apos;événement <span className="text-red-500">*</span></label>
+                        <input
+                            type="date"
+                            name="Date"
+                            required
+                            min={getMinDate()}
+                            value={formData.Date}
+                            onChange={handleChange}
+                            onBlur={handleDateBlur}
+                            className={getInputStyle("Date")}
+                        />
+                    </div>
+                    <div className="group">
+                        <label className={labelStyle}>Nombre de convives <span className="text-red-500">*</span></label>
+                        <div className="relative">
+                            <select
+                                name="Nombre_Convives"
+                                value={formData.Nombre_Convives}
                                 onChange={handleChange}
-                                onBlur={handleDateBlur}
-                                className={getInputStyle("Date")}
-                            />
-                        </div>
-                        <div className="group">
-                            <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
-                            <div className="relative">
-                                <select name="Nombre_Convives" value={formData.Nombre_Convives} onChange={handleChange} className={`${getInputStyle("Nombre_Convives")} appearance-none`}>
-                                    {getInitialConvivesOptions(formData.Type_Evenement).map(o => <option key={o} value={o}>{o}</option>)}
-                                </select>
-                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                </div>
+                                className={`${getInputStyle("Nombre_Convives")} appearance-none`}
+                            >
+                                {getInitialConvivesOptions(formData.Type_Evenement).map(o => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                             </div>
                         </div>
                     </div>
-                </>
+                </div>
             )}
-
-        </>
+        </div>
     );
 
 
@@ -2765,47 +2806,90 @@ function ContactForm() {
                             </div>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="space-y-8">
+                        <form onSubmit={handleSubmit} className="space-y-10">
                             {showMenuFirst ? (
                                 <>
-                                    {isAnyBBQ && renderBBQComposition()}
-                                    {isPlatUnique && renderPlatUniqueFields()}
-                                    {isBuffetFroid && renderBuffetFroidFields()}
-                                    {isPains && renderPainsFields()}
-                                    {isZakouskis && renderZakouskisFields()}
-                                    {isVerrines && renderVerrinesFields()}
-                                    {isCollectivite && renderCollectiviteFields()}
-                                    {isBuffetChaud && renderBuffetChaudFields()}
-                                    {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && !isCollectivite && !isBuffetChaud && (
-                                        <>
-                                            <div className="bg-neutral-50 p-6 rounded-xl text-center">
-                                                <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
+                                    {/* SECTION 1 : CONFIGURATION DE VOTRE FORMULE & OPTIONS */}
+                                    <div className="space-y-8">
+                                        {isAnyBBQ && renderBBQComposition()}
+                                        {isPlatUnique && renderPlatUniqueFields()}
+                                        {isBuffetFroid && renderBuffetFroidFields()}
+                                        {isPains && renderPainsFields()}
+                                        {isZakouskis && renderZakouskisFields()}
+                                        {isVerrines && renderVerrinesFields()}
+                                        {isCollectivite && renderCollectiviteFields()}
+                                        {isBuffetChaud && renderBuffetChaudFields()}
+                                        {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && !isCollectivite && !isBuffetChaud && (
+                                            <div className="bg-neutral-50/50 border border-neutral-200 rounded-2xl p-6 md:p-8 space-y-6">
+                                                <div className="bg-neutral-50 p-6 rounded-xl text-center">
+                                                    <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
+                                                </div>
+                                                {renderDessertSection()}
+                                                {renderLogisticsOptions()}
+                                                {renderPriceDisplay("Prix par personne")}
                                             </div>
-                                            {renderLogisticsOptions()}
-                                        </>
-                                    )}
+                                        )}
+                                    </div>
 
-                                    <h3 className="text-xl font-serif text-neutral-800 mt-10 mb-6 border-b border-neutral-200 pb-2">Vos informations</h3>
-                                    {renderContactFields()}
+                                    {/* SECTION 2 : VOS INFORMATIONS & COORDONNÉES */}
+                                    <div className="bg-white border border-neutral-200/80 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
+                                        <div className="border-b border-neutral-200 pb-4">
+                                            <h3 className="text-2xl font-serif text-neutral-900 font-bold">
+                                                Vos Coordonnées & Date de l&apos;Événement
+                                            </h3>
+                                            <p className="text-sm text-neutral-500 mt-1">
+                                                Renseignez vos coordonnées pour recevoir votre devis détaillé sous 24h.
+                                            </p>
+                                        </div>
+                                        {renderContactFields()}
+                                    </div>
                                 </>
                             ) : (
-                                <>
+                                <div className="bg-white border border-neutral-200/80 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
+                                    <div className="border-b border-neutral-200 pb-4">
+                                        <h3 className="text-2xl font-serif text-neutral-900 font-bold">
+                                            Vos Coordonnées & Date de l&apos;Événement
+                                        </h3>
+                                        <p className="text-sm text-neutral-500 mt-1">
+                                            Renseignez vos coordonnées pour nous transmettre votre demande.
+                                        </p>
+                                    </div>
                                     {renderContactFields()}
-                                </>
-                            )}
-
-                            {!isPlatPrepare && (
-                                <div className="group">
-                                    <label className={labelStyle}>Dites-nous en plus !</label>
-                                    <textarea name="details_projet" value={formData.details_projet} onChange={handleChange} className={`${getInputStyle("details_projet")} h-32 resize-y`} placeholder="Allergies, précisions, déroulement..." />
                                 </div>
                             )}
 
+                            {!isPlatPrepare && (
+                                <div className="group bg-white border border-neutral-200/80 rounded-2xl p-6 md:p-8 shadow-sm space-y-3">
+                                    <label className="block text-lg font-serif font-bold text-neutral-900">
+                                        Dites-nous en plus ! (Optionnel)
+                                    </label>
+                                    <p className="text-xs text-neutral-500">
+                                        Précisez vos éventuelles allergies alimentaires, souhaits particuliers, lieu exact de l&apos;événement ou toute autre indication utile.
+                                    </p>
+                                    <textarea
+                                        name="details_projet"
+                                        value={formData.details_projet}
+                                        onChange={handleChange}
+                                        className={`${getInputStyle("details_projet")} h-32 resize-y`}
+                                        placeholder="Ex : 2 personnes intolérantes au lactose, besoin d'une découpe à 19h..."
+                                    />
+                                </div>
+                            )}
 
-
-                            <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 flex items-center gap-3">
-                                <input type="checkbox" name="Souhaite_etre_recontacte" id="recontact" className="w-5 h-5 text-[#D4AF37] rounded" checked={formData.Souhaite_etre_recontacte === "Oui"} onChange={handleChange} />
-                                <label htmlFor="recontact" className="text-neutral-700 cursor-pointer">{isPlatPrepare ? "Je souhaite ajouter un commentaire à ma commande" : "Je souhaite être recontacté pour discuter de mon devis."}</label>
+                            <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    name="Souhaite_etre_recontacte"
+                                    id="recontact"
+                                    className="w-5 h-5 text-[#D4AF37] rounded cursor-pointer"
+                                    checked={formData.Souhaite_etre_recontacte === "Oui"}
+                                    onChange={handleChange}
+                                />
+                                <label htmlFor="recontact" className="text-neutral-800 text-sm font-medium cursor-pointer select-none">
+                                    {isPlatPrepare
+                                        ? "Je souhaite ajouter un commentaire à ma commande"
+                                        : "Je souhaite être recontacté par téléphone pour discuter de mon devis."}
+                                </label>
                             </div>
 
                             {isPlatPrepare && formData.Souhaite_etre_recontacte === "Oui" && (
@@ -2863,7 +2947,7 @@ function ContactForm() {
                                 )}
                             </div>
 
-                            <button type="submit" disabled={status === "submitting"} className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all">
+                            <button type="submit" disabled={status === "submitting"} className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all cursor-pointer">
                                 {status === "submitting" ? "Envoi en cours..." : "Envoyer la demande"}
                             </button>
                         </form>
