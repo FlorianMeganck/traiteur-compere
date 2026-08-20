@@ -427,6 +427,7 @@ function ContactForm() {
         Accompagnement_Chaud_Supplement_Check: "Non",
         Feculent: "",
         Feculent_Extra: "",
+        Crudites_Choix_Chef: "Non",
         Suppl_Crudite_Extra: "",
         Dessert_Check: "Non",
         Dessert_Type: "traditionnel" as "traditionnel" | "mignardises",
@@ -1027,20 +1028,24 @@ function ContactForm() {
             if (!formData.Plat_Associatif) newErrors.Plat_Associatif = "Requis";
         } else if (isBuffetFroid) {
             if (!formData.Feculent_Froid) newErrors.Feculent_Froid = "Requis";
-            if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
-            if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
-            if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
-            if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
-            if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
-            if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
+            if (formData.Crudites_Choix_Chef !== "Oui") {
+                if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
+                if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
+                if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
+                if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
+                if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
+                if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
+            }
         } else if (isAnyBBQ) {
             if (!formData.Feculent) newErrors.Feculent = "Requis";
-            if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
-            if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
-            if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
-            if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
-            if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
-            if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
+            if (formData.Crudites_Choix_Chef !== "Oui") {
+                if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
+                if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
+                if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
+                if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
+                if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
+                if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
+            }
 
             if (isCochonOrPorchetta) {
                 // No specific dynamic fields required for these
@@ -1227,13 +1232,48 @@ function ContactForm() {
             ...(formData.Feculent_Froid && { "🥔 Féculent Froid": formData.Feculent_Froid }),
 
             // CRUDITÉS (BBQ & Buffets)
-            ...(formData.Crudite_1 && { "🥗 Crudité 1": formData.Crudite_1 }),
-            ...(formData.Crudite_2 && { "🥗 Crudité 2": formData.Crudite_2 }),
-            ...(formData.Crudite_3 && { "🥗 Crudité 3": formData.Crudite_3 }),
-            ...(formData.Crudite_4 && { "🥗 Crudité 4": formData.Crudite_4 }),
-            ...(formData.Crudite_5 && { "🥗 Crudité 5": formData.Crudite_5 }),
-            ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
-            ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra }),
+            ...(() => {
+                const checkedCrudites = [
+                    formData.Crudite_1,
+                    formData.Crudite_2,
+                    formData.Crudite_3,
+                    formData.Crudite_4,
+                    formData.Crudite_5,
+                    formData.Crudite_6
+                ].filter(Boolean);
+
+                if (isAnyBBQ || isBuffetFroid) {
+                    if (formData.Crudites_Choix_Chef === "Oui") {
+                        if (checkedCrudites.length === 0) {
+                            return {
+                                "🥗 Crudités": "Assortiment au choix du chef",
+                                ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra })
+                            };
+                        } else if (checkedCrudites.length < 6) {
+                            return {
+                                "🥗 Crudités": `${checkedCrudites.join(', ')} + Complément au choix du chef`,
+                                ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra })
+                            };
+                        } else {
+                            return {
+                                "🥗 Crudités": checkedCrudites.join(', '),
+                                ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra })
+                            };
+                        }
+                    } else if (checkedCrudites.length > 0) {
+                        return {
+                            ...(formData.Crudite_1 && { "🥗 Crudité 1": formData.Crudite_1 }),
+                            ...(formData.Crudite_2 && { "🥗 Crudité 2": formData.Crudite_2 }),
+                            ...(formData.Crudite_3 && { "🥗 Crudité 3": formData.Crudite_3 }),
+                            ...(formData.Crudite_4 && { "🥗 Crudité 4": formData.Crudite_4 }),
+                            ...(formData.Crudite_5 && { "🥗 Crudité 5": formData.Crudite_5 }),
+                            ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
+                            ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra })
+                        };
+                    }
+                }
+                return {};
+            })(),
 
             // --- SECTION PETITS PAINS ---
             ...(formData.Type_Evenement === 'Petits pains' && {
@@ -1964,6 +2004,33 @@ function ContactForm() {
                     {/* CRUDITÉS */}
                     <div className="mt-6 border-t border-dashed border-neutral-200 pt-6"></div>
                     <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Crudités (6 Incluses)</label>
+
+                    {/* OPTION LAISSER LE CHEF COMPOSER */}
+                    <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 ${
+                        formData.Crudites_Choix_Chef === "Oui"
+                            ? "bg-[#D4AF37]/10 border-[#D4AF37] shadow-xs"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
+                    }`}>
+                        <div className="flex items-start gap-3">
+                            <input
+                                type="checkbox"
+                                name="Crudites_Choix_Chef"
+                                id="BBQ_Crudites_Choix_Chef"
+                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                checked={formData.Crudites_Choix_Chef === "Oui"}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="BBQ_Crudites_Choix_Chef" className="cursor-pointer select-none">
+                                <span className="block font-bold text-neutral-800 text-sm md:text-base">
+                                    👨‍🍳 Laisser le chef composer l&apos;assortiment selon la saison
+                                </span>
+                                <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                    Cochez cette option pour un assortiment équilibré, ou sélectionnez vos indispensables et le chef complètera le reste.
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3, 4, 5, 6].map(num => (
                             <div key={`bbq_crudite_${num}`}>
@@ -2162,6 +2229,33 @@ function ContactForm() {
                     <label className={`${labelStyle} flex items-center gap-2 mb-4`}>
                         <span>🥗</span> Vos 6 Crudités Incluses
                     </label>
+
+                    {/* OPTION LAISSER LE CHEF COMPOSER */}
+                    <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 ${
+                        formData.Crudites_Choix_Chef === "Oui"
+                            ? "bg-[#D4AF37]/10 border-[#D4AF37] shadow-xs"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
+                    }`}>
+                        <div className="flex items-start gap-3">
+                            <input
+                                type="checkbox"
+                                name="Crudites_Choix_Chef"
+                                id="Buffet_Crudites_Choix_Chef"
+                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                checked={formData.Crudites_Choix_Chef === "Oui"}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="Buffet_Crudites_Choix_Chef" className="cursor-pointer select-none">
+                                <span className="block font-bold text-neutral-800 text-sm md:text-base">
+                                    👨‍🍳 Laisser le chef composer l&apos;assortiment selon la saison
+                                </span>
+                                <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                    Cochez cette option pour un assortiment équilibré, ou sélectionnez vos indispensables et le chef complètera le reste.
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[1, 2, 3, 4, 5, 6].map(num => (
                             <div className="relative group" key={`Crudite_${num}`}>
@@ -2171,7 +2265,7 @@ function ContactForm() {
                                     onChange={handleChange}
                                     className={getInputStyle(`Crudite_${num}`) + " appearance-none"}
                                 >
-                                    <option value="">Choix {num}...</option>
+                                    <option value="">Choix {num} (ou choix du chef)...</option>
                                     {cruditesFroids.map(c => <option key={c} value={c}>{c}</option>)}
                                 </select>
                                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">

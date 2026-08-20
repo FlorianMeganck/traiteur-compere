@@ -284,7 +284,6 @@ const FORMULES = [
         price: "Dès 11€ / pers",
         image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=2070&auto=format&fit=crop",
         items: [],
-        allergens: ["fish", "crustace", "moutarde"],
         imageStyle: "rounded-t-2xl"
     }
 ];
@@ -851,35 +850,8 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                     </ul>
                 </div>
 
-                {/* ALLERGENS FOR THIS ITEM */}
-                <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <span className="uppercase tracking-widest text-xs font-bold">Contient :</span>
-                    <div className="flex gap-3">
-                        {formule.allergens?.map((alg) => {
-                            const data = ALLERGEN_ICONS[alg];
-                            if (!data) return null;
-
-                            return (
-                                <div key={alg} className="flex items-center gap-1.5" title={data.label}>
-                                    {data.image ? (
-                                        <Image
-                                            src={data.image}
-                                            alt={data.label}
-                                            width={20}
-                                            height={20}
-                                            className="object-contain"
-                                        />
-                                    ) : (
-                                        data.icon && <data.icon size={20} strokeWidth={1.5} className="text-neutral-500" />
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
                 {formule.tag === "BBQ & Feu de bois" && (
-                    <div className="mt-6 mb-2">
+                    <div className="mt-4 mb-2">
                         <AllergenLink section="bbq" />
                     </div>
                 )}
