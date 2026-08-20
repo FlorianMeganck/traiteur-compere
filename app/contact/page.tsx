@@ -851,7 +851,7 @@ function ContactForm() {
         // 4. Dessert & Mignardises
         if (formData.Dessert_Check === "Oui") {
             if (formData.Dessert_Type === "mignardises") {
-                const qty = parseInt(formData.Mignardises_Quantite || "0", 10);
+                const qty = (formData.Mignardises_Varietes || []).length;
                 if (qty > 0) {
                     supplements += getMignardisesPricePerPerson(qty);
                 }
@@ -973,33 +973,19 @@ function ContactForm() {
     const handleToggleMignardiseVariete = (item: string) => {
         setFormData(prev => {
             const currentVarietes = prev.Mignardises_Varietes || [];
-            const maxPieces = parseInt(prev.Mignardises_Quantite || "3", 10);
+            let updatedVarietes: string[];
             if (currentVarietes.includes(item)) {
-                return {
-                    ...prev,
-                    Mignardises_Varietes: currentVarietes.filter(v => v !== item)
-                };
+                updatedVarietes = currentVarietes.filter(v => v !== item);
             } else {
-                if (currentVarietes.length >= maxPieces) {
-                    return prev;
+                if (currentVarietes.length >= 6) {
+                    return prev; // Maximum 6 variétés
                 }
-                return {
-                    ...prev,
-                    Mignardises_Varietes: [...currentVarietes, item]
-                };
+                updatedVarietes = [...currentVarietes, item];
             }
-        });
-    };
-
-    const handleMignardiseQtyChange = (qtyStr: string) => {
-        const qty = parseInt(qtyStr, 10);
-        setFormData(prev => {
-            const currentVarietes = prev.Mignardises_Varietes || [];
-            const updatedVarietes = currentVarietes.slice(0, qty);
             return {
                 ...prev,
-                Mignardises_Quantite: qtyStr,
-                Mignardises_Varietes: updatedVarietes
+                Mignardises_Varietes: updatedVarietes,
+                Mignardises_Quantite: updatedVarietes.length.toString()
             };
         });
     };
@@ -1104,11 +1090,8 @@ function ContactForm() {
                     newErrors.Dessert_Choix = "Veuillez choisir un dessert";
                 }
             } else if (formData.Dessert_Type === "mignardises") {
-                if (!formData.Mignardises_Quantite) {
-                    newErrors.Mignardises_Quantite = "Veuillez choisir une quantité";
-                }
                 if (!formData.Mignardises_Varietes || formData.Mignardises_Varietes.length === 0) {
-                    newErrors.Mignardises_Varietes = "Veuillez sélectionner au moins 1 variété";
+                    newErrors.Mignardises_Varietes = "Veuillez sélectionner au moins 1 variété de mignardise";
                 }
             }
         }
@@ -1324,7 +1307,7 @@ function ContactForm() {
             // DESSERTS
             ...(formData.Dessert_Check === "Oui" && {
                 "🍰 Option Dessert": formData.Dessert_Type === "mignardises"
-                    ? `Option : Mignardises (${formData.Mignardises_Quantite} pièces/p - ${getMignardisesPricePerPerson(parseInt(formData.Mignardises_Quantite || "0", 10)).toFixed(2).replace('.', ',')} €/p) — Variétés : ${formData.Mignardises_Varietes.length > 0 ? formData.Mignardises_Varietes.join(', ') : 'Non spécifiées'}`
+                    ? `Option : Mignardises (${formData.Mignardises_Varietes.length} pièces/p - ${getMignardisesPricePerPerson(formData.Mignardises_Varietes.length).toFixed(2).replace('.', ',')} €/p) — Variétés : ${formData.Mignardises_Varietes.length > 0 ? formData.Mignardises_Varietes.join(', ') : 'Non spécifiées'}`
                     : `Option : Desserts traditionnels (+6,00 €/p)${formData.Dessert_Choix ? ` (${formData.Dessert_Choix})` : ''}`
             }),
 
@@ -1573,9 +1556,15 @@ function ContactForm() {
     const renderDessertSection = () => {
         const isChecked = formData.Dessert_Check === "Oui";
         const dessertType = formData.Dessert_Type || "traditionnel";
-        const mignardiseQty = parseInt(formData.Mignardises_Quantite || "3", 10);
-        const mignardisePrice = getMignardisesPricePerPerson(mignardiseQty);
         const selectedVarietes = formData.Mignardises_Varietes || [];
+        const mignardiseCount = selectedVarietes.length;
+        const mignardisePrice = getMignardisesPricePerPerson(mignardiseCount);
+
+        const getMignardisesPriceBadge = () => {
+            if (mignardiseCount === 0) return "Dès 2,50 € TTC / pièce";
+            const unitPrice = mignardiseCount <= 2 ? "2,75 €" : "2,50 €";
+            return `${unitPrice} TTC / pièce (+${mignardisePrice.toFixed(2).replace('.', ',')} € / pers.)`;
+        };
 
         return (
             <div className="mt-8 border-t border-dashed border-neutral-200 pt-8">
@@ -1597,7 +1586,11 @@ function ContactForm() {
                         </div>
                         {isChecked && (
                             <span className="text-xs font-semibold px-3 py-1 bg-[#D4AF37]/15 text-[#8A7120] rounded-full border border-[#D4AF37]/30">
-                                {dessertType === "traditionnel" ? "+6,00 € / pers." : `+${mignardisePrice.toFixed(2).replace('.', ',')} € / pers.`}
+                                {dessertType === "traditionnel"
+                                    ? "+6,00 € / pers."
+                                    : mignardiseCount > 0
+                                        ? `+${mignardisePrice.toFixed(2).replace('.', ',')} € / pers.`
+                                        : "Dès 2,50 € / pièce"}
                             </span>
                         )}
                     </div>
@@ -1653,13 +1646,13 @@ function ContactForm() {
                                             <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
                                                 dessertType === "mignardises" ? "bg-[#D4AF37] text-black font-bold" : "bg-neutral-100 text-neutral-600"
                                             }`}>
-                                                Dès 2,50 € / pièce
+                                                {mignardiseCount > 0 ? `+${mignardisePrice.toFixed(2).replace('.', ',')} € / pers` : "Dès 2,50 € / pièce"}
                                             </span>
                                         </div>
                                         <div>
                                             <h4 className="font-bold text-sm">Mignardises artisanales</h4>
                                             <p className={`text-xs mt-1 ${dessertType === "mignardises" ? "text-neutral-300" : "text-neutral-500"}`}>
-                                                Sélection personnalisée au nombre et à la variété
+                                                Sélection directe des variétés (1 à 6 pièces par personne)
                                             </p>
                                         </div>
                                     </button>
@@ -1699,83 +1692,58 @@ function ContactForm() {
                                     </motion.div>
                                 )}
 
-                                {/* Sous-section : Mignardises */}
+                                {/* Sous-section : Mignardises (Simplifiée - Sélection directe via cases à cocher) */}
                                 {dessertType === "mignardises" && (
                                     <motion.div
                                         initial={{ opacity: 0, y: 6 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="bg-white p-5 rounded-xl border border-neutral-200 space-y-6 shadow-xs"
+                                        className="bg-white p-5 rounded-xl border border-neutral-200 space-y-5 shadow-xs"
                                     >
-                                        {/* Sélecteur de quantité */}
-                                        <div>
-                                            <div className="flex items-center justify-between mb-2">
-                                                <label className={labelStyle}>
-                                                    Nombre de pièces par personne <span className="text-red-500">*</span>
+                                        {/* En-tête avec compteur & Prix dynamique à droite */}
+                                        <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-neutral-100">
+                                            <div>
+                                                <label className={`${labelStyle} mb-0.5`}>
+                                                    Sélectionnez vos variétés de mignardises <span className="text-red-500">*</span>
                                                 </label>
-                                                <span className="text-xs font-bold text-[#8A7120]">
-                                                    {mignardiseQty <= 2 ? "2,75 € TTC / pièce" : "2,50 € TTC / pièce"}
+                                                <p className="text-xs text-neutral-500 italic">
+                                                    Cochez les variétés souhaitées (1 case = 1 pièce / pers, max 6).
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="inline-block text-xs font-bold text-[#8A7120] bg-[#D4AF37]/10 px-3 py-1 rounded-full border border-[#D4AF37]/30">
+                                                    {getMignardisesPriceBadge()}
                                                 </span>
                                             </div>
-
-                                            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                                                {[1, 2, 3, 4, 5, 6].map((q) => {
-                                                    const isSel = mignardiseQty === q;
-                                                    const price = getMignardisesPricePerPerson(q);
-                                                    return (
-                                                        <button
-                                                            key={q}
-                                                            type="button"
-                                                            onClick={() => handleMignardiseQtyChange(q.toString())}
-                                                            className={`py-2.5 px-2 rounded-lg border text-center transition-all cursor-pointer ${
-                                                                isSel
-                                                                    ? "bg-black text-[#D4AF37] border-black shadow-sm font-bold ring-1 ring-[#D4AF37]"
-                                                                    : "bg-neutral-50 text-neutral-700 border-neutral-200 hover:border-neutral-400 hover:bg-neutral-100"
-                                                            }`}
-                                                        >
-                                                            <div className="text-sm font-bold">{q} {q > 1 ? "pièces" : "pièce"}</div>
-                                                            <div className="text-[11px] opacity-80">{price.toFixed(2).replace('.', ',')} €/p</div>
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-
-                                            <p className="text-xs text-neutral-500 mt-2.5 italic flex items-center gap-1.5">
-                                                <span>💡</span> Nous recommandons un minimum de 3 pièces par personne.
-                                            </p>
                                         </div>
 
-                                        {/* Grille tarifaire explicative discrète */}
-                                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200/80 text-xs text-neutral-600 flex items-center justify-between flex-wrap gap-2">
-                                            <span>🏷️ <strong>Tarif dégressif :</strong></span>
-                                            <span>1 ou 2 pièces : <strong>2,75 € / pc</strong></span>
-                                            <span className="text-neutral-300">|</span>
-                                            <span>3 à 6 pièces : <strong className="text-[#8A7120]">2,50 € / pc</strong></span>
-                                        </div>
-
-                                        {/* Sélection des variétés */}
+                                        {/* Grille des variétés (Cases à cocher directes) */}
                                         <div>
                                             <div className="flex items-center justify-between mb-3">
-                                                <label className={labelStyle}>
-                                                    Sélectionnez vos variétés souhaitées <span className="text-red-500">*</span>
-                                                </label>
+                                                <span className="text-xs text-neutral-500">
+                                                    {mignardiseCount === 0
+                                                        ? "Aucune variété sélectionnée"
+                                                        : `${mignardiseCount} pièce${mignardiseCount > 1 ? "s" : ""} / personne sélectionnée${mignardiseCount > 1 ? "s" : ""}`}
+                                                </span>
                                                 <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                                                    selectedVarietes.length === mignardiseQty
+                                                    mignardiseCount >= 3
                                                         ? "bg-green-100 text-green-800 font-bold"
-                                                        : "bg-neutral-100 text-neutral-600"
+                                                        : mignardiseCount > 0
+                                                            ? "bg-amber-100 text-amber-800 font-medium"
+                                                            : "bg-neutral-100 text-neutral-600"
                                                 }`}>
-                                                    {selectedVarietes.length} / {mignardiseQty} sélectionnée{selectedVarietes.length > 1 ? "s" : ""}
+                                                    {mignardiseCount} / 6 variété{mignardiseCount > 1 ? "s" : ""}
                                                 </span>
                                             </div>
 
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                                                 {MIGNARDISES_LIST.map((item) => {
                                                     const isItemChecked = selectedVarietes.includes(item);
-                                                    const isMaxReached = selectedVarietes.length >= mignardiseQty && !isItemChecked;
+                                                    const isMaxReached = selectedVarietes.length >= 6 && !isItemChecked;
 
                                                     return (
                                                         <label
                                                             key={item}
-                                                            className={`flex items-center gap-3 p-3 rounded-xl border text-sm transition-all cursor-pointer select-none ${
+                                                            className={`flex items-center gap-3 p-3.5 rounded-xl border text-sm transition-all cursor-pointer select-none ${
                                                                 isItemChecked
                                                                     ? "bg-[#D4AF37]/10 border-[#D4AF37] text-neutral-900 font-semibold shadow-xs"
                                                                     : isMaxReached
@@ -1798,6 +1766,20 @@ function ContactForm() {
                                             {errors.Mignardises_Varietes && (
                                                 <p className="text-xs text-red-500 font-medium mt-2">{errors.Mignardises_Varietes}</p>
                                             )}
+                                        </div>
+
+                                        {/* Indications informatives conservées */}
+                                        <div className="space-y-2 pt-2">
+                                            <p className="text-xs text-neutral-500 italic flex items-center gap-1.5">
+                                                <span>💡</span> Nous recommandons un minimum de 3 pièces par personne.
+                                            </p>
+
+                                            <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200/80 text-xs text-neutral-600 flex items-center justify-between flex-wrap gap-2">
+                                                <span>🏷️ <strong>Tarif dégressif :</strong></span>
+                                                <span>1 ou 2 pièces : <strong>2,75 € / pc</strong></span>
+                                                <span className="text-neutral-300">|</span>
+                                                <span>3 à 6 pièces : <strong className="text-[#8A7120]">2,50 € / pc</strong></span>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
