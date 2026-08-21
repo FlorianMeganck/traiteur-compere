@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useLayoutEffect, Suspense } from "react";
+import { useState, useLayoutEffect, Suspense, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Leaf, Check, ShoppingCart } from "lucide-react";
+import { Users, Leaf, Check, ShoppingCart, ChevronDown, ChevronRight } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { MENU_DATA } from "../data/plats-prepares";
 import { useCart } from "../hooks/useCart";
@@ -19,18 +19,103 @@ export default function Contact() {
 
 // --- DATA CONSTANTS ---
 
-const viandesClassiques = [
-    "Saucisse (nature)", "Saucisse (campagne)", "Saucisse (barbecue)", "Saucisse (italienne)",
-    "Chipolata (nature)", "Chipolata (fines herbes)", "Chipolata (poivre)", "Chipolata (piment d'Espelette)",
-    "Merguez", "Mini boudin blanc", "Saucisse de volaille (nature)", "Saucisse de volaille (fromage)",
-    "Brochette nature aux oignons", "Brochette de bœuf marinée", "Brochette de porc aux oignons",
-    "Brochette de porc marinée", "Brochette de volaille nature aux oignons", "Brochette de volaille marinée",
-    "Brochette de dinde nature aux oignons", "Brochette de dinde marinée", "Brochette de mini boulettes marinées",
-    "Brochette de mini boudins", "Braisade de bœuf marinée", "Braisade de canard aux trois poivres (+2€)",
-    "Braisade de porc marinée", "Filet de poulet mariné", "Lard mariné (ail et fines herbes)",
-    "Lard mariné (paprika)", "Spare ribs marinés au miel (+1€)", "Jambon barbecue en tranche",
-    "Côte d'agneau marinée ail et fines herbes (+1€)", "Tranche de gigot d'agneau marinée (+2€)", "Pilon de poulet mariné"
+export type CascadeMeatItem =
+    | string
+    | {
+        label: string;
+        variants: string[];
+    };
+
+const viandesClassiquesCascade: CascadeMeatItem[] = [
+    { label: "Saucisse", variants: ["Nature", "Campagne", "Barbecue", "Italienne"] },
+    { label: "Chipolata", variants: ["Nature", "Fines herbes", "Poivre", "Piment d'Espelette"] },
+    "Merguez",
+    "Mini boudin blanc",
+    { label: "Saucisse de volaille", variants: ["Nature", "Fromage"] },
+    "Brochette de mini boulettes marinées",
+    "Brochette de mini boudins",
+    "Filet de poulet mariné",
+    "Pilon de poulet mariné",
+    "Brochette de volaille marinée",
+    "Brochette de volaille nature garnie aux oignons",
+    "Brochette de dinde nature garnie aux oignons",
+    "Brochette de dinde marinée",
+    "Brochette nature garnie d'oignons",
+    "Brochette de porc garnie aux oignons",
+    "Brochette de porc marinée",
+    "Braisade de porc marinée",
+    { label: "Lard mariné", variants: ["Ail & fines herbes", "Paprika"] },
+    "Jambon barbecue en tranche",
+    "Brochette de bœuf marinée (+1,00 € / pers.)",
+    "Braisade de bœuf marinée (+1,00 € / pers.)",
+    "Spare ribs marinés au miel (+1,00 € / pers.)",
+    "Côte d'agneau marinée ail & fines herbes (+1,00 € / pers.)",
+    "Braisade de canard aux trois poivres (+2,00 € / pers.)",
+    "Tranche de gigot d'agneau marinée ail & fines herbes (+2,00 € / pers.)",
+    "Spare ribs de bœuf (+2,50 € / pers.)"
 ];
+
+const viandesComposeCascade: CascadeMeatItem[] = [
+    "Brochette de scampi (+2,00 € / pers.)",
+    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
+    ...viandesClassiquesCascade
+];
+
+const dinatoireViandesCascade: CascadeMeatItem[] = [
+    "Brochette de scampi (+2,00 € / pers.)",
+    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
+    ...viandesClassiquesCascade
+];
+
+const viandesClassiques = [
+    "Saucisse (nature, campagne, barbecue, italienne)",
+    "Chipolata (nature, fines herbes, poivre, piment d'Espelette)",
+    "Merguez",
+    "Mini boudin blanc",
+    "Saucisse de volaille (nature, fromage)",
+    "Brochette de mini boulettes marinées",
+    "Brochette de mini boudins",
+    "Filet de poulet mariné",
+    "Pilon de poulet mariné",
+    "Brochette de volaille marinée",
+    "Brochette de volaille nature garnie aux oignons",
+    "Brochette de dinde nature garnie aux oignons",
+    "Brochette de dinde marinée",
+    "Brochette nature garnie d'oignons",
+    "Brochette de porc garnie aux oignons",
+    "Brochette de porc marinée",
+    "Braisade de porc marinée",
+    "Lard mariné (ail & fines herbes ou paprika)",
+    "Jambon barbecue en tranche",
+    "Brochette de bœuf marinée (+1,00 € / pers.)",
+    "Braisade de bœuf marinée (+1,00 € / pers.)",
+    "Spare ribs marinés au miel (+1,00 € / pers.)",
+    "Côte d'agneau marinée ail & fines herbes (+1,00 € / pers.)",
+    "Braisade de canard aux trois poivres (+2,00 € / pers.)",
+    "Tranche de gigot d'agneau marinée ail & fines herbes (+2,00 € / pers.)",
+    "Spare ribs de bœuf (+2,50 € / pers.)"
+];
+
+const viandesCompose = [
+    "Brochette de scampi (+2,00 € / pers.)",
+    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
+    ...viandesClassiques
+];
+
+const dinatoireViandes = [
+    "Brochette de scampi (+2,00 € / pers.)",
+    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
+    ...viandesClassiques
+];
+
+const getMeatSupplementPrice = (meatName: string): number => {
+    if (!meatName) return 0;
+    if (meatName.includes("+2,50 €") || meatName.includes("+2.50 €") || meatName.includes("+2,5€") || meatName.includes("+2.5€")) return 2.5;
+    if (meatName.includes("+2,00 €") || meatName.includes("+2.00 €") || meatName.includes("+2€")) return 2.0;
+    if (meatName.includes("+1,00 €") || meatName.includes("+1.00 €") || meatName.includes("+1€")) return 1.0;
+    if (meatName.includes("+3,00 €") || meatName.includes("+3.00 €") || meatName.includes("+3€")) return 3.0;
+    return 0;
+};
 
 const optionsVegetariennes = [
     "Halloumi grillé au miel", "Brochettes de légumes méditerranéens",
@@ -46,9 +131,7 @@ const entreesCompose = [
     "Tartare de bœuf aux herbes fines"
 ];
 
-const viandesCompose = ["Côte d'agneau", "Contrefilet de bœuf étranger", "Merguez", "Chipolata", "Brochette de bœuf"];
 const dinatoireServices = ["Lasagnes", "Chili", "Tortellini", "Paëlla"];
-const dinatoireViandes = ["Brochette de scampi", "Côte d'agneau", "Contrefilet de bœuf étranger", "Merguez et saucisse", "Brochette de bœuf"];
 
 const fruitsDeMer = [
     "Brochette de scampi", "Calamar mariné au cumin", "Brochette de Saint-Jacques",
@@ -826,20 +909,23 @@ function ContactForm() {
 
         // Loop over selected meats
         const meatFields = [
-            formData.Viande_1, formData.Viande_2, formData.Viande_3,
-            formData.dinatoire_service_1, formData.dinatoire_service_2
+            formData.Viande_1,
+            formData.Viande_2,
+            formData.Viande_3
         ];
         meatFields.forEach(field => {
             if (field) {
-                if (field.includes("(+1€)")) supplements += 1;
-                if (field.includes("(+2€)")) supplements += 2;
-                if (field.includes("(+3€)")) supplements += 3;
+                supplements += getMeatSupplementPrice(field);
             }
         });
 
         if (isAnyBBQ) {
-            if (formData.Viande_Extra_1) supplements += 3;
-            if (formData.Viande_Extra_2) supplements += 3;
+            if (formData.Viande_Extra_1) {
+                supplements += 3 + getMeatSupplementPrice(formData.Viande_Extra_1);
+            }
+            if (formData.Viande_Extra_2) {
+                supplements += 3 + getMeatSupplementPrice(formData.Viande_Extra_2);
+            }
             if (formData.Suppl_Crudite_Extra) supplements += 1.5;
             if (formData.Feculent_Extra) supplements += 2;
         }
@@ -889,7 +975,18 @@ function ContactForm() {
         if (isBBQVegetarien) return optionsVegetariennes;
         if (isBBQNobles) return NOBLES;
         if (isBBQDinatoire) return dinatoireViandes;
+        if (isBBQCompose) return viandesCompose;
         return viandesClassiques;
+    };
+
+    const getBBQCascadeList = (): CascadeMeatItem[] => {
+        if (isBBQClassique) return viandesClassiquesCascade;
+        if (isBBQMer) return fruitsDeMer;
+        if (isBBQVegetarien) return optionsVegetariennes;
+        if (isBBQNobles) return NOBLES;
+        if (isBBQDinatoire) return dinatoireViandesCascade;
+        if (isBBQCompose) return viandesComposeCascade;
+        return viandesClassiquesCascade;
     };
     const renderPriceDisplay = (label: string = "Prix par personne") => {
         if (totalPrice.perPerson === 0 && totalPrice.materiel === 0) return null;
@@ -1449,6 +1546,290 @@ function ContactForm() {
 
     // --- RENDERERS ---
 
+    const handleSelectMeat = (name: string, value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        if (errors[name]) {
+            setErrors(prev => {
+                const next = { ...prev };
+                delete next[name];
+                return next;
+            });
+        }
+    };
+
+    interface CascadeMeatDropdownProps {
+        label: string;
+        name: string;
+        value: string;
+        options: CascadeMeatItem[];
+        excludeValues?: string[];
+        req?: boolean;
+        hasError?: boolean;
+        onSelect: (name: string, val: string) => void;
+    }
+
+    const CascadeMeatDropdown = ({
+        label,
+        name,
+        value,
+        options,
+        excludeValues = [],
+        req = false,
+        hasError = false,
+        onSelect
+    }: CascadeMeatDropdownProps) => {
+        const [isOpen, setIsOpen] = useState(false);
+        const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
+        const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
+        const [submenuPos, setSubmenuPos] = useState<{ top: number; left: number } | null>(null);
+        const containerRef = useRef<HTMLDivElement>(null);
+        const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+        useEffect(() => {
+            const handleClickOutside = (e: MouseEvent) => {
+                if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                    setIsOpen(false);
+                    setHoveredLabel(null);
+                    setExpandedMobile(null);
+                }
+            };
+            if (isOpen) {
+                document.addEventListener("mousedown", handleClickOutside);
+            }
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, [isOpen]);
+
+        const handleItemMouseEnter = (e: React.MouseEvent<HTMLDivElement>, itemLabel: string) => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            const rect = e.currentTarget.getBoundingClientRect();
+            const opensLeft = typeof window !== 'undefined' && rect.right + 260 > window.innerWidth;
+            setSubmenuPos({
+                top: rect.top,
+                left: opensLeft ? Math.max(10, rect.left - 245) : rect.right + 4
+            });
+            setHoveredLabel(itemLabel);
+        };
+
+        const handleItemMouseLeave = () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(() => {
+                setHoveredLabel(null);
+            }, 180);
+        };
+
+        const handleSubmenuEnter = () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+
+        const handleSelectValue = (val: string) => {
+            onSelect(name, val);
+            setIsOpen(false);
+            setHoveredLabel(null);
+            setExpandedMobile(null);
+        };
+
+        const handleToggleParentMobile = (e: React.MouseEvent, itemLabel: string) => {
+            e.stopPropagation();
+            setExpandedMobile(prev => (prev === itemLabel ? null : itemLabel));
+        };
+
+        const hoveredOption = options.find(
+            opt => typeof opt !== "string" && opt.label === hoveredLabel
+        ) as { label: string; variants: string[] } | undefined;
+
+        return (
+            <div className="group relative" ref={containerRef}>
+                <label className={labelStyle}>
+                    {label} {req && <span className="text-red-500">*</span>}
+                </label>
+
+                {/* TRIGGER BUTTON */}
+                <button
+                    type="button"
+                    onClick={() => setIsOpen(!isOpen)}
+                    className={`w-full bg-white border rounded-xl px-5 py-4 text-left flex items-center justify-between text-base transition-all duration-300 shadow-inner cursor-pointer ${
+                        hasError
+                            ? "border-red-500 ring-1 ring-red-500 bg-red-50 text-red-900"
+                            : isOpen
+                            ? "border-[#D4AF37] ring-2 ring-[#D4AF37]/40 text-neutral-900"
+                            : "border-neutral-200 hover:border-[#D4AF37]/60 text-neutral-900"
+                    }`}
+                >
+                    <span className={`truncate pr-2 ${!value ? "text-neutral-400 font-normal" : "text-neutral-900 font-medium"}`}>
+                        {value || "Faites votre choix..."}
+                    </span>
+                    <ChevronDown
+                        size={18}
+                        className={`text-neutral-400 transition-transform duration-200 flex-shrink-0 ${
+                            isOpen ? "rotate-180 text-[#D4AF37]" : ""
+                        }`}
+                    />
+                </button>
+
+                {/* DROPDOWN OVERLAY */}
+                {isOpen && (
+                    <div className="absolute z-40 left-0 top-full mt-1.5 w-full min-w-[260px] bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 max-h-80 overflow-y-auto overscroll-contain animate-fade-in">
+                        {value && (
+                            <button
+                                type="button"
+                                onClick={() => handleSelectValue("")}
+                                className="w-full text-left px-4 py-2 text-xs font-semibold uppercase tracking-wider text-red-500 hover:bg-red-50 transition-colors flex items-center justify-between border-b border-neutral-100 mb-1 cursor-pointer"
+                            >
+                                <span>Effacer le choix</span>
+                                <span>✕</span>
+                            </button>
+                        )}
+
+                        {options.map((option, idx) => {
+                            const isObject = typeof option !== "string";
+                            const itemLabel = isObject ? option.label : option;
+                            const hasVariants = isObject && option.variants && option.variants.length > 0;
+
+                            if (!hasVariants) {
+                                const isSelected = value === itemLabel;
+                                const isExcluded = excludeValues.includes(itemLabel) && !isSelected;
+
+                                return (
+                                    <button
+                                        key={`meat_opt_${idx}`}
+                                        type="button"
+                                        disabled={isExcluded}
+                                        onClick={() => handleSelectValue(itemLabel)}
+                                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between cursor-pointer ${
+                                            isExcluded
+                                                ? "opacity-35 cursor-not-allowed bg-neutral-50 text-neutral-400"
+                                                : isSelected
+                                                ? "bg-[#D4AF37]/15 text-neutral-900 font-bold border-l-4 border-[#D4AF37]"
+                                                : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                                        }`}
+                                    >
+                                        <span className="truncate pr-2">{itemLabel}</span>
+                                        {isSelected && <Check size={16} className="text-[#D4AF37] flex-shrink-0" />}
+                                    </button>
+                                );
+                            }
+
+                            const isHovered = hoveredLabel === itemLabel;
+                            const isExpanded = expandedMobile === itemLabel;
+                            const isParentSelected = value.startsWith(`${itemLabel} (`) || value === itemLabel;
+
+                            return (
+                                <div
+                                    key={`meat_parent_${idx}`}
+                                    className="relative"
+                                    onMouseEnter={(e) => handleItemMouseEnter(e, itemLabel)}
+                                    onMouseLeave={handleItemMouseLeave}
+                                >
+                                    <div
+                                        onClick={(e) => handleToggleParentMobile(e, itemLabel)}
+                                        className={`w-full px-4 py-2.5 text-sm transition-colors flex items-center justify-between cursor-pointer select-none ${
+                                            isParentSelected
+                                                ? "bg-[#D4AF37]/10 text-neutral-900 font-bold border-l-4 border-[#D4AF37]"
+                                                : isHovered || isExpanded
+                                                ? "bg-neutral-100 text-neutral-900 font-semibold"
+                                                : "text-neutral-700 hover:bg-neutral-50"
+                                        }`}
+                                    >
+                                        <span className="truncate pr-2">{itemLabel}</span>
+                                        <div className="flex items-center gap-1.5 flex-shrink-0 text-neutral-400">
+                                            <span className="text-[11px] font-normal uppercase tracking-wider text-neutral-400">
+                                                {option.variants.length} choix
+                                            </span>
+                                            <ChevronRight
+                                                size={16}
+                                                className={`transition-transform duration-200 ${
+                                                    isExpanded ? "rotate-90 text-[#D4AF37]" : ""
+                                                }`}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* MOBILE ACCORDION */}
+                                    {isExpanded && (
+                                        <div className="md:hidden bg-neutral-50/80 border-y border-neutral-200 py-1.5 pl-4 pr-2 space-y-1 animate-fade-in">
+                                            {option.variants.map((v) => {
+                                                const fullVal = `${itemLabel} (${v})`;
+                                                const isVariantSelected = value === fullVal;
+                                                const isVariantExcluded = excludeValues.includes(fullVal) && !isVariantSelected;
+
+                                                return (
+                                                    <button
+                                                        key={`mob_var_${v}`}
+                                                        type="button"
+                                                        disabled={isVariantExcluded}
+                                                        onClick={() => handleSelectValue(fullVal)}
+                                                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
+                                                            isVariantExcluded
+                                                                ? "opacity-35 cursor-not-allowed text-neutral-400"
+                                                                : isVariantSelected
+                                                                ? "bg-[#D4AF37]/20 text-neutral-900 font-bold border-l-3 border-[#D4AF37]"
+                                                                : "text-neutral-700 hover:bg-white"
+                                                        }`}
+                                                    >
+                                                        <span>{v}</span>
+                                                        {isVariantSelected && <Check size={14} className="text-[#D4AF37]" />}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {/* DESKTOP CASCADING FLOATING SUBMENU */}
+                {isOpen && hoveredLabel && hoveredOption && submenuPos && (
+                    <div
+                        onMouseEnter={handleSubmenuEnter}
+                        onMouseLeave={handleItemMouseLeave}
+                        style={{
+                            position: "fixed",
+                            top: `${submenuPos.top}px`,
+                            left: `${submenuPos.left}px`,
+                            zIndex: 9999
+                        }}
+                        className="hidden md:block w-60 bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 animate-fade-in"
+                    >
+                        <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-400 border-b border-neutral-100 mb-1">
+                            Déclinaisons : {hoveredLabel}
+                        </div>
+                        {hoveredOption.variants.map((v) => {
+                            const fullVal = `${hoveredLabel} (${v})`;
+                            const isVariantSelected = value === fullVal;
+                            const isVariantExcluded = excludeValues.includes(fullVal) && !isVariantSelected;
+
+                            return (
+                                <button
+                                    key={`submenu_var_${v}`}
+                                    type="button"
+                                    disabled={isVariantExcluded}
+                                    onClick={() => handleSelectValue(fullVal)}
+                                    className={`w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center justify-between cursor-pointer ${
+                                        isVariantExcluded
+                                            ? "opacity-35 cursor-not-allowed bg-neutral-50 text-neutral-400"
+                                            : isVariantSelected
+                                            ? "bg-[#D4AF37]/15 text-neutral-900 font-bold border-l-3 border-[#D4AF37]"
+                                            : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                                    }`}
+                                >
+                                    <span>{v}</span>
+                                    {isVariantSelected && <Check size={14} className="text-[#D4AF37]" />}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const renderDropdown = (label: string, name: string, options: string[], excludeValues: string[] = [], req = false) => {
         // Filter options: remove if in excludeValues AND not the current value
         const currentVal = (formData as any)[name];
@@ -1904,8 +2285,26 @@ function ContactForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {renderDropdown("Entrée 1", "compose_entree_1", entreesCompose, composeEntreeChoices)}
                             {renderDropdown("Entrée 2", "compose_entree_2", entreesCompose, composeEntreeChoices)}
-                            {renderDropdown("Plat 1", "Viande_1", viandesCompose, bbqChoices)}
-                            {renderDropdown("Plat 2", "Viande_2", viandesCompose, bbqChoices)}
+                            <CascadeMeatDropdown
+                                label="Plat 1"
+                                name="Viande_1"
+                                value={formData.Viande_1}
+                                options={viandesComposeCascade}
+                                excludeValues={bbqChoices}
+                                req={true}
+                                hasError={!!errors.Viande_1}
+                                onSelect={handleSelectMeat}
+                            />
+                            <CascadeMeatDropdown
+                                label="Plat 2"
+                                name="Viande_2"
+                                value={formData.Viande_2}
+                                options={viandesComposeCascade}
+                                excludeValues={bbqChoices}
+                                req={true}
+                                hasError={!!errors.Viande_2}
+                                onSelect={handleSelectMeat}
+                            />
                         </div>
                     )}
 
@@ -1913,49 +2312,88 @@ function ContactForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {renderDropdown("1er Service (Plat 1)", "dinatoire_service_1", dinatoireServices, dinatoireServiceChoices)}
                             {renderDropdown("1er Service (Plat 2)", "dinatoire_service_2", dinatoireServices, dinatoireServiceChoices)}
-                            {renderDropdown("2ème Service (BBQ Choix 1)", "Viande_1", getBBQList(), bbqChoices)}
-                            {renderDropdown("2ème Service (BBQ Choix 2)", "Viande_2", getBBQList(), bbqChoices)}
+                            <CascadeMeatDropdown
+                                label="2ème Service (BBQ Choix 1)"
+                                name="Viande_1"
+                                value={formData.Viande_1}
+                                options={dinatoireViandesCascade}
+                                excludeValues={bbqChoices}
+                                req={true}
+                                hasError={!!errors.Viande_1}
+                                onSelect={handleSelectMeat}
+                            />
+                            <CascadeMeatDropdown
+                                label="2ème Service (BBQ Choix 2)"
+                                name="Viande_2"
+                                value={formData.Viande_2}
+                                options={dinatoireViandesCascade}
+                                excludeValues={bbqChoices}
+                                req={true}
+                                hasError={!!errors.Viande_2}
+                                onSelect={handleSelectMeat}
+                            />
                         </div>
                     )}
 
                     {!isCochonOrPorchetta && !isBBQCompose && !isBBQDinatoire && (
                         <div className={`grid grid-cols-1 ${isBBQNobles ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-6`}>
-                            {renderDropdown("Choix 1", "Viande_1", getBBQList(), bbqChoices)}
-                            {renderDropdown("Choix 2", "Viande_2", getBBQList(), bbqChoices)}
-                            {!isBBQNobles && renderDropdown("Choix 3", "Viande_3", getBBQList(), bbqChoices)}
+                            <CascadeMeatDropdown
+                                label="Choix 1"
+                                name="Viande_1"
+                                value={formData.Viande_1}
+                                options={getBBQCascadeList()}
+                                excludeValues={bbqChoices}
+                                req={true}
+                                hasError={!!errors.Viande_1}
+                                onSelect={handleSelectMeat}
+                            />
+                            <CascadeMeatDropdown
+                                label="Choix 2"
+                                name="Viande_2"
+                                value={formData.Viande_2}
+                                options={getBBQCascadeList()}
+                                excludeValues={bbqChoices}
+                                req={true}
+                                hasError={!!errors.Viande_2}
+                                onSelect={handleSelectMeat}
+                            />
+                            {!isBBQNobles && (
+                                <CascadeMeatDropdown
+                                    label="Choix 3"
+                                    name="Viande_3"
+                                    value={formData.Viande_3}
+                                    options={getBBQCascadeList()}
+                                    excludeValues={bbqChoices}
+                                    req={true}
+                                    hasError={!!errors.Viande_3}
+                                    onSelect={handleSelectMeat}
+                                />
+                            )}
                         </div>
                     )}
 
                     {/* Suppléments Viandes (Rattachés à la catégorie Viande) */}
                     {!isCochonOrPorchetta && (
-                        <div className="mt-4 p-4 bg-neutral-50/70 rounded-xl border border-dashed border-neutral-300">
-                            <label className={`${labelStyle} flex items-center gap-2`}>
-                                <span>🥩</span> Viande supplémentaire (+3,00€ / pers)
-                            </label>
-                            <div className="relative">
-                                <select name="Viande_Extra_1" value={formData.Viande_Extra_1 || ""} onChange={handleChange} className={getInputStyle("Viande_Extra_1") + " appearance-none"}>
-                                    <option value="">Aucun supplément...</option>
-                                    {getBBQList().map(v => <option key={v} value={v}>{v}</option>)}
-                                </select>
-                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                </div>
-                            </div>
+                        <div className="mt-4 p-4 bg-neutral-50/70 rounded-xl border border-dashed border-neutral-300 space-y-4">
+                            <CascadeMeatDropdown
+                                label="🥩 Viande supplémentaire (+3,00€ / pers)"
+                                name="Viande_Extra_1"
+                                value={formData.Viande_Extra_1}
+                                options={getBBQCascadeList()}
+                                excludeValues={bbqChoices}
+                                onSelect={handleSelectMeat}
+                            />
 
                             {formData.Viande_Extra_1 && (
-                                <div className="mt-4 animate-fade-in">
-                                    <label className={`${labelStyle} flex items-center gap-2`}>
-                                        <span>🥩</span> 2ème viande supplémentaire (+3,00€ / pers)
-                                    </label>
-                                    <div className="relative">
-                                        <select name="Viande_Extra_2" value={formData.Viande_Extra_2 || ""} onChange={handleChange} className={getInputStyle("Viande_Extra_2") + " appearance-none"}>
-                                            <option value="">Aucun supplément...</option>
-                                            {getBBQList().map(v => <option key={v} value={v}>{v}</option>)}
-                                        </select>
-                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                        </div>
-                                    </div>
+                                <div className="animate-fade-in">
+                                    <CascadeMeatDropdown
+                                        label="🥩 2ème viande supplémentaire (+3,00€ / pers)"
+                                        name="Viande_Extra_2"
+                                        value={formData.Viande_Extra_2}
+                                        options={getBBQCascadeList()}
+                                        excludeValues={bbqChoices}
+                                        onSelect={handleSelectMeat}
+                                    />
                                 </div>
                             )}
                         </div>
