@@ -1898,50 +1898,82 @@ function ContactForm() {
 
     const renderLogisticsOptions = () => {
         if (isPlatPrepare) return null;
+        const isVaisselleChecked = formData.Location_Vaisselle_Check === "Oui";
+        const isVerrerieChecked = formData.Location_Verrerie_Check === "Oui";
+
         return (
             <div className="space-y-4 mt-6 pt-6 border-t border-neutral-200">
-                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 max-w-lg mx-auto md:max-w-none">
-                    <div className="flex items-center gap-3 mb-2">
+                {/* Option Vaisselle */}
+                <div className={`p-5 rounded-2xl border transition-all duration-300 ${
+                    isVaisselleChecked
+                        ? "bg-[#D4AF37]/10 border-[#D4AF37] shadow-xs"
+                        : "bg-white border-neutral-200 hover:border-neutral-300"
+                }`}>
+                    <div className="flex items-start gap-3">
                         <input
                             type="checkbox"
                             name="Location_Vaisselle_Check"
                             id="Location_Vaisselle_Check"
-                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                            checked={formData.Location_Vaisselle_Check === "Oui"}
+                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                            checked={isVaisselleChecked}
                             onChange={handleChange}
                         />
-                        <label htmlFor="Location_Vaisselle_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
-                            Location de vaisselle (+1,50€ / pers)
+                        <label htmlFor="Location_Vaisselle_Check" className="cursor-pointer select-none flex-1">
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                    🍽️ Location de vaisselle
+                                </span>
+                                <span className="bg-[#D4AF37]/20 text-[#917217] text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                                    +1,50 € / pers.
+                                </span>
+                            </div>
+                            <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                Assiettes, couverts inox et serviettes (lavage inclus par nos soins).
+                            </span>
                         </label>
                     </div>
-                    <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
                 </div>
 
-                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 max-w-lg mx-auto md:max-w-none">
-                    <div className="flex items-center gap-3 mb-2">
+                {/* Option Verrerie */}
+                <div className={`p-5 rounded-2xl border transition-all duration-300 ${
+                    isVerrerieChecked
+                        ? "bg-[#D4AF37]/10 border-[#D4AF37] shadow-xs"
+                        : "bg-white border-neutral-200 hover:border-neutral-300"
+                }`}>
+                    <div className="flex items-start gap-3">
                         <input
                             type="checkbox"
                             name="Location_Verrerie_Check"
-                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                            checked={formData.Location_Verrerie_Check === "Oui"}
+                            id="Location_Verrerie_Check"
+                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                            checked={isVerrerieChecked}
                             onChange={handleChange}
                         />
-                        <label htmlFor="Location_Verrerie_Check" className="text-neutral-700 font-bold cursor-pointer select-none text-left leading-tight">
-                            Location de verrerie (1,50€ / lot de 5 verres)
+                        <label htmlFor="Location_Verrerie_Check" className="cursor-pointer select-none flex-1">
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                    🍷 Location de verrerie
+                                </span>
+                                <span className="bg-[#D4AF37]/20 text-[#917217] text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                                    1,50 € / lot de 5 verres
+                                </span>
+                            </div>
+                            <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                Verres à vin, softs et flûtes à champagne (lavage inclus).
+                            </span>
                         </label>
                     </div>
-                    <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
 
                     <AnimatePresence>
-                        {formData.Location_Verrerie_Check === "Oui" && (
+                        {isVerrerieChecked && (
                             <motion.div
                                 initial={{ opacity: 0, y: -6 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -6 }}
                                 transition={{ duration: 0.25 }}
-                                className="mt-4 pl-8"
+                                className="mt-4 pt-4 border-t border-neutral-200/80"
                             >
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                                     <div>
                                         <CustomDropdown
                                             label="🍷 Verre à vin"
