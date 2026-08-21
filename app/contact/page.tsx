@@ -389,6 +389,15 @@ const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liè
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison", "Terrine de légumes"];
 const ITEMS_ASSOCIATIONS = ["Boulets Liégeois (Sauce Lapin)", "Boulets Liégeois (Sauce Tomate)", "Vol-au-vent artisanal", "Pâtes Bolognaise", "Pâtes Carbonara", "Burgers Spécial Compère", "Option Végé : Grande Salade & Quiche"];
 
+// SAUCES CHAUDES
+const SAUCES_CHAUDES_LIST = [
+    "Sauce au poivre",
+    "Sauce béarnaise",
+    "Sauce dijonnaise",
+    "Sauce aux champignons",
+    "Sauce au fond de volaille"
+];
+
 // OPTIONS
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
 const OPTIONS_BUFFET_FROID = ["Moins de 25", "25 à 250", "Plus de 250"];
@@ -508,6 +517,9 @@ function ContactForm() {
         Accompagnement_Chaud: "",
         Accompagnement_Chaud_Supplement: "",
         Accompagnement_Chaud_Supplement_Check: "Non",
+        Legumes_Chauds_Check: "Non",
+        Sauces_Chaudes_Check: "Non",
+        Sauces_Chaudes_Choix: [] as string[],
         Feculent: "",
         Feculent_Extra: "",
         Crudites_Choix_Chef: "Non",
@@ -930,7 +942,13 @@ function ContactForm() {
             if (formData.Feculent_Extra) supplements += 2;
         }
 
-        // 3. Extra Hot Side
+        // 3. Options Chaudes (Légumes & Sauces)
+        if (formData.Legumes_Chauds_Check === "Oui") {
+            supplements += 1.0;
+        }
+        if (formData.Sauces_Chaudes_Check === "Oui") {
+            supplements += 0.5;
+        }
         if (formData.Accompagnement_Chaud_Supplement_Check === "Oui" && formData.Accompagnement_Chaud_Supplement) {
             supplements += 1;
         }
@@ -1016,10 +1034,6 @@ function ContactForm() {
         );
     };
 
-
-
-
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
 
@@ -1029,6 +1043,7 @@ function ContactForm() {
                 ...prev,
                 [name]: checked ? "Oui" : "Non",
                 ...(name === "Societe" && !checked ? { Nom_Societe: "" } : {}),
+                ...(name === "Sauces_Chaudes_Check" && !checked ? { Sauces_Chaudes_Choix: [] } : {}),
                 ...(name === "Accompagnement_Chaud_Supplement_Check" && !checked ? { Accompagnement_Chaud_Supplement: "" } : {}),
                 ...(name === "Dessert_Check" && !checked ? { Dessert_Choix: "", Dessert_Type: "traditionnel", Mignardises_Quantite: "3", Mignardises_Varietes: [] } : {}),
                 ...(name === "Location_Verrerie_Check" && !checked ? { Location_Verrerie_Vin: "0", Location_Verrerie_Soft: "0", Location_Verrerie_Flute: "0" } : {})
@@ -1066,6 +1081,17 @@ function ContactForm() {
         }
 
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleToggleSauceChaude = (sauce: string) => {
+        setFormData(prev => {
+            const current = prev.Sauces_Chaudes_Choix || [];
+            if (current.includes(sauce)) {
+                return { ...prev, Sauces_Chaudes_Choix: current.filter(s => s !== sauce) };
+            } else {
+                return { ...prev, Sauces_Chaudes_Choix: [...current, sauce] };
+            }
+        });
     };
 
     const handleToggleMignardiseVariete = (item: string) => {
@@ -1437,8 +1463,13 @@ function ContactForm() {
             ...(formData.Supplement_Viande_2 && { "⭐ Supplément Viande 2": formData.Supplement_Viande_2 }),
             ...(formData.Supplement_Viande_3 && { "⭐ Supplément Viande 3": formData.Supplement_Viande_3 }),
             ...(formData.Accompagnement_Froid_1 && { "🥗 Accompagnement Froid 1": formData.Accompagnement_Froid_1 }),
-            ...(formData.Accompagnement_Froid_2 && { "🥗 Accompagnement Froid 2": formData.Accompagnement_Froid_2 }),
-            ...(formData.Accompagnement_Froid_3 && { "🥗 Accompagnement Froid 3": formData.Accompagnement_Froid_3 }),
+            // ACCOMPAGNEMENTS CHAUDS & SAUCES
+            ...(formData.Legumes_Chauds_Check === "Oui" && {
+                "🥦 Option Légumes Chauds": "Légumes chauds cuisinés (+1,00 € / pers.)"
+            }),
+            ...(formData.Sauces_Chaudes_Check === "Oui" && {
+                "🍲 Option Sauces Chaudes": `Assortiment de sauces chaudes maison (+0,50 € / pers.)${formData.Sauces_Chaudes_Choix && formData.Sauces_Chaudes_Choix.length > 0 ? ` (${formData.Sauces_Chaudes_Choix.join(', ')})` : ''}`
+            }),
             ...(formData.Accompagnement_Chaud_Supplement && { "🔥 Accompagnement Chaud Extra": formData.Accompagnement_Chaud_Supplement }),
 
             // DESSERTS
@@ -1656,7 +1687,7 @@ function ContactForm() {
         });
 
         return (
-            <div className="group relative" ref={containerRef}>
+            <div className={`group relative ${isOpen ? 'z-50' : 'z-10'}`} ref={containerRef}>
                 {label && (
                     <label className={labelStyle}>
                         {label} {req && <span className="text-red-500">*</span>}
@@ -1691,8 +1722,8 @@ function ContactForm() {
 
                 {/* DROPDOWN OVERLAY */}
                 {isOpen && !disabled && (
-                    <div className="absolute z-40 left-0 top-full mt-1.5 w-full min-w-full md:min-w-[320px] md:w-max max-w-[92vw] md:max-w-lg bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 max-h-80 overflow-y-auto overscroll-contain animate-fade-in">
-                        {value && (
+                    <div className="absolute z-50 left-0 top-full mt-1.5 w-full min-w-full md:min-w-[320px] md:w-max max-w-[92vw] md:max-w-lg bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 max-h-80 overflow-y-auto overscroll-contain animate-fade-in">
+                        {value && !req && (
                             <button
                                 type="button"
                                 onClick={() => handleSelectValue("")}
@@ -1904,11 +1935,11 @@ function ContactForm() {
                     <AnimatePresence>
                         {formData.Location_Verrerie_Check === "Oui" && (
                             <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="overflow-hidden mt-4 pl-8"
+                                initial={{ opacity: 0, y: -6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                transition={{ duration: 0.25 }}
+                                className="mt-4 pl-8"
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                                     <div>
@@ -1947,6 +1978,124 @@ function ContactForm() {
                             </motion.div>
                         )}
                     </AnimatePresence>
+                </div>
+            </div>
+        );
+    };
+
+    const renderHotOptionsSection = () => {
+        const isLegumesChecked = formData.Legumes_Chauds_Check === "Oui";
+        const isSaucesChecked = formData.Sauces_Chaudes_Check === "Oui";
+        const selectedSauces = formData.Sauces_Chaudes_Choix || [];
+
+        return (
+            <div className="space-y-4 my-6">
+                <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest block">
+                    Accompagnements & Sauces Chaudes (En Option)
+                </label>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Option 1 : Légumes Chauds */}
+                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${
+                        isLegumesChecked
+                            ? "bg-[#D4AF37]/10 border-[#D4AF37] shadow-xs"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
+                    }`}>
+                        <div className="flex items-start gap-3">
+                            <input
+                                type="checkbox"
+                                name="Legumes_Chauds_Check"
+                                id="form_legumes_chauds"
+                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                checked={isLegumesChecked}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="form_legumes_chauds" className="cursor-pointer select-none flex-1">
+                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                    <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                        🥦 Légumes chauds cuisinés
+                                    </span>
+                                    <span className="bg-[#D4AF37]/20 text-[#917217] text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                                        +1,00 € / pers.
+                                    </span>
+                                </div>
+                                <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                    Assortiment de légumes chauds de saison cuisinés maison.
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Option 2 : Sauces Chaudes */}
+                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${
+                        isSaucesChecked
+                            ? "bg-[#D4AF37]/10 border-[#D4AF37] shadow-xs"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
+                    }`}>
+                        <div className="flex items-start gap-3">
+                            <input
+                                type="checkbox"
+                                name="Sauces_Chaudes_Check"
+                                id="form_sauces_chaudes"
+                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                checked={isSaucesChecked}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="form_sauces_chaudes" className="cursor-pointer select-none flex-1">
+                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                    <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                        🍲 Assortiment de sauces chaudes maison
+                                    </span>
+                                    <span className="bg-[#D4AF37]/20 text-[#917217] text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                                        +0,50 € / pers.
+                                    </span>
+                                </div>
+                                <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                    Sauces chaudes artisanales au choix pour sublimer vos viandes.
+                                </span>
+                            </label>
+                        </div>
+
+                        {/* Sous-section sélection des sauces */}
+                        <AnimatePresence>
+                            {isSaucesChecked && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -4 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -4 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="mt-4 pt-4 border-t border-neutral-200/80 space-y-2.5"
+                                >
+                                    <span className="block text-xs font-bold text-neutral-600 uppercase tracking-wider">
+                                        Sélectionnez vos sauces chaudes :
+                                    </span>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                        {SAUCES_CHAUDES_LIST.map((sauce) => {
+                                            const isSauceChecked = selectedSauces.includes(sauce);
+                                            return (
+                                                <label
+                                                    key={sauce}
+                                                    className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs transition-all cursor-pointer select-none ${
+                                                        isSauceChecked
+                                                            ? "bg-white border-[#D4AF37] text-neutral-900 font-semibold shadow-xs"
+                                                            : "bg-neutral-50/70 border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-white"
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSauceChecked}
+                                                        onChange={() => handleToggleSauceChaude(sauce)}
+                                                        className="w-4 h-4 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                                                    />
+                                                    <span className="leading-snug">{sauce}</span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
             </div>
         );
@@ -1998,11 +2147,11 @@ function ContactForm() {
                 <AnimatePresence>
                     {isChecked && (
                         <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3 }}
-                            className="overflow-hidden mt-6 pt-6 border-t border-neutral-200 space-y-6"
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.25 }}
+                            className="mt-6 pt-6 border-t border-neutral-200 space-y-6"
                         >
                             {/* Sélecteur de type de dessert (Radio/Toggles élégants) */}
                             <div>
@@ -2059,22 +2208,22 @@ function ContactForm() {
                             </div>
 
                             {/* Sous-section : Desserts traditionnels */}
-                                {dessertType === "traditionnel" && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 6 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="bg-white p-5 rounded-xl border border-neutral-200 space-y-3 shadow-xs mt-4"
-                                    >
-                                        <CustomDropdown
-                                            label="Sélectionnez votre dessert traditionnel"
-                                            name="Dessert_Choix"
-                                            value={formData.Dessert_Choix}
-                                            options={dessertsList}
-                                            placeholder="Faites votre choix de dessert..."
-                                            req={true}
-                                            hasError={!!errors.Dessert_Choix}
-                                            onSelect={handleSelectMeat}
-                                        />
+                            {dessertType === "traditionnel" && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-white p-5 rounded-xl border border-neutral-200 space-y-3 shadow-xs mt-4"
+                                >
+                                    <CustomDropdown
+                                        label="Sélectionnez votre dessert traditionnel"
+                                        name="Dessert_Choix"
+                                        value={formData.Dessert_Choix}
+                                        options={dessertsList}
+                                        placeholder="Faites votre choix de dessert..."
+                                        req={true}
+                                        hasError={!!errors.Dessert_Choix}
+                                        onSelect={handleSelectMeat}
+                                    />
                                         {errors.Dessert_Choix && (
                                             <p className="text-xs text-red-500 font-medium">{errors.Dessert_Choix}</p>
                                         )}
@@ -2453,6 +2602,9 @@ function ContactForm() {
                     </div>
                 </div>
 
+                {/* ACCOMPAGNEMENTS & SAUCES CHAUDES */}
+                {renderHotOptionsSection()}
+
                 {/* DESSERTS SECTION */}
                 {renderDessertSection()}
 
@@ -2521,7 +2673,7 @@ function ContactForm() {
             {/* CASCADE : Apparaît selon le choix principal */}
             <AnimatePresence>
                 {formData.Plat_Associatif === "Bar à Pâtes" && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="pt-2">
                         <CustomDropdown
                             label="Choix de la sauce"
                             name="Plat_Associatif_Detail"
@@ -2535,7 +2687,7 @@ function ContactForm() {
                 )}
 
                 {formData.Plat_Associatif === "Burgers" && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="pt-2">
                         <CustomDropdown
                             label="Type de Burger"
                             name="Plat_Associatif_Detail"
@@ -2549,7 +2701,7 @@ function ContactForm() {
                 )}
 
                 {formData.Plat_Associatif === "Boulets Liégeois" && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="pt-2">
                         <CustomDropdown
                             label="Choix de la sauce"
                             name="Plat_Associatif_Detail"
@@ -2658,6 +2810,9 @@ function ContactForm() {
                         ))}
                     </div>
                 </div>
+
+                {/* ACCOMPAGNEMENTS & SAUCES CHAUDES */}
+                {renderHotOptionsSection()}
 
                 {/* OPTION DESSERTS & MIGNARDISES */}
                 {renderDessertSection()}
@@ -3117,6 +3272,9 @@ function ContactForm() {
                     </div>
                 </div>
 
+                {/* ACCOMPAGNEMENTS & SAUCES CHAUDES */}
+                {renderHotOptionsSection()}
+
                 {/* OPTION DESSERTS & MIGNARDISES */}
                 {renderDessertSection()}
 
@@ -3319,6 +3477,7 @@ function ContactForm() {
                                                 <div className="bg-neutral-50 p-6 rounded-xl text-center">
                                                     <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
                                                 </div>
+                                                {renderHotOptionsSection()}
                                                 {renderDessertSection()}
                                                 {renderLogisticsOptions()}
                                                 {renderPriceDisplay("Prix par personne")}
