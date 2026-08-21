@@ -1560,33 +1560,40 @@ function ContactForm() {
         }
     };
 
-    interface CascadeMeatDropdownProps {
-        label: string;
+    interface CustomDropdownProps {
+        label?: string;
         name: string;
         value: string;
-        options: CascadeMeatItem[];
+        options: (string | { label: string; variants: string[] })[];
         excludeValues?: string[];
+        placeholder?: string;
         req?: boolean;
+        disabled?: boolean;
         hasError?: boolean;
-        onSelect: (name: string, val: string) => void;
+        onSelect?: (name: string, val: string) => void;
     }
 
-    const CascadeMeatDropdown = ({
+    const CustomDropdown = ({
         label,
         name,
         value,
         options,
         excludeValues = [],
+        placeholder = "Faites votre choix...",
         req = false,
+        disabled = false,
         hasError = false,
         onSelect
-    }: CascadeMeatDropdownProps) => {
+    }: CustomDropdownProps) => {
         const [isOpen, setIsOpen] = useState(false);
         const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
         const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
         const [submenuPos, setSubmenuPos] = useState<{ top: number; left: number } | null>(null);
         const containerRef = useRef<HTMLDivElement>(null);
         const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+        const selectHandler = onSelect || handleSelectMeat;
+        const isErr = hasError || !!errors[name];
 
         useEffect(() => {
             const handleClickOutside = (e: MouseEvent) => {
@@ -1607,10 +1614,10 @@ function ContactForm() {
         const handleItemMouseEnter = (e: React.MouseEvent<HTMLDivElement>, itemLabel: string) => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
             const rect = e.currentTarget.getBoundingClientRect();
-            const opensLeft = typeof window !== 'undefined' && rect.right + 260 > window.innerWidth;
+            const opensLeft = typeof window !== 'undefined' && rect.right + 310 > window.innerWidth;
             setSubmenuPos({
                 top: rect.top,
-                left: opensLeft ? Math.max(10, rect.left - 245) : rect.right + 4
+                left: opensLeft ? Math.max(10, rect.left - 295) : rect.right + 6
             });
             setHoveredLabel(itemLabel);
         };
@@ -1627,7 +1634,7 @@ function ContactForm() {
         };
 
         const handleSelectValue = (val: string) => {
-            onSelect(name, val);
+            selectHandler(name, val);
             setIsOpen(false);
             setHoveredLabel(null);
             setExpandedMobile(null);
@@ -1642,38 +1649,49 @@ function ContactForm() {
             opt => typeof opt !== "string" && opt.label === hoveredLabel
         ) as { label: string; variants: string[] } | undefined;
 
+        // Filter options with excludeValues
+        const filteredOptions = options.filter(opt => {
+            const itemLabel = typeof opt === "string" ? opt : opt.label;
+            return !excludeValues.includes(itemLabel) || itemLabel === value || (typeof opt !== "string" && opt.variants.some(v => `${itemLabel} (${v})` === value));
+        });
+
         return (
             <div className="group relative" ref={containerRef}>
-                <label className={labelStyle}>
-                    {label} {req && <span className="text-red-500">*</span>}
-                </label>
+                {label && (
+                    <label className={labelStyle}>
+                        {label} {req && <span className="text-red-500">*</span>}
+                    </label>
+                )}
 
                 {/* TRIGGER BUTTON */}
                 <button
                     type="button"
-                    onClick={() => setIsOpen(!isOpen)}
-                    className={`w-full bg-white border rounded-xl px-5 py-4 text-left flex items-center justify-between text-base transition-all duration-300 shadow-inner cursor-pointer ${
-                        hasError
-                            ? "border-red-500 ring-1 ring-red-500 bg-red-50 text-red-900"
+                    disabled={disabled}
+                    onClick={() => !disabled && setIsOpen(!isOpen)}
+                    className={`w-full bg-white border rounded-xl px-5 py-4 text-left flex items-center justify-between text-base transition-all duration-300 shadow-inner ${
+                        disabled
+                            ? "bg-neutral-100 opacity-60 cursor-not-allowed border-neutral-200"
+                            : isErr
+                            ? "border-red-500 ring-1 ring-red-500 bg-red-50 text-red-900 cursor-pointer"
                             : isOpen
-                            ? "border-[#D4AF37] ring-2 ring-[#D4AF37]/40 text-neutral-900"
-                            : "border-neutral-200 hover:border-[#D4AF37]/60 text-neutral-900"
+                            ? "border-[#D4AF37] ring-2 ring-[#D4AF37]/40 text-neutral-900 cursor-pointer"
+                            : "border-neutral-200 hover:border-[#D4AF37]/60 text-neutral-900 cursor-pointer"
                     }`}
                 >
-                    <span className={`truncate pr-2 ${!value ? "text-neutral-400 font-normal" : "text-neutral-900 font-medium"}`}>
-                        {value || "Faites votre choix..."}
+                    <span className={`text-left pr-2 leading-snug break-words ${!value ? "text-neutral-400 font-normal" : "text-neutral-900 font-medium"}`}>
+                        {value || placeholder}
                     </span>
                     <ChevronDown
                         size={18}
-                        className={`text-neutral-400 transition-transform duration-200 flex-shrink-0 ${
+                        className={`text-neutral-400 transition-transform duration-200 flex-shrink-0 ml-2 ${
                             isOpen ? "rotate-180 text-[#D4AF37]" : ""
                         }`}
                     />
                 </button>
 
                 {/* DROPDOWN OVERLAY */}
-                {isOpen && (
-                    <div className="absolute z-40 left-0 top-full mt-1.5 w-full min-w-[260px] bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 max-h-80 overflow-y-auto overscroll-contain animate-fade-in">
+                {isOpen && !disabled && (
+                    <div className="absolute z-40 left-0 top-full mt-1.5 w-full min-w-full md:min-w-[320px] md:w-max max-w-[92vw] md:max-w-lg bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 max-h-80 overflow-y-auto overscroll-contain animate-fade-in">
                         {value && (
                             <button
                                 type="button"
@@ -1685,7 +1703,7 @@ function ContactForm() {
                             </button>
                         )}
 
-                        {options.map((option, idx) => {
+                        {filteredOptions.map((option, idx) => {
                             const isObject = typeof option !== "string";
                             const itemLabel = isObject ? option.label : option;
                             const hasVariants = isObject && option.variants && option.variants.length > 0;
@@ -1696,11 +1714,11 @@ function ContactForm() {
 
                                 return (
                                     <button
-                                        key={`meat_opt_${idx}`}
+                                        key={`opt_${idx}_${itemLabel}`}
                                         type="button"
                                         disabled={isExcluded}
                                         onClick={() => handleSelectValue(itemLabel)}
-                                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between cursor-pointer ${
+                                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-3 cursor-pointer ${
                                             isExcluded
                                                 ? "opacity-35 cursor-not-allowed bg-neutral-50 text-neutral-400"
                                                 : isSelected
@@ -1708,7 +1726,7 @@ function ContactForm() {
                                                 : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
                                         }`}
                                     >
-                                        <span className="truncate pr-2">{itemLabel}</span>
+                                        <span className="pr-2 text-left whitespace-normal break-words leading-snug">{itemLabel}</span>
                                         {isSelected && <Check size={16} className="text-[#D4AF37] flex-shrink-0" />}
                                     </button>
                                 );
@@ -1720,14 +1738,14 @@ function ContactForm() {
 
                             return (
                                 <div
-                                    key={`meat_parent_${idx}`}
+                                    key={`parent_${idx}_${itemLabel}`}
                                     className="relative"
                                     onMouseEnter={(e) => handleItemMouseEnter(e, itemLabel)}
                                     onMouseLeave={handleItemMouseLeave}
                                 >
                                     <div
                                         onClick={(e) => handleToggleParentMobile(e, itemLabel)}
-                                        className={`w-full px-4 py-2.5 text-sm transition-colors flex items-center justify-between cursor-pointer select-none ${
+                                        className={`w-full px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-3 cursor-pointer select-none ${
                                             isParentSelected
                                                 ? "bg-[#D4AF37]/10 text-neutral-900 font-bold border-l-4 border-[#D4AF37]"
                                                 : isHovered || isExpanded
@@ -1735,7 +1753,7 @@ function ContactForm() {
                                                 : "text-neutral-700 hover:bg-neutral-50"
                                         }`}
                                     >
-                                        <span className="truncate pr-2">{itemLabel}</span>
+                                        <span className="pr-2 text-left whitespace-normal break-words leading-snug">{itemLabel}</span>
                                         <div className="flex items-center gap-1.5 flex-shrink-0 text-neutral-400">
                                             <span className="text-[11px] font-normal uppercase tracking-wider text-neutral-400">
                                                 {option.variants.length} choix
@@ -1763,7 +1781,7 @@ function ContactForm() {
                                                         type="button"
                                                         disabled={isVariantExcluded}
                                                         onClick={() => handleSelectValue(fullVal)}
-                                                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between cursor-pointer ${
+                                                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between gap-2 cursor-pointer ${
                                                             isVariantExcluded
                                                                 ? "opacity-35 cursor-not-allowed text-neutral-400"
                                                                 : isVariantSelected
@@ -1771,8 +1789,8 @@ function ContactForm() {
                                                                 : "text-neutral-700 hover:bg-white"
                                                         }`}
                                                     >
-                                                        <span>{v}</span>
-                                                        {isVariantSelected && <Check size={14} className="text-[#D4AF37]" />}
+                                                        <span className="text-left whitespace-normal break-words leading-snug">{v}</span>
+                                                        {isVariantSelected && <Check size={14} className="text-[#D4AF37] flex-shrink-0" />}
                                                     </button>
                                                 );
                                             })}
@@ -1785,7 +1803,7 @@ function ContactForm() {
                 )}
 
                 {/* DESKTOP CASCADING FLOATING SUBMENU */}
-                {isOpen && hoveredLabel && hoveredOption && submenuPos && (
+                {isOpen && !disabled && hoveredLabel && hoveredOption && submenuPos && (
                     <div
                         onMouseEnter={handleSubmenuEnter}
                         onMouseLeave={handleItemMouseLeave}
@@ -1795,7 +1813,7 @@ function ContactForm() {
                             left: `${submenuPos.left}px`,
                             zIndex: 9999
                         }}
-                        className="hidden md:block w-60 bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 animate-fade-in"
+                        className="hidden md:block w-64 md:w-72 bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 animate-fade-in"
                     >
                         <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-400 border-b border-neutral-100 mb-1">
                             Déclinaisons : {hoveredLabel}
@@ -1811,7 +1829,7 @@ function ContactForm() {
                                     type="button"
                                     disabled={isVariantExcluded}
                                     onClick={() => handleSelectValue(fullVal)}
-                                    className={`w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center justify-between cursor-pointer ${
+                                    className={`w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center justify-between gap-2 cursor-pointer ${
                                         isVariantExcluded
                                             ? "opacity-35 cursor-not-allowed bg-neutral-50 text-neutral-400"
                                             : isVariantSelected
@@ -1819,8 +1837,8 @@ function ContactForm() {
                                             : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
                                     }`}
                                 >
-                                    <span>{v}</span>
-                                    {isVariantSelected && <Check size={14} className="text-[#D4AF37]" />}
+                                    <span className="text-left whitespace-normal break-words leading-snug">{v}</span>
+                                    {isVariantSelected && <Check size={14} className="text-[#D4AF37] flex-shrink-0" />}
                                 </button>
                             );
                         })}
@@ -1830,29 +1848,20 @@ function ContactForm() {
         );
     };
 
-    const renderDropdown = (label: string, name: string, options: string[], excludeValues: string[] = [], req = false) => {
-        // Filter options: remove if in excludeValues AND not the current value
-        const currentVal = (formData as any)[name];
-        const filteredOptions = options.filter(opt => !excludeValues.includes(opt) || opt === currentVal);
+    const CascadeMeatDropdown = CustomDropdown;
 
+    const renderDropdown = (label: string, name: string, options: (string | { label: string; variants: string[] })[], excludeValues: string[] = [], req = false) => {
         return (
-            <div className="group">
-                <label className={labelStyle}>{label} {req && <span className="text-red-500">*</span>}</label>
-                <div className="relative">
-                    <select
-                        name={name}
-                        value={currentVal}
-                        onChange={handleChange}
-                        className={`${getInputStyle(name)} appearance-none cursor-pointer`}
-                    >
-                        <option value="">Faites votre choix...</option>
-                        {filteredOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
-                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </div>
-                </div>
-            </div>
+            <CustomDropdown
+                label={label}
+                name={name}
+                value={(formData as any)[name] || ""}
+                options={options}
+                excludeValues={excludeValues}
+                req={req}
+                hasError={!!errors[name]}
+                onSelect={handleSelectMeat}
+            />
         );
     };
 
@@ -1882,8 +1891,7 @@ function ContactForm() {
                         <input
                             type="checkbox"
                             name="Location_Verrerie_Check"
-                            id="Location_Verrerie_Check"
-                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
                             checked={formData.Location_Verrerie_Check === "Oui"}
                             onChange={handleChange}
                         />
@@ -1904,66 +1912,36 @@ function ContactForm() {
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                                            🍷 Verre à vin
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                name="Location_Verrerie_Vin"
-                                                value={formData.Location_Verrerie_Vin}
-                                                onChange={handleChange}
-                                                className={getInputStyle("Location_Verrerie_Vin")}
-                                            >
-                                                {glassSteps.map(step => (
-                                                    <option key={step} value={step}>{step} verres</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                            </div>
-                                        </div>
+                                        <CustomDropdown
+                                            label="🍷 Verre à vin"
+                                            name="Location_Verrerie_Vin"
+                                            value={formData.Location_Verrerie_Vin ? `${formData.Location_Verrerie_Vin} verres` : ""}
+                                            options={glassSteps.map(step => `${step} verres`)}
+                                            placeholder="Choisir..."
+                                            onSelect={(name, val) => handleSelectMeat(name, val.replace(" verres", ""))}
+                                        />
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                                            🥤 Verre à soft (25cl)
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                name="Location_Verrerie_Soft"
-                                                value={formData.Location_Verrerie_Soft}
-                                                onChange={handleChange}
-                                                className={getInputStyle("Location_Verrerie_Soft")}
-                                            >
-                                                {glassSteps.map(step => (
-                                                    <option key={step} value={step}>{step} verres</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                            </div>
-                                        </div>
+                                        <CustomDropdown
+                                            label="🥤 Verre à soft (25cl)"
+                                            name="Location_Verrerie_Soft"
+                                            value={formData.Location_Verrerie_Soft ? `${formData.Location_Verrerie_Soft} verres` : ""}
+                                            options={glassSteps.map(step => `${step} verres`)}
+                                            placeholder="Choisir..."
+                                            onSelect={(name, val) => handleSelectMeat(name, val.replace(" verres", ""))}
+                                        />
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                                            🥂 Flûte à champagne
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                name="Location_Verrerie_Flute"
-                                                value={formData.Location_Verrerie_Flute}
-                                                onChange={handleChange}
-                                                className={getInputStyle("Location_Verrerie_Flute")}
-                                            >
-                                                {glassSteps.map(step => (
-                                                    <option key={step} value={step}>{step} verres</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                            </div>
-                                        </div>
+                                        <CustomDropdown
+                                            label="🥂 Flûte à champagne"
+                                            name="Location_Verrerie_Flute"
+                                            value={formData.Location_Verrerie_Flute ? `${formData.Location_Verrerie_Flute} verres` : ""}
+                                            options={glassSteps.map(step => `${step} verres`)}
+                                            placeholder="Choisir..."
+                                            onSelect={(name, val) => handleSelectMeat(name, val.replace(" verres", ""))}
+                                        />
                                     </div>
                                 </div>
                             </motion.div>
@@ -1988,125 +1966,115 @@ function ContactForm() {
         };
 
         return (
-            <div className="mt-8 border-t border-dashed border-neutral-200 pt-8">
-                <div className="bg-neutral-50/70 p-6 rounded-2xl border border-neutral-200 hover:border-[#D4AF37]/40 transition-all duration-300 shadow-sm">
-                    {/* Niveau 1 : Case à cocher principale */}
-                    <div className="flex items-center justify-between flex-wrap gap-3">
-                        <div className="flex items-center gap-3">
-                            <input
-                                type="checkbox"
-                                name="Dessert_Check"
-                                id="Dessert_Check"
-                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                                checked={isChecked}
-                                onChange={handleChange}
-                            />
-                            <label htmlFor="Dessert_Check" className="text-neutral-800 font-bold cursor-pointer select-none text-base">
-                                🍰 Ajouter une option dessert
-                            </label>
-                        </div>
-                        {isChecked && (
-                            <span className="text-xs font-semibold px-3 py-1 bg-[#D4AF37]/15 text-[#8A7120] rounded-full border border-[#D4AF37]/30">
-                                {dessertType === "traditionnel"
-                                    ? "+6,00 € / pers."
-                                    : mignardiseCount > 0
-                                        ? `+${mignardisePrice.toFixed(2).replace('.', ',')} € / pers.`
-                                        : "Dès 2,50 € / pièce"}
-                            </span>
-                        )}
-                    </div>
+            <div className="bg-neutral-50/50 p-6 md:p-8 rounded-2xl border border-neutral-200 mt-8 mb-8">
+                {/* Titre principal avec Case à cocher Niveau 1 */}
+                <div className="flex items-start gap-4 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        id="form_dessert_check"
+                        name="Dessert_Check"
+                        className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-1"
+                        checked={isChecked}
+                        onChange={(e) => {
+                            const val = e.target.checked ? "Oui" : "Non";
+                            setFormData(prev => ({
+                                ...prev,
+                                Dessert_Check: val,
+                                Dessert_Choix: val === "Oui" ? prev.Dessert_Choix : ""
+                            }));
+                        }}
+                    />
+                    <label htmlFor="form_dessert_check" className="cursor-pointer select-none">
+                        <span className="block text-lg font-serif font-bold text-neutral-800">
+                            🍰 Ajouter une option dessert
+                        </span>
+                        <span className="block text-xs text-neutral-500 mt-0.5">
+                            Sublimez votre événement avec nos douceurs artisanales au choix.
+                        </span>
+                    </label>
+                </div>
 
-                    {/* Niveau 2 : Sélecteur d'option sucrée */}
-                    <AnimatePresence>
-                        {isChecked && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                                animate={{ opacity: 1, height: "auto", marginTop: 20 }}
-                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                transition={{ duration: 0.35, ease: [0.04, 0.62, 0.23, 0.98] }}
-                                className="overflow-hidden space-y-6 pt-3 border-t border-neutral-200"
-                            >
-                                {/* Choix exclusif : Toggles / Cards */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Niveau 2 : Si la case est cochée */}
+                <AnimatePresence>
+                    {isChecked && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden mt-6 pt-6 border-t border-neutral-200 space-y-6"
+                        >
+                            {/* Sélecteur de type de dessert (Radio/Toggles élégants) */}
+                            <div>
+                                <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">
+                                    Type de prestation sucrée
+                                </label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Option 1 : Desserts traditionnels */}
                                     <button
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, Dessert_Type: "traditionnel" }))}
-                                        className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer ${
+                                        className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-start justify-between cursor-pointer ${
                                             dessertType === "traditionnel"
-                                                ? "bg-black text-white border-black shadow-md ring-2 ring-[#D4AF37]/60"
-                                                : "bg-white text-neutral-800 border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50"
+                                                ? "border-[#D4AF37] bg-white shadow-md ring-2 ring-[#D4AF37]/30"
+                                                : "border-neutral-200 bg-neutral-50 hover:bg-white text-neutral-600"
                                         }`}
                                     >
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-2xl">🍰</span>
-                                            <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                                                dessertType === "traditionnel" ? "bg-[#D4AF37] text-black font-bold" : "bg-neutral-100 text-neutral-600"
-                                            }`}>
-                                                +6,00 € / pers
-                                            </span>
-                                        </div>
                                         <div>
-                                            <h4 className="font-bold text-sm">Desserts traditionnels</h4>
-                                            <p className={`text-xs mt-1 ${dessertType === "traditionnel" ? "text-neutral-300" : "text-neutral-500"}`}>
-                                                Portion individuelle au choix parmi nos recettes traditionnelles
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-base font-bold text-neutral-800">Desserts traditionnels</span>
+                                                <span className="bg-[#D4AF37]/15 text-[#917217] text-[11px] font-extrabold px-2 py-0.5 rounded-full">
+                                                    +6,00 € / pers
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-neutral-500 mt-1">
+                                                Gâteaux & tartes artisanales à partager (1 choix pour l&apos;ensemble)
                                             </p>
                                         </div>
                                     </button>
 
+                                    {/* Option 2 : Mignardises artisanales */}
                                     <button
                                         type="button"
                                         onClick={() => setFormData(prev => ({ ...prev, Dessert_Type: "mignardises" }))}
-                                        className={`p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between cursor-pointer ${
+                                        className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-start justify-between cursor-pointer ${
                                             dessertType === "mignardises"
-                                                ? "bg-black text-white border-black shadow-md ring-2 ring-[#D4AF37]/60"
-                                                : "bg-white text-neutral-800 border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50"
+                                                ? "border-[#D4AF37] bg-white shadow-md ring-2 ring-[#D4AF37]/30"
+                                                : "border-neutral-200 bg-neutral-50 hover:bg-white text-neutral-600"
                                         }`}
                                     >
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="text-2xl">🧁</span>
-                                            <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                                                dessertType === "mignardises" ? "bg-[#D4AF37] text-black font-bold" : "bg-neutral-100 text-neutral-600"
-                                            }`}>
-                                                {mignardiseCount > 0 ? `+${mignardisePrice.toFixed(2).replace('.', ',')} € / pers` : "Dès 2,50 € / pièce"}
-                                            </span>
-                                        </div>
                                         <div>
-                                            <h4 className="font-bold text-sm">Mignardises artisanales</h4>
-                                            <p className={`text-xs mt-1 ${dessertType === "mignardises" ? "text-neutral-300" : "text-neutral-500"}`}>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-base font-bold text-neutral-800">Mignardises artisanales</span>
+                                                <span className="bg-[#D4AF37]/15 text-[#917217] text-[11px] font-extrabold px-2 py-0.5 rounded-full">
+                                                    Dès 2,50 € TTC / pièce
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-neutral-500 mt-1">
                                                 Sélection directe des variétés (1 à 6 pièces par personne)
                                             </p>
                                         </div>
                                     </button>
                                 </div>
+                            </div>
 
-                                {/* Sous-section : Desserts traditionnels */}
+                            {/* Sous-section : Desserts traditionnels */}
                                 {dessertType === "traditionnel" && (
                                     <motion.div
                                         initial={{ opacity: 0, y: 6 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="bg-white p-5 rounded-xl border border-neutral-200 space-y-3 shadow-xs"
+                                        className="bg-white p-5 rounded-xl border border-neutral-200 space-y-3 shadow-xs mt-4"
                                     >
-                                        <label className={labelStyle}>
-                                            Sélectionnez votre dessert traditionnel <span className="text-red-500">*</span>
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                name="Dessert_Choix"
-                                                value={formData.Dessert_Choix}
-                                                onChange={handleChange}
-                                                className={getInputStyle("Dessert_Choix") + " appearance-none"}
-                                            >
-                                                <option value="">Faites votre choix de dessert...</option>
-                                                {dessertsList.map((c) => (
-                                                    <option key={c} value={c}>{c}</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                            </div>
-                                        </div>
+                                        <CustomDropdown
+                                            label="Sélectionnez votre dessert traditionnel"
+                                            name="Dessert_Choix"
+                                            value={formData.Dessert_Choix}
+                                            options={dessertsList}
+                                            placeholder="Faites votre choix de dessert..."
+                                            req={true}
+                                            hasError={!!errors.Dessert_Choix}
+                                            onSelect={handleSelectMeat}
+                                        />
                                         {errors.Dessert_Choix && (
                                             <p className="text-xs text-red-500 font-medium">{errors.Dessert_Choix}</p>
                                         )}
@@ -2208,7 +2176,6 @@ function ContactForm() {
                         )}
                     </AnimatePresence>
                 </div>
-            </div>
         );
     };
 
@@ -2411,30 +2378,26 @@ function ContactForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Féculent Inclus */}
                             <div>
-                                <label className={labelStyle}>Féculent (Inclus)</label>
-                                <div className="relative">
-                                    <select name="Feculent" value={formData.Feculent || ""} onChange={handleChange} className={getInputStyle("Feculent") + " appearance-none"}>
-                                        <option value="">Faites votre choix...</option>
-                                        {feculentsBBQ.map(f => <option key={f} value={f}>{f}</option>)}
-                                    </select>
-                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                    </div>
-                                </div>
+                                <CustomDropdown
+                                    label="Féculent (Inclus)"
+                                    name="Feculent"
+                                    value={formData.Feculent || ""}
+                                    options={feculentsBBQ}
+                                    placeholder="Faites votre choix..."
+                                    onSelect={handleSelectMeat}
+                                />
                             </div>
 
                             {/* Féculent Supplémentaire */}
                             <div>
-                                <label className={labelStyle}>Féculent Extra (+2,00€ / pers)</label>
-                                <div className="relative">
-                                    <select name="Feculent_Extra" value={formData.Feculent_Extra || ""} onChange={handleChange} className={getInputStyle("Feculent_Extra") + " appearance-none"}>
-                                        <option value="">Aucun supplément...</option>
-                                        {feculentsBBQ.map(f => <option key={f} value={f}>{f}</option>)}
-                                    </select>
-                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                    </div>
-                                </div>
+                                <CustomDropdown
+                                    label="Féculent Extra (+2,00€ / pers)"
+                                    name="Feculent_Extra"
+                                    value={formData.Feculent_Extra || ""}
+                                    options={feculentsBBQ}
+                                    placeholder="Aucun supplément..."
+                                    onSelect={handleSelectMeat}
+                                />
                             </div>
                         </div>
                     </div>
@@ -2479,18 +2442,14 @@ function ContactForm() {
 
                     {/* Supplément Crudité (Rattaché à la catégorie Crudités) */}
                     <div className="mt-4 p-4 bg-neutral-50/70 rounded-xl border border-dashed border-neutral-300">
-                        <label className={`${labelStyle} flex items-center gap-2`}>
-                            <span>🥗</span> Crudité supplémentaire (+1,50€ / pers)
-                        </label>
-                        <div className="relative">
-                            <select name="Suppl_Crudite_Extra" value={formData.Suppl_Crudite_Extra || ""} onChange={handleChange} className={getInputStyle("Suppl_Crudite_Extra") + " appearance-none"}>
-                                <option value="">Aucun supplément...</option>
-                                {SIDES_COLD.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            label="🥗 Crudité supplémentaire (+1,50€ / pers)"
+                            name="Suppl_Crudite_Extra"
+                            value={formData.Suppl_Crudite_Extra || ""}
+                            options={SIDES_COLD}
+                            placeholder="Aucun supplément..."
+                            onSelect={handleSelectMeat}
+                        />
                     </div>
                 </div>
 
@@ -2541,70 +2500,65 @@ function ContactForm() {
         <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37]">
             <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mb-4">Votre Choix de Plat Unique</h3>
 
-            <div className="group">
-                <label className={labelStyle}>Choisissez votre Plat Principal <span className="text-red-500">*</span></label>
-                <div className="relative">
-                    <select name="Plat_Associatif" value={formData.Plat_Associatif} onChange={handleChange} className={getInputStyle("Plat_Associatif")}>
-                        <option value="">Faites votre choix...</option>
-                        <option value="Bar à Pâtes">Bar à Pâtes</option>
-                        <option value="Burgers">Burgers Spécial Compère</option>
-                        <option value="Boulets Liégeois">Boulets Liégeois & Frites</option>
-                        <option value="Vol-au-vent">Vol-au-vent artisanal & Frites</option>
-                        <option value="Option Végétarienne">Option Végé (Salade & Quiche)</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </div>
-                </div>
+            <div>
+                <CustomDropdown
+                    label="Choisissez votre Plat Principal"
+                    name="Plat_Associatif"
+                    value={formData.Plat_Associatif}
+                    options={[
+                        "Bar à Pâtes",
+                        "Burgers",
+                        "Boulets Liégeois",
+                        "Vol-au-vent",
+                        "Option Végétarienne"
+                    ]}
+                    req={true}
+                    placeholder="Faites votre choix..."
+                    onSelect={handleSelectMeat}
+                />
             </div>
 
             {/* CASCADE : Apparaît selon le choix principal */}
             <AnimatePresence>
                 {formData.Plat_Associatif === "Bar à Pâtes" && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
-                        <label className={labelStyle}>Choix de la sauce <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                            <select name="Plat_Associatif_Detail" value={formData.Plat_Associatif_Detail} onChange={handleChange} className={getInputStyle("Plat_Associatif_Detail")}>
-                                <option value="">Sélectionnez la sauce...</option>
-                                <option value="Bolognaise">Bolognaise</option>
-                                <option value="Carbonara">Carbonara</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            label="Choix de la sauce"
+                            name="Plat_Associatif_Detail"
+                            value={formData.Plat_Associatif_Detail}
+                            options={["Bolognaise", "Carbonara"]}
+                            req={true}
+                            placeholder="Sélectionnez la sauce..."
+                            onSelect={handleSelectMeat}
+                        />
                     </motion.div>
                 )}
 
                 {formData.Plat_Associatif === "Burgers" && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
-                        <label className={labelStyle}>Type de Burger <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                            <select name="Plat_Associatif_Detail" value={formData.Plat_Associatif_Detail} onChange={handleChange} className={getInputStyle("Plat_Associatif_Detail")}>
-                                <option value="">Sélectionnez le type...</option>
-                                <option value="Normal">Burger Normal</option>
-                                <option value="Spécial Compère">Spécial Compère</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            label="Type de Burger"
+                            name="Plat_Associatif_Detail"
+                            value={formData.Plat_Associatif_Detail}
+                            options={["Normal", "Spécial Compère"]}
+                            req={true}
+                            placeholder="Sélectionnez le type..."
+                            onSelect={handleSelectMeat}
+                        />
                     </motion.div>
                 )}
 
                 {formData.Plat_Associatif === "Boulets Liégeois" && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
-                        <label className={labelStyle}>Choix de la sauce <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                            <select name="Plat_Associatif_Detail" value={formData.Plat_Associatif_Detail} onChange={handleChange} className={getInputStyle("Plat_Associatif_Detail")}>
-                                <option value="">Sélectionnez la sauce...</option>
-                                <option value="Sauce Lapin">Sauce Lapin</option>
-                                <option value="Sauce Tomate">Sauce Tomate</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            label="Choix de la sauce"
+                            name="Plat_Associatif_Detail"
+                            value={formData.Plat_Associatif_Detail}
+                            options={["Sauce Lapin", "Sauce Tomate"]}
+                            req={true}
+                            placeholder="Sélectionnez la sauce..."
+                            onSelect={handleSelectMeat}
+                        />
                     </motion.div>
                 )}
             </AnimatePresence>
@@ -2648,18 +2602,14 @@ function ContactForm() {
 
                 {/* Féculent */}
                 <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200">
-                    <label className={`${labelStyle} flex items-center gap-2`}>
-                        <span>🍚</span> Votre Féculent (Inclus)
-                    </label>
-                    <div className="relative">
-                        <select name="Feculent_Froid" value={formData.Feculent_Froid || ""} onChange={handleChange} className={getInputStyle("Feculent_Froid") + " appearance-none"}>
-                            <option value="">Choisissez 1 féculent...</option>
-                            {feculentsFroids.map(f => <option key={f} value={f}>{f}</option>)}
-                        </select>
-                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                        </div>
-                    </div>
+                    <CustomDropdown
+                        label="🍚 Votre Féculent (Inclus)"
+                        name="Feculent_Froid"
+                        value={formData.Feculent_Froid || ""}
+                        options={feculentsFroids}
+                        placeholder="Choisissez 1 féculent..."
+                        onSelect={handleSelectMeat}
+                    />
                 </div>
 
                 {/* Crudités Incluses (Grille de 6) */}
@@ -2696,19 +2646,14 @@ function ContactForm() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[1, 2, 3, 4, 5, 6].map(num => (
-                            <div className="relative group" key={`Crudite_${num}`}>
-                                <select
+                            <div key={`Crudite_${num}`}>
+                                <CustomDropdown
                                     name={`Crudite_${num}`}
                                     value={(formData as any)[`Crudite_${num}`] || ""}
-                                    onChange={handleChange}
-                                    className={getInputStyle(`Crudite_${num}`) + " appearance-none"}
-                                >
-                                    <option value="">Choix {num} (ou choix du chef)...</option>
-                                    {cruditesFroids.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                </div>
+                                    options={cruditesFroids}
+                                    placeholder={`Choix ${num} (ou choix du chef)...`}
+                                    onSelect={handleSelectMeat}
+                                />
                             </div>
                         ))}
                     </div>
@@ -2747,25 +2692,29 @@ function ContactForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
-                        <label className={`${labelStyle} flex items-center gap-2`}>
-                            <span>🥖</span> Gamme de pains
-                        </label>
-                        <div className="relative">
-                            <select name="Categorie_Pains" value={formData.Categorie_Pains || ""} onChange={handleChange} className={getInputStyle("Categorie_Pains") + " appearance-none"}>
-                                <option value="">Sélectionnez une gamme...</option>
-                                {Object.keys(painsData).map(cat => {
-                                    const adjustedPrice = getAdjustedUnitPrice(painsData[cat].price);
-                                    return (
-                                        <option key={cat} value={cat}>
-                                            {cat} ({adjustedPrice.toFixed(2).replace('.', ',')}€ / pièce)
-                                        </option>
-                                    );
-                                })}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            label="🥖 Gamme de pains"
+                            name="Categorie_Pains"
+                            value={formData.Categorie_Pains ? (
+                                (() => {
+                                    const cat = formData.Categorie_Pains;
+                                    if (painsData[cat]) {
+                                        const adjustedPrice = getAdjustedUnitPrice(painsData[cat].price);
+                                        return `${cat} (${adjustedPrice.toFixed(2).replace('.', ',')}€ / pièce)`;
+                                    }
+                                    return cat;
+                                })()
+                            ) : ""}
+                            options={Object.keys(painsData).map(cat => {
+                                const adjustedPrice = getAdjustedUnitPrice(painsData[cat].price);
+                                return `${cat} (${adjustedPrice.toFixed(2).replace('.', ',')}€ / pièce)`;
+                            })}
+                            placeholder="Sélectionnez une gamme..."
+                            onSelect={(name, val) => {
+                                const rawCat = Object.keys(painsData).find(cat => val.startsWith(cat)) || val;
+                                handleSelectMeat(name, rawCat);
+                            }}
+                        />
 
                         {categoryInfo && (
                             <div className="mt-4 pt-4 border-t border-neutral-200 animate-fade-in">
@@ -2782,20 +2731,17 @@ function ContactForm() {
                     </div>
 
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
-                        <label className={`${labelStyle} flex items-center gap-2`}>
-                            <span>🔢</span> Quantité par personne
-                        </label>
-                        <div className="relative">
-                            <select name="Quantite_Pains" value={formData.Quantite_Pains || ""} onChange={handleChange} className={getInputStyle("Quantite_Pains") + " appearance-none"}>
-                                <option value="">Nombre de pièces/pers...</option>
-                                {[3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                                    <option key={num} value={num}>{num} pièces / pers</option>
-                                ))}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            label="🔢 Quantité par personne"
+                            name="Quantite_Pains"
+                            value={formData.Quantite_Pains ? `${formData.Quantite_Pains} pièces / pers` : ""}
+                            options={[3, 4, 5, 6, 7, 8, 9, 10].map(num => `${num} pièces / pers`)}
+                            placeholder="Nombre de pièces/pers..."
+                            onSelect={(name, val) => {
+                                const numVal = val.split(' ')[0];
+                                handleSelectMeat(name, numVal);
+                            }}
+                        />
                         {/* Message intolérances */}
                         <p className="text-xs text-neutral-500 mt-2 italic px-1">
                             En cas d'intolérances, merci de le préciser dans le champ message en bas du formulaire.
@@ -2827,37 +2773,40 @@ function ContactForm() {
             const formAny = formData as any;
             const selectedCat = formAny[catKey];
 
+            const rawItems = selectedCat && zakouskisData[selectedCat]
+                ? Object.entries(zakouskisData[selectedCat]).flatMap(([gammeName, gammeData]) => {
+                    const adjustedPrice = getAdjustedPrice(gammeData.price);
+                    return gammeData.items.map(item => `${item} (${adjustedPrice.toFixed(2).replace('.', ',')}€)`);
+                })
+                : [];
+
             return (
                 <div key={`zakouski_slot_${num}`} className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
                     <label className="block text-xs font-bold text-neutral-800 uppercase tracking-widest mb-3 border-b pb-2">
                         Choix {num} {isRequired && <span className="text-red-500">*</span>}
                     </label>
                     <div className="space-y-3">
-                        <div className="relative">
-                            <select name={catKey} value={selectedCat || ""} onChange={handleChange} className={getInputStyle(catKey as any) + " appearance-none py-2 text-sm"}>
-                                <option value="">Famille de produit...</option>
-                                {Object.keys(zakouskisData).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
-                        <div className="relative">
-                            <select name={itemKey} value={formAny[itemKey] || ""} onChange={handleChange} disabled={!selectedCat} className={getInputStyle(itemKey as any) + ` appearance-none py-2 text-sm ${!selectedCat ? 'bg-neutral-100 opacity-60' : ''}`}>
-                                <option value="">Sélectionnez la pièce...</option>
-                                {selectedCat && Object.entries(zakouskisData[selectedCat]).map(([gammeName, gammeData]) => {
-                                    const adjustedPrice = getAdjustedPrice(gammeData.price);
-                                    return (
-                                        <optgroup key={gammeName} label={`--- ${gammeName} (${adjustedPrice.toFixed(2).replace('.', ',')}€) ---`}>
-                                            {gammeData.items.map(item => <option key={item} value={item}>{item}</option>)}
-                                        </optgroup>
-                                    );
-                                })}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            name={catKey}
+                            value={selectedCat || ""}
+                            options={Object.keys(zakouskisData)}
+                            placeholder="Famille de produit..."
+                            onSelect={(k, val) => {
+                                handleSelectMeat(k, val);
+                                if (formAny[itemKey]) handleSelectMeat(itemKey, "");
+                            }}
+                        />
+                        <CustomDropdown
+                            name={itemKey}
+                            value={formAny[itemKey] ? (rawItems.find(i => i.startsWith(formAny[itemKey])) || formAny[itemKey]) : ""}
+                            options={rawItems}
+                            placeholder="Sélectionnez la pièce..."
+                            disabled={!selectedCat}
+                            onSelect={(k, val) => {
+                                const rawItem = val.replace(/\s\(\d+.*€\)$/, '');
+                                handleSelectMeat(k, rawItem);
+                            }}
+                        />
                     </div>
                 </div>
             );
@@ -2936,6 +2885,9 @@ function ContactForm() {
             const selectedCat = formAny[catKey];
 
             const isSlotsDisabled = !selectedFormat;
+            const rawVerrineItems = selectedCat && verrinesData[selectedCat]
+                ? verrinesData[selectedCat].items.map(item => `${item} (${getAdjustedPriceDisplay(selectedCat).toFixed(2).replace('.', ',')}€ / pièce)`)
+                : [];
 
             return (
                 <div key={`verrine_slot_${num}`} className={`bg-white p-4 rounded-xl border border-neutral-200 shadow-sm transition-opacity duration-300 ${isSlotsDisabled ? 'opacity-50' : ''}`}>
@@ -2943,28 +2895,28 @@ function ContactForm() {
                         Choix {num} {isRequired && <span className="text-red-500">*</span>}
                     </label>
                     <div className="space-y-3">
-                        <div className="relative">
-                            <select name={catKey} value={selectedCat || ""} onChange={handleChange} disabled={isSlotsDisabled} className={getInputStyle(catKey as any) + " appearance-none py-2 text-sm"}>
-                                <option value="">Famille de verrine...</option>
-                                {Object.keys(verrinesData).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
-                        <div className="relative">
-                            <select name={itemKey} value={formAny[itemKey] || ""} onChange={handleChange} disabled={isSlotsDisabled || !selectedCat} className={getInputStyle(itemKey as any) + ` appearance-none py-2 text-sm ${(isSlotsDisabled || !selectedCat) ? 'bg-neutral-100 opacity-60' : ''}`}>
-                                <option value="">Sélectionnez la pièce...</option>
-                                {selectedCat && (
-                                    <optgroup label={`--- ${selectedCat} (${getAdjustedPriceDisplay(selectedCat).toFixed(2).replace('.', ',')}€ / pièce) ---`}>
-                                        {verrinesData[selectedCat].items.map(item => <option key={item} value={item}>{item}</option>)}
-                                    </optgroup>
-                                )}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            name={catKey}
+                            value={selectedCat || ""}
+                            options={Object.keys(verrinesData)}
+                            placeholder="Famille de verrine..."
+                            disabled={isSlotsDisabled}
+                            onSelect={(k, val) => {
+                                handleSelectMeat(k, val);
+                                if (formAny[itemKey]) handleSelectMeat(itemKey, "");
+                            }}
+                        />
+                        <CustomDropdown
+                            name={itemKey}
+                            value={formAny[itemKey] ? (rawVerrineItems.find(i => i.startsWith(formAny[itemKey])) || formAny[itemKey]) : ""}
+                            options={rawVerrineItems}
+                            placeholder="Sélectionnez la pièce..."
+                            disabled={isSlotsDisabled || !selectedCat}
+                            onSelect={(k, val) => {
+                                const rawItem = val.replace(/\s\(\d+.*€ \/ pièce\)$/, '');
+                                handleSelectMeat(k, rawItem);
+                            }}
+                        />
                     </div>
                 </div>
             );
@@ -3055,25 +3007,29 @@ function ContactForm() {
                 {FormAllergenLink({ section: 'collectivite' })}
 
                 <div className="group">
-                    <label className={labelStyle}>Sélectionnez le plat pour votre groupe <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                        <select name="Plat_Collectivite" value={formData.Plat_Collectivite} onChange={handleChange} className={getInputStyle("Plat_Collectivite" as any) + " appearance-none"}>
-                            <option value="">Faites votre choix parmi nos 21 plats...</option>
-                            {sortedDishes.map(dish => {
+                    <CustomDropdown
+                        label="Sélectionnez le plat pour votre groupe"
+                        name="Plat_Collectivite"
+                        value={formData.Plat_Collectivite ? (
+                            (() => {
                                 const showPrice = formData.Nombre_Convives !== 'Plus de 100';
-                                const price = getAdjustedPriceDisplay(collectiviteData[dish]);
-                                return (
-                                    <option key={dish} value={dish}>
-                                        {dish}{showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                        </div>
-                    </div>
-                    <p className="text-xs text-neutral-500 mt-2 italic px-1">Un seul et même plat pour l'ensemble des convives.</p>
+                                const price = getAdjustedPriceDisplay(collectiviteData[formData.Plat_Collectivite]);
+                                return `${formData.Plat_Collectivite}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
+                            })()
+                        ) : ""}
+                        options={sortedDishes.map(dish => {
+                            const showPrice = formData.Nombre_Convives !== 'Plus de 100';
+                            const price = getAdjustedPriceDisplay(collectiviteData[dish]);
+                            return `${dish}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
+                        })}
+                        placeholder="Faites votre choix parmi nos 21 plats..."
+                        req={true}
+                        onSelect={(name, val) => {
+                            const dish = sortedDishes.find(d => val.startsWith(d)) || val;
+                            handleSelectMeat(name, dish);
+                        }}
+                    />
+                    <p className="text-xs text-neutral-500 mt-2 italic px-1">Un seul et même plat pour l&apos;ensemble des convives.</p>
                 </div>
 
                 {renderLogisticsOptions()}
@@ -3098,17 +3054,29 @@ function ContactForm() {
 
                 {/* Choix du nombre de services */}
                 <div className="group mb-8">
-                    <label className={labelStyle}>Nombre de services <span className="text-red-500">*</span></label>
-                    <div className="relative md:w-1/2">
-                        <select name="Buffet_Chaud_Services" value={formData.Buffet_Chaud_Services} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Services") + " appearance-none"}>
-                            <option value="2">2 Services (Plat + Dessert)</option>
-                            <option value="3">3 Services (Entrée + Plat + Dessert)</option>
-                            <option value="4">4 Services (Zakouskis + Entrée + Plat + Dessert)</option>
-                            <option value="5">5 Services (Zakouskis + 2 Entrées + Plat + Dessert)</option>
-                        </select>
-                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                        </div>
+                    <div className="md:w-1/2">
+                        <CustomDropdown
+                            label="Nombre de services"
+                            name="Buffet_Chaud_Services"
+                            value={
+                                formData.Buffet_Chaud_Services === "2" ? "2 Services (Plat + Dessert)" :
+                                formData.Buffet_Chaud_Services === "3" ? "3 Services (Entrée + Plat + Dessert)" :
+                                formData.Buffet_Chaud_Services === "4" ? "4 Services (Zakouskis + Entrée + Plat + Dessert)" :
+                                formData.Buffet_Chaud_Services === "5" ? "5 Services (Zakouskis + 2 Entrées + Plat + Dessert)" :
+                                "3 Services (Entrée + Plat + Dessert)"
+                            }
+                            options={[
+                                "2 Services (Plat + Dessert)",
+                                "3 Services (Entrée + Plat + Dessert)",
+                                "4 Services (Zakouskis + Entrée + Plat + Dessert)",
+                                "5 Services (Zakouskis + 2 Entrées + Plat + Dessert)"
+                            ]}
+                            req={true}
+                            onSelect={(name, val) => {
+                                const s = val.charAt(0);
+                                handleSelectMeat(name, s);
+                            }}
+                        />
                     </div>
                 </div>
 
@@ -3280,20 +3248,15 @@ function ContactForm() {
                         />
                     </div>
                     <div className="group">
-                        <label className={labelStyle}>Nombre de convives <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                            <select
-                                name="Nombre_Convives"
-                                value={formData.Nombre_Convives}
-                                onChange={handleChange}
-                                className={`${getInputStyle("Nombre_Convives")} appearance-none`}
-                            >
-                                {getInitialConvivesOptions(formData.Type_Evenement).map(o => <option key={o} value={o}>{o}</option>)}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            label="Nombre de convives"
+                            name="Nombre_Convives"
+                            value={formData.Nombre_Convives}
+                            options={getInitialConvivesOptions(formData.Type_Evenement)}
+                            req={true}
+                            hasError={!!errors.Nombre_Convives}
+                            onSelect={handleSelectMeat}
+                        />
                     </div>
                 </div>
             )}
