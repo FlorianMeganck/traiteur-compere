@@ -1904,17 +1904,17 @@ function ContactForm() {
         return (
             <div className="space-y-4 mt-6 pt-6 border-t border-neutral-200">
                 {/* Option Vaisselle */}
-                <div className={`p-5 rounded-2xl border transition-all duration-300 bg-white ${
+                <div className={`p-5 rounded-2xl border transition-all duration-300 ${
                     isVaisselleChecked
-                        ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/25 shadow-xs"
-                        : "border-neutral-200 hover:border-neutral-300"
+                        ? "border-[#b4842d] bg-[#fdfbf7] shadow-xs"
+                        : "bg-white border-neutral-200 hover:border-neutral-300"
                 }`}>
                     <div className="flex items-start gap-3">
                         <input
                             type="checkbox"
                             name="Location_Vaisselle_Check"
                             id="Location_Vaisselle_Check"
-                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                            className="w-5 h-5 text-[#b4842d] accent-[#b4842d] border-gray-300 rounded focus:ring-[#b4842d] cursor-pointer mt-0.5"
                             checked={isVaisselleChecked}
                             onChange={handleChange}
                         />
@@ -1923,7 +1923,7 @@ function ContactForm() {
                                 <span className="font-bold text-neutral-800 text-sm md:text-base">
                                     🍽️ Location de vaisselle
                                 </span>
-                                <span className="bg-neutral-100 text-neutral-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-neutral-200/80">
+                                <span className="bg-[#fbf7ee] text-[#b4842d] text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200/60">
                                     +1,50 € / pers.
                                 </span>
                             </div>
@@ -1935,17 +1935,17 @@ function ContactForm() {
                 </div>
 
                 {/* Option Verrerie */}
-                <div className={`p-5 rounded-2xl border transition-all duration-300 bg-white ${
+                <div className={`p-5 rounded-2xl border transition-all duration-300 ${
                     isVerrerieChecked
-                        ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/25 shadow-xs"
-                        : "border-neutral-200 hover:border-neutral-300"
+                        ? "border-[#b4842d] bg-[#fdfbf7] shadow-xs"
+                        : "bg-white border-neutral-200 hover:border-neutral-300"
                 }`}>
                     <div className="flex items-start gap-3">
                         <input
                             type="checkbox"
                             name="Location_Verrerie_Check"
                             id="Location_Verrerie_Check"
-                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                            className="w-5 h-5 text-[#b4842d] accent-[#b4842d] border-gray-300 rounded focus:ring-[#b4842d] cursor-pointer mt-0.5"
                             checked={isVerrerieChecked}
                             onChange={handleChange}
                         />
@@ -1954,7 +1954,7 @@ function ContactForm() {
                                 <span className="font-bold text-neutral-800 text-sm md:text-base">
                                     🍷 Location de verrerie
                                 </span>
-                                <span className="bg-neutral-100 text-neutral-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-neutral-200/80">
+                                <span className="bg-[#fbf7ee] text-[#b4842d] text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200/60">
                                     1,50 € / lot de 5 verres
                                 </span>
                             </div>
@@ -1971,7 +1971,7 @@ function ContactForm() {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -6 }}
                                 transition={{ duration: 0.25 }}
-                                className="mt-4 pt-4 border-t border-neutral-200/80"
+                                className="mt-4 pt-4 border-t border-neutral-200/80 bg-[#faf8f5]/80 p-4 rounded-xl"
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                                     <div>
@@ -2028,17 +2028,17 @@ function ContactForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Option 1 : Légumes Chauds */}
-                    <div className={`p-5 rounded-2xl border transition-all duration-300 bg-white ${
+                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${
                         isLegumesChecked
-                            ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/25 shadow-xs"
-                            : "border-neutral-200 hover:border-neutral-300"
+                            ? "border-[#b4842d] bg-[#fdfbf7] shadow-xs"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
                     }`}>
                         <div className="flex items-start gap-3">
                             <input
                                 type="checkbox"
                                 name="Legumes_Chauds_Check"
                                 id="form_legumes_chauds"
-                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                className="w-5 h-5 text-[#b4842d] accent-[#b4842d] border-gray-300 rounded focus:ring-[#b4842d] cursor-pointer mt-0.5"
                                 checked={isLegumesChecked}
                                 onChange={handleChange}
                             />
@@ -2047,7 +2047,7 @@ function ContactForm() {
                                     <span className="font-bold text-neutral-800 text-sm md:text-base">
                                         🥦 Légumes chauds cuisinés
                                     </span>
-                                    <span className="bg-neutral-100 text-neutral-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-neutral-200/80">
+                                    <span className="bg-[#fbf7ee] text-[#b4842d] text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200/60">
                                         +1,00 € / pers.
                                     </span>
                                 </div>
@@ -2059,17 +2059,17 @@ function ContactForm() {
                     </div>
 
                     {/* Option 2 : Sauces Chaudes */}
-                    <div className={`p-5 rounded-2xl border transition-all duration-300 bg-white ${
+                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${
                         isSaucesChecked
-                            ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/25 shadow-xs"
-                            : "border-neutral-200 hover:border-neutral-300"
+                            ? "border-[#b4842d] bg-[#fdfbf7] shadow-xs"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
                     }`}>
                         <div className="flex items-start gap-3">
                             <input
                                 type="checkbox"
                                 name="Sauces_Chaudes_Check"
                                 id="form_sauces_chaudes"
-                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                className="w-5 h-5 text-[#b4842d] accent-[#b4842d] border-gray-300 rounded focus:ring-[#b4842d] cursor-pointer mt-0.5"
                                 checked={isSaucesChecked}
                                 onChange={handleChange}
                             />
@@ -2078,7 +2078,7 @@ function ContactForm() {
                                     <span className="font-bold text-neutral-800 text-sm md:text-base">
                                         🍲 Assortiment de sauces chaudes maison
                                     </span>
-                                    <span className="bg-neutral-100 text-neutral-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-neutral-200/80">
+                                    <span className="bg-[#fbf7ee] text-[#b4842d] text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200/60">
                                         +0,50 € / pers.
                                     </span>
                                 </div>
@@ -2096,7 +2096,7 @@ function ContactForm() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -4 }}
                                     transition={{ duration: 0.2 }}
-                                    className="mt-4 pt-4 border-t border-neutral-200/80 space-y-2.5"
+                                    className="mt-4 pt-4 border-t border-neutral-200/80 bg-[#faf8f5]/80 p-3 rounded-xl space-y-2.5"
                                 >
                                     <span className="block text-xs font-bold text-neutral-600 uppercase tracking-wider">
                                         Sélectionnez vos sauces chaudes :
@@ -2109,15 +2109,15 @@ function ContactForm() {
                                                     key={sauce}
                                                     className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs transition-all cursor-pointer select-none ${
                                                         isSauceChecked
-                                                            ? "bg-white border-[#D4AF37] ring-1 ring-[#D4AF37]/20 text-neutral-900 font-semibold shadow-xs"
-                                                            : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50/50"
+                                                            ? "bg-white border-[#b4842d] text-neutral-900 font-semibold shadow-xs"
+                                                            : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-[#faf8f5]"
                                                     }`}
                                                 >
                                                     <input
                                                         type="checkbox"
                                                         checked={isSauceChecked}
                                                         onChange={() => handleToggleSauceChaude(sauce)}
-                                                        className="w-4 h-4 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                                                        className="w-4 h-4 text-[#b4842d] accent-[#b4842d] border-gray-300 rounded focus:ring-[#b4842d] cursor-pointer"
                                                     />
                                                     <span className="leading-snug">{sauce}</span>
                                                 </label>
@@ -2147,10 +2147,10 @@ function ContactForm() {
         };
 
         return (
-            <div className={`p-5 rounded-2xl border transition-all duration-300 bg-white mt-6 ${
+            <div className={`p-5 rounded-2xl border transition-all duration-300 mt-6 ${
                 isChecked
-                    ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/25 shadow-xs"
-                    : "border-neutral-200 hover:border-neutral-300"
+                    ? "border-[#b4842d] bg-[#fdfbf7] shadow-xs"
+                    : "bg-white border-neutral-200 hover:border-neutral-300"
             }`}>
                 {/* Titre principal avec Case à cocher Niveau 1 */}
                 <div className="flex items-start gap-3">
@@ -2158,7 +2158,7 @@ function ContactForm() {
                         type="checkbox"
                         id="form_dessert_check"
                         name="Dessert_Check"
-                        className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                        className="w-5 h-5 text-[#b4842d] accent-[#b4842d] border-gray-300 rounded focus:ring-[#b4842d] cursor-pointer mt-0.5"
                         checked={isChecked}
                         onChange={(e) => {
                             const val = e.target.checked ? "Oui" : "Non";
@@ -2174,7 +2174,7 @@ function ContactForm() {
                             <span className="font-bold text-neutral-800 text-sm md:text-base">
                                 🍰 Ajouter une option dessert
                             </span>
-                            <span className="bg-neutral-100 text-neutral-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-neutral-200/80">
+                            <span className="bg-[#fbf7ee] text-[#b4842d] text-xs font-bold px-2.5 py-0.5 rounded-full border border-amber-200/60">
                                 Dès 2,50 € / pers.
                             </span>
                         </div>
@@ -2192,7 +2192,7 @@ function ContactForm() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
                             transition={{ duration: 0.25 }}
-                            className="mt-6 pt-6 border-t border-neutral-200/80 space-y-6"
+                            className="mt-6 pt-6 border-t border-neutral-200/80 bg-[#faf8f5]/80 p-5 rounded-xl space-y-6"
                         >
                             {/* Sélecteur de type de dessert (Radio/Toggles élégants) */}
                             <div>
@@ -2206,14 +2206,14 @@ function ContactForm() {
                                         onClick={() => setFormData(prev => ({ ...prev, Dessert_Type: "traditionnel" }))}
                                         className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-start justify-between cursor-pointer ${
                                             dessertType === "traditionnel"
-                                                ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/30"
-                                                : "border-neutral-200 bg-neutral-50/60 hover:bg-white text-neutral-600"
+                                                ? "border-[#b4842d] bg-white shadow-xs ring-1 ring-[#b4842d]/30"
+                                                : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
                                         }`}
                                     >
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-base font-bold text-neutral-800">Desserts traditionnels</span>
-                                                <span className="bg-neutral-100 text-neutral-700 text-[11px] font-bold px-2 py-0.5 rounded-full border border-neutral-200/80">
+                                                <span className="bg-[#fbf7ee] text-[#b4842d] text-[11px] font-bold px-2 py-0.5 rounded-full border border-amber-200/60">
                                                     +6,00 € / pers
                                                 </span>
                                             </div>
@@ -2229,14 +2229,14 @@ function ContactForm() {
                                         onClick={() => setFormData(prev => ({ ...prev, Dessert_Type: "mignardises" }))}
                                         className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-start justify-between cursor-pointer ${
                                             dessertType === "mignardises"
-                                                ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/30"
-                                                : "border-neutral-200 bg-neutral-50/60 hover:bg-white text-neutral-600"
+                                                ? "border-[#b4842d] bg-white shadow-xs ring-1 ring-[#b4842d]/30"
+                                                : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
                                         }`}
                                     >
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-base font-bold text-neutral-800">Mignardises artisanales</span>
-                                                <span className="bg-neutral-100 text-neutral-700 text-[11px] font-bold px-2 py-0.5 rounded-full border border-neutral-200/80">
+                                                <span className="bg-[#fbf7ee] text-[#b4842d] text-[11px] font-bold px-2 py-0.5 rounded-full border border-amber-200/60">
                                                     Dès 2,50 € TTC / pièce
                                                 </span>
                                             </div>
@@ -2265,107 +2265,107 @@ function ContactForm() {
                                         hasError={!!errors.Dessert_Choix}
                                         onSelect={handleSelectMeat}
                                     />
-                                        {errors.Dessert_Choix && (
-                                            <p className="text-xs text-red-500 font-medium">{errors.Dessert_Choix}</p>
-                                        )}
-                                    </motion.div>
-                                )}
+                                    {errors.Dessert_Choix && (
+                                        <p className="text-xs text-red-500 font-medium">{errors.Dessert_Choix}</p>
+                                    )}
+                                </motion.div>
+                            )}
 
-                                {/* Sous-section : Mignardises (Simplifiée - Sélection directe via cases à cocher) */}
-                                {dessertType === "mignardises" && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 6 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className="bg-white p-5 rounded-xl border border-neutral-200 space-y-5 shadow-xs"
-                                    >
-                                        {/* En-tête avec compteur & Prix dynamique à droite */}
-                                        <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-neutral-100">
-                                            <div>
-                                                <label className={`${labelStyle} mb-0.5`}>
-                                                    Sélectionnez vos variétés de mignardises <span className="text-red-500">*</span>
-                                                </label>
-                                                <p className="text-xs text-neutral-500 italic">
-                                                    Cochez les variétés souhaitées (1 case = 1 pièce / pers, max 6).
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="inline-block text-xs font-bold text-neutral-800 bg-neutral-100 px-3 py-1 rounded-full border border-neutral-200">
-                                                    {getMignardisesPriceBadge()}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {/* Grille des variétés (Cases à cocher directes) */}
+                            {/* Sous-section : Mignardises (Simplifiée - Sélection directe via cases à cocher) */}
+                            {dessertType === "mignardises" && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-white p-5 rounded-xl border border-neutral-200 space-y-5 shadow-xs"
+                                >
+                                    {/* En-tête avec compteur & Prix dynamique à droite */}
+                                    <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-neutral-100">
                                         <div>
-                                            <div className="flex items-center justify-between mb-3">
-                                                <span className="text-xs text-neutral-500">
-                                                    {mignardiseCount === 0
-                                                        ? "Aucune variété sélectionnée"
-                                                        : `${mignardiseCount} pièce${mignardiseCount > 1 ? "s" : ""} / personne sélectionnée${mignardiseCount > 1 ? "s" : ""}`}
-                                                </span>
-                                                <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                                                    mignardiseCount >= 3
-                                                        ? "bg-green-100 text-green-800 font-bold"
-                                                        : mignardiseCount > 0
-                                                            ? "bg-neutral-100 text-neutral-800 font-medium border border-neutral-200"
-                                                            : "bg-neutral-100 text-neutral-600"
-                                                }`}>
-                                                    {mignardiseCount} / 6 variété{mignardiseCount > 1 ? "s" : ""}
-                                                </span>
-                                            </div>
-
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                                                {MIGNARDISES_LIST.map((item) => {
-                                                    const isItemChecked = selectedVarietes.includes(item);
-                                                    const isMaxReached = selectedVarietes.length >= 6 && !isItemChecked;
-
-                                                    return (
-                                                        <label
-                                                            key={item}
-                                                            className={`flex items-center gap-3 p-3.5 rounded-xl border text-sm transition-all cursor-pointer select-none ${
-                                                                isItemChecked
-                                                                    ? "bg-white border-[#D4AF37] ring-1 ring-[#D4AF37]/20 text-neutral-900 font-semibold shadow-xs"
-                                                                    : isMaxReached
-                                                                        ? "bg-neutral-50 border-neutral-200 text-neutral-400 opacity-50 cursor-not-allowed"
-                                                                        : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50/50"
-                                                            }`}
-                                                        >
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={isItemChecked}
-                                                                disabled={isMaxReached}
-                                                                onChange={() => handleToggleMignardiseVariete(item)}
-                                                                className="w-4 h-4 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer disabled:cursor-not-allowed"
-                                                            />
-                                                            <span className="flex-1 text-xs leading-relaxed">{item}</span>
-                                                        </label>
-                                                    );
-                                                })}
-                                            </div>
-                                            {errors.Mignardises_Varietes && (
-                                                <p className="text-xs text-red-500 font-medium mt-2">{errors.Mignardises_Varietes}</p>
-                                            )}
-                                        </div>
-
-                                        {/* Indications informatives conservées */}
-                <div className="space-y-2 pt-2">
-                                            <p className="text-xs text-neutral-500 italic flex items-center gap-1.5">
-                                                <span>💡</span> Nous recommandons un minimum de 3 pièces par personne.
+                                            <label className={`${labelStyle} mb-0.5`}>
+                                                Sélectionnez vos variétés de mignardises <span className="text-red-500">*</span>
+                                            </label>
+                                            <p className="text-xs text-neutral-500 italic">
+                                                Cochez les variétés souhaitées (1 case = 1 pièce / pers, max 6).
                                             </p>
-
-                                            <div className="bg-white p-3 rounded-lg border border-neutral-200 text-xs text-neutral-600 flex items-center justify-between flex-wrap gap-2">
-                                                <span>🏷️ <strong>Tarif dégressif :</strong></span>
-                                                <span>1 ou 2 pièces : <strong>2,75 € / pc</strong></span>
-                                                <span className="text-neutral-300">|</span>
-                                                <span>3 à 6 pièces : <strong className="text-[#8A7120]">2,50 € / pc</strong></span>
-                                            </div>
                                         </div>
-                                    </motion.div>
-                                )}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
+                                        <div className="text-right">
+                                            <span className="inline-block text-xs font-bold text-[#b4842d] bg-[#fbf7ee] px-3 py-1 rounded-full border border-amber-200/60">
+                                                {getMignardisesPriceBadge()}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Grille des variétés (Cases à cocher directes) */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className="text-xs text-neutral-500">
+                                                {mignardiseCount === 0
+                                                    ? "Aucune variété sélectionnée"
+                                                    : `${mignardiseCount} pièce${mignardiseCount > 1 ? "s" : ""} / personne sélectionnée${mignardiseCount > 1 ? "s" : ""}`}
+                                            </span>
+                                            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                                                mignardiseCount >= 3
+                                                    ? "bg-green-100 text-green-800 font-bold"
+                                                    : mignardiseCount > 0
+                                                        ? "bg-neutral-100 text-neutral-800 font-medium border border-neutral-200"
+                                                        : "bg-neutral-100 text-neutral-600"
+                                            }`}>
+                                                {mignardiseCount} / 6 variété{mignardiseCount > 1 ? "s" : ""}
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                            {MIGNARDISES_LIST.map((item) => {
+                                                const isItemChecked = selectedVarietes.includes(item);
+                                                const isMaxReached = selectedVarietes.length >= 6 && !isItemChecked;
+
+                                                return (
+                                                    <label
+                                                        key={item}
+                                                        className={`flex items-center gap-3 p-3.5 rounded-xl border text-sm transition-all cursor-pointer select-none ${
+                                                            isItemChecked
+                                                                ? "bg-white border-[#b4842d] ring-1 ring-[#b4842d]/20 text-neutral-900 font-semibold shadow-xs"
+                                                                : isMaxReached
+                                                                    ? "bg-neutral-50 border-neutral-200 text-neutral-400 opacity-50 cursor-not-allowed"
+                                                                    : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-[#faf8f5]"
+                                                        }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isItemChecked}
+                                                            disabled={isMaxReached}
+                                                            onChange={() => handleToggleMignardiseVariete(item)}
+                                                            className="w-4 h-4 text-[#b4842d] accent-[#b4842d] border-gray-300 rounded focus:ring-[#b4842d] cursor-pointer disabled:cursor-not-allowed"
+                                                        />
+                                                        <span className="flex-1 text-xs leading-relaxed">{item}</span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                        {errors.Mignardises_Varietes && (
+                                            <p className="text-xs text-red-500 font-medium mt-2">{errors.Mignardises_Varietes}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Indications informatives conservées */}
+                                    <div className="space-y-2 pt-2">
+                                        <p className="text-xs text-neutral-500 italic flex items-center gap-1.5">
+                                            <span>💡</span> Nous recommandons un minimum de 3 pièces par personne.
+                                        </p>
+
+                                        <div className="bg-white p-3 rounded-lg border border-neutral-200 text-xs text-neutral-600 flex items-center justify-between flex-wrap gap-2">
+                                            <span>🏷️ <strong>Tarif dégressif :</strong></span>
+                                            <span>1 ou 2 pièces : <strong>2,75 € / pc</strong></span>
+                                            <span className="text-neutral-300">|</span>
+                                            <span>3 à 6 pièces : <strong className="text-[#b4842d]">2,50 € / pc</strong></span>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
         );
     };
 
@@ -2534,17 +2534,17 @@ function ContactForm() {
                     <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Crudités (6 Incluses)</label>
 
                     {/* OPTION LAISSER LE CHEF COMPOSER */}
-                    <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 bg-white ${
+                    <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 ${
                         formData.Crudites_Choix_Chef === "Oui"
-                            ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/25 shadow-xs"
-                            : "border-neutral-200 hover:border-neutral-300"
+                            ? "border-[#b4842d] bg-[#fdfbf7] shadow-xs"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
                     }`}>
                         <div className="flex items-start gap-3">
                             <input
                                 type="checkbox"
                                 name="Crudites_Choix_Chef"
                                 id="BBQ_Crudites_Choix_Chef"
-                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                className="w-5 h-5 text-[#b4842d] accent-[#b4842d] border-gray-300 rounded focus:ring-[#b4842d] cursor-pointer mt-0.5"
                                 checked={formData.Crudites_Choix_Chef === "Oui"}
                                 onChange={handleChange}
                             />
@@ -2749,17 +2749,17 @@ function ContactForm() {
                     </label>
 
                     {/* OPTION LAISSER LE CHEF COMPOSER */}
-                    <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 bg-white ${
+                    <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 ${
                         formData.Crudites_Choix_Chef === "Oui"
-                            ? "border-[#D4AF37] ring-1 ring-[#D4AF37]/25 shadow-xs"
-                            : "border-neutral-200 hover:border-neutral-300"
+                            ? "border-[#b4842d] bg-[#fdfbf7] shadow-xs"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
                     }`}>
                         <div className="flex items-start gap-3">
                             <input
                                 type="checkbox"
                                 name="Crudites_Choix_Chef"
                                 id="Buffet_Crudites_Choix_Chef"
-                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                className="w-5 h-5 text-[#b4842d] accent-[#b4842d] border-gray-300 rounded focus:ring-[#b4842d] cursor-pointer mt-0.5"
                                 checked={formData.Crudites_Choix_Chef === "Oui"}
                                 onChange={handleChange}
                             />
@@ -3279,7 +3279,7 @@ function ContactForm() {
                         type="checkbox"
                         name="Societe"
                         id="Societe"
-                        className="w-5 h-5 text-[#D4AF37] rounded cursor-pointer"
+                        className="w-5 h-5 text-[#b4842d] accent-[#b4842d] rounded focus:ring-[#b4842d] cursor-pointer"
                         checked={formData.Societe === "Oui"}
                         onChange={handleChange}
                     />
@@ -3513,7 +3513,7 @@ function ContactForm() {
                                     type="checkbox"
                                     name="Souhaite_etre_recontacte"
                                     id="recontact"
-                                    className="w-5 h-5 text-[#D4AF37] rounded cursor-pointer"
+                                    className="w-5 h-5 text-[#b4842d] accent-[#b4842d] rounded focus:ring-[#b4842d] cursor-pointer"
                                     checked={formData.Souhaite_etre_recontacte === "Oui"}
                                     onChange={handleChange}
                                 />
