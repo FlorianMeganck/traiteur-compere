@@ -2147,14 +2147,18 @@ function ContactForm() {
         };
 
         return (
-            <div className="bg-neutral-50/50 p-6 md:p-8 rounded-2xl border border-neutral-200 mt-8 mb-8">
+            <div className={`p-5 rounded-2xl border transition-all duration-300 mt-6 ${
+                isChecked
+                    ? "bg-[#D4AF37]/10 border-[#D4AF37] shadow-xs"
+                    : "bg-white border-neutral-200 hover:border-neutral-300"
+            }`}>
                 {/* Titre principal avec Case à cocher Niveau 1 */}
-                <div className="flex items-start gap-4 cursor-pointer">
+                <div className="flex items-start gap-3">
                     <input
                         type="checkbox"
                         id="form_dessert_check"
                         name="Dessert_Check"
-                        className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-1"
+                        className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
                         checked={isChecked}
                         onChange={(e) => {
                             const val = e.target.checked ? "Oui" : "Non";
@@ -2165,11 +2169,16 @@ function ContactForm() {
                             }));
                         }}
                     />
-                    <label htmlFor="form_dessert_check" className="cursor-pointer select-none">
-                        <span className="block text-lg font-serif font-bold text-neutral-800">
-                            🍰 Ajouter une option dessert
-                        </span>
-                        <span className="block text-xs text-neutral-500 mt-0.5">
+                    <label htmlFor="form_dessert_check" className="cursor-pointer select-none flex-1">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                🍰 Ajouter une option dessert
+                            </span>
+                            <span className="bg-[#D4AF37]/20 text-[#917217] text-xs font-extrabold px-2.5 py-0.5 rounded-full">
+                                Dès 2,50 € / pers.
+                            </span>
+                        </div>
+                        <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
                             Sublimez votre événement avec nos douceurs artisanales au choix.
                         </span>
                     </label>
@@ -2183,7 +2192,7 @@ function ContactForm() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
                             transition={{ duration: 0.25 }}
-                            className="mt-6 pt-6 border-t border-neutral-200 space-y-6"
+                            className="mt-6 pt-6 border-t border-neutral-200/80 space-y-6"
                         >
                             {/* Sélecteur de type de dessert (Radio/Toggles élégants) */}
                             <div>
