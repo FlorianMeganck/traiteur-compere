@@ -1086,29 +1086,88 @@ function ContactForm() {
         if (isBBQCompose) return viandesComposeCascade;
         return viandesClassiquesCascade;
     };
-    const renderPriceDisplay = (label: string = "Prix par personne") => {
+    const renderServiceToggle = (
+        priceLabel: string = "+2,50 € / pers.",
+        description: string = "Personnel de service et prise en charge sur place."
+    ) => {
+        const isWithService = formData.Service_Check === "Oui";
+        return (
+            <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <label className="block text-sm font-bold text-neutral-800 uppercase tracking-wide flex items-center gap-1.5">
+                        <span>🧑‍🍳</span> Prestation de Service
+                    </label>
+                    <p className="text-xs text-neutral-500 mt-1 italic">
+                        {description}
+                    </p>
+                </div>
+                <div className="flex bg-neutral-100/80 p-1 rounded-xl w-fit border border-neutral-200 shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Non" }))}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                            !isWithService
+                                ? "bg-white border border-neutral-200 shadow-xs text-neutral-900 font-bold"
+                                : "text-neutral-500 hover:text-black"
+                        }`}
+                    >
+                        Sans service
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Oui" }))}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                            isWithService
+                                ? "bg-black text-[#D4AF37] shadow-sm font-bold"
+                                : "text-neutral-500 hover:text-black"
+                        }`}
+                    >
+                        Avec service ({priceLabel})
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    const renderPriceDisplay = () => {
         if (totalPrice.perPerson === 0 && totalPrice.materiel === 0) return null;
         return (
-            <div className="transition-all duration-300 border-t border-[#cbb079]/30 pt-6 mt-6">
-                <div className="bg-neutral-900 text-[#cbb079] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#cbb079]/40 max-w-sm mx-auto">
-                    <span className="text-xs font-bold uppercase tracking-wide text-[#cbb079]">{label}</span>
-                    {totalPrice.perPerson === -1 ? (
-                        <span className="bg-[#cbb079] text-neutral-900 px-3 py-1 rounded font-bold text-xs tracking-widest uppercase">SUR DEVIS</span>
-                    ) : (
-                        <span className="text-xl font-serif font-bold text-[#cbb079]">
-                            {totalPrice.perPerson > 0 ? (
-                                <>
-                                    {totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers
-                                    {totalPrice.materiel > 0 && (
-                                        <> + {totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ (Matériel)</>
-                                    )}
-                                    <span className="text-xs font-sans font-normal text-[#cbb079]/70 ml-1">HTVA</span>
-                                </>
-                            ) : (
-                                "---"
-                            )}
+            <div className="transition-all duration-300 border-t border-[#cbb079]/30 pt-8 mt-8">
+                <div className="bg-neutral-900 text-[#cbb079] p-6 rounded-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#cbb079]/40 max-w-lg mx-auto transform hover:scale-[1.01] transition-transform">
+                    <div>
+                        <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-[#cbb079] block">
+                            PRIX ESTIMATIF
                         </span>
-                    )}
+                        <span className="text-xs text-[#cbb079]/70 mt-1 font-light block">
+                            {formData.Service_Check === "Oui" ? "Prestation de service incluse" : "Hors frais de déplacement et service"}
+                        </span>
+                    </div>
+
+                    <div className="text-left sm:text-right">
+                        {totalPrice.perPerson === -1 ? (
+                            <span className="bg-[#cbb079] text-neutral-900 px-4 py-1.5 rounded-lg font-bold text-xs tracking-widest uppercase inline-block">
+                                SUR DEVIS
+                            </span>
+                        ) : (
+                            <div>
+                                <span className="text-2xl font-serif font-bold text-[#cbb079]">
+                                    {totalPrice.perPerson > 0 ? (
+                                        <>
+                                            {totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € <span className="text-sm font-sans font-normal text-neutral-300">/ pers</span>
+                                            {totalPrice.materiel > 0 && (
+                                                <span className="block text-xs text-[#cbb079]/80 font-sans font-normal">
+                                                    + {totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € (Matériel)
+                                                </span>
+                                            )}
+                                            <span className="text-xs font-sans font-normal text-[#cbb079]/70 ml-1.5 uppercase">HTVA</span>
+                                        </>
+                                    ) : (
+                                        "---"
+                                    )}
+                                </span>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -2489,36 +2548,7 @@ function ContactForm() {
                 </div>
 
                 {/* PRESTATION SERVICE OPTION */}
-                <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                        <label className="block text-sm font-bold text-neutral-800 uppercase tracking-wide">
-                            🔥 Prestation Service
-                        </label>
-                        <p className="text-xs text-neutral-500 mt-1 italic">
-                            Maîtres du feu, découpe & service à table sur place.
-                        </p>
-                    </div>
-                    <div className="flex bg-neutral-50 p-1 rounded-xl w-fit border border-neutral-200">
-                        <button
-                            type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Non" }))}
-                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
-                                formData.Service_Check !== "Oui" ? 'bg-white border border-neutral-200 shadow-sm' : 'text-neutral-500 hover:text-black'
-                            }`}
-                        >
-                            Sans service
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Oui" }))}
-                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
-                                formData.Service_Check === "Oui" ? 'bg-white border border-[#D4AF37] text-[#D4AF37] shadow-sm font-bold' : 'text-neutral-500 hover:text-black'
-                            }`}
-                        >
-                            Avec service (+2,50€ / pers)
-                        </button>
-                    </div>
-                </div>
+                {renderServiceToggle("+2,50 € / pers.", "Maîtres du feu, découpe & service à table sur place.")}
 
                 {/* MAIN CHOICES */}
                 <div className="space-y-6">
@@ -2683,36 +2713,8 @@ function ContactForm() {
 
                 {renderLogisticsOptions()}
 
-                {/* PRICE DISPLAY MOVED TO BOTTOM */}
-                <div className={`transition-all duration-300 border-t border-[#cbb079]/30 pt-8 mt-8 ${totalPrice.perPerson !== 0 || totalPrice.materiel !== 0 ? "opacity-100" : "opacity-50"}`}>
-                    <div className="bg-neutral-900 text-[#cbb079] p-6 rounded-2xl shadow-xl flex items-center justify-between border border-[#cbb079]/40 max-w-lg mx-auto transform hover:scale-[1.01] transition-transform">
-                        <span className="text-sm font-bold uppercase tracking-widest text-[#cbb079]">Prix Estimatif</span>
-                        <div className="text-right">
-                            {totalPrice.perPerson === -1 ? (
-                                <span className="bg-[#cbb079] text-neutral-900 px-4 py-1 rounded font-bold text-sm tracking-widest uppercase">SUR DEVIS</span>
-                            ) : (
-                                <span className="text-2xl font-serif font-bold text-[#cbb079]">
-                                    {totalPrice.perPerson > 0 ? (
-                                        <>
-                                            {totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers
-                                            {totalPrice.materiel > 0 && (
-                                                <> + {totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ (Matériel)</>
-                                            )}
-                                            <span className="text-sm font-sans font-normal text-[#cbb079]/70 ml-1">HTVA</span>
-                                        </>
-                                    ) : (
-                                        "---"
-                                    )}
-                                </span>
-                            )}
-                            {totalPrice.perPerson > 0 && (
-                                <p className="text-xs text-[#cbb079]/70 mt-1 font-light">
-                                    {formData.Service_Check === "Oui" ? "Frais de déplacement et service inclus" : "Hors frais de déplacement et service"}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                {/* PRICE DISPLAY */}
+                {renderPriceDisplay()}
             </motion.div>
         );
     };     // Legacy renderers for Associations / Buffet can be simplified or kept similar...
@@ -2724,6 +2726,8 @@ function ContactForm() {
     const renderPlatUniqueFields = () => (
         <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37]">
             <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mb-4">Votre Choix de Plat Unique</h3>
+
+            {renderServiceToggle("Sur devis", "Prise en charge et service de vos plats chauds.")}
 
             <div>
                 <CustomDropdown
@@ -2788,10 +2792,12 @@ function ContactForm() {
                 )}
             </AnimatePresence>
 
+            {renderDessertSection()}
+
             {renderLogisticsOptions()}
 
             {/* PRICE INDICATION */}
-            {renderPriceDisplay("Prix par personne")}
+            {renderPriceDisplay()}
         </div>
     );
 
@@ -2807,6 +2813,8 @@ function ContactForm() {
                     Composition de votre Buffet
                 </h3>
                 {FormAllergenLink({ section: 'buffets' })}
+
+                {renderServiceToggle("Sur devis", "Mise en place, réassort et service de votre buffet sur place.")}
 
                 {/* NOUVEAU : Encart des plats inclus */}
                 {viandesIncluses.length > 0 && (
@@ -2893,7 +2901,7 @@ function ContactForm() {
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {renderPriceDisplay("Prix par personne")}
+                {renderPriceDisplay()}
             </div>
         );
     };
@@ -2977,10 +2985,12 @@ function ContactForm() {
                     </div>
                 </div>
 
+                {renderDessertSection()}
+
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {renderPriceDisplay("Prix par personne")}
+                {renderPriceDisplay()}
             </div>
         );
     };
@@ -3082,10 +3092,12 @@ function ContactForm() {
                     )}
                 </AnimatePresence>
 
+                {renderDessertSection()}
+
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {renderPriceDisplay("Prix par personne")}
+                {renderPriceDisplay()}
             </div>
         );
     };
@@ -3208,10 +3220,12 @@ function ContactForm() {
                     )}
                 </AnimatePresence>
 
+                {renderDessertSection()}
+
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {renderPriceDisplay("Prix par personne")}
+                {renderPriceDisplay()}
             </div>
         );
     };
@@ -3240,6 +3254,8 @@ function ContactForm() {
                         Choisissez votre formule : plats chauds mijotés ou salad bar & bowls fraîcheur (1 plat unique pour votre groupe).
                     </p>
                 </div>
+
+                {renderServiceToggle("Sur devis", "Mise en place, maintien en température et service pour votre groupe.")}
 
                 {/* Sélecteur de Volet (Toggle buttons) */}
                 <div>
@@ -3452,7 +3468,7 @@ function ContactForm() {
 
                 {/* PRICE INDICATION */}
                 {((currentVolet === "plats_chauds" && formData.Plat_Collectivite) || (currentVolet === "salad_bar" && formData.Salad_Bar_Choix)) && (
-                    renderPriceDisplay("Prix par personne")
+                    renderPriceDisplay()
                 )}
             </div>
         );
@@ -3469,6 +3485,8 @@ function ContactForm() {
                     Personnalisez votre Buffet Chaud
                 </h3>
                 {FormAllergenLink({ section: 'buffets' })}
+
+                {renderServiceToggle("Sur devis", "Prise en charge et service de votre buffet chaud sur place.")}
 
                 {/* Choix du nombre de services */}
                 <div className="group mb-8">
@@ -3552,6 +3570,9 @@ function ContactForm() {
                     />
                 </div>
                 {renderLogisticsOptions()}
+
+                {/* PRICE INDICATION */}
+                {renderPriceDisplay()}
             </div>
         );
     };
@@ -3743,7 +3764,7 @@ function ContactForm() {
                                                 {renderHotOptionsSection()}
                                                 {renderDessertSection()}
                                                 {renderLogisticsOptions()}
-                                                {renderPriceDisplay("Prix par personne")}
+                                                {renderPriceDisplay()}
                                             </div>
                                         )}
                                     </div>
