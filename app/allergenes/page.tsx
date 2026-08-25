@@ -121,7 +121,7 @@ const allergenMatrix: CategoryData[] = [
     },
     {
         id: "collectivite",
-        title: "Repas de Collectivité & Plats Uniques",
+        title: "Repas de Collectivité, Plats Uniques & Salad Bar",
         items: [
             { name: "Lasagnes (Bœuf, Saumon, Légumes)", allergens: ["GLU", "LAI", "OEU", "POI", "CEL"] },
             { name: "Boulettes / Boulets Liégeois (Tomate, Lapin, Chasseur)", allergens: ["GLU", "OEU", "LAI", "SUL", "MOU"] },
@@ -129,7 +129,15 @@ const allergenMatrix: CategoryData[] = [
             { name: "Vol-au-vent", allergens: ["GLU", "LAI", "OEU", "CEL"] },
             { name: "Blanquette de veau à l'ancienne", allergens: ["GLU", "LAI", "CEL"] },
             { name: "Tartiflette", allergens: ["LAI", "SUL"] },
-            { name: "Potées (Carottes, Liégeoise, Choux)", allergens: ["CEL", "SUL", "LAI"] }
+            { name: "Potées (Carottes, Liégeoise, Choux)", allergens: ["CEL", "SUL", "LAI"] },
+            { name: "La Buddha Bowl Maison", allergens: ["SES"] },
+            { name: "La Jardinière du Compère", allergens: ["GLU", "LAI", "FRU"] },
+            { name: "La Fraîcheur Méditerranéenne", allergens: ["LAI", "MOU"] },
+            { name: "La César Revisitée du Compère", allergens: ["GLU", "LAI", "OEU", "POI", "MOU"] },
+            { name: "La Caprese du Compère", allergens: ["GLU", "LAI", "FRU"] },
+            { name: "La Compère Campagnarde", allergens: ["OEU", "SUL"] },
+            { name: "La Power Bowl", allergens: ["OEU", "SOJ", "POI"] },
+            { name: "La Nordique", allergens: ["POI", "CRU", "OEU", "MOU"] }
         ]
     }
 ];

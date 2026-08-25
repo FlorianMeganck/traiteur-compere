@@ -641,84 +641,11 @@ export default function Formules() {
                     </div>
                 </section>
 
-                <SectionTitle title="Plats Uniques & Associations" />
+                <SectionTitle title="Plats Uniques & Salad Bar" />
 
-                {/* SECTION COLLECTIVITÉS */}
-                <div className="flex flex-col lg:flex-row gap-12 items-center mb-32">
-                    {/* Colonne Image (À gauche ou à droite pour alterner) */}
-                    <div className="w-full lg:w-1/2 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl">
-                        <Image
-                            src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"
-                            alt="Repas de Collectivité"
-                            fill
-                            className="object-cover"
-                        />
-                    </div>
-
-                    {/* Colonne Contenu */}
-                    <div className="w-full lg:w-1/2 flex flex-col items-start">
-                        <h2 className="text-3xl md:text-4xl font-serif text-black mb-4">Repas de Collectivité & Plats Uniques</h2>
-                        <div className="w-12 h-1 bg-[#D4AF37] mb-6"></div>
-
-                        <p className="text-neutral-500 font-light mb-8 leading-relaxed">
-                            Des plats mijotés, généreux et réconfortants, pensés spécialement pour les grands groupes, les clubs sportifs et les associations. La convivialité au meilleur prix avec un plat unique pour tous.
-                        </p>
-
-                        <div className="mb-4">
-                            <div className="inline-block bg-neutral-100 text-neutral-600 px-4 py-2 rounded-lg font-bold text-sm tracking-widest">
-                                De 8,00€ à 14,00€ HTVA / personne
-                            </div>
-                        </div>
-
-                        {/* Encadré Composition / Plats */}
-                        <div className="w-full bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-100 mb-8">
-                            <h3 className="text-xs font-bold text-black uppercase tracking-widest mb-4">
-                                Nos Propositions
-                            </h3>
-                            <div className="text-neutral-600 leading-relaxed">
-                                <ul className="space-y-2">
-                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Carbonnade flamande, purée et compote</li>
-                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Lasagnes (Bœuf, Saumon, Légumes)</li>
-                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Boulettes sauce tomate ou chasseur</li>
-                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Et bien d'autres (21 plats au choix)...</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div className="mb-6 -mt-2 w-full flex justify-center">
-                            <AllergenLink section="collectivite" />
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-8">
-                            {/* Bouton 1 : Petit groupe (+10%) */}
-                            <Link
-                                href="/contact?formule=collectivite&groupe=petit"
-                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
-                            >
-                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 30 pers.</p>
-                                <p className="text-xl font-bold text-neutral-800 font-serif">+10%</p>
-                            </Link>
-
-                            {/* Bouton 2 : Standard */}
-                            <Link
-                                href="/contact?formule=collectivite&groupe=standard"
-                                className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
-                            >
-                                <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                                <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">30 à 100 pers.</p>
-                                <p className="text-2xl font-bold text-white font-serif">Devis Standard</p>
-                            </Link>
-
-                            {/* Bouton 3 : Grand groupe (Dégressif) */}
-                            <Link
-                                href="/contact?formule=collectivite&groupe=grand"
-                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
-                            >
-                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
-                                <p className="text-xl font-bold text-neutral-800 font-serif">Dégressif</p>
-                            </Link>
-                        </div>
-                    </div>
+                {/* SECTION COLLECTIVITÉS & SALAD BAR */}
+                <div className="mb-32">
+                    <CollectiviteSection />
                 </div>
 
                 {/* BOTTOM LEGEND */}
@@ -1041,6 +968,251 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
                 <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
                 <p className="text-xl font-bold text-neutral-800 font-serif">Sur devis</p>
             </Link>
+        </div>
+    );
+}
+
+// --- SALAD BAR & BOWLS DATA ---
+export interface SaladBowlItem {
+    name: string;
+    price: number;
+    desc: string;
+}
+
+export const SALADS_BOWLS_DATA: SaladBowlItem[] = [
+    {
+        name: "La Buddha Bowl Maison",
+        price: 10.50,
+        desc: "Riz complet, lentilles corail, patate douce au cumin, chou rouge mariné, carottes à l'orange, avocat, pois chiches"
+    },
+    {
+        name: "La Jardinière du Compère",
+        price: 13.00,
+        desc: "Boulgour aux herbes, chèvre frais, betterave rôtie, noix, pomme verte, roquette, miel-balsamique, parmesan"
+    },
+    {
+        name: "La Fraîcheur Méditerranéenne",
+        price: 14.50,
+        desc: "Mesclun, poulet grillé, tomates confites, concombre, radis, quinoa, feta, graines de courge, vinaigrette citron"
+    },
+    {
+        name: "La César Revisitée du Compère",
+        price: 16.00,
+        desc: "Romaine, poulet rôti, lardons fumés, parmesan, croûtons à l'ail, œuf mollet, sauce César maison"
+    },
+    {
+        name: "La Caprese du Compère",
+        price: 18.00,
+        desc: "Orecchiette, mozzarella di bufala, tomates anciennes, roquette, pesto maison, olives taggiasche, tomates séchées, pignons"
+    },
+    {
+        name: "La Compère Campagnarde",
+        price: 21.00,
+        desc: "Mesclun, magret fumé, lardons fermiers, jambon cru d'Ardenne, œuf poché, grenailles tièdes, oignons confits, croûtons"
+    },
+    {
+        name: "La Power Bowl",
+        price: 22.50,
+        desc: "Filet de bœuf émincé ou saumon grillé, œuf dur, edamame, pois chiches paprika, quinoa, épinards, avocat, chia"
+    },
+    {
+        name: "La Nordique",
+        price: 25.00,
+        desc: "Saumon fumé, crevettes grises, œuf dur, avocat, grenailles tièdes, concombre, jeunes pousses, câpres, oignons rouges"
+    }
+];
+
+function CollectiviteSection() {
+    const [activeVolet, setActiveVolet] = useState<'plats_chauds' | 'salad_bar'>('plats_chauds');
+
+    return (
+        <div className="space-y-8">
+            {/* Sélecteur des 2 Volets */}
+            <div className="flex justify-center">
+                <div className="bg-neutral-100 p-1.5 rounded-2xl flex gap-2 border border-neutral-200 shadow-inner max-w-lg w-full">
+                    <button
+                        type="button"
+                        onClick={() => setActiveVolet('plats_chauds')}
+                        className={`flex-1 py-3 px-4 rounded-xl text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                            activeVolet === 'plats_chauds'
+                                ? "bg-black text-[#D4AF37] shadow-md scale-[1.02]"
+                                : "text-neutral-600 hover:text-black hover:bg-white/60"
+                        }`}
+                    >
+                        <span>🍲</span> Plats Uniques Chauds
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveVolet('salad_bar')}
+                        className={`flex-1 py-3 px-4 rounded-xl text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                            activeVolet === 'salad_bar'
+                                ? "bg-black text-[#D4AF37] shadow-md scale-[1.02]"
+                                : "text-neutral-600 hover:text-black hover:bg-white/60"
+                        }`}
+                    >
+                        <span>🥗</span> Salad Bar & Bowls
+                    </button>
+                </div>
+            </div>
+
+            {/* Contenu Volet 1 : Plats Uniques Chauds */}
+            {activeVolet === 'plats_chauds' ? (
+                <div className="flex flex-col lg:flex-row gap-12 items-center animate-fade-in">
+                    {/* Colonne Image */}
+                    <div className="w-full lg:w-1/2 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl">
+                        <Image
+                            src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"
+                            alt="Repas de Collectivité & Plats Uniques"
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
+
+                    {/* Colonne Contenu */}
+                    <div className="w-full lg:w-1/2 flex flex-col items-start">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold border border-[#cbb079]/30 mb-3">
+                            <span>🍲</span> Volet 1 : Convivialité & Plats Mijotés
+                        </div>
+                        <h2 className="text-3xl md:text-4xl font-serif text-black mb-4">Plats Uniques Chauds</h2>
+                        <div className="w-12 h-1 bg-[#D4AF37] mb-6"></div>
+
+                        <p className="text-neutral-500 font-light mb-6 leading-relaxed">
+                            Des plats mijotés, généreux et réconfortants, pensés spécialement pour les grands groupes, les clubs sportifs et les associations. La convivialité au meilleur prix avec un plat unique pour tous.
+                        </p>
+
+                        <div className="mb-4">
+                            <div className="inline-block bg-neutral-100 text-neutral-700 px-4 py-2 rounded-lg font-bold text-sm tracking-widest border border-neutral-200">
+                                De 8,00€ à 14,00€ HTVA / personne
+                            </div>
+                        </div>
+
+                        {/* Encadré Composition / Plats */}
+                        <div className="w-full bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-100 mb-6">
+                            <h3 className="text-xs font-bold text-black uppercase tracking-widest mb-4">
+                                Nos Propositions Phares (21 plats au choix)
+                            </h3>
+                            <div className="text-neutral-600 leading-relaxed">
+                                <ul className="space-y-2">
+                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Carbonnade flamande, purée et compote</li>
+                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Lasagnes (Bœuf, Saumon, Légumes du soleil)</li>
+                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Boulettes sauce tomate, liégeoise ou chasseur</li>
+                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Blanquette de veau à l&apos;ancienne, tartiflette, potées...</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="mb-6 w-full flex justify-start">
+                            <AllergenLink section="collectivite" />
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-4 w-full">
+                            {/* Bouton 1 : Petit groupe (+10%) */}
+                            <Link
+                                href="/contact?formule=collectivite&volet=plats_chauds&groupe=petit"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                            >
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 30 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">+10%</p>
+                            </Link>
+
+                            {/* Bouton 2 : Standard */}
+                            <Link
+                                href="/contact?formule=collectivite&volet=plats_chauds&groupe=standard"
+                                className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
+                            >
+                                <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
+                                <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">30 à 100 pers.</p>
+                                <p className="text-2xl font-bold text-white font-serif">Devis Standard</p>
+                            </Link>
+
+                            {/* Bouton 3 : Grand groupe (Dégressif) */}
+                            <Link
+                                href="/contact?formule=collectivite&volet=plats_chauds&groupe=grand"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                            >
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">Dégressif</p>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                /* Contenu Volet 2 : Salad Bar & Bowls Fraîcheur */
+                <div className="space-y-8 animate-fade-in">
+                    {/* Header Volet 2 */}
+                    <div className="flex flex-col md:flex-row gap-6 items-start justify-between border-b border-neutral-200 pb-6">
+                        <div className="max-w-2xl">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold border border-[#cbb079]/30 mb-3">
+                                <span>🥗</span> Volet 2 : Fraîcheur & Équilibre
+                            </div>
+                            <h2 className="text-3xl md:text-4xl font-serif text-black mb-3">Salad Bar & Bowls Fraîcheur</h2>
+                            <div className="w-12 h-1 bg-[#D4AF37] mb-4"></div>
+                            <p className="text-neutral-500 font-light leading-relaxed">
+                                Une sélection complète de salades repas et bowls gourmands préparés maison avec des produits frais, sains et colorés. Idéal pour les événements d&apos;entreprise, séminaires, clubs sportifs et réceptions estivales.
+                            </p>
+                        </div>
+
+                        {/* Banner Conditions et Portions */}
+                        <div className="bg-[#fcf9f2] border border-[#cbb079]/40 p-5 rounded-2xl max-w-md shadow-xs">
+                            <div className="flex items-start gap-3">
+                                <span className="text-xl">ℹ️</span>
+                                <div>
+                                    <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-wide mb-1">Conditions & Portions</h4>
+                                    <p className="text-xs text-neutral-600 leading-relaxed font-medium">
+                                        Tarif par personne (base 25 à 150 pers.) – <strong className="text-neutral-900">Minimum 6 portions par référence sélectionnée.</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Grille des 8 Salades & Bowls */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        {SALADS_BOWLS_DATA.map((item, idx) => (
+                            <div
+                                key={idx}
+                                className="bg-white rounded-2xl p-5 border border-neutral-200 shadow-xs hover:shadow-md hover:border-[#cbb079] transition-all flex flex-col justify-between group"
+                            >
+                                <div>
+                                    <div className="flex items-start justify-between gap-2 mb-2.5">
+                                        <h3 className="font-serif font-bold text-base text-neutral-900 group-hover:text-black transition-colors leading-snug">
+                                            {item.name}
+                                        </h3>
+                                    </div>
+                                    <p className="text-xs text-neutral-500 leading-relaxed mb-4">
+                                        {item.desc}
+                                    </p>
+                                </div>
+                                <div className="pt-3 border-t border-neutral-100 flex items-center justify-between">
+                                    <span className="bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold px-3 py-1 rounded-full border border-[#cbb079]/30">
+                                        {item.price.toFixed(2).replace('.', ',')} € <span className="text-[10px] font-normal text-neutral-500">/ pers</span>
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex justify-center pt-2">
+                        <AllergenLink section="collectivite" />
+                    </div>
+
+                    {/* CTA Bottom Salad Bar */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-6 bg-black text-white p-8 rounded-3xl shadow-xl mt-4">
+                        <div>
+                            <h3 className="text-2xl font-serif text-[#D4AF37] mb-1">Composez votre Salad Bar sur-mesure</h3>
+                            <p className="text-sm text-neutral-300 font-light">
+                                Sélectionnez une ou plusieurs recettes et configurez votre devis en ligne instantanément.
+                            </p>
+                        </div>
+                        <Link
+                            href="/contact?formule=collectivite&volet=salad_bar"
+                            className="bg-[#D4AF37] text-black font-bold px-8 py-4 rounded-xl text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-all transform hover:scale-105 shadow-md whitespace-nowrap"
+                        >
+                            Composer mon Salad Bar →
+                        </Link>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
