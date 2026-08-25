@@ -409,6 +409,17 @@ const SALADS_BOWLS_DATA: SaladBowlItem[] = [
     }
 ];
 
+const saladesBowlsData: Record<string, number> = {
+    "La Buddha Bowl Maison": 10.50,
+    "La Jardinière du Compère": 13.00,
+    "La Fraîcheur Méditerranéenne": 14.50,
+    "La César Revisitée du Compère": 16.00,
+    "La Caprese du Compère": 18.00,
+    "La Compère Campagnarde": 21.00,
+    "La Power Bowl": 22.50,
+    "La Nordique": 25.00
+};
+
 const collectiviteData: Record<string, number> = {
     "Lasagne aux légumes du soleil": 8,
     "Cannellonis ricotta épinards": 8,
@@ -629,7 +640,7 @@ function ContactForm() {
         Verrine_Cat_10: "", Verrine_Item_10: "",
         Collectivite_Volet: "plats_chauds" as "plats_chauds" | "salad_bar",
         Plat_Collectivite: "",
-        Salad_Bar_Choix: [] as string[],
+        Salad_Bar_Choix: "",
         Buffet_Chaud_Services: "3",
         Buffet_Chaud_Commentaires: "",
         Buffet_Chaud_Zakouskis: "",
@@ -959,18 +970,14 @@ function ContactForm() {
             }
             base = basePriceTotal;
         } else if (isCollectivite) {
-            if (formData.Collectivite_Volet === 'salad_bar') {
-                const selectedItems = SALADS_BOWLS_DATA.filter(item => (formData.Salad_Bar_Choix || []).includes(item.name));
-                if (selectedItems.length > 0) {
-                    const totalPriceSum = selectedItems.reduce((acc, curr) => acc + curr.price, 0);
-                    let avgPrice = totalPriceSum / selectedItems.length;
-                    if (formData.Nombre_Convives === 'Moins de 30') {
-                        avgPrice = avgPrice * 1.10;
-                    }
-                    base = avgPrice;
+            if (formData.Collectivite_Volet === 'salad_bar' && formData.Salad_Bar_Choix) {
+                let itemPrice = saladesBowlsData[formData.Salad_Bar_Choix] || 0;
+                if (formData.Nombre_Convives === 'Moins de 30') {
+                    itemPrice = itemPrice * 1.10;
                 }
+                base = itemPrice;
             } else if (formData.Plat_Collectivite) {
-                let itemPrice = collectiviteData[formData.Plat_Collectivite];
+                let itemPrice = collectiviteData[formData.Plat_Collectivite] || 0;
                 // Majoration de 10% si moins de 30 personnes
                 if (formData.Nombre_Convives === 'Moins de 30') {
                     itemPrice = itemPrice * 1.10;
@@ -1282,8 +1289,8 @@ function ContactForm() {
             if (!formAny.Verrine_Item_3) newErrors.Verrine_Item_3 = "Requis";
         } else if (isCollectivite) {
             if (formData.Collectivite_Volet === 'salad_bar') {
-                if (!formData.Salad_Bar_Choix || formData.Salad_Bar_Choix.length === 0) {
-                    newErrors.Salad_Bar_Choix = "Veuillez sélectionner au moins 1 recette de salade ou bowl";
+                if (!formData.Salad_Bar_Choix) {
+                    newErrors.Salad_Bar_Choix = "Veuillez choisir une salade ou un bowl";
                 }
             } else {
                 if (!formData.Plat_Collectivite) newErrors.Plat_Collectivite = "Requis";
@@ -1517,13 +1524,16 @@ function ContactForm() {
 
             // --- SECTION COLLECTIVITÉS & SALAD BAR ---
             ...(formData.Type_Evenement === 'Repas de collectivité' && {
-                "🥘 MENU SÉLECTIONNÉ": "REPAS DE COLLECTIVITÉ & SALAD BAR",
+                "🥘 MENU SÉLECTIONNÉ": "REPAS DE COLLECTIVITÉ & PLATS UNIQUES",
                 "📋 Volet Sélectionné": formData.Collectivite_Volet === 'salad_bar' ? "Salad Bar & Bowls Fraîcheur" : "Plats Uniques Chauds",
                 ...(formData.Collectivite_Volet === 'salad_bar' ? {
-                    "🥗 Recettes Salad Bar & Bowls": (formData.Salad_Bar_Choix || []).join(", ") || "Aucune sélection",
-                    "🔢 Nombre de recettes": `${(formData.Salad_Bar_Choix || []).length} recette(s)`
+                    "🥗 Salade / Bowl Choisi": formData.Salad_Bar_Choix
+                        ? `${formData.Salad_Bar_Choix} (${(saladesBowlsData[formData.Salad_Bar_Choix] || 0).toFixed(2).replace('.', ',')} € HTVA / pers.)`
+                        : "Non spécifié"
                 } : {
-                    "🍽️ Plat Unique Choisi": formData.Plat_Collectivite || "Non spécifié"
+                    "🍽️ Plat Unique Chaud Choisi": formData.Plat_Collectivite
+                        ? `${formData.Plat_Collectivite} (${(collectiviteData[formData.Plat_Collectivite] || 0).toFixed(2).replace('.', ',')} € HTVA / pers.)`
+                        : "Non spécifié"
                 })
             }),
 
@@ -3206,47 +3216,18 @@ function ContactForm() {
         );
     };
 
-    const handleToggleSaladBarRecipe = (recipeName: string) => {
-        setFormData(prev => {
-            const current = prev.Salad_Bar_Choix || [];
-            const isSelected = current.includes(recipeName);
-            const updated = isSelected
-                ? current.filter(r => r !== recipeName)
-                : [...current, recipeName];
-            return {
-                ...prev,
-                Salad_Bar_Choix: updated
-            };
-        });
-        if (errors.Salad_Bar_Choix) {
-            setErrors(prev => {
-                const next = { ...prev };
-                delete next.Salad_Bar_Choix;
-                return next;
-            });
-        }
-    };
-
     const renderCollectiviteFields = () => {
         if (!isCollectivite) return null;
 
         const currentVolet = formData.Collectivite_Volet || "plats_chauds";
-        const selectedSalads = formData.Salad_Bar_Choix || [];
 
         // Tri alphabétique des plats chauds pour un affichage propre
         const sortedDishes = Object.keys(collectiviteData).sort((a, b) => a.localeCompare(b));
+        const sortedSalads = Object.keys(saladesBowlsData);
 
         const getAdjustedPriceDisplay = (basePrice: number) => {
             if (formData.Nombre_Convives === 'Moins de 30') return basePrice * 1.10;
             return basePrice;
-        };
-
-        const getSelectedSaladsAvgPrice = () => {
-            const selectedItems = SALADS_BOWLS_DATA.filter(item => selectedSalads.includes(item.name));
-            if (selectedItems.length === 0) return 0;
-            const total = selectedItems.reduce((acc, curr) => acc + curr.price, 0);
-            const avg = total / selectedItems.length;
-            return formData.Nombre_Convives === 'Moins de 30' ? avg * 1.10 : avg;
         };
 
         return (
@@ -3256,7 +3237,7 @@ function ContactForm() {
                         Repas de Collectivité & Plats Uniques
                     </h3>
                     <p className="text-xs text-neutral-500 mt-1">
-                        Choisissez votre formule : plats chauds mijotés ou salad bar & bowls fraîcheur.
+                        Choisissez votre formule : plats chauds mijotés ou salad bar & bowls fraîcheur (1 plat unique pour votre groupe).
                     </p>
                 </div>
 
@@ -3351,13 +3332,13 @@ function ContactForm() {
                                 value={formData.Plat_Collectivite ? (
                                     (() => {
                                         const showPrice = formData.Nombre_Convives !== 'Plus de 100';
-                                        const price = getAdjustedPriceDisplay(collectiviteData[formData.Plat_Collectivite]);
+                                        const price = getAdjustedPriceDisplay(collectiviteData[formData.Plat_Collectivite] || 0);
                                         return `${formData.Plat_Collectivite}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
                                     })()
                                 ) : ""}
                                 options={sortedDishes.map(dish => {
                                     const showPrice = formData.Nombre_Convives !== 'Plus de 100';
-                                    const price = getAdjustedPriceDisplay(collectiviteData[dish]);
+                                    const price = getAdjustedPriceDisplay(collectiviteData[dish] || 0);
                                     return `${dish}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
                                 })}
                                 placeholder="Faites votre choix parmi nos 21 plats mijotés..."
@@ -3383,89 +3364,49 @@ function ContactForm() {
                         animate={{ opacity: 1, y: 0 }}
                         className="space-y-4 pt-2"
                     >
-                        {/* Mention d'information & Conditions requises */}
-                        <div className="bg-[#fcf9f2] border border-[#cbb079]/40 p-4 rounded-xl shadow-xs">
-                            <div className="flex items-start gap-3">
-                                <span className="text-lg">ℹ️</span>
-                                <div>
-                                    <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-wide mb-0.5">
-                                        Conditions & Portions
-                                    </h4>
-                                    <p className="text-xs text-neutral-600 leading-relaxed font-medium">
-                                        Tarif par personne (base 25 à 150 pers.) – <strong className="text-neutral-900">Minimum 6 portions par référence sélectionnée.</strong>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
                         {FormAllergenLink({ section: 'collectivite' })}
 
-                        {/* En-tête de sélection avec compteur */}
-                        <div className="flex items-center justify-between flex-wrap gap-2 pt-2">
-                            <div>
-                                <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider">
-                                    Sélectionnez vos recettes de Salades & Bowls <span className="text-red-500">*</span>
-                                </label>
-                                <p className="text-xs text-neutral-500 italic">
-                                    Cochez une ou plusieurs références selon vos envies.
-                                </p>
-                            </div>
-                            {selectedSalads.length > 0 && (
-                                <div className="text-right">
-                                    <span className="inline-block text-xs font-bold text-[#9e7d3b] bg-[#fcf9f2] px-3 py-1 rounded-full border border-[#cbb079]/30">
-                                        {selectedSalads.length} recette{selectedSalads.length > 1 ? 's' : ''} sélectionnée{selectedSalads.length > 1 ? 's' : ''} (Moyenne : {getSelectedSaladsAvgPrice().toFixed(2).replace('.', ',')} € / pers)
-                                    </span>
+                        <div className="group">
+                            <CustomDropdown
+                                label="CHOISISSEZ VOTRE SALADE / BOWL (1 CHOIX POUR LE GROUPE)"
+                                name="Salad_Bar_Choix"
+                                value={formData.Salad_Bar_Choix ? (
+                                    (() => {
+                                        const showPrice = formData.Nombre_Convives !== 'Plus de 100';
+                                        const price = getAdjustedPriceDisplay(saladesBowlsData[formData.Salad_Bar_Choix] || 0);
+                                        return `${formData.Salad_Bar_Choix}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
+                                    })()
+                                ) : ""}
+                                options={sortedSalads.map(salad => {
+                                    const showPrice = formData.Nombre_Convives !== 'Plus de 100';
+                                    const price = getAdjustedPriceDisplay(saladesBowlsData[salad] || 0);
+                                    return `${salad}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
+                                })}
+                                placeholder="Faites votre choix parmi nos 8 salades & bowls..."
+                                req={true}
+                                hasError={!!errors.Salad_Bar_Choix}
+                                onSelect={(name, val) => {
+                                    const salad = sortedSalads.find(s => val.startsWith(s)) || val;
+                                    handleSelectMeat(name, salad);
+                                }}
+                            />
+                            {errors.Salad_Bar_Choix && (
+                                <p className="text-xs text-red-500 font-medium mt-1">{errors.Salad_Bar_Choix}</p>
+                            )}
+                            <p className="text-xs text-neutral-500 mt-2 italic px-1">Un seul et même choix pour l&apos;ensemble des convives.</p>
+
+                            {/* Aperçu de la composition du bowl sélectionné */}
+                            {formData.Salad_Bar_Choix && (
+                                <div className="bg-[#fcf9f2] border border-[#cbb079]/40 p-4 rounded-xl mt-3 shadow-xs">
+                                    <p className="text-xs font-bold text-neutral-800 uppercase tracking-wide mb-1 flex items-center gap-1.5">
+                                        <span>🥗</span> Composition de {formData.Salad_Bar_Choix} :
+                                    </p>
+                                    <p className="text-xs text-neutral-600 leading-relaxed">
+                                        {SALADS_BOWLS_DATA.find(b => b.name === formData.Salad_Bar_Choix)?.desc}
+                                    </p>
                                 </div>
                             )}
                         </div>
-
-                        {/* Grille des 8 Salades & Bowls interactives */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                            {SALADS_BOWLS_DATA.map((bowl) => {
-                                const isChecked = selectedSalads.includes(bowl.name);
-                                const adjustedPrice = getAdjustedPriceDisplay(bowl.price);
-                                return (
-                                    <div
-                                        key={bowl.name}
-                                        className={`p-4 rounded-2xl border transition-all duration-300 ${
-                                            isChecked
-                                                ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs ring-1 ring-[#cbb079]/20"
-                                                : "bg-white border-neutral-200 hover:border-neutral-300"
-                                        }`}
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            <input
-                                                type="checkbox"
-                                                id={`salad_bowl_${bowl.name.replace(/\s+/g, '_')}`}
-                                                className="w-5 h-5 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer mt-0.5"
-                                                checked={isChecked}
-                                                onChange={() => handleToggleSaladBarRecipe(bowl.name)}
-                                            />
-                                            <label
-                                                htmlFor={`salad_bowl_${bowl.name.replace(/\s+/g, '_')}`}
-                                                className="cursor-pointer select-none flex-1"
-                                            >
-                                                <div className="flex items-center justify-between gap-2 flex-wrap">
-                                                    <span className="font-bold text-neutral-800 text-sm md:text-base">
-                                                        {bowl.name}
-                                                    </span>
-                                                    <span className="bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#cbb079]/30">
-                                                        {adjustedPrice.toFixed(2).replace('.', ',')} € / pers.
-                                                    </span>
-                                                </div>
-                                                <span className="block text-xs text-neutral-500 mt-1.5 leading-relaxed">
-                                                    {bowl.desc}
-                                                </span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-
-                        {errors.Salad_Bar_Choix && (
-                            <p className="text-xs text-red-500 font-medium">{errors.Salad_Bar_Choix}</p>
-                        )}
                     </motion.div>
                 )}
 
@@ -3476,7 +3417,7 @@ function ContactForm() {
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {((currentVolet === "plats_chauds" && formData.Plat_Collectivite) || (currentVolet === "salad_bar" && selectedSalads.length > 0)) && (
+                {((currentVolet === "plats_chauds" && formData.Plat_Collectivite) || (currentVolet === "salad_bar" && formData.Salad_Bar_Choix)) && (
                     renderPriceDisplay("Prix par personne")
                 )}
             </div>
