@@ -1168,15 +1168,31 @@ function CollectiviteSection() {
 
                         <AllergenLink section="collectivite" />
 
-                        {/* Bouton d'action "Demander un devis" */}
-                        <div className="mt-8">
+                        {/* Boutons d'action Devis / Convives */}
+                        <div className="flex flex-wrap gap-4 mt-8">
                             <Link
-                                href="/contact?menu=collectivite_saladbar"
-                                className="w-full bg-black text-[#D4AF37] hover:bg-neutral-800 p-4 rounded-xl text-center shadow-lg font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:scale-[1.02] relative overflow-hidden"
+                                href="/contact?menu=collectivite_saladbar&convives=Moins de 30"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                            >
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 30 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">+10%</p>
+                            </Link>
+
+                            <Link
+                                href="/contact?menu=collectivite_saladbar&convives=30 à 100"
+                                className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
                             >
                                 <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                                <span>Demander un devis Salad Bar</span>
-                                <span>→</span>
+                                <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">30 à 100 pers.</p>
+                                <p className="text-xl font-bold text-white font-serif">Demander un devis</p>
+                            </Link>
+
+                            <Link
+                                href="/contact?menu=collectivite_saladbar&convives=Plus de 100"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                            >
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">Dégressif</p>
                             </Link>
                         </div>
                     </div>
