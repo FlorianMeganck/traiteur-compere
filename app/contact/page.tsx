@@ -689,7 +689,7 @@ function ContactForm() {
     const isPainsMode = menuParam === 'pains_garnis';
     const isZakouskisMode = menuParam === 'zakouskis';
     const isVerrinesMode = menuParam === 'verrines';
-    const isCollectiviteMode = menuParam === 'collectivite' || menuParam === 'salad_bar' || searchParams.get('formule') === 'collectivite' || searchParams.get('formule') === 'salad_bar';
+    const isCollectiviteMode = menuParam === 'collectivite' || menuParam === 'collectivite_chaud' || menuParam === 'salad_bar' || menuParam === 'collectivite_saladbar' || menuParam === 'collectivite_salad_bar' || searchParams.get('formule') === 'collectivite' || searchParams.get('formule') === 'salad_bar';
     const isBuffetChaudMode = searchParams.get('formule') === 'buffet-chaud';
     const isPlatPrepare = typeParam === 'plat_prepare';
 
@@ -768,9 +768,10 @@ function ContactForm() {
                     newData.Type_Evenement = 'Zakouskis';
                 } else if (menuParam === 'verrines') {
                     newData.Type_Evenement = 'Verrines';
-                } else if (menuParam === 'collectivite') {
+                } else if (menuParam === 'collectivite' || menuParam === 'collectivite_chaud') {
                     newData.Type_Evenement = 'Repas de collectivité';
-                } else if (menuParam === 'salad_bar') {
+                    newData.Collectivite_Volet = 'plats_chauds';
+                } else if (menuParam === 'salad_bar' || menuParam === 'collectivite_saladbar' || menuParam === 'collectivite_salad_bar') {
                     newData.Type_Evenement = 'Repas de collectivité';
                     newData.Collectivite_Volet = 'salad_bar';
                 }
@@ -786,11 +787,11 @@ function ContactForm() {
                 if (servicesParam) {
                     newData.Buffet_Chaud_Services = servicesParam;
                 }
-            } else if (formuleParam === 'collectivite' || formuleParam === 'salad_bar') {
+            } else if (formuleParam === 'collectivite' || formuleParam === 'salad_bar' || formuleParam === 'collectivite_chaud' || formuleParam === 'collectivite_saladbar') {
                 newData.Type_Evenement = 'Repas de collectivité';
-                if (formuleParam === 'salad_bar' || voletParam === 'salad_bar' || voletParam === 'salades') {
+                if (formuleParam === 'salad_bar' || formuleParam === 'collectivite_saladbar' || voletParam === 'salad_bar' || voletParam === 'salades') {
                     newData.Collectivite_Volet = 'salad_bar';
-                } else if (voletParam === 'plats_chauds') {
+                } else if (formuleParam === 'collectivite_chaud' || voletParam === 'plats_chauds' || voletParam === 'chaud') {
                     newData.Collectivite_Volet = 'plats_chauds';
                 }
                 const groupeParam = searchParams.get('groupe');
