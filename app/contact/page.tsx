@@ -3366,45 +3366,79 @@ function ContactForm() {
                     >
                         {FormAllergenLink({ section: 'collectivite' })}
 
-                        <div className="group">
-                            <CustomDropdown
-                                label="CHOISISSEZ VOTRE SALADE / BOWL (1 CHOIX POUR LE GROUPE)"
-                                name="Salad_Bar_Choix"
-                                value={formData.Salad_Bar_Choix ? (
-                                    (() => {
-                                        const showPrice = formData.Nombre_Convives !== 'Plus de 100';
-                                        const price = getAdjustedPriceDisplay(saladesBowlsData[formData.Salad_Bar_Choix] || 0);
-                                        return `${formData.Salad_Bar_Choix}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
-                                    })()
-                                ) : ""}
-                                options={sortedSalads.map(salad => {
-                                    const showPrice = formData.Nombre_Convives !== 'Plus de 100';
-                                    const price = getAdjustedPriceDisplay(saladesBowlsData[salad] || 0);
-                                    return `${salad}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
-                                })}
-                                placeholder="Faites votre choix parmi nos 8 salades & bowls..."
-                                req={true}
-                                hasError={!!errors.Salad_Bar_Choix}
-                                onSelect={(name, val) => {
-                                    const salad = sortedSalads.find(s => val.startsWith(s)) || val;
-                                    handleSelectMeat(name, salad);
-                                }}
-                            />
-                            {errors.Salad_Bar_Choix && (
-                                <p className="text-xs text-red-500 font-medium mt-1">{errors.Salad_Bar_Choix}</p>
-                            )}
-                            <p className="text-xs text-neutral-500 mt-2 italic px-1">Un seul et même choix pour l&apos;ensemble des convives.</p>
+                        <div>
+                            <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider">
+                                    CHOISISSEZ VOTRE SALADE / BOWL (1 CHOIX POUR LE GROUPE) <span className="text-red-500">*</span>
+                                </label>
+                                <p className="text-xs text-neutral-500 italic">
+                                    Un seul et même choix pour l&apos;ensemble des convives.
+                                </p>
+                            </div>
 
-                            {/* Aperçu de la composition du bowl sélectionné */}
-                            {formData.Salad_Bar_Choix && (
-                                <div className="bg-[#fcf9f2] border border-[#cbb079]/40 p-4 rounded-xl mt-3 shadow-xs">
-                                    <p className="text-xs font-bold text-neutral-800 uppercase tracking-wide mb-1 flex items-center gap-1.5">
-                                        <span>🥗</span> Composition de {formData.Salad_Bar_Choix} :
-                                    </p>
-                                    <p className="text-xs text-neutral-600 leading-relaxed">
-                                        {SALADS_BOWLS_DATA.find(b => b.name === formData.Salad_Bar_Choix)?.desc}
-                                    </p>
-                                </div>
+                            {/* Grille responsive des 8 Cartes Radio descriptives */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                {SALADS_BOWLS_DATA.map((bowl) => {
+                                    const isSelected = formData.Salad_Bar_Choix === bowl.name;
+                                    const showPrice = formData.Nombre_Convives !== 'Plus de 100';
+                                    const price = getAdjustedPriceDisplay(bowl.price);
+
+                                    return (
+                                        <div
+                                            key={bowl.name}
+                                            onClick={() => {
+                                                handleFormStart();
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    Salad_Bar_Choix: bowl.name
+                                                }));
+                                                if (errors.Salad_Bar_Choix) {
+                                                    setErrors(prev => {
+                                                        const next = { ...prev };
+                                                        delete next.Salad_Bar_Choix;
+                                                        return next;
+                                                    });
+                                                }
+                                            }}
+                                            className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer select-none group flex flex-col justify-between ${
+                                                isSelected
+                                                    ? "border-[#cbb079] bg-[#fcfbf8] shadow-xs ring-1 ring-[#cbb079]/30"
+                                                    : "bg-white border-gray-200 hover:border-gray-300 hover:bg-neutral-50/40"
+                                            }`}
+                                        >
+                                            {/* Haut de la carte : Radio + Nom + Badge Prix */}
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex items-start gap-3 flex-1">
+                                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0 mt-0.5 ${
+                                                        isSelected
+                                                            ? "border-[#c2a661] bg-[#c2a661]"
+                                                            : "border-gray-300 bg-white group-hover:border-gray-400"
+                                                    }`}>
+                                                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                    </div>
+                                                    <span className={`font-bold text-sm md:text-base leading-snug transition-colors ${
+                                                        isSelected ? "text-neutral-900" : "text-neutral-800 group-hover:text-black"
+                                                    }`}>
+                                                        {bowl.name}
+                                                    </span>
+                                                </div>
+
+                                                <span className="bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#cbb079]/30 shrink-0 whitespace-nowrap">
+                                                    {showPrice ? `${price.toFixed(2).replace('.', ',')} € / pers.` : 'Sur devis'}
+                                                </span>
+                                            </div>
+
+                                            {/* Bas de la carte : Description complète des ingrédients */}
+                                            <p className="text-gray-500 text-xs md:text-sm leading-relaxed mt-2.5 pl-7">
+                                                {bowl.desc}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {errors.Salad_Bar_Choix && (
+                                <p className="text-xs text-red-500 font-medium mt-2">{errors.Salad_Bar_Choix}</p>
                             )}
                         </div>
                     </motion.div>
