@@ -1132,34 +1132,34 @@ function ContactForm() {
     const renderPriceDisplay = () => {
         if (totalPrice.perPerson === 0 && totalPrice.materiel === 0) return null;
         return (
-            <div className="transition-all duration-300 border-t border-[#cbb079]/30 pt-8 mt-8">
-                <div className="bg-neutral-900 text-[#cbb079] p-6 rounded-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#cbb079]/40 max-w-lg mx-auto transform hover:scale-[1.01] transition-transform">
+            <div className="transition-all duration-300 border-t border-[#D4AF37]/30 pt-8 mt-8">
+                <div className="bg-neutral-900 text-[#D4AF37] p-6 rounded-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#D4AF37]/40 max-w-lg mx-auto transform hover:scale-[1.01] transition-transform">
                     <div>
-                        <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-[#cbb079] block">
+                        <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-[#D4AF37] block">
                             PRIX ESTIMATIF
                         </span>
-                        <span className="text-xs text-[#cbb079]/70 mt-1 font-light block">
+                        <span className="text-xs text-[#D4AF37]/70 mt-1 font-light block">
                             {formData.Service_Check === "Oui" ? "Prestation de service incluse" : "Hors frais de déplacement et service"}
                         </span>
                     </div>
 
                     <div className="text-left sm:text-right">
                         {totalPrice.perPerson === -1 ? (
-                            <span className="bg-[#cbb079] text-neutral-900 px-4 py-1.5 rounded-lg font-bold text-xs tracking-widest uppercase inline-block">
+                            <span className="bg-[#D4AF37] text-neutral-900 px-4 py-1.5 rounded-lg font-bold text-xs tracking-widest uppercase inline-block">
                                 SUR DEVIS
                             </span>
                         ) : (
                             <div>
-                                <span className="text-2xl font-serif font-bold text-[#cbb079]">
+                                <span className="text-2xl font-serif font-bold text-[#D4AF37]">
                                     {totalPrice.perPerson > 0 ? (
                                         <>
                                             {totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € <span className="text-sm font-sans font-normal text-neutral-300">/ pers</span>
                                             {totalPrice.materiel > 0 && (
-                                                <span className="block text-xs text-[#cbb079]/80 font-sans font-normal">
+                                                <span className="block text-xs text-[#D4AF37]/80 font-sans font-normal">
                                                     + {totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € (Matériel)
                                                 </span>
                                             )}
-                                            <span className="text-xs font-sans font-normal text-[#cbb079]/70 ml-1.5 uppercase">HTVA</span>
+                                            <span className="text-xs font-sans font-normal text-[#D4AF37]/70 ml-1.5 uppercase">HTVA</span>
                                         </>
                                     ) : (
                                         "---"
@@ -2060,7 +2060,7 @@ function ContactForm() {
                 {/* Option Vaisselle */}
                 <div className={`p-5 rounded-2xl border transition-all duration-300 ${
                     isVaisselleChecked
-                        ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs"
+                        ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                         : "bg-white border-neutral-200 hover:border-neutral-300"
                 }`}>
                     <div className="flex items-start gap-3">
@@ -2068,7 +2068,7 @@ function ContactForm() {
                             type="checkbox"
                             name="Location_Vaisselle_Check"
                             id="Location_Vaisselle_Check"
-                            className="w-5 h-5 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer mt-0.5"
+                            className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
                             checked={isVaisselleChecked}
                             onChange={handleChange}
                         />
@@ -2077,7 +2077,7 @@ function ContactForm() {
                                 <span className="font-bold text-neutral-800 text-sm md:text-base">
                                     🍽️ Location de vaisselle
                                 </span>
-                                <span className="bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#cbb079]/30">
+                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
                                     +1,50 € / pers.
                                 </span>
                             </div>
@@ -2091,7 +2091,7 @@ function ContactForm() {
                 {/* Option Verrerie */}
                 <div className={`p-5 rounded-2xl border transition-all duration-300 ${
                     isVerrerieChecked
-                        ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs"
+                        ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                         : "bg-white border-neutral-200 hover:border-neutral-300"
                 }`}>
                     <div className="flex items-start gap-3">
@@ -2099,7 +2099,7 @@ function ContactForm() {
                             type="checkbox"
                             name="Location_Verrerie_Check"
                             id="Location_Verrerie_Check"
-                            className="w-5 h-5 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer mt-0.5"
+                            className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
                             checked={isVerrerieChecked}
                             onChange={handleChange}
                         />
@@ -2108,7 +2108,7 @@ function ContactForm() {
                                 <span className="font-bold text-neutral-800 text-sm md:text-base">
                                     🍷 Location de verrerie
                                 </span>
-                                <span className="bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#cbb079]/30">
+                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
                                     1,50 € / lot de 5 verres
                                 </span>
                             </div>
@@ -2125,7 +2125,7 @@ function ContactForm() {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -6 }}
                                 transition={{ duration: 0.25 }}
-                                className="mt-4 pt-4 border-t border-neutral-200/80 bg-[#faf8f5]/80 p-4 rounded-xl"
+                                className="mt-4 pt-4 border-t border-neutral-200 bg-white p-4 rounded-xl border border-neutral-100"
                             >
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                                     <div>
@@ -2184,7 +2184,7 @@ function ContactForm() {
                     {/* Option 1 : Légumes Chauds */}
                     <div className={`p-5 rounded-2xl border transition-all duration-300 ${
                         isLegumesChecked
-                            ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs"
+                            ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                             : "bg-white border-neutral-200 hover:border-neutral-300"
                     }`}>
                         <div className="flex items-start gap-3">
@@ -2192,7 +2192,7 @@ function ContactForm() {
                                 type="checkbox"
                                 name="Legumes_Chauds_Check"
                                 id="form_legumes_chauds"
-                                className="w-5 h-5 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer mt-0.5"
+                                className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
                                 checked={isLegumesChecked}
                                 onChange={handleChange}
                             />
@@ -2201,7 +2201,7 @@ function ContactForm() {
                                     <span className="font-bold text-neutral-800 text-sm md:text-base">
                                         🥦 Légumes chauds cuisinés
                                     </span>
-                                    <span className="bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#cbb079]/30">
+                                    <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
                                         +1,00 € / pers.
                                     </span>
                                 </div>
@@ -2215,7 +2215,7 @@ function ContactForm() {
                     {/* Option 2 : Sauces Chaudes */}
                     <div className={`p-5 rounded-2xl border transition-all duration-300 ${
                         isSaucesChecked
-                            ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs"
+                            ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                             : "bg-white border-neutral-200 hover:border-neutral-300"
                     }`}>
                         <div className="flex items-start gap-3">
@@ -2223,7 +2223,7 @@ function ContactForm() {
                                 type="checkbox"
                                 name="Sauces_Chaudes_Check"
                                 id="form_sauces_chaudes"
-                                className="w-5 h-5 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer mt-0.5"
+                                className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
                                 checked={isSaucesChecked}
                                 onChange={handleChange}
                             />
@@ -2232,7 +2232,7 @@ function ContactForm() {
                                     <span className="font-bold text-neutral-800 text-sm md:text-base">
                                         🍲 Assortiment de sauces chaudes maison
                                     </span>
-                                    <span className="bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#cbb079]/30">
+                                    <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
                                         +0,50 € / pers.
                                     </span>
                                 </div>
@@ -2250,7 +2250,7 @@ function ContactForm() {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -4 }}
                                     transition={{ duration: 0.2 }}
-                                    className="mt-4 pt-4 border-t border-neutral-200/80 bg-[#faf8f5]/80 p-3 rounded-xl space-y-2.5"
+                                    className="mt-4 pt-4 border-t border-neutral-200 bg-white p-3 rounded-xl border border-neutral-100 space-y-2.5"
                                 >
                                     <span className="block text-xs font-bold text-neutral-600 uppercase tracking-wider">
                                         Sélectionnez vos sauces chaudes :
@@ -2263,15 +2263,15 @@ function ContactForm() {
                                                     key={sauce}
                                                     className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs transition-all cursor-pointer select-none ${
                                                         isSauceChecked
-                                                            ? "bg-white border-[#cbb079] text-neutral-900 font-semibold shadow-xs"
-                                                            : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-[#faf8f5]"
+                                                            ? "bg-white border-[#D4AF37] ring-1 ring-[#D4AF37]/20 text-neutral-900 font-semibold shadow-xs"
+                                                            : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50/50"
                                                     }`}
                                                 >
                                                     <input
                                                         type="checkbox"
                                                         checked={isSauceChecked}
                                                         onChange={() => handleToggleSauceChaude(sauce)}
-                                                        className="w-4 h-4 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer"
+                                                        className="w-4 h-4 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
                                                     />
                                                     <span className="leading-snug">{sauce}</span>
                                                 </label>
@@ -2303,7 +2303,7 @@ function ContactForm() {
         return (
             <div className={`p-5 rounded-2xl border transition-all duration-300 mt-6 ${
                 isChecked
-                    ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs"
+                    ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                     : "bg-white border-neutral-200 hover:border-neutral-300"
             }`}>
                 {/* Titre principal avec Case à cocher Niveau 1 */}
@@ -2312,7 +2312,7 @@ function ContactForm() {
                         type="checkbox"
                         id="form_dessert_check"
                         name="Dessert_Check"
-                        className="w-5 h-5 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer mt-0.5"
+                        className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
                         checked={isChecked}
                         onChange={(e) => {
                             const val = e.target.checked ? "Oui" : "Non";
@@ -2328,7 +2328,7 @@ function ContactForm() {
                             <span className="font-bold text-neutral-800 text-sm md:text-base">
                                 🍰 Ajouter une option dessert
                             </span>
-                            <span className="bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#cbb079]/30">
+                            <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
                                 Dès 2,50 € / pers.
                             </span>
                         </div>
@@ -2346,7 +2346,7 @@ function ContactForm() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -6 }}
                             transition={{ duration: 0.25 }}
-                            className="mt-6 pt-6 border-t border-neutral-200/80 bg-[#faf8f5]/80 p-5 rounded-xl space-y-6"
+                            className="mt-6 pt-6 border-t border-neutral-200 bg-white p-5 rounded-xl border border-neutral-100 space-y-6"
                         >
                             {/* Sélecteur de type de dessert (Radio/Toggles élégants) */}
                             <div>
@@ -2360,14 +2360,14 @@ function ContactForm() {
                                         onClick={() => setFormData(prev => ({ ...prev, Dessert_Type: "traditionnel" }))}
                                         className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-start justify-between cursor-pointer ${
                                             dessertType === "traditionnel"
-                                                ? "border-[#cbb079] bg-white shadow-xs ring-1 ring-[#cbb079]/30"
+                                                ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/30"
                                                 : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
                                         }`}
                                     >
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-base font-bold text-neutral-800">Desserts traditionnels</span>
-                                                <span className="bg-[#fcf9f2] text-[#9e7d3b] text-[11px] font-bold px-2 py-0.5 rounded-full border border-[#cbb079]/30">
+                                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-[11px] font-bold px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
                                                     +6,00 € / pers
                                                 </span>
                                             </div>
@@ -2383,14 +2383,14 @@ function ContactForm() {
                                         onClick={() => setFormData(prev => ({ ...prev, Dessert_Type: "mignardises" }))}
                                         className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-start justify-between cursor-pointer ${
                                             dessertType === "mignardises"
-                                                ? "border-[#cbb079] bg-white shadow-xs ring-1 ring-[#cbb079]/30"
+                                                ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/30"
                                                 : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
                                         }`}
                                     >
                                         <div>
                                             <div className="flex items-center gap-2">
                                                 <span className="text-base font-bold text-neutral-800">Mignardises artisanales</span>
-                                                <span className="bg-[#fcf9f2] text-[#9e7d3b] text-[11px] font-bold px-2 py-0.5 rounded-full border border-[#cbb079]/30">
+                                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-[11px] font-bold px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
                                                     Dès 2,50 € TTC / pièce
                                                 </span>
                                             </div>
@@ -2443,7 +2443,7 @@ function ContactForm() {
                                             </p>
                                         </div>
                                         <div className="text-right">
-                                            <span className="inline-block text-xs font-bold text-[#9e7d3b] bg-[#fcf9f2] px-3 py-1 rounded-full border border-[#cbb079]/30">
+                                            <span className="inline-block text-xs font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1 rounded-full border border-[#D4AF37]/30">
                                                 {getMignardisesPriceBadge()}
                                             </span>
                                         </div>
@@ -2478,10 +2478,10 @@ function ContactForm() {
                                                         key={item}
                                                         className={`flex items-center gap-3 p-3.5 rounded-xl border text-sm transition-all cursor-pointer select-none ${
                                                             isItemChecked
-                                                                ? "bg-white border-[#cbb079] ring-1 ring-[#cbb079]/20 text-neutral-900 font-semibold shadow-xs"
+                                                                ? "bg-white border-[#D4AF37] ring-1 ring-[#D4AF37]/20 text-neutral-900 font-semibold shadow-xs"
                                                                 : isMaxReached
                                                                     ? "bg-neutral-50 border-neutral-200 text-neutral-400 opacity-50 cursor-not-allowed"
-                                                                    : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-[#faf8f5]"
+                                                                    : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50/50"
                                                         }`}
                                                     >
                                                         <input
@@ -2489,7 +2489,7 @@ function ContactForm() {
                                                             checked={isItemChecked}
                                                             disabled={isMaxReached}
                                                             onChange={() => handleToggleMignardiseVariete(item)}
-                                                            className="w-4 h-4 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer disabled:cursor-not-allowed"
+                                                            className="w-4 h-4 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer disabled:cursor-not-allowed"
                                                         />
                                                         <span className="flex-1 text-xs leading-relaxed">{item}</span>
                                                     </label>
@@ -2511,7 +2511,7 @@ function ContactForm() {
                                             <span>🏷️ <strong>Tarif dégressif :</strong></span>
                                             <span>1 ou 2 pièces : <strong>2,75 € / pc</strong></span>
                                             <span className="text-neutral-300">|</span>
-                                            <span>3 à 6 pièces : <strong className="text-[#9e7d3b]">2,50 € / pc</strong></span>
+                                            <span>3 à 6 pièces : <strong className="text-[#D4AF37]">2,50 € / pc</strong></span>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -2661,7 +2661,7 @@ function ContactForm() {
                     {/* OPTION LAISSER LE CHEF COMPOSER */}
                     <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 ${
                         formData.Crudites_Choix_Chef === "Oui"
-                            ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs"
+                            ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                             : "bg-white border-neutral-200 hover:border-neutral-300"
                     }`}>
                         <div className="flex items-start gap-3">
@@ -2669,7 +2669,7 @@ function ContactForm() {
                                 type="checkbox"
                                 name="Crudites_Choix_Chef"
                                 id="BBQ_Crudites_Choix_Chef"
-                                className="w-5 h-5 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer mt-0.5"
+                                className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
                                 checked={formData.Crudites_Choix_Chef === "Oui"}
                                 onChange={handleChange}
                             />
@@ -2854,7 +2854,7 @@ function ContactForm() {
                     {/* OPTION LAISSER LE CHEF COMPOSER */}
                     <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 ${
                         formData.Crudites_Choix_Chef === "Oui"
-                            ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs"
+                            ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                             : "bg-white border-neutral-200 hover:border-neutral-300"
                     }`}>
                         <div className="flex items-start gap-3">
@@ -2862,7 +2862,7 @@ function ContactForm() {
                                 type="checkbox"
                                 name="Crudites_Choix_Chef"
                                 id="Buffet_Crudites_Choix_Chef"
-                                className="w-5 h-5 text-[#c2a661] accent-[#c2a661] border-gray-300 rounded focus:ring-[#c2a661] cursor-pointer mt-0.5"
+                                className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
                                 checked={formData.Crudites_Choix_Chef === "Oui"}
                                 onChange={handleChange}
                             />
@@ -3277,7 +3277,7 @@ function ContactForm() {
                             }}
                             className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-center justify-between cursor-pointer ${
                                 currentVolet === "plats_chauds"
-                                    ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs ring-1 ring-[#cbb079]/30"
+                                    ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                                     : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
                             }`}
                         >
@@ -3308,7 +3308,7 @@ function ContactForm() {
                             }}
                             className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-center justify-between cursor-pointer ${
                                 currentVolet === "salad_bar"
-                                    ? "border-[#cbb079] bg-[#fdfbf7] shadow-xs ring-1 ring-[#cbb079]/30"
+                                    ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                                     : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
                             }`}
                         >
@@ -3319,7 +3319,7 @@ function ContactForm() {
                                         <span className="font-bold text-neutral-800 text-sm md:text-base">
                                             Salad Bar & Bowls
                                         </span>
-                                        <span className="bg-[#fcf9f2] text-[#9e7d3b] text-[10px] font-bold px-2 py-0.2 rounded-full border border-[#cbb079]/30">
+                                        <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
                                             NOUVEAU
                                         </span>
                                     </div>
@@ -3418,7 +3418,7 @@ function ContactForm() {
                                             }}
                                             className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer select-none group flex flex-col justify-between ${
                                                 isSelected
-                                                    ? "border-[#cbb079] bg-[#fcfbf8] shadow-xs ring-1 ring-[#cbb079]/30"
+                                                    ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
                                                     : "bg-white border-gray-200 hover:border-gray-300 hover:bg-neutral-50/40"
                                             }`}
                                         >
@@ -3427,7 +3427,7 @@ function ContactForm() {
                                                 <div className="flex items-start gap-3 flex-1">
                                                     <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0 mt-0.5 ${
                                                         isSelected
-                                                            ? "border-[#c2a661] bg-[#c2a661]"
+                                                            ? "border-[#D4AF37] bg-[#D4AF37]"
                                                             : "border-gray-300 bg-white group-hover:border-gray-400"
                                                     }`}>
                                                         {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -3439,7 +3439,7 @@ function ContactForm() {
                                                     </span>
                                                 </div>
 
-                                                <span className="bg-[#fcf9f2] text-[#9e7d3b] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#cbb079]/30 shrink-0 whitespace-nowrap">
+                                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30 shrink-0 whitespace-nowrap">
                                                     {showPrice ? `${price.toFixed(2).replace('.', ',')} € / pers.` : 'Sur devis'}
                                                 </span>
                                             </div>
@@ -3585,7 +3585,7 @@ function ContactForm() {
                         type="checkbox"
                         name="Societe"
                         id="Societe"
-                        className="w-5 h-5 text-[#c2a661] accent-[#c2a661] rounded focus:ring-[#c2a661] cursor-pointer"
+                        className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] rounded focus:ring-[#D4AF37] cursor-pointer"
                         checked={formData.Societe === "Oui"}
                         onChange={handleChange}
                     />
@@ -3819,7 +3819,7 @@ function ContactForm() {
                                     type="checkbox"
                                     name="Souhaite_etre_recontacte"
                                     id="recontact"
-                                    className="w-5 h-5 text-[#c2a661] accent-[#c2a661] rounded focus:ring-[#c2a661] cursor-pointer"
+                                    className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] rounded focus:ring-[#D4AF37] cursor-pointer"
                                     checked={formData.Souhaite_etre_recontacte === "Oui"}
                                     onChange={handleChange}
                                 />

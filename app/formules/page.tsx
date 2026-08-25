@@ -1136,7 +1136,7 @@ function CollectiviteSection() {
                                 <div className="inline-block bg-neutral-100 text-neutral-700 px-4 py-2 rounded-lg font-bold text-xs tracking-widest border border-neutral-200">
                                     Dès 10,50€ HTVA / personne
                                 </div>
-                                <p className="text-xs text-[#9e7d3b] bg-[#fcf9f2] border border-[#cbb079]/30 p-2.5 rounded-xl font-medium leading-relaxed">
+                                <p className="text-xs text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-2.5 rounded-xl font-medium leading-relaxed">
                                     ℹ️ Tarif de référence (25 à 150 pers.) – <strong>Minimum 6 portions par référence sélectionnée.</strong>
                                 </p>
                             </div>
