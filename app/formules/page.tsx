@@ -1034,22 +1034,20 @@ function CollectiviteSection() {
                     <button
                         type="button"
                         onClick={() => setActiveCollectiviteTab('chaud')}
-                        className={`px-4 py-3 rounded-lg text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 cursor-pointer ${
-                            activeCollectiviteTab === 'chaud'
-                                ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
-                                : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
-                        }`}
+                        className={`px-4 py-3 rounded-lg text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 cursor-pointer ${activeCollectiviteTab === 'chaud'
+                            ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
+                            : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
+                            }`}
                     >
                         Plats Uniques Chauds
                     </button>
                     <button
                         type="button"
                         onClick={() => setActiveCollectiviteTab('salad_bar')}
-                        className={`px-4 py-3 rounded-lg text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 cursor-pointer ${
-                            activeCollectiviteTab === 'salad_bar'
-                                ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
-                                : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
-                        }`}
+                        className={`px-4 py-3 rounded-lg text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 cursor-pointer ${activeCollectiviteTab === 'salad_bar'
+                            ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
+                            : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
+                            }`}
                     >
                         Salad Bar & Bowls
                     </button>
