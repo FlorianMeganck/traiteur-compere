@@ -351,7 +351,7 @@ function BuffetChaudSection() {
     };
 
     const images = {
-        2: "/images/buffet-2",
+        2: "/images/buffet-2.jpeg",
         3: "/images/buffet-3.jpg",
         4: "/images/buffet-4.jpg",
         5: "/images/buffet-5.jpg"
