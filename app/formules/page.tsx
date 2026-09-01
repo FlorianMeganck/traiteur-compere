@@ -233,7 +233,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
         ],
         smallPrice: 24,
         mediumPrice: 22,
-        image: '/images/buffet_gala.jpeg'
+        image: '/images/buffet_gala.png'
     }
 };
 
@@ -351,7 +351,7 @@ function BuffetChaudSection() {
     };
 
     const images = {
-        2: "/images/buffet-2.jpg",
+        2: "/images/buffet-2.png",
         3: "/images/buffet-3.jpg",
         4: "/images/buffet-4.jpg",
         5: "/images/buffet-5.jpg"
