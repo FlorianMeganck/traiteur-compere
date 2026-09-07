@@ -267,10 +267,11 @@ export default function PlatsPrepares() {
                 <div className="absolute inset-0">
                     <Image
                         src="https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=2070&auto=format&fit=crop"
-                        alt="Plats préparés maison"
+                        alt="Plats préparés maison de saison - Traiteur Compère"
                         fill
                         className="object-cover"
                         priority
+                        sizes="100vw"
                     />
                     <div className="absolute inset-0 bg-black/60" />
                 </div>

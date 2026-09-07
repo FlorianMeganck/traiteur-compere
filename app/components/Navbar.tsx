@@ -101,10 +101,11 @@ export default function Navbar() {
                         <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
                             <Image
                                 src="/images/Logo_traiteur.png"
-                                alt="Traiteur Compère"
+                                alt="Logo Traiteur Compère"
                                 fill
                                 className="object-contain"
                                 priority
+                                sizes="(max-width: 768px) 128px, 192px"
                             />
                         </Link>
                     </div>
@@ -147,10 +148,11 @@ export default function Navbar() {
                     <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
                         <Image
                             src="/images/Logo_traiteur.png"
-                            alt="Traiteur Compère"
+                            alt="Logo Traiteur Compère"
                             fill
                             className="object-contain"
                             priority
+                            sizes="(max-width: 768px) 128px, 192px"
                         />
                     </Link>
 

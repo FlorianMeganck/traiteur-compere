@@ -363,9 +363,10 @@ function BuffetChaudSection() {
             <div className="w-full lg:w-1/2 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl">
                 <Image
                     src={images[services as keyof typeof images]}
-                    alt={`Buffet Chaud ${services} services`}
+                    alt={`Buffet Chaud ${services} services - Traiteur Compère`}
                     fill
                     className="object-cover transition-all duration-300"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
                 />
             </div>
 
@@ -535,9 +536,10 @@ export default function Formules() {
                             <div className="lg:col-span-7 h-[500px] relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in lg:order-first">
                                 <Image
                                     src={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].image}
-                                    alt={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].title}
+                                    alt={`Apéritif ${aperitifsData[activeAperitifTab as keyof typeof aperitifsData].title} - Traiteur Compère`}
                                     fill
                                     className="object-cover"
+                                    sizes="(max-width: 1024px) 100vw, 58vw"
                                 />
                             </div>
                         </div>
@@ -624,9 +626,10 @@ export default function Formules() {
                             <div className="lg:col-span-7 h-[500px] relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in">
                                 <Image
                                     src={BUFFETS_FROIDS_OPTIONS[activeBuffetTab].image}
-                                    alt={BUFFETS_FROIDS_OPTIONS[activeBuffetTab].label}
+                                    alt={`Buffet froid ${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].label} - Traiteur Compère`}
                                     fill
                                     className="object-cover"
+                                    sizes="(max-width: 1024px) 100vw, 58vw"
                                 />
                             </div>
                         </div>
@@ -669,9 +672,10 @@ export default function Formules() {
                                             <div className="relative w-6 h-6">
                                                 <Image
                                                     src={data.image}
-                                                    alt={data.label}
+                                                    alt={`Allergène ${data.label}`}
                                                     fill
                                                     className="object-contain"
+                                                    sizes="24px"
                                                 />
                                             </div>
                                         ) : (
@@ -713,9 +717,11 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             <div className="w-full md:w-1/2 relative h-[280px] md:h-[500px] flex-shrink-0 overflow-hidden rounded-2xl shadow-xl">
                 <Image
                     src={formule.image}
-                    alt={formule.title}
+                    alt={`${formule.title} - Traiteur Compère`}
                     fill
                     className="object-cover transition-transform duration-700"
+                    priority={index === 0}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                 />
             </div>
 
@@ -1204,9 +1210,10 @@ function CollectiviteSection() {
                         ? "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"
                         : "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop"
                     }
-                    alt={activeCollectiviteTab === 'chaud' ? "Plats Uniques Chauds" : "Salad Bar & Bowls Fraîcheur"}
+                    alt={activeCollectiviteTab === 'chaud' ? "Plats Uniques Chauds - Traiteur Compère" : "Salad Bar & Bowls Fraîcheur - Traiteur Compère"}
                     fill
                     className="object-cover transition-all duration-500"
+                    sizes="(max-width: 1024px) 100vw, 58vw"
                 />
             </div>
         </div>

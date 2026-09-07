@@ -349,9 +349,10 @@ function SectionService({ title, desc, ctaLabel = "En savoir plus", ctaLink = "/
                                 >
                                     <Image
                                         src={img}
-                                        alt={`${title} ${idx + 1}`}
+                                        alt={`${title} - Présentation ${idx + 1} - Traiteur Compère`}
                                         fill
                                         className="object-cover hover:scale-105 transition-transform duration-700"
+                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 300px"
                                     />
                                 </motion.div>
                             ))}
@@ -386,9 +387,10 @@ function ParallaxCta({
             <motion.div style={{ y }} className="absolute inset-0 w-full h-[140%] -top-[20%] z-0">
                 <Image
                     src={image}
-                    alt="Ambiance"
+                    alt="Ambiance réception et traiteur haut de gamme - Traiteur Compère"
                     fill
                     className="object-cover"
+                    sizes="100vw"
                 />
             </motion.div>
 

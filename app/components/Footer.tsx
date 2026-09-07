@@ -16,9 +16,10 @@ export default function Footer() {
                         <div className="text-white relative w-48 h-24 md:w-56 md:h-28">
                             <Image
                                 src="/images/logo-2.png"
-                                alt="Traiteur Compère"
+                                alt="Logo Traiteur Compère"
                                 fill
                                 className="object-contain"
+                                sizes="(max-width: 768px) 192px, 224px"
                             />
                         </div>
                         <p className="text-sm leading-relaxed font-light">

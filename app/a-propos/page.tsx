@@ -60,41 +60,46 @@ export default function About() {
                         <div className="relative col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-xl group">
                             <Image
                                 src="/images/histoire/Histoire1.jpeg"
-                                alt="Archives fondateurs"
+                                alt="Archives des fondateurs - Maison Compère"
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
+                                sizes="(max-width: 1024px) 100vw, 50vw"
                             />
                         </div>
                         <div className="relative rounded-2xl overflow-hidden shadow-lg group">
                             <Image
                                 src="/images/histoire/Histoire2.jpeg"
-                                alt="Ancienne devanture"
+                                alt="Ancienne devanture historique - Maison Compère"
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
+                                sizes="(max-width: 1024px) 50vw, 25vw"
                             />
                         </div>
                         <div className="relative rounded-2xl overflow-hidden shadow-lg group">
                             <Image
                                 src="/images/histoire/Histoire3.jpeg"
-                                alt="L'équipe d'antan"
+                                alt="L'équipe artisanale d'antan"
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
+                                sizes="(max-width: 1024px) 50vw, 25vw"
                             />
                         </div>
                         <div className="relative rounded-2xl overflow-hidden shadow-lg group hidden md:block">
                             <Image
                                 src="/images/histoire/Histoire4.jpeg"
-                                alt="Outils traditionnels"
+                                alt="Outils traditionnels de découpe et préparation"
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
+                                sizes="(max-width: 1024px) 50vw, 25vw"
                             />
                         </div>
                         <div className="relative rounded-2xl overflow-hidden shadow-lg group hidden md:block">
                             <Image
                                 src="/images/histoire/Histoire5.jpeg"
-                                alt="Savoir-faire artisanal"
+                                alt="Savoir-faire artisanal bicentenaire"
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
+                                sizes="(max-width: 1024px) 50vw, 25vw"
                             />
                         </div>
                     </motion.div>
@@ -167,6 +172,7 @@ export default function About() {
                                         alt="Logo de la Maison Otte"
                                         fill
                                         className="object-cover"
+                                        sizes="(max-width: 768px) 100vw, 25vw"
                                     />
                                 </motion.div>
 
@@ -180,9 +186,10 @@ export default function About() {
                                 >
                                     <Image
                                         src="/images/Maison_otte2.jpeg"
-                                        alt="La Maison Otte"
+                                        alt="Boutique et ateliers de La Maison Otte"
                                         fill
                                         className="object-cover"
+                                        sizes="(max-width: 768px) 100vw, 35vw"
                                     />
                                 </motion.div>
                             </motion.div>
@@ -198,13 +205,13 @@ export default function About() {
                                 className="w-full lg:w-1/2 grid grid-cols-2 gap-4"
                             >
                                 <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md">
-                                    <Image src="/images/Event2.jpeg" alt="Chalet de Noël" fill className="object-cover transition-transform duration-700 hover:scale-105" />
+                                    <Image src="/images/Event2.jpeg" alt="Chalet de Noël de Saint-Georges" fill className="object-cover transition-transform duration-700 hover:scale-105" sizes="(max-width: 768px) 50vw, 25vw" />
                                 </div>
                                 <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md mt-8">
-                                    <Image src="/images/Event1.jpeg" alt="L'Affiche au chalet" fill className="object-cover transition-transform duration-700 hover:scale-105" />
+                                    <Image src="/images/Event1.jpeg" alt="L'Affiche gourmande au chalet" fill className="object-cover transition-transform duration-700 hover:scale-105" sizes="(max-width: 768px) 50vw, 25vw" />
                                 </div>
                                 <div className="relative aspect-[2/1] col-span-2 rounded-2xl overflow-hidden shadow-md">
-                                    <Image src="/images/bouffe/Bouffe8.jpeg" alt="Les pains saucisses du chalet" fill className="object-cover transition-transform duration-700 hover:scale-105" />
+                                    <Image src="/images/bouffe/Bouffe8.jpeg" alt="Les pains saucisses artisanaux du chalet" fill className="object-cover transition-transform duration-700 hover:scale-105" sizes="(max-width: 768px) 100vw, 50vw" />
                                 </div>
                             </motion.div>
 
@@ -243,9 +250,10 @@ export default function About() {
                     >
                         <Image
                             src="/images/Releve1.jpeg"
-                            alt="Christophe Compere, la relève"
+                            alt="Christophe Compère, la relève de la Maison Compère"
                             fill
                             className="object-cover"
+                            sizes="(max-width: 1024px) 100vw, 42vw"
                         />
                     </motion.div>
 

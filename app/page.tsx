@@ -4,20 +4,23 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, animate } from "framer-motion";
+import StructuredData from "./components/StructuredData";
 
 export default function Home() {
   return (
     <main className="bg-white text-gray-800 font-sans selection:bg-[#D4AF37] selection:text-white overflow-hidden">
+      <StructuredData />
 
       <section className="relative w-full h-[80vh] md:h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
         {/* Image d'arrière-plan */}
         <div className="absolute inset-0 z-0">
           <Image
             src="/images/hero-traiteur.png"
-            alt="Traiteur Compère - Buffet de réception"
+            alt="Traiteur Compère - Maison fondée en 1821, traiteur événementiel d'exception à Saint-Georges-sur-Meuse"
             fill
             className="object-cover"
             priority
+            sizes="100vw"
           />
           {/* Voile sombre pour faire ressortir le texte */}
           <div className="absolute inset-0 bg-black/50"></div>
@@ -213,9 +216,10 @@ function ServiceCard({ title, image, desc, link }: { title: string, image: strin
           >
             <Image
               src={image}
-              alt={title}
+              alt={`Service ${title} - Traiteur Compère`}
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
             />
           </motion.div>
         </div>
