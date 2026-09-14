@@ -104,7 +104,6 @@ export default function Navbar() {
                                 alt="Logo Traiteur Compère"
                                 fill
                                 className="object-contain"
-                                priority
                                 sizes="(max-width: 768px) 128px, 192px"
                             />
                         </Link>
@@ -151,7 +150,6 @@ export default function Navbar() {
                             alt="Logo Traiteur Compère"
                             fill
                             className="object-contain"
-                            priority
                             sizes="(max-width: 768px) 128px, 192px"
                         />
                     </Link>

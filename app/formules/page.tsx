@@ -538,6 +538,7 @@ export default function Formules() {
                                     src={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].image}
                                     alt={`Apéritif ${aperitifsData[activeAperitifTab as keyof typeof aperitifsData].title} - Traiteur Compère`}
                                     fill
+                                    priority
                                     className="object-cover"
                                     sizes="(max-width: 1024px) 100vw, 58vw"
                                 />

@@ -62,6 +62,7 @@ export default function About() {
                                 src="/images/histoire/Histoire1.jpeg"
                                 alt="Archives des fondateurs - Maison Compère"
                                 fill
+                                priority
                                 className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
                                 sizes="(max-width: 1024px) 100vw, 50vw"
                             />
