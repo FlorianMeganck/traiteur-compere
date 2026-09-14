@@ -1133,7 +1133,7 @@ function ContactForm() {
         if (totalPrice.perPerson === 0 && totalPrice.materiel === 0) return null;
         return (
             <div className="transition-all duration-300 border-t border-[#D4AF37]/30 pt-8 mt-8">
-                <div className="bg-neutral-900 text-[#D4AF37] p-6 rounded-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#D4AF37]/40 max-w-lg mx-auto transform hover:scale-[1.01] transition-transform">
+                <div className="bg-neutral-900 text-[#D4AF37] p-4 sm:p-6 rounded-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#D4AF37]/40 w-full max-w-lg mx-auto transform hover:scale-[1.01] transition-transform">
                     <div>
                         <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-[#D4AF37] block">
                             PRIX ESTIMATIF
@@ -2533,7 +2533,7 @@ function ContactForm() {
         const bbqName = menuParam ? menuParam.replace('bbq_', '').charAt(0).toUpperCase() + menuParam.replace('bbq_', '').slice(1) : "Sur Mesure";
 
         return (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white border border-neutral-200 rounded-2xl p-6 md:p-8 space-y-8 shadow-sm relative">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white border border-neutral-200 rounded-2xl p-4 sm:p-6 md:p-8 space-y-8 shadow-sm relative">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
 
                 {/* HEADER Configuration */}
@@ -2724,7 +2724,7 @@ function ContactForm() {
     // Simplified renderers for Associations / Buffet can be kept minimal
 
     const renderPlatUniqueFields = () => (
-        <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37]">
+        <div className="space-y-6 animate-fade-in bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37]">
             <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mb-4">Votre Choix de Plat Unique</h3>
 
             {renderServiceToggle("Sur devis", "Prise en charge et service de vos plats chauds.")}
@@ -3713,9 +3713,9 @@ function ContactForm() {
             <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#D4AF37]/5 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3 z-0 pointer-events-none" />
 
-            <div className="max-w-5xl mx-auto px-6 relative z-10">
-                <div className="bg-white shadow-2xl p-8 md:p-14 rounded-[2rem] border-t-4 border-[#D4AF37]">
-                    <header className="text-center mb-10">
+            <div className="w-full max-w-5xl mx-auto px-2 sm:px-4 md:px-6 relative z-10">
+                <div className="bg-white shadow-2xl p-4 sm:p-8 md:p-14 rounded-2xl md:rounded-[2rem] border-t-4 border-[#D4AF37]">
+                    <header className="text-center mb-8 md:mb-10">
                         <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Contactez-nous</h1>
                         <p className="text-gray-500 font-light text-lg">Parlons de votre prochain événement.</p>
                     </header>
@@ -3757,7 +3757,7 @@ function ContactForm() {
                                         {isCollectivite && renderCollectiviteFields()}
                                         {isBuffetChaud && renderBuffetChaudFields()}
                                         {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && !isCollectivite && !isBuffetChaud && (
-                                            <div className="bg-neutral-50/50 border border-neutral-200 rounded-2xl p-6 md:p-8 space-y-6">
+                                            <div className="bg-neutral-50/50 border border-neutral-200 rounded-2xl p-4 sm:p-6 md:p-8 space-y-6">
                                                 <div className="bg-neutral-50 p-6 rounded-xl text-center">
                                                     <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
                                                 </div>
@@ -3770,7 +3770,7 @@ function ContactForm() {
                                     </div>
 
                                     {/* SECTION 2 : VOS INFORMATIONS & COORDONNÉES */}
-                                    <div className="bg-white border border-neutral-200/80 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
+                                    <div className="bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 shadow-sm">
                                         <div className="border-b border-neutral-200 pb-4">
                                             <h3 className="text-2xl font-serif text-neutral-900 font-bold">
                                                 Vos Coordonnées & Date de l&apos;Événement
@@ -3783,7 +3783,7 @@ function ContactForm() {
                                     </div>
                                 </>
                             ) : (
-                                <div className="bg-white border border-neutral-200/80 rounded-2xl p-6 md:p-8 space-y-6 shadow-sm">
+                                <div className="bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 shadow-sm">
                                     <div className="border-b border-neutral-200 pb-4">
                                         <h3 className="text-2xl font-serif text-neutral-900 font-bold">
                                             Vos Coordonnées & Date de l&apos;Événement
@@ -3797,7 +3797,7 @@ function ContactForm() {
                             )}
 
                             {!isPlatPrepare && (
-                                <div className="group bg-white border border-neutral-200/80 rounded-2xl p-6 md:p-8 shadow-sm space-y-3">
+                                <div className="group bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm space-y-3">
                                     <label className="block text-lg font-serif font-bold text-neutral-900">
                                         Dites-nous en plus ! (Optionnel)
                                     </label>
@@ -3837,7 +3837,7 @@ function ContactForm() {
                             )}
 
                             {isPlatPrepare && (
-                                <div className="bg-white p-6 rounded-2xl border border-neutral-200 mt-6 shadow-sm">
+                                <div className="bg-white p-4 sm:p-6 rounded-2xl border border-neutral-200 mt-6 shadow-sm">
                                     <h3 className="text-xl font-serif text-black mb-4 flex items-center gap-2">
                                         <ShoppingCart className="text-[#D4AF37]" size={20} /> Récapitulatif de votre panier
                                     </h3>
