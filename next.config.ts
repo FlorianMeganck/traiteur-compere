@@ -43,6 +43,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/politique-confidentialite',
+        destination: '/legal/confidentialite',
+        permanent: true,
+      },
+      {
+        source: '/cgv',
+        destination: '/legal/cgv',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
