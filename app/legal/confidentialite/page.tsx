@@ -1,4 +1,29 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Politique de Confidentialité & Données Personnelles",
+  description:
+    "Découvrez comment Traiteur Compère protège votre vie privée et traite vos données personnelles conformément au Règlement Général sur la Protection des Données.",
+  alternates: {
+    canonical: "/legal/confidentialite",
+  },
+  openGraph: {
+    title:
+      "Politique de Confidentialité & Données Personnelles | Traiteur Compère",
+    description:
+      "Découvrez comment Traiteur Compère protège votre vie privée et traite vos données personnelles conformément au Règlement Général sur la Protection des Données.",
+    url: "https://traiteur-compere.be/legal/confidentialite",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Traiteur Compère - Politique de Confidentialité",
+      },
+    ],
+  },
+};
 
 export default function Confidentialite() {
     return (

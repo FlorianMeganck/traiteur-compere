@@ -1,4 +1,28 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Mentions Légales & Informations Juridiques",
+  description:
+    "Mentions légales, informations d'entreprise et conditions d'utilisation du site officiel de la Maison Compère SRL, traiteur à Saint-Georges-sur-Meuse.",
+  alternates: {
+    canonical: "/mentions-legales",
+  },
+  openGraph: {
+    title: "Mentions Légales & Informations Juridiques | Traiteur Compère",
+    description:
+      "Mentions légales, informations d'entreprise et conditions d'utilisation du site officiel de la Maison Compère SRL, traiteur à Saint-Georges-sur-Meuse.",
+    url: "https://traiteur-compere.be/mentions-legales",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Traiteur Compère - Mentions Légales",
+      },
+    ],
+  },
+};
 
 export default function MentionsLegales() {
     return (

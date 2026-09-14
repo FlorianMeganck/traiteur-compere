@@ -1,4 +1,28 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Conditions Générales de Vente (CGV)",
+  description:
+    "Conditions générales de vente et modalités de prestation de services de Traiteur Compère pour vos réceptions privées et événements professionnels.",
+  alternates: {
+    canonical: "/legal/cgv",
+  },
+  openGraph: {
+    title: "Conditions Générales de Vente (CGV) | Traiteur Compère",
+    description:
+      "Conditions générales de vente et modalités de prestation de services de Traiteur Compère pour vos réceptions privées et événements professionnels.",
+    url: "https://traiteur-compere.be/legal/cgv",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Traiteur Compère - Conditions Générales de Vente",
+      },
+    ],
+  },
+};
 
 export default function CGV() {
     return (
