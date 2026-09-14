@@ -13,7 +13,7 @@ export const metadata: Metadata = {
       "Politique de Confidentialité & Données Personnelles | Traiteur Compère",
     description:
       "Découvrez comment Traiteur Compère protège votre vie privée et traite vos données personnelles conformément au Règlement Général sur la Protection des Données.",
-    url: "https://traiteur-compere.be/legal/confidentialite",
+    url: "https://www.traiteur-compere.be/legal/confidentialite",
     images: [
       {
         url: "/images/og-image.jpg",

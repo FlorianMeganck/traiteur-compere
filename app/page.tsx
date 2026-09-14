@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: 'Traiteur Artisanal & Événements à Liège | Traiteur Compère',
     description:
       "Découvrez la cuisine authentique de la Maison Compère. Formules barbecues, buffets et événements privés ou d'entreprise en Wallonie.",
-    url: 'https://traiteur-compere.be',
+    url: 'https://www.traiteur-compere.be',
     images: [
       {
         url: '/images/og-image.jpg',

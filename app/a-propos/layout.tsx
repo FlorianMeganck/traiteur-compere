@@ -12,7 +12,7 @@ export const metadata: Metadata = {
       'Maison Compère depuis 1821 | Notre Histoire & Savoir-Faire | Traiteur Compère',
     description:
       "Découvrez l'histoire bicentenaire de la Maison Compère, traiteur d'excellence en Province de Liège alliant passion culinaire et tradition artisanale.",
-    url: 'https://traiteur-compere.be/a-propos',
+    url: 'https://www.traiteur-compere.be/a-propos',
     images: [
       {
         url: '/images/og-image.jpg',

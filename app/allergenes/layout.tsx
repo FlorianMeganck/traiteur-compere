@@ -12,7 +12,7 @@ export const metadata: Metadata = {
       'Guide des Allergènes & Informations Ingrédients | Traiteur Compère',
     description:
       'Consultez les informations détaillées sur les 14 allergènes majeurs présents dans nos menus et préparations pour un événement en toute sécurité.',
-    url: 'https://traiteur-compere.be/allergenes',
+    url: 'https://www.traiteur-compere.be/allergenes',
     images: [
       {
         url: '/images/og-image.jpg',

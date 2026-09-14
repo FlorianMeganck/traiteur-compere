@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: 'Demande de Devis en Ligne Gratuit | Traiteur Compère',
     description:
       'Composez votre formule en quelques clics et recevez votre devis personnalisé sous 24h pour vos événements en région liégeoise.',
-    url: 'https://traiteur-compere.be/contact',
+    url: 'https://www.traiteur-compere.be/contact',
     images: [
       {
         url: '/images/og-image.jpg',

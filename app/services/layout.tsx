@@ -12,7 +12,7 @@ export const metadata: Metadata = {
       'Services Traiteur : Mariages, Entreprises & Événements Privés | Traiteur Compère',
     description:
       'Organisation traiteur sur-mesure pour vos mariages, réceptions professionnelles et fêtes privées à Liège et en Wallonie avec un service haut de gamme.',
-    url: 'https://traiteur-compere.be/services',
+    url: 'https://www.traiteur-compere.be/services',
     images: [
       {
         url: '/images/og-image.jpg',

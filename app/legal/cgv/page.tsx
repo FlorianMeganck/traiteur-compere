@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: "Conditions Générales de Vente (CGV) | Traiteur Compère",
     description:
       "Conditions générales de vente et modalités de prestation de services de Traiteur Compère pour vos réceptions privées et événements professionnels.",
-    url: "https://traiteur-compere.be/legal/cgv",
+    url: "https://www.traiteur-compere.be/legal/cgv",
     images: [
       {
         url: "/images/og-image.jpg",

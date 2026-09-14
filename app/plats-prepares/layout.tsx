@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: 'Plats Préparés du Chef à Emporter | Traiteur Compère',
     description:
       'Commandez nos plats traiteur artisanaux cuisinés chaque semaine : recettes traditionnelles, produits frais locaux et formules à emporter en région liégeoise.',
-    url: 'https://traiteur-compere.be/plats-prepares',
+    url: 'https://www.traiteur-compere.be/plats-prepares',
     images: [
       {
         url: '/images/og-image.jpg',

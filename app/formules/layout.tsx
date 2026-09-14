@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: 'Formules & Menus (BBQ, Buffets, Plats Uniques) | Traiteur Compère',
     description:
       "Consultez notre carte complète : barbecues au feu de bois, buffets froids d'exception, salad bar et formules pour grandes tablées.",
-    url: 'https://traiteur-compere.be/formules',
+    url: 'https://www.traiteur-compere.be/formules',
     images: [
       {
         url: '/images/og-image.jpg',

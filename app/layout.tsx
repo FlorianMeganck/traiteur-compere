@@ -15,7 +15,7 @@ const lato = Lato({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://traiteur-compere.be'),
+  metadataBase: new URL('https://www.traiteur-compere.be'),
   title: {
     default: 'Traiteur Compère | Traiteur Événementiel & Mariages en Province de Liège',
     template: '%s | Traiteur Compère',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'fr_BE',
-    url: 'https://traiteur-compere.be',
+    url: 'https://www.traiteur-compere.be',
     siteName: 'Traiteur Compère',
     images: [
       {

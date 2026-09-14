@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     title: "Mentions Légales & Informations Juridiques | Traiteur Compère",
     description:
       "Mentions légales, informations d'entreprise et conditions d'utilisation du site officiel de la Maison Compère SRL, traiteur à Saint-Georges-sur-Meuse.",
-    url: "https://traiteur-compere.be/mentions-legales",
+    url: "https://www.traiteur-compere.be/mentions-legales",
     images: [
       {
         url: "/images/og-image.jpg",

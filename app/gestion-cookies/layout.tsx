@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: 'Gestion des Cookies & Préférences | Traiteur Compère',
     description:
       'Gérez vos préférences relatives aux cookies et traceurs utilisés sur le site Traiteur Compère pour une expérience de navigation respectueuse.',
-    url: 'https://traiteur-compere.be/gestion-cookies',
+    url: 'https://www.traiteur-compere.be/gestion-cookies',
     images: [
       {
         url: '/images/og-image.jpg',

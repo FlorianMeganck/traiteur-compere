@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/commande-confirmee', '/api/'],
       },
     ],
-    sitemap: 'https://traiteur-compere.be/sitemap.xml',
+    sitemap: 'https://www.traiteur-compere.be/sitemap.xml',
   };
 }
