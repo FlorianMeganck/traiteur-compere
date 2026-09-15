@@ -103,6 +103,9 @@ export function useCart() {
             newCart.push(item);
         }
         saveCart(newCart);
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('cart-bump'));
+        }
     };
 
     const removeFromCart = (id: string) => {

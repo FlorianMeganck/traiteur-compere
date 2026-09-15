@@ -63,10 +63,20 @@ export default function Navbar() {
         };
     }, [isMenuOpen]);
 
+    const [cartBump, setCartBump] = useState(false);
+
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
+        const handleCartBump = () => {
+            setCartBump(true);
+            setTimeout(() => setCartBump(false), 800);
+        };
         window.addEventListener('open-cart-drawer', handleOpenCart);
-        return () => window.removeEventListener('open-cart-drawer', handleOpenCart);
+        window.addEventListener('cart-bump', handleCartBump);
+        return () => {
+            window.removeEventListener('open-cart-drawer', handleOpenCart);
+            window.removeEventListener('cart-bump', handleCartBump);
+        };
     }, []);
 
     return (
@@ -116,14 +126,28 @@ export default function Navbar() {
                         <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} />
                         
                         {/* Desktop Cart Button */}
-                        <button onClick={() => setIsCartOpen(true)} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37]`}>
+                        <motion.button 
+                            onClick={() => setIsCartOpen(true)} 
+                            aria-label="Voir mon panier"
+                            animate={cartBump ? { scale: [1, 1.25, 0.9, 1.15, 1], rotate: [0, -12, 12, -6, 0] } : { scale: 1, rotate: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37]`}
+                        >
                             <ShoppingCart size={24} />
-                            {totalItems > 0 && (
-                                <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                                    {totalItems}
-                                </span>
-                            )}
-                        </button>
+                            <AnimatePresence>
+                                {totalItems > 0 && (
+                                    <motion.span 
+                                        key={totalItems}
+                                        initial={{ scale: 0.5, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        exit={{ scale: 0.5, opacity: 0 }}
+                                        className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm"
+                                    >
+                                        {totalItems}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </motion.button>
                     </div>
 
                     {/* SOCIALS (Absolute left) */}
@@ -156,14 +180,28 @@ export default function Navbar() {
 
                     <div className="flex items-center gap-4">
                         {/* Mobile Cart Button */}
-                        <button onClick={() => { setIsMenuOpen(false); setIsCartOpen(true); }} className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-50`}>
+                        <motion.button 
+                            onClick={() => { setIsMenuOpen(false); setIsCartOpen(true); }} 
+                            aria-label="Voir mon panier"
+                            animate={cartBump ? { scale: [1, 1.25, 0.9, 1.15, 1], rotate: [0, -12, 12, -6, 0] } : { scale: 1, rotate: 0 }}
+                            transition={{ duration: 0.5 }}
+                            className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-50`}
+                        >
                             <ShoppingCart size={24} />
-                            {totalItems > 0 && (
-                                <span className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                                    {totalItems}
-                                </span>
-                            )}
-                        </button>
+                            <AnimatePresence>
+                                {totalItems > 0 && (
+                                    <motion.span 
+                                        key={totalItems}
+                                        initial={{ scale: 0.5, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        exit={{ scale: 0.5, opacity: 0 }}
+                                        className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm"
+                                    >
+                                        {totalItems}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </motion.button>
 
                         {/* BURGER */}
                         <div className="relative z-50">

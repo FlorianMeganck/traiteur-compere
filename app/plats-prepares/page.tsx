@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Trash2 } from "lucide-react";
+import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Trash2, Check } from "lucide-react";
 
 import { MENU_DATA } from "../data/plats-prepares";
 import { useCart, CartItem } from "../hooks/useCart";
@@ -12,13 +12,13 @@ import { useCart, CartItem } from "../hooks/useCart";
 export default function PlatsPrepares() {
     const { cartItems, addToCart, removeFromCart, cartTotal, totalItems } = useCart();
     
-    const [toastMessage, setToastMessage] = useState("");
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'warning' } | null>(null);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
     useEffect(() => {
         const handleCartCleaned = () => {
-            setToastMessage("Certains plats de votre panier ne sont plus disponibles dans les délais et ont été retirés.");
-            setTimeout(() => setToastMessage(""), 5000);
+            setToast({ message: "Certains plats de votre panier ne sont plus disponibles dans les délais et ont été retirés.", type: 'warning' });
+            setTimeout(() => setToast(null), 5000);
         };
         window.addEventListener('cart-cleaned', handleCartCleaned);
         return () => window.removeEventListener('cart-cleaned', handleCartCleaned);
@@ -119,6 +119,11 @@ export default function PlatsPrepares() {
         };
         addToCart(item);
         setSelectedMeal(null);
+        setToast({ 
+            message: `${quantitePlat}x "${dayData.meal}" ajouté${quantitePlat > 1 ? 's' : ''} au panier !`, 
+            type: 'success' 
+        });
+        setTimeout(() => setToast(null), 3500);
         window.dispatchEvent(new Event('open-cart-drawer'));
     };
 
@@ -126,17 +131,31 @@ export default function PlatsPrepares() {
         <main className="min-h-screen bg-gray-50 pb-24 relative">
             {/* Toast Notification */}
             <AnimatePresence>
-                {toastMessage && (
+                {toast && (
                     <motion.div
-                        initial={{ opacity: 0, y: -50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -50 }}
-                        className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-red-600 text-white px-6 py-3 rounded-full shadow-lg text-sm font-medium flex items-center gap-3"
+                        initial={{ opacity: 0, y: -40, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -40, scale: 0.95 }}
+                        className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 text-white px-5 py-3 rounded-full shadow-2xl text-sm font-medium flex items-center gap-3 backdrop-blur-md border ${
+                            toast.type === 'success' 
+                                ? 'bg-neutral-900/95 border-[#D4AF37]/40 text-white' 
+                                : 'bg-red-600/95 border-red-500 text-white'
+                        }`}
                     >
-                        <UtensilsCrossed size={18} />
-                        {toastMessage}
-                        <button onClick={() => setToastMessage("")} className="ml-2 hover:text-red-200">
-                            <X size={16} />
+                        {toast.type === 'success' ? (
+                            <span className="w-5 h-5 rounded-full bg-[#D4AF37] flex items-center justify-center text-black">
+                                <Check size={13} strokeWidth={3} />
+                            </span>
+                        ) : (
+                            <UtensilsCrossed size={18} />
+                        )}
+                        <span className="max-w-xs md:max-w-md truncate">{toast.message}</span>
+                        <button 
+                            onClick={() => setToast(null)} 
+                            className="ml-1 opacity-70 hover:opacity-100 transition-opacity p-0.5 rounded-full hover:bg-white/10"
+                            aria-label="Fermer la notification"
+                        >
+                            <X size={15} />
                         </button>
                     </motion.div>
                 )}
