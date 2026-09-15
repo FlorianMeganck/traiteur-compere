@@ -47,8 +47,8 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import CookieBanner from "./components/CookieBanner";
-
 import ScrollToTop from "./components/ScrollToTop";
+import StructuredData from "./components/StructuredData";
 
 export default function RootLayout({
   children,
@@ -60,6 +60,7 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${lato.variable} antialiased bg-white text-black font-sans`}
       >
+        <StructuredData />
         <Navbar />
         {children}
         <CookieBanner />

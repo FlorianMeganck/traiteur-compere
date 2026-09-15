@@ -412,6 +412,88 @@ export default function StructuredData() {
             }
           ]
         }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://www.traiteur-compere.be/#website",
+        "url": "https://www.traiteur-compere.be",
+        "name": "Traiteur Compère",
+        "description": "Traiteur haut de gamme pour mariages, barbecues et événements d'entreprise à Liège et en Wallonie.",
+        "publisher": {
+          "@id": "https://www.traiteur-compere.be/#caterer"
+        },
+        "hasPart": [
+          {
+            "@type": "WebPage",
+            "@id": "https://www.traiteur-compere.be/formules",
+            "name": "Formules & Menus",
+            "url": "https://www.traiteur-compere.be/formules",
+            "description": "Découvrez toutes nos formules : barbecues au feu de bois, buffets froids & chauds, salad bars."
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.traiteur-compere.be/services",
+            "name": "Services Traiteur",
+            "url": "https://www.traiteur-compere.be/services",
+            "description": "Prestations pour mariages, banquets, réceptions d'entreprise et événements privés."
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.traiteur-compere.be/plats-prepares",
+            "name": "Plats Préparés",
+            "url": "https://www.traiteur-compere.be/plats-prepares",
+            "description": "Menus hebdomadaires de plats cuisinés maison et commande en ligne."
+          },
+          {
+            "@type": "WebPage",
+            "@id": "https://www.traiteur-compere.be/contact",
+            "name": "Contact & Devis",
+            "url": "https://www.traiteur-compere.be/contact",
+            "description": "Demandez votre devis gratuit sur-mesure pour votre événement."
+          }
+        ]
+      },
+      {
+        "@type": "ItemList",
+        "@id": "https://www.traiteur-compere.be/#site-navigation",
+        "name": "Navigation Principale Traiteur Compère",
+        "itemListElement": [
+          {
+            "@type": "SiteNavigationElement",
+            "position": 1,
+            "name": "Formules",
+            "description": "Formules barbecues, buffets chauds et froids, salad bars et réceptions",
+            "url": "https://www.traiteur-compere.be/formules"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 2,
+            "name": "Services",
+            "description": "Services traiteur pour mariages, entreprises, anniversaires et événements",
+            "url": "https://www.traiteur-compere.be/services"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 3,
+            "name": "Plats Préparés",
+            "description": "Plats cuisinés maison chaque semaine à emporter ou en livraison",
+            "url": "https://www.traiteur-compere.be/plats-prepares"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 4,
+            "name": "Contact & Devis",
+            "description": "Demandez un devis gratuit et personnalisé pour votre événement",
+            "url": "https://www.traiteur-compere.be/contact"
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 5,
+            "name": "À Propos",
+            "description": "Histoire et savoir-faire bicentenaire de la Maison Compère",
+            "url": "https://www.traiteur-compere.be/a-propos"
+          }
+        ]
       }
     ]
   };

@@ -4,13 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, animate } from "framer-motion";
-import StructuredData from "./StructuredData";
 
 export default function HomeClient() {
   return (
     <main className="bg-white text-gray-800 font-sans selection:bg-[#D4AF37] selection:text-white overflow-hidden">
-      <StructuredData />
-
       <section className="relative w-full h-[80vh] md:h-screen min-h-[600px] flex items-center justify-center overflow-hidden">
         {/* Image d'arrière-plan */}
         <div className="absolute inset-0 z-0">

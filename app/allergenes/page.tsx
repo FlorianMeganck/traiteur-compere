@@ -341,7 +341,15 @@ function AllergenesContent() {
                 <div className="mt-10 text-center pb-8">
                     <button
                         type="button"
-                        onClick={() => window.close()}
+                        onClick={() => {
+                            window.close();
+                            // Fallback si l'onglet n'a pas été ouvert via script ou si le navigateur bloque window.close()
+                            setTimeout(() => {
+                                if (!document.hidden) {
+                                    window.location.href = "/";
+                                }
+                            }, 200);
+                        }}
                         className="inline-block bg-[#D4AF37] text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest text-sm hover:bg-black transition-colors shadow-md"
                     >
                         Fermer cette page

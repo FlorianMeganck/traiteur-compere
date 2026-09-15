@@ -52,19 +52,19 @@ export default function Footer() {
                         <h3 className="font-serif text-white text-lg tracking-widest uppercase">Navigation</h3>
                         <div className="flex flex-col gap-3 text-sm">
                             <FooterLink href="/" label="Accueil" />
-                            <FooterLink href="/plats-prepares" label="Plats Préparés" />
                             <FooterLink href="/formules" label="Formules" />
                             <FooterLink href="/services" label="Services" />
+                            <FooterLink href="/plats-prepares" label="Plats Préparés" />
                             <FooterLink href="/a-propos" label="À Propos" />
-                            <FooterLink href="/allergenes" label="Allergènes" />
                             <FooterLink href="/contact" label="Contact" />
                         </div>
                     </div>
 
-                    {/* Column 4: Legal */}
+                    {/* Column 4: Legal / Infos */}
                     <div className="flex flex-col gap-6">
                         <h3 className="font-serif text-white text-lg tracking-widest uppercase">Informations</h3>
                         <div className="flex flex-col gap-3 text-sm">
+                            <FooterLink href="/allergenes" label="Tableau des allergènes" target="_blank" rel="noopener noreferrer" />
                             <FooterLink href="/mentions-legales" label="Mentions légales" />
                             <FooterLink href="/legal/confidentialite" label="Politique de confidentialité" />
                             <FooterLink href="/legal/cgv" label="CGV" />
@@ -99,10 +99,12 @@ export default function Footer() {
 
 // --- Sub-components ---
 
-function FooterLink({ href, label }: { href: string; label: string }) {
+function FooterLink({ href, label, target, rel }: { href: string; label: string; target?: string; rel?: string }) {
     return (
         <Link
             href={href}
+            target={target}
+            rel={rel}
             className="hover:text-[#D4AF37] transition-all duration-300 hover:translate-x-1 inline-block"
         >
             {label}
