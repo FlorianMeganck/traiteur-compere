@@ -599,21 +599,19 @@ export default function MenusFetesPage() {
                                                                         handleModalSingleChoice(step.id, option.id);
                                                                     }
                                                                 }}
-                                                                className={`cursor-pointer p-3.5 rounded-2xl border transition-all flex flex-col justify-between text-left ${
-                                                                    isSelected
+                                                                className={`cursor-pointer p-3.5 rounded-2xl border transition-all flex flex-col justify-between text-left ${isSelected
                                                                         ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-xs'
                                                                         : 'bg-[#FAF9F6] border-neutral-200/90 hover:border-[#D4AF37]/50 hover:bg-white'
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 <div className="flex items-start justify-between gap-2 mb-1">
                                                                     <p className="font-serif font-bold text-xs sm:text-sm text-neutral-900 leading-snug">
                                                                         {option.title}
                                                                     </p>
-                                                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
-                                                                        isSelected
+                                                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${isSelected
                                                                             ? 'bg-[#D4AF37] border-[#D4AF37] text-black text-[10px] font-bold'
                                                                             : 'border-neutral-300'
-                                                                    }`}>
+                                                                        }`}>
                                                                         {isSelected && '✓'}
                                                                     </div>
                                                                 </div>
