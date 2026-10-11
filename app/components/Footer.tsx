@@ -31,9 +31,9 @@ export default function Footer() {
                     <div className="flex flex-col gap-6">
                         <h3 className="font-serif text-white text-lg tracking-widest uppercase">Nous Contacter</h3>
                         <div className="flex flex-col gap-4 text-sm">
-                            <a href="tel:+32476865407" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
+                            <a href="tel:+32468385082" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
                                 <PhoneIcon className="w-5 h-5 text-[#D4AF37]" />
-                                <span className="group-hover:translate-x-1 transition-transform duration-300">+32 476 86 54 07</span>
+                                <span className="group-hover:translate-x-1 transition-transform duration-300">+32 468 38 50 82</span>
                             </a>
                             <a href="mailto:contact@traiteur-compere.be" className="flex items-center gap-3 hover:text-[#D4AF37] transition-colors duration-300 group">
                                 <MailIcon className="w-5 h-5 text-[#D4AF37]" />

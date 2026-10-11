@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useLayoutEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle } from "lucide-react";
+import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle, Phone } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { FESTIVE_DATE_OPTIONS, NOEL_DATE_OPTIONS, NOUVEL_AN_DATE_OPTIONS, getFestiveMenuDateRestrictions } from "../data/menus-fetes";
 import { useCart } from "../hooks/useCart";
@@ -116,7 +116,9 @@ const feculentsBBQ = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenail
 
 const BUFFET_FROID_PRICES: Record<string, { small: number; medium: number }> = {
     buffet_campagnard: { small: 17, medium: 14 },
-    buffet_ardenais: { small: 17, medium: 15 },
+    buffet_ardenais: { small: 17, medium: 16 },
+    buffet_ardennais: { small: 17, medium: 16 },
+    ardennais: { small: 17, medium: 16 },
     buffet_reception: { small: 20, medium: 18 },
     buffet_gala: { small: 24, medium: 22 }
 };
@@ -418,6 +420,8 @@ function ContactForm() {
         Location_Verrerie_Vin: "0",
         Location_Verrerie_Soft: "0",
         Location_Verrerie_Flute: "0",
+        Option_Brasserie_Check: "Non",
+        Option_Brasserie_Details: "",
         plat_1: "",
         plat_2: "",
         plat_3: "",
@@ -988,7 +992,8 @@ function ContactForm() {
                 ...(name === "Societe" && !checked ? { Nom_Societe: "" } : {}),
                 ...(name === "Accompagnement_Chaud_Supplement_Check" && !checked ? { Accompagnement_Chaud_Supplement: "" } : {}),
                 ...(name === "Dessert_Check" && !checked ? { Dessert_Choix: "" } : {}),
-                ...(name === "Location_Verrerie_Check" && !checked ? { Location_Verrerie_Vin: "0", Location_Verrerie_Soft: "0", Location_Verrerie_Flute: "0" } : {})
+                ...(name === "Location_Verrerie_Check" && !checked ? { Location_Verrerie_Vin: "0", Location_Verrerie_Soft: "0", Location_Verrerie_Flute: "0" } : {}),
+                ...(name === "Option_Brasserie_Check" && !checked ? { Option_Brasserie_Details: "" } : {})
             }));
             return;
         }
@@ -1350,6 +1355,10 @@ function ContactForm() {
             // DIVERS
             "🍽️ Location de vaisselle": formData.Location_Vaisselle_Check === "Oui" ? "Oui (+1,50€/pers)" : "Non",
             "🍷 Location de verrerie": getVerrerieDetail(),
+            "🍺 Option Bar & Gestion des Boissons (Formule Brasserie)": formData.Option_Brasserie_Check === "Oui" ? "Oui (Fourniture frigo vitré, stock reprise des invendus & service à 18€/h HTVA)" : "Non",
+            ...(formData.Option_Brasserie_Check === "Oui" && formData.Option_Brasserie_Details ? { "📝 Précisions Boissons & Bar": formData.Option_Brasserie_Details } : {}),
+            brasserieOption: formData.Option_Brasserie_Check === "Oui",
+            brasserieDetails: formData.Option_Brasserie_Details || "",
             "💬 Message / Allergies": formData.details_projet || "Aucun message",
             "🔄 Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
         };
@@ -1404,6 +1413,8 @@ function ContactForm() {
                     dateEvenement: isMenusFetes ? dateEvenementFormatted : undefined,
                     creneauRetrait: isMenusFetes ? creneauRetraitFormatted : undefined,
                     details_projet: formData.details_projet,
+                    brasserieOption: formData.Option_Brasserie_Check === "Oui",
+                    brasserieDetails: formData.Option_Brasserie_Details || undefined,
                     totalPrice: cartTotal,
                     cartItems: cartItems,
                     captchaToken: captchaToken,
@@ -1622,6 +1633,51 @@ function ContactForm() {
                                         </div>
                                     </div>
                                 </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* OPTION BAR & BOISSONS (FORMULE BRASSERIE) */}
+                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 max-w-lg mx-auto md:max-w-none">
+                    <div className="flex items-start sm:items-center gap-3 mb-2">
+                        <input
+                            type="checkbox"
+                            name="Option_Brasserie_Check"
+                            id="Option_Brasserie_Check"
+                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5 sm:mt-0 shrink-0"
+                            checked={formData.Option_Brasserie_Check === "Oui"}
+                            onChange={handleChange}
+                        />
+                        <label htmlFor="Option_Brasserie_Check" className="text-neutral-700 font-bold cursor-pointer select-none text-left leading-tight">
+                            Option Bar & Gestion des Boissons (Formule Brasserie)
+                        </label>
+                    </div>
+                    <p className="text-sm text-neutral-500 ml-8 italic">
+                        Fourniture du frigo, stock avec reprise des invendus et personnel de service à 18 €/h HTVA.
+                    </p>
+
+                    <AnimatePresence>
+                        {formData.Option_Brasserie_Check === "Oui" && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="overflow-hidden mt-4 pl-0 sm:pl-8"
+                            >
+                                <label htmlFor="Option_Brasserie_Details" className="block text-xs font-bold text-neutral-600 uppercase tracking-wider mb-2">
+                                    Précisions éventuelles sur vos boissons (optionnel)
+                                </label>
+                                <textarea
+                                    id="Option_Brasserie_Details"
+                                    name="Option_Brasserie_Details"
+                                    rows={3}
+                                    value={formData.Option_Brasserie_Details}
+                                    onChange={handleChange}
+                                    placeholder="Précisions éventuelles sur vos boissons (ex : bières régionales, softs, vins, durée estimée du service...)"
+                                    className="w-full px-4 py-3 rounded-xl border border-neutral-200 bg-white text-neutral-800 text-sm focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none transition-all placeholder:text-neutral-400 resize-y"
+                                />
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -2626,6 +2682,34 @@ function ContactForm() {
                         <p className="text-gray-500 font-light text-lg">
                             {isMenusFetes ? "Réveillon de Noël & Nouvel An — Réservation de votre repas" : (isPlatPrepare ? "Renseignez vos coordonnées pour valider votre commande." : "Parlons de votre prochain événement.")}
                         </p>
+
+                        {/* Coordonnées directes */}
+                        <div className="mt-6 pt-5 border-t border-neutral-100 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm text-neutral-600">
+                            <a
+                                href="tel:+32468385082"
+                                className="inline-flex items-center gap-2 font-medium hover:text-[#D4AF37] transition-colors group"
+                            >
+                                <span className="w-8 h-8 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    <Phone size={14} />
+                                </span>
+                                <span className="font-semibold text-neutral-800 group-hover:text-[#D4AF37]">+32 468 38 50 82</span>
+                            </a>
+                            <a
+                                href="mailto:contact@traiteur-compere.be"
+                                className="inline-flex items-center gap-2 font-medium hover:text-[#D4AF37] transition-colors group"
+                            >
+                                <span className="w-8 h-8 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    ✉️
+                                </span>
+                                <span>contact@traiteur-compere.be</span>
+                            </a>
+                            <span className="inline-flex items-center gap-2 font-medium text-neutral-500">
+                                <span className="w-8 h-8 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0">
+                                    📍
+                                </span>
+                                <span>Rue Potay 3, 4470 Saint-Georges</span>
+                            </span>
+                        </div>
                     </header>
 
                     {status === "success" ? (

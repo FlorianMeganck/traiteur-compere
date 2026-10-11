@@ -532,7 +532,7 @@ export default function PlatsPrepares() {
                 >
                     <p className="text-neutral-500 italic mb-8 max-w-2xl mx-auto">
                         *Menu susceptible d'évoluer en fonction des arrivages et de la saisonnalité.<br />
-                        Pour toute question, n'hésitez pas à nous contacter au <strong className="text-black font-semibold">+32 476 86 54 07</strong>.
+                        Pour toute question, n'hésitez pas à nous contacter au <a href="tel:+32468385082" className="text-black font-semibold hover:text-[#D4AF37] transition-colors">+32 468 38 50 82</a>.
                     </p>
                 </motion.div>
             </div>

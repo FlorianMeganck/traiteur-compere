@@ -228,7 +228,7 @@ function CommandeConfirmeeContent() {
                                     </div>
                                     <div>
                                         <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Téléphone</p>
-                                        <p className="font-bold text-black text-lg">+32 476 86 54 07</p>
+                                        <a href="tel:+32468385082" className="font-bold text-black text-lg hover:text-[#D4AF37] transition-colors">+32 468 38 50 82</a>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">

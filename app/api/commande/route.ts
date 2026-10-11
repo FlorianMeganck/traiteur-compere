@@ -281,7 +281,7 @@ export async function POST(req: Request) {
                             
                             <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #D4AF37; border-radius: 0 8px 8px 0; margin-top: 30px;">
                                 <h3 style="margin-top: 0; color: #000;">Infos pratiques de retrait</h3>
-                                <p style="margin: 5px 0;"><strong>📞 Téléphone :</strong> +32 476 86 54 07</p>
+                                <p style="margin: 5px 0;"><strong>📞 Téléphone :</strong> <a href="tel:+32468385082" style="color: #000; text-decoration: none;">+32 468 38 50 82</a></p>
                                 <p style="margin: 5px 0;"><strong>📍 Atelier de retrait :</strong> Rue Potay 3, 4470 Saint-Georges-sur-Meuse, Belgique</p>
                                 <p style="margin: 5px 0;"><a href="https://maps.google.com/?q=Traiteur+Compere,+Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique" style="color: #D4AF37; text-decoration: none; font-weight: bold;">🗺️ Voir sur Google Maps</a></p>
                             </div>
