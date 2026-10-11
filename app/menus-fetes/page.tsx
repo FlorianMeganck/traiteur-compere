@@ -5,7 +5,8 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Sparkles, Check, Plus, Minus, ShoppingCart, X,
-    ChefHat, Calendar, Clock, MapPin, Award, FileText, ArrowRight
+    ChefHat, Calendar, Clock, MapPin, Award, FileText, ArrowRight,
+    UtensilsCrossed, CreditCard
 } from "lucide-react";
 
 import {
@@ -218,7 +219,7 @@ export default function MenusFetesPage() {
             {/* Halo doré décoratif */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[550px] bg-gradient-to-b from-[#D4AF37]/10 via-[#D4AF37]/5 to-transparent blur-3xl pointer-events-none -z-10" />
 
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
 
                 {/* ==================================================== */}
                 {/* 1. EN-TÊTE HERO                                      */}
@@ -239,159 +240,176 @@ export default function MenusFetesPage() {
                 </header>
 
                 {/* ==================================================== */}
-                {/* 2. BANDEAU SUPÉRIEUR : RÉASSURANCE & MODALITÉS       */}
+                {/* 2. BLOC DE RÉASSURANCE EN 2 COLONNES (STYLE PLATS)   */}
                 {/* ==================================================== */}
-                <section className="bg-white/95 rounded-3xl border border-[#D4AF37]/40 shadow-sm p-6 sm:p-8 backdrop-blur-xs relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-2 h-full bg-[#D4AF37]" />
+                <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Colonne de gauche : Comment commander */}
+                    <div className="lg:col-span-2 bg-white p-8 sm:p-10 rounded-3xl shadow-sm border border-neutral-200 flex flex-col justify-between">
+                        <div>
+                            <h2 className="text-2xl sm:text-3xl font-serif text-black mb-8 flex items-center gap-3">
+                                <span className="w-8 h-1 bg-[#D4AF37]"></span>
+                                Comment commander vos menus de fêtes ?
+                            </h2>
 
-                    <div className="flex items-center gap-2.5 mb-5">
-                        <span className="text-xs font-bold uppercase tracking-widest text-[#927116] bg-[#D4AF37]/15 px-3 py-1 rounded-full">
-                            Modalités de commande & Organisation
-                        </span>
+                            <ul className="space-y-6">
+                                <li className="flex items-start gap-4">
+                                    <div className="bg-[#FAF9F6] p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shrink-0">
+                                        <UtensilsCrossed size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-neutral-900 mb-1 text-base">
+                                            1. Choisissez vos formules & plats
+                                        </h3>
+                                        <p className="text-neutral-600 text-sm leading-relaxed">
+                                            Composez vos menus festifs directement sur cette page pour l&apos;ensemble de vos convives.
+                                        </p>
+                                    </div>
+                                </li>
+
+                                <li className="flex items-start gap-4">
+                                    <div className="bg-[#FAF9F6] p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shrink-0">
+                                        <CreditCard size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-neutral-900 mb-1 text-base">
+                                            2. Validation & Acompte (30 %)
+                                        </h3>
+                                        <p className="text-neutral-600 text-sm leading-relaxed">
+                                            Validez votre commande avec un acompte de 30 %. Le nombre de convives reste ajustable jusqu&apos;au 15 décembre.
+                                        </p>
+                                    </div>
+                                </li>
+
+                                <li className="flex items-start gap-4">
+                                    <div className="bg-[#FAF9F6] p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shrink-0">
+                                        <Clock size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-neutral-900 mb-1 text-base">
+                                            3. Délais de réservation
+                                        </h3>
+                                        <p className="text-neutral-600 text-sm leading-relaxed">
+                                            Commandes ouvertes du 20 décembre au 5 janvier, au plus tard 4 jours avant la date de retrait.
+                                        </p>
+                                    </div>
+                                </li>
+
+                                <li className="flex items-start gap-4">
+                                    <div className="bg-[#FAF9F6] p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shrink-0">
+                                        <MapPin size={20} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-neutral-900 mb-1 text-base">
+                                            4. Retrait à l&apos;atelier
+                                        </h3>
+                                        <p className="text-neutral-600 text-sm leading-relaxed">
+                                            Retrait à notre atelier à Saint-Georges-sur-Meuse (Rue Potay 3) selon les créneaux habituels de réveillon. Notice de réchauffage et dressage fournie.
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
-                        {/* Période de disponibilité */}
-                        <div className="flex items-start gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#D4AF37]/30 text-[#927116] flex items-center justify-center shrink-0 mt-0.5">
-                                <Calendar size={18} />
+                    {/* Colonne de droite : Encart sombre noir & or élégant */}
+                    <div className="lg:col-span-1 bg-black text-white p-8 sm:p-10 rounded-3xl shadow-xl relative overflow-hidden flex flex-col justify-between border border-[#D4AF37]/40">
+                        {/* Halo doré décoratif */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+
+                        <div className="relative z-10 flex flex-col items-center text-center space-y-6 my-auto">
+                            <div className="bg-[#D4AF37]/20 p-4 rounded-full text-[#D4AF37] border border-[#D4AF37]/30 shadow-inner">
+                                <Sparkles size={38} />
                             </div>
-                            <div>
-                                <h4 className="font-serif font-bold text-neutral-900 text-sm">
-                                    Période de disponibilité
-                                </h4>
-                                <p className="text-neutral-600 text-xs mt-0.5 leading-relaxed">
-                                    Menus festifs disponibles du <strong>20 décembre au 5 janvier</strong> pour vos repas de Noël et Nouvel An.
+
+                            <div className="space-y-2">
+                                <span className="text-[11px] uppercase tracking-widest font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1 rounded-full">
+                                    Offre Réservation Anticipée
+                                </span>
+                                <h3 className="text-3xl sm:text-4xl font-serif font-bold text-white pt-2">
+                                    -5 %
+                                </h3>
+                                <p className="text-lg sm:text-xl font-serif text-[#D4AF37]">
+                                    sur vos menus de fêtes
                                 </p>
                             </div>
+
+                            <p className="text-neutral-300 text-sm leading-relaxed font-light max-w-xs">
+                                Pour toute réservation effectuée et validée avant le <strong>1er décembre</strong>.
+                            </p>
                         </div>
 
-                        {/* Délais de réservation */}
-                        <div className="flex items-start gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#D4AF37]/30 text-[#927116] flex items-center justify-center shrink-0 mt-0.5">
-                                <Clock size={18} />
-                            </div>
-                            <div>
-                                <h4 className="font-serif font-bold text-neutral-900 text-sm">
-                                    Délais de réservation
-                                </h4>
-                                <p className="text-neutral-600 text-xs mt-0.5 leading-relaxed">
-                                    Commande obligatoire au plus tard <strong>4 jours avant la date de retrait</strong> souhaitée.
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Lieu & Retrait */}
-                        <div className="flex items-start gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#D4AF37]/30 text-[#927116] flex items-center justify-center shrink-0 mt-0.5">
-                                <MapPin size={18} />
-                            </div>
-                            <div>
-                                <h4 className="font-serif font-bold text-neutral-900 text-sm">
-                                    Lieu de retrait
-                                </h4>
-                                <p className="text-neutral-600 text-xs mt-0.5 leading-relaxed">
-                                    À notre atelier à <strong>Saint-Georges-sur-Meuse</strong> (Rue Potay 3) selon les créneaux habituels de réveillon.
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Offre Early Bird (-5%) */}
-                        <div className="flex items-start gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-black text-[#D4AF37] flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">
-                                -5%*
-                            </div>
-                            <div>
-                                <h4 className="font-serif font-bold text-neutral-900 text-sm">
-                                    Avantage Early Bird (-5%)
-                                </h4>
-                                <p className="text-neutral-600 text-xs mt-0.5 leading-relaxed">
-                                    Remise de <strong>-5 % déduite automatiquement</strong> pour toute commande validée avant le <strong>1er décembre</strong> (acompte 30 %, convives ajustables).
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Prêt à réchauffer & Notice */}
-                        <div className="flex items-start gap-3 md:col-span-2">
-                            <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#D4AF37]/30 text-[#927116] flex items-center justify-center shrink-0 mt-0.5">
-                                <FileText size={18} />
-                            </div>
-                            <div>
-                                <h4 className="font-serif font-bold text-neutral-900 text-sm">
-                                    Qualité maison & Notice de dressage fournie
-                                </h4>
-                                <p className="text-neutral-600 text-xs mt-0.5 leading-relaxed">
-                                    Tout est préparé maison, conditionné prêt à réchauffer. Une <strong>notice explicative détaillée de réchauffage et dressage</strong> est fournie avec chaque commande pour un service parfait.
-                                </p>
-                            </div>
+                        <div className="relative z-10 mt-6 pt-6 border-t border-white/20 w-full text-center">
+                            <p className="text-neutral-400 text-xs leading-relaxed">
+                                Remise déduite automatiquement lors de la validation. Seul l&apos;acompte de 30 % est requis à la commande.
+                            </p>
                         </div>
                     </div>
                 </section>
 
                 {/* ==================================================== */}
-                {/* 3. VITRINE DES 3 FORMULES (STYLE FLYER - FIXES)       */}
+                {/* 3. VITRINE DES 3 FORMULES (STYLE FLYER - GRANDES)    */}
                 {/* ==================================================== */}
-                <section className="space-y-8">
+                <section className="space-y-10">
                     <div className="text-center max-w-2xl mx-auto">
                         <h2 className="text-3xl sm:text-4xl font-serif text-black font-bold">
                             Nos 3 Formules Festives
                         </h2>
-                        <p className="font-serif italic text-neutral-500 text-sm mt-1">
+                        <p className="font-serif italic text-neutral-500 text-sm sm:text-base mt-2">
                             Menus 4 services harmonieux • Cliquez sur &laquo; Composer ce menu &raquo; pour choisir vos plats
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
                         {FORMULES_FETES.map((formule) => {
                             return (
                                 <div
                                     key={formule.id}
-                                    className="bg-white rounded-3xl p-7 border-2 border-neutral-200/90 hover:border-[#D4AF37] shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+                                    className="bg-white rounded-3xl p-8 sm:p-9 border-2 border-neutral-200 hover:border-[#D4AF37] shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group"
                                 >
                                     <div>
                                         {/* Badge et titre */}
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="text-[10px] uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-2.5 py-1 rounded-full">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <span className="text-xs uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-3 py-1 rounded-full">
                                                 {formule.badge}
                                             </span>
-                                            <span className="text-[11px] font-serif font-bold text-neutral-400 uppercase tracking-wider">
+                                            <span className="text-xs font-serif font-bold text-neutral-400 uppercase tracking-wider">
                                                 {formule.tagline}
                                             </span>
                                         </div>
 
-                                        <h3 className="font-serif text-2xl sm:text-3xl font-bold text-black mb-1">
+                                        <h3 className="font-serif text-3xl sm:text-4xl font-bold text-black mb-2 tracking-tight">
                                             {formule.title}
                                         </h3>
-                                        <p className="font-serif italic text-xs text-neutral-500 mb-5 min-h-[2.5rem] leading-relaxed">
+                                        <p className="font-serif italic text-sm text-neutral-600 mb-6 min-h-[2.75rem] leading-relaxed">
                                             {formule.subtitle}
                                         </p>
 
-                                        {/* Tarif avec badge -5% */}
-                                        <div className="flex items-baseline gap-2 mb-6 pb-5 border-b border-neutral-100">
-                                            <span className="font-serif text-3xl sm:text-4xl font-bold text-black">
+                                        {/* Tarif avec badge -5% : Prix grossi à fort impact */}
+                                        <div className="flex items-baseline gap-2 mb-7 pb-6 border-b border-neutral-200">
+                                            <span className="font-serif text-5xl sm:text-6xl font-extrabold text-black tracking-tight">
                                                 {formule.price} €
                                             </span>
-                                            <span className="text-xs text-neutral-500 font-medium">
+                                            <span className="text-xs sm:text-sm text-neutral-500 font-medium">
                                                 / pers. TVAC
                                             </span>
-                                            <span className="bg-black text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ml-auto">
+                                            <span className="bg-black text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ml-auto shadow-xs">
                                                 -5%*
                                             </span>
                                         </div>
 
-                                        {/* Décomposition des services du flyer */}
-                                        <div className="space-y-3 mb-8">
-                                            <p className="text-[10px] uppercase tracking-wider font-bold text-neutral-400">
+                                        {/* Décomposition des services du flyer avec espacement aéré */}
+                                        <div className="space-y-4 mb-8">
+                                            <p className="text-[11px] uppercase tracking-wider font-bold text-neutral-400">
                                                 Composition du menu :
                                             </p>
 
                                             {formule.steps.map((st, sIdx) => (
-                                                <div key={sIdx} className="bg-[#FAF9F6] p-3 rounded-2xl border border-neutral-150">
-                                                    <p className="font-bold text-xs text-neutral-900 flex items-center gap-1.5 mb-1">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
+                                                <div key={sIdx} className="bg-[#FAF9F6] p-4 rounded-2xl border border-neutral-200/80 shadow-2xs">
+                                                    <p className="font-bold text-sm text-neutral-900 flex items-center gap-2 mb-1.5">
+                                                        <span className="w-2 h-2 rounded-full bg-[#D4AF37] shrink-0" />
                                                         <span>{st.stepTitle}</span>
                                                     </p>
-                                                    <p className="text-[11px] text-neutral-600 font-serif italic pl-3 leading-relaxed">
+                                                    <p className="text-xs sm:text-[13px] text-neutral-700 font-serif italic pl-4 leading-relaxed">
                                                         {st.selectionType === 'fixed'
                                                             ? (st.fixedItem?.title || st.options[0]?.title)
                                                             : st.options.map(o => o.title).join(' • ')}
@@ -406,11 +424,11 @@ export default function MenusFetesPage() {
                                         <button
                                             type="button"
                                             onClick={() => handleOpenModal(formule)}
-                                            className="w-full bg-black hover:bg-[#D4AF37] text-white hover:text-black py-4 px-6 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
+                                            className="w-full bg-black hover:bg-[#D4AF37] text-white hover:text-black py-4.5 px-6 rounded-full font-serif font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2.5"
                                         >
-                                            <ChefHat size={16} />
+                                            <ChefHat size={18} />
                                             <span>Composer ce menu</span>
-                                            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                            <ArrowRight size={16} className="group-hover:translate-x-1.5 transition-transform" />
                                         </button>
                                     </div>
                                 </div>
