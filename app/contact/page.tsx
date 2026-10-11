@@ -3287,14 +3287,14 @@ function ContactForm() {
                                                         <div className="space-y-1.5 flex-1">
                                                             <div className="flex items-baseline justify-between flex-wrap gap-2">
                                                                 <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
-                                                                    Payer un acompte de 30%
+                                                                    Payer l&apos;acompte de 30 %
                                                                 </span>
                                                                 <span className="font-serif font-bold text-sm sm:text-base text-[#927116] bg-[#D4AF37]/15 px-2.5 py-0.5 rounded-full">
                                                                     {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € à verser
                                                                 </span>
                                                             </div>
                                                             <p className="text-xs text-neutral-600 leading-relaxed">
-                                                                Bloque votre commande et la promotion de -5%. Vous pourrez ajuster le nombre exact de convives jusqu&apos;à la mi-décembre. Le solde ({festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) sera facturé plus tard.
+                                                                Bloque votre commande et la remise de -5%. Le nombre de convives reste ajustable jusqu&apos;à 4 jours avant le retrait. Le solde ({festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) sera réglé ultérieurement.
                                                             </p>
                                                         </div>
                                                     </div>
@@ -3320,14 +3320,14 @@ function ContactForm() {
                                                         <div className="space-y-1.5 flex-1">
                                                             <div className="flex items-baseline justify-between flex-wrap gap-2">
                                                                 <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
-                                                                    Payer la totalité (100%)
+                                                                    Payer la totalité (100 %)
                                                                 </span>
                                                                 <span className="font-serif font-bold text-sm sm:text-base text-black bg-neutral-100 px-2.5 py-0.5 rounded-full">
                                                                     {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € total
                                                                 </span>
                                                             </div>
                                                             <p className="text-xs text-neutral-600 leading-relaxed">
-                                                                Validation définitive de la commande (convives non ajustables).
+                                                                Validation définitive et figée de la commande.
                                                             </p>
                                                         </div>
                                                     </div>
@@ -3373,13 +3373,13 @@ function ContactForm() {
                                             {validationMode === 'acompte_30' ? (
                                                 <div className="mt-3 pt-3 border-t border-dashed border-[#D4AF37]/40 space-y-2">
                                                     <div className="flex justify-between items-center text-base sm:text-lg font-bold text-[#927116] bg-amber-50 p-3 rounded-xl border border-amber-200">
-                                                        <span>Acompte de 30% à verser sous 24h :</span>
+                                                        <span>Acompte de 30% à verser sous 48h :</span>
                                                         <span className="font-serif text-2xl text-black">
                                                             {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                         </span>
                                                     </div>
                                                     <div className="flex justify-between items-center text-xs text-neutral-500 px-1">
-                                                        <span>Solde restant (facturé à mi-décembre) :</span>
+                                                        <span>Solde restant (ajustable jusqu&apos;à 4 jours avant retrait) :</span>
                                                         <span className="font-medium text-neutral-700">
                                                             {festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                         </span>
@@ -3388,7 +3388,7 @@ function ContactForm() {
                                             ) : (
                                                 <div className="mt-3 pt-3 border-t border-dashed border-[#D4AF37]/40">
                                                     <div className="flex justify-between items-center text-base sm:text-lg font-bold text-black bg-neutral-100 p-3 rounded-xl">
-                                                        <span>Montant total (100%) à régler sous 24h :</span>
+                                                        <span>Montant total (100%) à régler sous 48h :</span>
                                                         <span className="font-serif text-2xl text-[#927116]">
                                                             {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                         </span>
@@ -3397,7 +3397,7 @@ function ContactForm() {
                                             )}
 
                                             <p className="text-[11px] text-neutral-500 text-center pt-1 italic">
-                                                Paiement par virement bancaire uniquement. Votre commande et la réduction de -5% sont définitivement réservées à réception du virement sur le compte de Traiteur Compère (IBAN et QR Code fournis à l&apos;étape suivante).
+                                                Paiement par virement bancaire sous 48h. Votre commande et la réduction de -5% sont définitivement réservées dès réception du virement sur le compte bancaire de Traiteur Compère (coordonnées IBAN et QR Code fournis à l&apos;étape suivante).
                                             </p>
                                         </div>
                                     ) : (

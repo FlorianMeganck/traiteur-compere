@@ -15,6 +15,7 @@ export type CartItem = {
     itemType?: 'plat_prepare' | 'menu_fete';
     badge?: string;
     coursesSummary?: string[];
+    coursesDescription?: string;
 };
 
 export function useCart() {

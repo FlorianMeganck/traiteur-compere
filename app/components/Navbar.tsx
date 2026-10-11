@@ -371,23 +371,31 @@ export default function Navbar() {
                                                         {item.badge || (weekData ? `${item.jour} (${weekData.week.split(' :')[0]})` : item.jour)}
                                                     </p>
 
-                                                    {/* Zone de composition avec étiquettes claires */}
-                                                    {isFestive && item.coursesSummary && item.coursesSummary.length > 0 && (
-                                                        <div className="bg-[#FAF9F6] border border-neutral-200/80 rounded-2xl p-3.5 mb-3.5 space-y-2 text-xs">
-                                                            {item.coursesSummary.map((course, cIdx) => {
-                                                                const [label, ...valParts] = course.split(':');
-                                                                const value = valParts.join(':').trim();
-                                                                return (
-                                                                    <div key={cIdx} className="grid grid-cols-[70px_1fr] items-start gap-2 leading-snug">
-                                                                        <span className="font-bold text-[9px] uppercase tracking-wider text-[#927116] bg-[#D4AF37]/15 px-1.5 py-0.5 rounded text-center shrink-0">
-                                                                            {label.trim()}
-                                                                        </span>
-                                                                        <span className="text-neutral-850 font-medium leading-relaxed">
-                                                                            {value}
-                                                                        </span>
-                                                                    </div>
-                                                                );
-                                                            })}
+                                                    {/* Zone de composition avec étiquettes claires ou résumé compact */}
+                                                    {isFestive && (item.coursesDescription || (item.coursesSummary && item.coursesSummary.length > 0)) && (
+                                                        <div className="bg-[#FAF9F6] border border-neutral-200/80 rounded-2xl p-3 mb-3 text-xs">
+                                                            {item.coursesDescription ? (
+                                                                <p className="text-neutral-700 font-serif italic text-xs leading-relaxed">
+                                                                    {item.coursesDescription}
+                                                                </p>
+                                                            ) : (
+                                                                <div className="space-y-1.5">
+                                                                    {item.coursesSummary?.map((course, cIdx) => {
+                                                                        const [label, ...valParts] = course.split(':');
+                                                                        const value = valParts.join(':').trim();
+                                                                        return (
+                                                                            <div key={cIdx} className="grid grid-cols-[65px_1fr] items-start gap-2 leading-snug">
+                                                                                <span className="font-bold text-[9px] uppercase tracking-wider text-[#927116] bg-[#D4AF37]/15 px-1.5 py-0.5 rounded text-center shrink-0">
+                                                                                    {label.trim()}
+                                                                                </span>
+                                                                                <span className="text-neutral-800 font-medium leading-relaxed">
+                                                                                    {value}
+                                                                                </span>
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
 

@@ -234,7 +234,7 @@ export async function POST(req: Request) {
                 ${festivePricing.validationMode === 'acompte_30' ? `
                     <tr>
                         <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #666;">Mode de validation choisi :</td>
-                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Acompte 30% (convives ajustables jusqu'à mi-décembre)</td>
+                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Acompte 30% (convives ajustables jusqu'à 4 jours avant le retrait)</td>
                     </tr>
                     <tr style="background-color: #fff9e6;">
                         <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 15px; color: #000; border-top: 2px solid #D4AF37;">
@@ -245,7 +245,7 @@ export async function POST(req: Request) {
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777;">Solde restant dû (facturé à mi-décembre) :</td>
+                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777;">Solde restant dû (ajustable jusqu'à 4 jours avant retrait) :</td>
                         <td style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777; white-space: nowrap;">${festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
                 ` : `
@@ -339,10 +339,10 @@ export async function POST(req: Request) {
                                     ⚠️ Important – Enregistrement définitif de votre commande :
                                 </p>
                                 <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #444;">
-                                    Veuillez noter que votre commande n'est <strong>définitivement enregistrée qu'à la réception effective de votre virement bancaire</strong> (${isFestiveOrder && festivePricing.validationMode === 'acompte_30' ? `de votre acompte de <strong>${festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong>` : `du montant de <strong>${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong>`}) sur le compte bancaire de Traiteur Compère sous 24 heures.
+                                    Veuillez noter que votre commande n'est <strong>définitivement enregistrée qu'à la réception effective de votre virement bancaire</strong> (${isFestiveOrder && festivePricing.validationMode === 'acompte_30' ? `de votre acompte de <strong>${festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong>` : `du montant de <strong>${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong>`}) sur le compte bancaire de Traiteur Compère sous 48 heures.
                                 </p>
                                 <p style="margin: 0; font-size: 13px; font-weight: bold; color: #b71c1c; line-height: 1.4;">
-                                    Passé ce délai de 24h sans réception du paiement, la réservation des créneaux et la réduction de -5% seront automatiquement libérées.
+                                    Passé ce délai de 48h sans réception du paiement, la réservation des créneaux et la réduction de -5% seront automatiquement libérées.
                                 </p>
                             </div>
 
