@@ -9,6 +9,7 @@ import { ShoppingCart, X, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 import Logo from "./Logo";
 import { useCart } from "../hooks/useCart";
 import { MENU_DATA } from "../data/plats-prepares";
+import { calculateFestiveOrderPricing } from "../data/menus-fetes";
 
 const NAV_LINKS = [
     { href: "/a-propos", label: "À Propos" },
@@ -436,27 +437,57 @@ export default function Navbar() {
                             </div>
 
                             {/* 3. FOOTER COLLÉ EN BAS */}
-                            {cartItems.length > 0 && (
-                                <div className="sticky bottom-0 bg-white border-t border-neutral-100 p-6 space-y-4 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] shrink-0">
-                                    <div className="flex justify-between items-baseline">
-                                        <div>
-                                            <span className="text-sm font-bold text-neutral-900 block">Total TTC</span>
-                                            <span className="text-[11px] text-neutral-400">TVA incluse</span>
-                                        </div>
-                                        <span className="text-3xl font-serif font-bold text-[#D4AF37]">
-                                            {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                        </span>
+                            {cartItems.length > 0 && (() => {
+                                const pricing = calculateFestiveOrderPricing(cartItems);
+                                const isFestive = pricing.hasFestiveItems;
+
+                                return (
+                                    <div className="sticky bottom-0 bg-white border-t border-neutral-100 p-6 space-y-4 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] shrink-0">
+                                        {isFestive && pricing.isEarlyBirdEligible && pricing.discountAmount > 0 ? (
+                                            <div className="space-y-1.5 pb-2 border-b border-neutral-100">
+                                                <div className="flex justify-between items-center text-xs text-neutral-500">
+                                                    <span>Sous-total articles</span>
+                                                    <span>{pricing.rawTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-xs text-[#927116] font-semibold bg-[#D4AF37]/10 px-2 py-1 rounded">
+                                                    <span>Offre Early Bird (-5%)</span>
+                                                    <span>- {pricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                                </div>
+                                                <div className="flex justify-between items-baseline pt-1">
+                                                    <div>
+                                                        <span className="text-sm font-bold text-neutral-900 block">Total TTC</span>
+                                                        <span className="text-[10px] text-green-700 font-medium">Remise -5% déduite</span>
+                                                    </div>
+                                                    <span className="text-3xl font-serif font-bold text-[#D4AF37]">
+                                                        {pricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-neutral-400 italic pt-1">
+                                                    Choix d&apos;acompte (30%) ou totalité (100%) à la validation.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="flex justify-between items-baseline">
+                                                <div>
+                                                    <span className="text-sm font-bold text-neutral-900 block">Total TTC</span>
+                                                    <span className="text-[11px] text-neutral-400">TVA incluse</span>
+                                                </div>
+                                                <span className="text-3xl font-serif font-bold text-[#D4AF37]">
+                                                    {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                </span>
+                                            </div>
+                                        )}
+                                        <Link
+                                            href={isFestive ? "/contact?type=menus_fetes" : "/contact?type=plat_prepare"}
+                                            onClick={() => setIsCartOpen(false)}
+                                            className="w-full bg-black hover:bg-[#D4AF37] text-white font-bold text-center py-4 px-6 rounded-xl flex justify-center items-center gap-2.5 uppercase tracking-wider text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.01]"
+                                        >
+                                            <span>Valider ma commande</span>
+                                            <ArrowRight size={16} />
+                                        </Link>
                                     </div>
-                                    <Link
-                                        href={cartItems.some(i => i.itemType === 'menu_fete' || i.semaineId.startsWith('menu') || i.semaineId.startsWith('fetes')) ? "/contact?type=menus_fetes" : "/contact?type=plat_prepare"}
-                                        onClick={() => setIsCartOpen(false)}
-                                        className="w-full bg-black hover:bg-[#D4AF37] text-white font-bold text-center py-4 px-6 rounded-xl flex justify-center items-center gap-2.5 uppercase tracking-wider text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.01]"
-                                    >
-                                        <span>Valider ma commande</span>
-                                        <ArrowRight size={16} />
-                                    </Link>
-                                </div>
-                            )}
+                                );
+                            })()}
                         </motion.div>
                     </>
                 )}

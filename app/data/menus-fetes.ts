@@ -2,6 +2,7 @@ export interface MenuOption {
     id: string;
     title: string;
     description?: string;
+    price?: number;
 }
 
 export interface FestiveMenuCourses {
@@ -16,320 +17,459 @@ export interface FestiveMenu {
     title: string;
     subtitle: string;
     badge: string;
-    price: number; // Prix par personne en euros (ex: 49)
+    price: number; // Prix par personne en euros TVAC (ex: 49)
     priceFormatted: string; // "49,00 €"
     image: string;
-    pickupDates: string[];
-    deadlineNotice: string;
+    pickupDates?: string[];
+    deadlineNotice?: string;
     description: string;
-    category: 'noel' | 'nouvel_an' | 'enfant';
+    category?: 'formule' | 'noel' | 'nouvel_an';
     courses: FestiveMenuCourses;
     allergens?: string[];
     isPopular?: boolean;
 }
 
-export const MENUS_FETES_DATA: FestiveMenu[] = [
+// ==========================================
+// 1. LA CARTE LIBRE (Données exactes du flyer)
+// ==========================================
+
+export type CarteCategoryKey = 'zakouskis' | 'potages' | 'entrees_froides' | 'entrees_chaudes' | 'plats' | 'buchettes';
+
+export interface CarteItem {
+    id: string;
+    title: string;
+    description?: string;
+    category: CarteCategoryKey;
+    categoryLabel: string;
+    price: number; // TVAC
+    priceFormatted: string;
+    unitLabel: string;
+}
+
+export const CARTE_CATEGORIES: { id: CarteCategoryKey; label: string; unitPriceLabel: string; icon: string; description: string }[] = [
     {
-        id: "menu-reveillon-noel",
-        title: "Menu Réveillon de Noël",
-        subtitle: "Un menu festif et gourmand pour célébrer Noël en famille.",
-        badge: "24 & 25 Décembre",
-        price: 49.00,
-        priceFormatted: "49,00 €",
-        image: "/images/hero-traiteur.png",
-        pickupDates: ["Mardi 24 Décembre après 11h", "Mercredi 25 Décembre avant 12h"],
-        deadlineNotice: "Réservation souhaitée avant le 19 Décembre",
-        description: "Un menu 4 services cuisiné maison avec des produits de saison, préparé dans notre atelier à Saint-Georges.",
-        category: "noel",
-        isPopular: true,
-        courses: {
-            entrees: [
-                {
-                    id: "noel-entree-1",
-                    title: "Terrine de Foie Gras de Canard Maison",
-                    description: "Chutney de figues moelleuses au Porto rouge & brioche dorée toastée"
-                },
-                {
-                    id: "noel-entree-2",
-                    title: "Saumon Fumé d'Écosse Artisanal & Blinis Maison",
-                    description: "Crème acidulée à l'aneth frais, zeste de citron et baies roses"
-                }
-            ],
-            potages: [
-                {
-                    id: "noel-potage-1",
-                    title: "Velouté de Châtaignes & Brisures de Truffe",
-                    description: "Émulsion crémeuse et éclats de noisettes torréfiées"
-                },
-                {
-                    id: "noel-potage-2",
-                    title: "Crème de Butternut au Lait de Coco & Épices Douces",
-                    description: "Graines de courge torréfiées et pointe de gingembre"
-                }
-            ],
-            plats: [
-                {
-                    id: "noel-plat-1",
-                    title: "Filet de Biche Sauce Grand Veneur",
-                    description: "Mousseline de potimarron, airelles sauvages & poire pochée aux épices"
-                },
-                {
-                    id: "noel-plat-2",
-                    title: "Suprême de Pintade Fermière aux Morilles",
-                    description: "Gratin dauphinois onctueux à la crème et petits légumes glacés"
-                },
-                {
-                    id: "noel-plat-3",
-                    title: "Pavé de Dos de Cabillaud Rôti aux Agrumes",
-                    description: "Risotto crémeux au parmesan et émulsion légère au safran"
-                }
-            ],
-            desserts: [
-                {
-                    id: "noel-dessert-1",
-                    title: "Bûche Chocolat Valrhona & Praliné Croustillant",
-                    description: "Cœur coulant caramel fleur de sel et biscuit dacquoise"
-                },
-                {
-                    id: "noel-dessert-2",
-                    title: "Bûche Légère Mangue & Fruit de la Passion",
-                    description: "Mousse légère vanille bourbon et biscuit génoise imbibé"
-                },
-                {
-                    id: "noel-dessert-3",
-                    title: "Pavlova d'Hiver aux Marrons & Myrtilles",
-                    description: "Meringue croquante, crème fouettée vanillée et marrons glacés"
-                }
-            ]
-        },
-        allergens: ["Gluten", "Lactose", "Fruits à coque", "Œufs"]
+        id: 'zakouskis',
+        label: 'Zakouskis froids',
+        unitPriceLabel: '4 € / pièce TVAC',
+        icon: '🥟',
+        description: 'Bouchées apéritives raffinées et artisanales, prêtes à déguster.'
     },
     {
-        id: "menu-saint-sylvestre",
-        title: "Menu Saint-Sylvestre",
-        subtitle: "Une sélection gourmande pour fêter le passage à la nouvelle année.",
-        badge: "31 Décembre & 1er Janvier",
-        price: 55.00,
-        priceFormatted: "55,00 €",
-        image: "/images/banquet.png",
-        pickupDates: ["Mercredi 31 Décembre après 11h", "Jeudi 1er Janvier avant 12h"],
-        deadlineNotice: "Réservation souhaitée avant le 26 Décembre",
-        description: "Un repas chaleureux et festif pour passer le réveillon du Nouvel An en toute convivialité.",
-        category: "nouvel_an",
-        isPopular: true,
-        courses: {
-            entrees: [
-                {
-                    id: "sylvestre-entree-1",
-                    title: "Carpaccio de Noix de Saint-Jacques & Émulsion Agrumes",
-                    description: "Perles de yuzu, huile vierge à l'aneth et jeunes pousses croquantes"
-                },
-                {
-                    id: "sylvestre-entree-2",
-                    title: "Médaillon de Foie Gras Poêlé & Pain d'Épices Artisanal",
-                    description: "Compotée de coings au miel d'acacia et réduction balsamique"
-                }
-            ],
-            potages: [
-                {
-                    id: "sylvestre-potage-1",
-                    title: "Bisque Onctueuse de Homard & Croûtons Dorés",
-                    description: "Parfumée à l'estragon frais et pointe de cognac"
-                },
-                {
-                    id: "sylvestre-potage-2",
-                    title: "Cappuccino de Cèpes & Noisettes Grillées",
-                    description: "Mousse de lait truffée et brisures croustillantes de châtaigne"
-                }
-            ],
-            plats: [
-                {
-                    id: "sylvestre-plat-1",
-                    title: "Suprême de Chapon Farci aux Morilles & Vin Jaune",
-                    description: "Gratin dauphinois à la crème et poêlée de champignons"
-                },
-                {
-                    id: "sylvestre-plat-2",
-                    title: "Filet de Bœuf Simmental Sauce Périgourdine",
-                    description: "Pommes grenailles confites au romarin et fagot de haricots fins"
-                },
-                {
-                    id: "sylvestre-plat-3",
-                    title: "Dos de Bar Sauvage Rôti au Beurre Blanc Citronné",
-                    description: "Purée onctueuse de panais vanillée et tombée de jeunes épinards"
-                }
-            ],
-            desserts: [
-                {
-                    id: "sylvestre-dessert-1",
-                    title: "Dôme Mangue-Passion & Vanille",
-                    description: "Sablé breton pur beurre et coulis exotique acidulé"
-                },
-                {
-                    id: "sylvestre-dessert-2",
-                    title: "Entremets Chocolat Noir & Feuillantine Pralinée",
-                    description: "Mousse chocolat noir fondante et biscuit croustillant"
-                },
-                {
-                    id: "sylvestre-dessert-3",
-                    title: "Tartelette Sablée aux Noix de Pécan & Sirop d'Érable",
-                    description: "Glace artisanale vanille bourbon de Madagascar"
-                }
-            ]
-        },
-        allergens: ["Gluten", "Lactose", "Crustacés", "Mollusques", "Œufs"]
+        id: 'potages',
+        label: 'Potages veloutés',
+        unitPriceLabel: '4 € / portion TVAC',
+        icon: '🥣',
+        description: 'Potages onctueux et réconfortants mijotés avec des légumes de saison.'
     },
     {
-        id: "menu-prestige-fetes",
-        title: "Menu Dégustation Prestige",
-        subtitle: "Une formule complète avec des produits nobles pour une table de fête soignée.",
-        badge: "Édition Limitée",
-        price: 65.00,
-        priceFormatted: "65,00 €",
-        image: "/images/wedding_table.png",
-        pickupDates: ["24 Décembre après 11h", "31 Décembre après 11h"],
-        deadlineNotice: "Série limitée - Réservation anticipée requise",
-        description: "Des recettes soignées mettant à l'honneur des produits de choix comme le homard, le foie gras et le veau de lait.",
-        category: "noel",
-        isPopular: false,
-        courses: {
-            entrees: [
-                {
-                    id: "prestige-entree-1",
-                    title: "Médaillon de Homard Bleu & Mousseline d'Avocat",
-                    description: "Vinaigrette passion au poivre de Timut & tuile croustillante"
-                },
-                {
-                    id: "prestige-entree-2",
-                    title: "Duo Festif : Foie Gras Maison & Tartare de Saint-Jacques Truffé",
-                    description: "Gelée au vin doux et toasts briochés maison"
-                }
-            ],
-            potages: [
-                {
-                    id: "prestige-potage-1",
-                    title: "Consommé de Faisan aux Cèpes & Truffe Noire",
-                    description: "Infusion parfumée aux herbes et quenelle de volaille fine"
-                },
-                {
-                    id: "prestige-potage-2",
-                    title: "Velouté de Châtaignes & Noix de Saint-Jacques Rôties",
-                    description: "Huile de truffe blanche et jeunes pousses d'aneth"
-                }
-            ],
-            plats: [
-                {
-                    id: "prestige-plat-1",
-                    title: "Pavé de Veau Cuit Basse Température",
-                    description: "Jus corsé au vin de Madère, grenailles confites et légumes glacés"
-                },
-                {
-                    id: "prestige-plat-2",
-                    title: "Filet de Chevreuil Grand Veneur aux Airelles",
-                    description: "Mousseline de céleri-rave et poire pochée aux épices"
-                },
-                {
-                    id: "prestige-plat-3",
-                    title: "Lotte Rôtie & Jus de Crustacés",
-                    description: "Risotto carnaroli aux morilles et asperges vertes"
-                }
-            ],
-            desserts: [
-                {
-                    id: "prestige-dessert-1",
-                    title: "Dôme Chocolat Noir Grand Cru & Praliné",
-                    description: "Feuillantine pralinée et ganache intense au chocolat"
-                },
-                {
-                    id: "prestige-dessert-2",
-                    title: "Lingot Croustillant Praliné Noisette & Yuzu",
-                    description: "Mousse légère à la vanille et cœur caramel coulant"
-                },
-                {
-                    id: "prestige-dessert-3",
-                    title: "Coupe Glacée au Champagne & Fruits Rouges",
-                    description: "Crumble sablé amande et coulis de framboises"
-                }
-            ]
-        },
-        allergens: ["Gluten", "Lactose", "Crustacés", "Poissons", "Œufs", "Fruits à coque"]
+        id: 'entrees_froides',
+        label: 'Entrées froides',
+        unitPriceLabel: 'Dès 22 € TVAC',
+        icon: '❄️',
+        description: 'Le foie gras et les Saint-Jacques à l\'honneur pour démarrer les festivités.'
     },
     {
-        id: "menu-enfant-fetes",
-        title: "Menu Enfant Festif",
-        subtitle: "Des saveurs douces et gourmandes adaptées aux enfants.",
-        badge: "Spécial Enfants (jusqu'à 12 ans)",
-        price: 22.00,
-        priceFormatted: "22,00 €",
-        image: "/images/entreprise.jpeg",
-        pickupDates: ["24 Décembre après 11h", "31 Décembre après 11h"],
-        deadlineNotice: "Disponible pour les réveillons de Noël et Nouvel An",
-        description: "Des saveurs douces et gourmandes préparées maison pour régaler les petits convives.",
-        category: "enfant",
-        isPopular: false,
-        courses: {
-            entrees: [
-                {
-                    id: "enfant-entree-1",
-                    title: "Mini Feuilleté Croustillant au Jambon Artisanal & Fromage Doré",
-                    description: "Petite sauce veloutée douce"
-                },
-                {
-                    id: "enfant-entree-2",
-                    title: "Petit Roulé de Saumon Doux & Cream Cheese",
-                    description: "Mini toasts dorés croustillants"
-                }
-            ],
-            potages: [
-                {
-                    id: "enfant-potage-1",
-                    title: "Petit Velouté Doux de Potiron au Beurre Fermier",
-                    description: "Mini croûtons croustillants dorés"
-                },
-                {
-                    id: "enfant-potage-2",
-                    title: "Bouillon Gourmand aux Petites Pâtes Étoiles",
-                    description: "Petites boulettes de volaille fondantes"
-                }
-            ],
-            plats: [
-                {
-                    id: "enfant-plat-1",
-                    title: "Filet de Poulet Fermier Braisé & Pommes Noisettes Maison",
-                    description: "Sauce crème douce et compote de pommes fraîches"
-                },
-                {
-                    id: "enfant-plat-2",
-                    title: "Mini Pavé de Saumon Doré & Écrasé de Pommes de Terre",
-                    description: "Légère crème citronnée douce"
-                },
-                {
-                    id: "enfant-plat-3",
-                    title: "Émincé de Veau Fondant & Gratin Dauphinois Doux",
-                    description: "Jus gourmand aux carottes glacées"
-                }
-            ],
-            desserts: [
-                {
-                    id: "enfant-dessert-1",
-                    title: "Mini Bûchette Gourmande Chocolat au Lait & Guimauve",
-                    description: "Décoration lutin de Noël en sucre"
-                },
-                {
-                    id: "enfant-dessert-2",
-                    title: "Mousse Fondante au Chocolat Blanc & Coulis Fraise",
-                    description: "Étoiles en chocolat pétillant"
-                },
-                {
-                    id: "enfant-dessert-3",
-                    title: "Duo de Glaces Artisanales (Vanille & Fraise) & Biscuit Sablé",
-                    description: "Mini pépites festives croustillantes"
-                }
-            ]
-        },
-        allergens: ["Gluten", "Lactose", "Œufs"]
+        id: 'entrees_chaudes',
+        label: 'Entrées chaudes',
+        unitPriceLabel: 'Dès 22 € TVAC',
+        icon: '🔥',
+        description: 'Ris de veau et raviolis gourmands préparés avec des champignons des bois.'
+    },
+    {
+        id: 'plats',
+        label: 'Plats de fête',
+        unitPriceLabel: 'Dès 30 € TVAC',
+        icon: '🥩',
+        description: 'Gibier, volaille laquée et poisson noble préparés en cuisson douce (±250g).'
+    },
+    {
+        id: 'buchettes',
+        label: 'Bûchettes artisanales (La Pavée)',
+        unitPriceLabel: '8 € / pièce TVAC',
+        icon: '🍰',
+        description: 'Créations gourmandes individuelles signées par la pâtisserie renommée La Pavée.'
     }
 ];
+
+export const CARTE_FETES_ITEMS: CarteItem[] = [
+    // --- ZAKOUSKIS (4 € / pièce) ---
+    {
+        id: "zak-volaille",
+        title: "Cuillère de mousse de volaille façon Périgord",
+        description: "Mousse légère et parfumée, noisettes torréfiées et pointe de réduction",
+        category: "zakouskis",
+        categoryLabel: "Zakouskis",
+        price: 4.00,
+        priceFormatted: "4,00 €",
+        unitLabel: "pièce"
+    },
+    {
+        id: "zak-maquereau",
+        title: "Blini de maquereau fumé, raifort et pomme verte",
+        description: "Maquereau fumé artisanalement, fraîcheur acidulée de granny-smith et crème raifort douce",
+        category: "zakouskis",
+        categoryLabel: "Zakouskis",
+        price: 4.00,
+        priceFormatted: "4,00 €",
+        unitLabel: "pièce"
+    },
+    {
+        id: "zak-jambon",
+        title: "Roulé de jambon d'Ardenne, Herve et sirop de Liège",
+        description: "Jambon d'Ardenne affiné, fromage de Herve doux et douceur du véritable sirop de Liège",
+        category: "zakouskis",
+        categoryLabel: "Zakouskis",
+        price: 4.00,
+        priceFormatted: "4,00 €",
+        unitLabel: "pièce"
+    },
+
+    // --- POTAGES (4 € / portion) ---
+    {
+        id: "pot-cresson",
+        title: "Velouté de cresson",
+        description: "Cresson de fontaine fraîchement lié à la crème double et pointe de muscade",
+        category: "potages",
+        categoryLabel: "Potages",
+        price: 4.00,
+        priceFormatted: "4,00 €",
+        unitLabel: "portion"
+    },
+    {
+        id: "pot-potiron",
+        title: "Velouté de potiron et de châtaignes",
+        description: "Douceur de potiron rôti au beurre et brisures de châtaignes moelleuses",
+        category: "potages",
+        categoryLabel: "Potages",
+        price: 4.00,
+        priceFormatted: "4,00 €",
+        unitLabel: "portion"
+    },
+
+    // --- ENTRÉES FROIDES ---
+    {
+        id: "ef-foie-gras",
+        title: "Foie gras de canard mi-cuit, chutney de figues et brioche dorée",
+        description: "Terrine maison au poivre de Sichuan, chutney de figues au Porto et brioche toastée",
+        category: "entrees_froides",
+        categoryLabel: "Entrées froides",
+        price: 22.00,
+        priceFormatted: "22,00 €",
+        unitLabel: "portion"
+    },
+    {
+        id: "ef-st-jacques",
+        title: "Carpaccio de noix de St-Jacques, suprêmes d'agrumes, confit pamplemousse et huile vierge",
+        description: "Noix de Saint-Jacques tranchées minute, agrumes frais, baies roses et huile d'olive vierge extra",
+        category: "entrees_froides",
+        categoryLabel: "Entrées froides",
+        price: 24.00,
+        priceFormatted: "24,00 €",
+        unitLabel: "portion"
+    },
+
+    // --- ENTRÉES CHAUDES ---
+    {
+        id: "ec-ris-de-veau",
+        title: "Cassolette de ris de veau dorés au beurre, crème onctueuse aux champignons des bois",
+        description: "Ris de veau de cœur croustillants, girolles, chanterelles et crème fine réduite",
+        category: "entrees_chaudes",
+        categoryLabel: "Entrées chaudes",
+        price: 24.00,
+        priceFormatted: "24,00 €",
+        unitLabel: "portion"
+    },
+    {
+        id: "ec-raviolis",
+        title: "Raviolis farcis aux girolles, crème de parmesan affiné et girolles poêlées",
+        description: "Pâtes fraîches farcies aux sous-bois, crème de Parmigiano Reggiano 24 mois",
+        category: "entrees_chaudes",
+        categoryLabel: "Entrées chaudes",
+        price: 22.00,
+        priceFormatted: "22,00 €",
+        unitLabel: "portion"
+    },
+
+    // --- PLATS (±250g) ---
+    {
+        id: "plat-chevreuil",
+        title: "Filet de chevreuil rôti ±250g, sauce aux agrumes et chocolat noir amer",
+        description: "Gibier noble saisi au sautoir, jus corsé lié aux écorces d'orange et cacao grand cru",
+        category: "plats",
+        categoryLabel: "Plats",
+        price: 36.00,
+        priceFormatted: "36,00 €",
+        unitLabel: "portion"
+    },
+    {
+        id: "plat-pintadeau",
+        title: "Suprême de pintadeau ±250g laqué au miel, mandarines rôties et jus corsé",
+        description: "Volaille fermière dorée au miel d'acacia, quartiers de clémentines et jus de volaille réduit",
+        category: "plats",
+        categoryLabel: "Plats",
+        price: 30.00,
+        priceFormatted: "30,00 €",
+        unitLabel: "portion"
+    },
+    {
+        id: "plat-saumon",
+        title: "Pavé de saumon à l'oseille ±250g en cuisson lente, crème légère au champagne et julienne légumes",
+        description: "Cœur de filet de saumon fondant, émulsion veloutée au champagne et tombée d'oseille",
+        category: "plats",
+        categoryLabel: "Plats",
+        price: 30.00,
+        priceFormatted: "30,00 €",
+        unitLabel: "portion"
+    },
+
+    // --- BÛCHETTES (8 € / pièce) ---
+    {
+        id: "buch-framboise",
+        title: "Bûchette crème fraîche & framboise",
+        description: "Biscuit roulé aérien, crème fraîche légère et compotée de framboises acidulées",
+        category: "buchettes",
+        categoryLabel: "Bûchettes",
+        price: 8.00,
+        priceFormatted: "8,00 €",
+        unitLabel: "pièce"
+    },
+    {
+        id: "buch-chocolat",
+        title: "Bûchette mousse au chocolat, cœur framboise",
+        description: "Mousse intense au chocolat noir belge, insert fruité framboise et croustillant praliné",
+        category: "buchettes",
+        categoryLabel: "Bûchettes",
+        price: 8.00,
+        priceFormatted: "8,00 €",
+        unitLabel: "pièce"
+    },
+    {
+        id: "buch-moka",
+        title: "Bûchette au beurre moka",
+        description: "La recette festive traditionnelle : crème au beurre au café pur arabica et génoise moelleuse",
+        category: "buchettes",
+        categoryLabel: "Bûchettes",
+        price: 8.00,
+        priceFormatted: "8,00 €",
+        unitLabel: "pièce"
+    }
+];
+
+// ==========================================
+// 2. LES FORMULES (Configurateur 49€, 59€, 69€)
+// ==========================================
+
+export interface FormuleStepConfig {
+    id: string;
+    stepNumber: number;
+    stepTitle: string; // Ex: "Choix 1 : 1 Potage au choix"
+    selectionCount: 1 | 2;
+    selectionType: 'single' | 'multiple_2' | 'fixed';
+    options: MenuOption[];
+    fixedItem?: MenuOption;
+}
+
+export interface FestiveFormule {
+    id: string;
+    title: string;
+    badge: string;
+    tagline: string;
+    subtitle: string;
+    price: number;
+    priceFormatted: string;
+    steps: FormuleStepConfig[];
+}
+
+// Options partagées pour les formules
+const POTAGES_OPTIONS: MenuOption[] = [
+    { id: "pot-cresson", title: "Velouté de cresson", description: "Cresson de fontaine lié à la crème et pointe de muscade" },
+    { id: "pot-potiron", title: "Velouté de potiron et de châtaignes", description: "Potiron rôti au beurre et brisures de châtaignes" }
+];
+
+const ZAKOUSKIS_OPTIONS: MenuOption[] = [
+    { id: "zak-volaille", title: "Cuillère de mousse de volaille façon Périgord", description: "Mousse légère et noisettes torréfiées" },
+    { id: "zak-maquereau", title: "Blini de maquereau fumé, raifort et pomme verte", description: "Maquereau fumé artisanal et pomme croquante" },
+    { id: "zak-jambon", title: "Roulé de jambon d'Ardenne, Herve et sirop de Liège", description: "Jambon d'Ardenne, Herve doux et sirop de Liège" }
+];
+
+const PLATS_DUO_OPTIONS: MenuOption[] = [
+    { id: "plat-pintadeau", title: "Pintadeau laqué au miel (±250g)", description: "Mandarines rôties et jus de volaille corsé" },
+    { id: "plat-saumon", title: "Pavé de saumon à l'oseille (±250g)", description: "Cuisson lente, crème légère au champagne et julienne" }
+];
+
+const BUCHETTES_OPTIONS: MenuOption[] = [
+    { id: "buch-framboise", title: "Bûchette crème fraîche & framboise", description: "Par la pâtisserie La Pavée" },
+    { id: "buch-chocolat", title: "Bûchette mousse au chocolat, cœur framboise", description: "Par la pâtisserie La Pavée" },
+    { id: "buch-moka", title: "Bûchette au beurre moka", description: "Par la pâtisserie La Pavée" }
+];
+
+export const FORMULES_FETES: FestiveFormule[] = [
+    {
+        id: "formule-zakouskis",
+        title: "Formule Zakouskis",
+        badge: "Conviviale & Gourmande",
+        tagline: "4 Services",
+        subtitle: "La convivialité festive autour de bouchées fines et d'un plat savoureux",
+        price: 49.00,
+        priceFormatted: "49,00 €",
+        steps: [
+            {
+                id: "step-potage",
+                stepNumber: 1,
+                stepTitle: "1 Potage au choix",
+                selectionCount: 1,
+                selectionType: "single",
+                options: POTAGES_OPTIONS
+            },
+            {
+                id: "step-zakouskis",
+                stepNumber: 2,
+                stepTitle: "2 Zakouskis froids au choix",
+                selectionCount: 2,
+                selectionType: "multiple_2",
+                options: ZAKOUSKIS_OPTIONS
+            },
+            {
+                id: "step-plat",
+                stepNumber: 3,
+                stepTitle: "1 Plat principal au choix (±250g)",
+                selectionCount: 1,
+                selectionType: "single",
+                options: PLATS_DUO_OPTIONS
+            },
+            {
+                id: "step-dessert",
+                stepNumber: 4,
+                stepTitle: "1 Bûchette au choix (La Pavée)",
+                selectionCount: 1,
+                selectionType: "single",
+                options: BUCHETTES_OPTIONS
+            }
+        ]
+    },
+    {
+        id: "formule-reveillon",
+        title: "Formule Réveillon",
+        badge: "Le Grand Classique",
+        tagline: "4 Services",
+        subtitle: "L'équilibre parfait entre tradition festive et raffinement gastronomique",
+        price: 59.00,
+        priceFormatted: "59,00 €",
+        steps: [
+            {
+                id: "step-potage",
+                stepNumber: 1,
+                stepTitle: "1 Potage au choix",
+                selectionCount: 1,
+                selectionType: "single",
+                options: POTAGES_OPTIONS
+            },
+            {
+                id: "step-entree",
+                stepNumber: 2,
+                stepTitle: "1 Entrée au choix (Froide ou Chaude)",
+                selectionCount: 1,
+                selectionType: "single",
+                options: [
+                    { id: "ef-foie-gras", title: "Foie gras de canard mi-cuit", description: "Chutney de figues et brioche dorée maison" },
+                    { id: "ec-raviolis", title: "Raviolis farcis aux girolles", description: "Crème de parmesan affiné et girolles poêlées" }
+                ]
+            },
+            {
+                id: "step-plat",
+                stepNumber: 3,
+                stepTitle: "1 Plat principal au choix (±250g)",
+                selectionCount: 1,
+                selectionType: "single",
+                options: PLATS_DUO_OPTIONS
+            },
+            {
+                id: "step-dessert",
+                stepNumber: 4,
+                stepTitle: "1 Bûchette au choix (La Pavée)",
+                selectionCount: 1,
+                selectionType: "single",
+                options: BUCHETTES_OPTIONS
+            }
+        ]
+    },
+    {
+        id: "formule-prestige",
+        title: "Formule Prestige",
+        badge: "Haute Gastronomie",
+        tagline: "4 Services Nobles",
+        subtitle: "L'excellence des produits d'exception : Saint-Jacques, Ris de veau & Chevreuil",
+        price: 69.00,
+        priceFormatted: "69,00 €",
+        steps: [
+            {
+                id: "step-potage",
+                stepNumber: 1,
+                stepTitle: "1 Potage au choix",
+                selectionCount: 1,
+                selectionType: "single",
+                options: POTAGES_OPTIONS
+            },
+            {
+                id: "step-entree",
+                stepNumber: 2,
+                stepTitle: "1 Entrée prestigieuse au choix",
+                selectionCount: 1,
+                selectionType: "single",
+                options: [
+                    { id: "ef-st-jacques", title: "Carpaccio de noix de Saint-Jacques", description: "Suprêmes d'agrumes, confit pamplemousse et huile vierge" },
+                    { id: "ec-ris-de-veau", title: "Cassolette de ris de veau dorés au beurre", description: "Crème onctueuse aux champignons des bois" }
+                ]
+            },
+            {
+                id: "step-plat",
+                stepNumber: 3,
+                stepTitle: "Plat Signature (Inclus)",
+                selectionCount: 1,
+                selectionType: "fixed",
+                options: [
+                    { id: "plat-chevreuil", title: "Filet de chevreuil rôti (±250g)", description: "Sauce aux agrumes et chocolat noir amer" }
+                ],
+                fixedItem: {
+                    id: "plat-chevreuil",
+                    title: "Filet de chevreuil rôti (±250g)",
+                    description: "Sauce aux agrumes et chocolat noir amer • Servi avec ses accompagnements de fête"
+                }
+            },
+            {
+                id: "step-dessert",
+                stepNumber: 4,
+                stepTitle: "1 Bûchette au choix (La Pavée)",
+                selectionCount: 1,
+                selectionType: "single",
+                options: BUCHETTES_OPTIONS
+            }
+        ]
+    }
+];
+
+// Compatibilité descendante pour l'API de commande et les tunnels existants
+export const MENUS_FETES_DATA: FestiveMenu[] = FORMULES_FETES.map(f => ({
+    id: f.id,
+    title: f.title,
+    subtitle: f.subtitle,
+    badge: f.badge,
+    price: f.price,
+    priceFormatted: f.priceFormatted,
+    image: f.id === 'formule-prestige' ? '/images/wedding_table.png' : (f.id === 'formule-reveillon' ? '/images/hero-traiteur.png' : '/images/banquet.png'),
+    description: f.subtitle,
+    category: 'formule',
+    courses: {
+        potages: POTAGES_OPTIONS,
+        entrees: f.steps.find(s => s.id.includes('entree') || s.id.includes('zakouskis'))?.options || [],
+        plats: f.steps.find(s => s.id.includes('plat'))?.options || [],
+        desserts: BUCHETTES_OPTIONS
+    }
+}));
+
+// ==========================================
+// 3. CALENDRIER DE RETRAIT & RESTRICTIONS
+// ==========================================
 
 export type FestiveDateOption = {
     id: string;
@@ -388,13 +528,6 @@ export const FESTIVE_DATE_OPTIONS: FestiveDateOption[] = [
     ...NOUVEL_AN_DATE_OPTIONS
 ];
 
-/**
- * Matrice des restrictions de dates par menu :
- * - Menu Noël (Réveillon & Prestige) : 24 et 25 Décembre
- * - Menu Nouvel An (Saint-Sylvestre) : 31 Décembre et 1er Janvier
- * - Menu Enfant : s'adapte aux menus choisis ou permet toutes les dates
- * - Si le panier contient à la fois Noël et Nouvel An : mode mixte (sélection de 2 dates distinctes)
- */
 export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; nomPlat?: string; itemType?: string }>) {
     let hasNoel = false;
     let hasNouvelAn = false;
@@ -404,34 +537,24 @@ export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; n
         const id = (item.id || "").toLowerCase();
         const nom = (item.nomPlat || "").toLowerCase();
 
-        if (id === 'menu-reveillon-noel' || id === 'menu-prestige-fetes' || id.startsWith('menu-reveillon-noel') || id.startsWith('menu-prestige-fetes') || nom.includes('noël') || nom.includes('noel') || nom.includes('prestige')) {
+        if (id.includes('noel') || id.includes('noël') || nom.includes('noël') || nom.includes('noel')) {
             hasNoel = true;
-        } else if (id === 'menu-saint-sylvestre' || id.startsWith('menu-saint-sylvestre') || nom.includes('sylvestre') || nom.includes('nouvel an')) {
+        } else if (id.includes('sylvestre') || id.includes('nouvel') || nom.includes('sylvestre') || nom.includes('nouvel an')) {
             hasNouvelAn = true;
-        } else if (id === 'menu-enfant-fetes' || id.startsWith('menu-enfant-fetes') || nom.includes('enfant')) {
+        } else if (id.includes('enfant') || nom.includes('enfant')) {
             hasEnfant = true;
+        } else {
+            // Par défaut, toute formule ou article à la carte fête permet Noël ou Nouvel An
+            hasNoel = true;
+            hasNouvelAn = true;
         }
     });
 
     const isMixed = hasNoel && hasNouvelAn;
     const onlyEnfant = hasEnfant && !hasNoel && !hasNouvelAn;
 
-    let allowedOptionIds: string[] = ["noel-24", "noel-25", "nouvel-an-31", "nouvel-an-01"];
-    let allowedPeriodLabel = "";
-
-    if (isMixed) {
-        allowedOptionIds = ["noel-24", "noel-25", "nouvel-an-31", "nouvel-an-01"];
-        allowedPeriodLabel = "Votre commande comprend des repas pour Noël et pour Nouvel An. Veuillez choisir une date pour chaque événement.";
-    } else if (hasNoel) {
-        allowedOptionIds = ["noel-24", "noel-25"];
-        allowedPeriodLabel = "Menus de Noël : réservations pour les 24 & 25 Décembre.";
-    } else if (hasNouvelAn) {
-        allowedOptionIds = ["nouvel-an-31", "nouvel-an-01"];
-        allowedPeriodLabel = "Menus de Nouvel An : réservations pour les 31 Décembre & 1er Janvier.";
-    } else if (onlyEnfant) {
-        allowedOptionIds = ["noel-24", "noel-25", "nouvel-an-31", "nouvel-an-01"];
-        allowedPeriodLabel = "Menus Enfants : réservations disponibles pour le 24, 25, 31 Décembre & 1er Janvier.";
-    }
+    const allowedOptionIds: string[] = ["noel-24", "noel-25", "nouvel-an-31", "nouvel-an-01"];
+    const allowedPeriodLabel = "Sélectionnez votre date de réveillon (Noël 24-25 Décembre ou Nouvel An 31 Décembre - 1er Janvier).";
 
     return {
         hasNoel,
@@ -443,3 +566,124 @@ export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; n
         allowedPeriodLabel
     };
 }
+
+// ==========================================
+// 6. LOGIQUE PROMO EARLY BIRD (-5%) & ACOMPTE
+// ==========================================
+
+export type FestiveValidationMode = 'acompte_30' | 'totalite_100';
+
+/**
+ * Date limite de la promotion Early Bird : jusqu'au 1er décembre 2026 inclus (23h59:59)
+ */
+export const EARLY_BIRD_DEADLINE = new Date(2026, 11, 1, 23, 59, 59, 999); // 1er décembre 2026
+
+/**
+ * Vérifie si la date spécifiée (ou actuelle) donne droit à la promotion Early Bird -5%
+ */
+export function isEarlyBirdFestivePromoActive(date: Date = new Date()): boolean {
+    return date.getTime() <= EARLY_BIRD_DEADLINE.getTime();
+}
+
+/**
+ * Vérifie si un article du panier appartient à l'offre Menus des Fêtes
+ */
+export function isFestiveCartItem(item: { id?: string; itemType?: string; semaineId?: string; nomPlat?: string }): boolean {
+    if (!item) return false;
+    if (item.itemType === 'menu_fete') return true;
+    const sid = item.semaineId || '';
+    if (sid.startsWith('menu') || sid.startsWith('fetes') || sid === 'menus-fetes') return true;
+    const id = (item.id || '').toLowerCase();
+    if (
+        id.startsWith('formule-') ||
+        id.startsWith('zak-') ||
+        id.startsWith('pot-') ||
+        id.startsWith('ef-') ||
+        id.startsWith('ec-') ||
+        id.startsWith('plat-') ||
+        id.startsWith('buch-')
+    ) {
+        return true;
+    }
+    return false;
+}
+
+export interface FestiveOrderPricingSummary {
+    hasFestiveItems: boolean;
+    festiveSubtotal: number;
+    classicSubtotal: number;
+    rawTotal: number;
+    isEarlyBirdEligible: boolean;
+    discountRate: number; // 0.05 ou 0
+    discountAmount: number; // -5% appliqué sur le total fêtes
+    totalNet: number; // rawTotal - discountAmount
+    validationMode: FestiveValidationMode;
+    amountToPayNow: number; // Si acompte_30: 30% du totalNet, sinon 100%
+    depositAmount: number; // 30%
+    remainingBalance: number; // Solde restant dû plus tard
+}
+
+/**
+ * Calcule la décomposition financière complète d'une commande (promo -5% fêtes et acompte 30% ou 100%)
+ */
+export function calculateFestiveOrderPricing(
+    cartItems: Array<{ id?: string; itemType?: string; semaineId?: string; nomPlat?: string; prixTotalLigne: number }>,
+    validationMode: FestiveValidationMode = 'totalite_100',
+    currentDate: Date = new Date()
+): FestiveOrderPricingSummary {
+    let festiveSubtotal = 0;
+    let classicSubtotal = 0;
+    let hasFestiveItems = false;
+
+    cartItems.forEach(item => {
+        if (isFestiveCartItem(item)) {
+            hasFestiveItems = true;
+            festiveSubtotal += item.prixTotalLigne;
+        } else {
+            classicSubtotal += item.prixTotalLigne;
+        }
+    });
+
+    const isEarlyBirdEligible = isEarlyBirdFestivePromoActive(currentDate) && festiveSubtotal > 0;
+    const discountRate = isEarlyBirdEligible ? 0.05 : 0;
+    // Arrondi au centime près
+    const discountAmount = isEarlyBirdEligible
+        ? Math.round(festiveSubtotal * 0.05 * 100) / 100
+        : 0;
+
+    const totalNet = Math.max(0, Math.round(((classicSubtotal + festiveSubtotal) - discountAmount) * 100) / 100);
+    const rawTotal = classicSubtotal + festiveSubtotal;
+
+    // Si pas d'articles fêtes, le mode de validation est toujours 100%
+    const effectiveMode: FestiveValidationMode = hasFestiveItems ? validationMode : 'totalite_100';
+
+    let depositAmount = 0;
+    let remainingBalance = 0;
+    let amountToPayNow = totalNet;
+
+    if (effectiveMode === 'acompte_30') {
+        depositAmount = Math.round(totalNet * 0.30 * 100) / 100;
+        remainingBalance = Math.round((totalNet - depositAmount) * 100) / 100;
+        amountToPayNow = depositAmount;
+    } else {
+        depositAmount = 0;
+        remainingBalance = 0;
+        amountToPayNow = totalNet;
+    }
+
+    return {
+        hasFestiveItems,
+        festiveSubtotal,
+        classicSubtotal,
+        rawTotal,
+        isEarlyBirdEligible,
+        discountRate,
+        discountAmount,
+        totalNet,
+        validationMode: effectiveMode,
+        amountToPayNow,
+        depositAmount,
+        remainingBalance
+    };
+}
+

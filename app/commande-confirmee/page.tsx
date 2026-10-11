@@ -17,6 +17,12 @@ function CommandeConfirmeeContent() {
     const creneauParam = searchParams.get('creneau') || "";
     const total = searchParams.get('total') || "0";
 
+    const toPayParam = searchParams.get('toPay');
+    const mode = searchParams.get('mode') || 'totalite_100';
+    const solde = searchParams.get('solde') || '0';
+    const remise = searchParams.get('remise') || '0';
+    const isAcompte = mode === 'acompte_30';
+
     const qrRef = useRef<HTMLDivElement>(null);
 
     // Logique pour déterminer le jour de retrait
@@ -39,16 +45,19 @@ function CommandeConfirmeeContent() {
         joursRetraitText = jour;
     }
 
-    // Informations bancaires pour la génération du QR Code (à adapter)
+    // Informations bancaires pour la génération du QR Code
     const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE22 0689 4683 8447";
     const BIC = process.env.NEXT_PUBLIC_TRAITEUR_BIC || "GKCCBEBB";
     const BENEFICIAIRE = process.env.NEXT_PUBLIC_TRAITEUR_BENEFICIAIRE || "JEAN COMPERE";
     const COMMUNICATION = `COMMANDE #${orderId} ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
     const TOTAL_NUM = parseFloat(total);
+    const TOPAY_NUM = toPayParam ? parseFloat(toPayParam) : TOTAL_NUM;
+    const SOLDE_NUM = parseFloat(solde);
+    const REMISE_NUM = parseFloat(remise);
 
     // Fonction pour générer la chaîne EPC pour le QR Code (Virement SEPA)
     const generateEPCString = () => {
-        const montantStr = TOTAL_NUM > 0 ? TOTAL_NUM.toFixed(2) : "";
+        const montantStr = TOPAY_NUM > 0 ? TOPAY_NUM.toFixed(2) : (TOTAL_NUM > 0 ? TOTAL_NUM.toFixed(2) : "");
         return `BCD\n002\n1\nSCT\n${BIC}\n${BENEFICIAIRE}\n${IBAN}\n${montantStr}\n\n\n${COMMUNICATION}\n\n`;
     };
 
@@ -99,6 +108,19 @@ function CommandeConfirmeeContent() {
                         Merci <span className="font-bold text-black">{prenom} {nom}</span>, votre commande a bien été enregistrée.
                     </p>
 
+                    {/* Mode Acompte ou Totalité Badge */}
+                    {isAcompte && (
+                        <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-4 mb-6 text-left flex items-start gap-3">
+                            <span className="text-xl">✨</span>
+                            <div className="text-sm">
+                                <p className="font-bold text-neutral-900 font-serif">Option Acompte de 30% sélectionnée</p>
+                                <p className="text-neutral-700 mt-0.5">
+                                    Le paiement de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> bloque votre commande et garantit vos tarifs préférentiels. Vous pourrez ajuster le nombre exact de convives jusqu'à la mi-décembre. Le solde restant sera facturé ultérieurement.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Bandeau d'alerte Paiement 24h */}
                     <div className="bg-amber-50/90 border-2 border-amber-300 rounded-2xl p-5 md:p-6 mb-10 text-left shadow-sm">
                         <div className="flex items-start gap-3.5">
@@ -107,13 +129,17 @@ function CommandeConfirmeeContent() {
                             </div>
                             <div className="space-y-1.5 text-sm md:text-base">
                                 <h4 className="font-bold text-amber-950 font-serif text-base md:text-lg">
-                                    ⚠️ Important – Validation de votre réservation :
+                                    ⚠️ Important – Validation définitive de votre réservation :
                                 </h4>
                                 <p className="text-neutral-700 leading-relaxed">
-                                    Merci de bien vouloir procéder au règlement du paiement <strong>sous 24 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).
+                                    {isAcompte ? (
+                                        <>Merci de bien vouloir procéder au règlement de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous <strong>24 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).</>
+                                    ) : (
+                                        <>Merci de bien vouloir procéder au règlement de votre commande sous <strong>24 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).</>
+                                    )}
                                 </p>
                                 <p className="text-red-600 font-bold text-xs md:text-sm pt-0.5">
-                                    Passé ce délai de 24h sans confirmation de paiement, votre réservation sera automatiquement annulée.
+                                    La commande n'est définitivement prise en compte qu'à réception du virement sur le compte bancaire de Traiteur Compère. Passé ce délai de 24h sans confirmation, la réservation sera automatiquement annulée.
                                 </p>
                             </div>
                         </div>
@@ -137,7 +163,11 @@ function CommandeConfirmeeContent() {
                                         <span className="font-mono text-black font-semibold text-base tracking-wider">{IBAN}</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Communication</span>
+                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">BIC</span>
+                                        <span className="font-mono text-black font-semibold text-base tracking-wider">{BIC}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Communication structurée / libre</span>
                                         <span className="font-medium text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1 rounded inline-block w-fit mt-1">{COMMUNICATION}</span>
                                     </div>
                                     <div className="flex flex-col">
@@ -179,11 +209,38 @@ function CommandeConfirmeeContent() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-8 pt-6 border-t border-neutral-200">
-                                <div className="flex justify-between items-end">
-                                    <span className="uppercase tracking-widest font-bold text-neutral-500">Montant total</span>
-                                    <span className="text-3xl font-serif font-bold text-black">{TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+
+                            <div className="mt-8 pt-6 border-t border-neutral-200 space-y-3">
+                                {REMISE_NUM > 0 && (
+                                    <div className="flex justify-between items-center text-sm text-emerald-700">
+                                        <span>Promotion Early Bird (-5%)</span>
+                                        <span className="font-bold">-{REMISE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center text-sm text-neutral-600">
+                                    <span>Total de la commande</span>
+                                    <span className="font-bold text-black">{TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
                                 </div>
+                                {isAcompte ? (
+                                    <>
+                                        <div className="flex justify-between items-end pt-2 border-t border-dashed border-neutral-200">
+                                            <div>
+                                                <span className="uppercase tracking-widest font-bold text-amber-800 text-xs block">Acompte à payer (30%)</span>
+                                                <span className="text-xs text-neutral-500">Sous 24h pour valider</span>
+                                            </div>
+                                            <span className="text-3xl font-serif font-bold text-[#D4AF37]">{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs text-neutral-500 pt-1">
+                                            <span>Solde restant dû (mi-décembre)</span>
+                                            <span className="font-medium text-neutral-700">{SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="flex justify-between items-end pt-2 border-t border-dashed border-neutral-200">
+                                        <span className="uppercase tracking-widest font-bold text-neutral-500">Montant à régler (100%)</span>
+                                        <span className="text-3xl font-serif font-bold text-black">{TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -191,10 +248,14 @@ function CommandeConfirmeeContent() {
                         <div className="bg-black text-white p-8 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
 
-                            <h3 className="text-xl font-bold uppercase tracking-widest text-[#D4AF37] mb-6 z-10 text-center">
+                            <h3 className="text-xl font-bold uppercase tracking-widest text-[#D4AF37] mb-2 z-10 text-center">
                                 Scannez & Payez
                             </h3>
-                            <p className="text-sm text-neutral-400 mb-6 text-center z-10">Ouvrez votre application bancaire et scannez ce code pour pré-remplir le virement.</p>
+                            <p className="text-xs font-semibold text-neutral-300 mb-2 z-10 text-center">
+                                Montant : <span className="text-[#D4AF37] text-sm font-bold">{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                {isAcompte ? ' (Acompte 30%)' : ''}
+                            </p>
+                            <p className="text-xs text-neutral-400 mb-6 text-center z-10">Ouvrez votre application bancaire et scannez ce code pour pré-remplir le virement.</p>
 
                             <div className="bg-white p-4 rounded-xl z-10" ref={qrRef}>
                                 <QRCode
@@ -213,6 +274,7 @@ function CommandeConfirmeeContent() {
                             </button>
                         </div>
                     </div>
+
 
                     {/* Bloc Infos Pratiques */}
                     <div className="mt-10 mb-10 bg-white p-8 rounded-2xl border border-neutral-200 text-left">

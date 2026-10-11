@@ -6,7 +6,14 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle, Phone } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
-import { FESTIVE_DATE_OPTIONS, NOEL_DATE_OPTIONS, NOUVEL_AN_DATE_OPTIONS, getFestiveMenuDateRestrictions } from "../data/menus-fetes";
+import {
+    FESTIVE_DATE_OPTIONS,
+    NOEL_DATE_OPTIONS,
+    NOUVEL_AN_DATE_OPTIONS,
+    getFestiveMenuDateRestrictions,
+    calculateFestiveOrderPricing,
+    FestiveValidationMode
+} from "../data/menus-fetes";
 import { useCart } from "../hooks/useCart";
 
 export default function Contact() {
@@ -537,6 +544,14 @@ function ContactForm() {
     const isBuffetChaudMode = searchParams.get('formule') === 'buffet-chaud';
     const isMenusFetes = typeParam === 'menus_fetes' || typeParam === 'menu_fetes' || (isLoaded && cartItems.some(i => i.itemType === 'menu_fete' || i.semaineId?.startsWith('menu') || i.semaineId?.startsWith('fetes') || i.semaineId === 'menus-fetes'));
     const isPlatPrepare = typeParam === 'plat_prepare' || isMenusFetes;
+
+    // Mode de validation spécifique aux Menus de Fêtes (Acompte 30% vs Totalité 100%)
+    const [validationMode, setValidationMode] = useState<FestiveValidationMode>('acompte_30');
+
+    // Synthèse financière dynamique (Early Bird -5% et décomposition acompte/totalité)
+    const festivePricing = useMemo(() => {
+        return calculateFestiveOrderPricing(cartItems, validationMode);
+    }, [cartItems, validationMode]);
 
     // Matrice des restrictions de dates Fêtes
     const festiveRestrictions = useMemo(() => getFestiveMenuDateRestrictions(cartItems), [cartItems]);
@@ -1402,6 +1417,9 @@ function ContactForm() {
                     }
                 }
 
+                const targetTotalPrice = isMenusFetes ? festivePricing.totalNet : cartTotal;
+                const targetAmountToPay = isMenusFetes ? festivePricing.amountToPayNow : cartTotal;
+
                 const apiPayload = {
                     Nom: formData.Nom,
                     Prenom: formData.Prenom,
@@ -1415,7 +1433,13 @@ function ContactForm() {
                     details_projet: formData.details_projet,
                     brasserieOption: formData.Option_Brasserie_Check === "Oui",
                     brasserieDetails: formData.Option_Brasserie_Details || undefined,
-                    totalPrice: cartTotal,
+                    totalPrice: targetTotalPrice,
+                    amountToPayNow: targetAmountToPay,
+                    validationMode: isMenusFetes ? validationMode : 'totalite_100',
+                    depositAmount: isMenusFetes ? festivePricing.depositAmount : 0,
+                    remainingBalance: isMenusFetes ? festivePricing.remainingBalance : 0,
+                    discountAmount: isMenusFetes ? festivePricing.discountAmount : 0,
+                    isEarlyBirdDiscount: isMenusFetes ? festivePricing.isEarlyBirdEligible : false,
                     cartItems: cartItems,
                     captchaToken: captchaToken,
                     typeCommande: isMenusFetes ? 'menus_fetes' : 'plat_prepare'
@@ -1435,7 +1459,7 @@ function ContactForm() {
                     const redirectCreneau = creneauRetraitFormatted ? `&creneau=${encodeURIComponent(creneauRetraitFormatted)}` : '';
                     clearCart();
                     setTimeout(() => {
-                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}&jours=${encodeURIComponent(redirectJours)}${redirectCreneau}`;
+                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${targetTotalPrice}&toPay=${targetAmountToPay}&mode=${isMenusFetes ? validationMode : 'totalite_100'}&solde=${isMenusFetes ? festivePricing.remainingBalance : 0}&remise=${isMenusFetes ? festivePricing.discountAmount : 0}&jours=${encodeURIComponent(redirectJours)}${redirectCreneau}`;
                     }, 3000);
                 } else {
                     console.error("Erreur API Commande:", result);
@@ -3225,10 +3249,163 @@ function ContactForm() {
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div className="bg-[#D4AF37]/10 p-4 rounded-xl border border-[#D4AF37]/30 text-center flex flex-col justify-center items-center gap-2">
-                                        <p className="text-neutral-800 font-bold text-lg">Total de votre commande : {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</p>
-                                        <p className="text-xs text-neutral-500 uppercase tracking-widest">Paiement par virement bancaire uniquement (QR Code sur la page suivante).</p>
-                                    </div>
+                                    {/* SECTION SPÉCIFIQUE MENUS DES FÊTES : CHOIX ACOMPTE 30% OU TOTALITÉ 100% */}
+                                    {isMenusFetes && (
+                                        <div className="bg-[#FAF9F6] p-5 sm:p-6 rounded-2xl border border-[#D4AF37]/50 mt-6 mb-6 shadow-sm space-y-4">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-black text-[#D4AF37] flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                                                    ✓
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-serif font-bold text-lg text-black">
+                                                        Mode de validation de votre commande
+                                                    </h4>
+                                                    <p className="text-xs text-neutral-600 font-serif italic mt-0.5">
+                                                        Choisissez comment vous souhaitez valider votre réservation pour les réveillons.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3 pt-1">
+                                                {/* Option 1 : Acompte 30% */}
+                                                <label
+                                                    className={`block p-4 sm:p-5 rounded-xl border cursor-pointer transition-all ${
+                                                        validationMode === 'acompte_30'
+                                                            ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
+                                                            : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-start gap-3">
+                                                        <input
+                                                            type="radio"
+                                                            name="mode_validation_fetes"
+                                                            value="acompte_30"
+                                                            checked={validationMode === 'acompte_30'}
+                                                            onChange={() => setValidationMode('acompte_30')}
+                                                            className="mt-1 text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
+                                                        />
+                                                        <div className="space-y-1.5 flex-1">
+                                                            <div className="flex items-baseline justify-between flex-wrap gap-2">
+                                                                <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
+                                                                    Payer un acompte de 30%
+                                                                </span>
+                                                                <span className="font-serif font-bold text-sm sm:text-base text-[#927116] bg-[#D4AF37]/15 px-2.5 py-0.5 rounded-full">
+                                                                    {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € à verser
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-xs text-neutral-600 leading-relaxed">
+                                                                Bloque votre commande et la promotion de -5%. Vous pourrez ajuster le nombre exact de convives jusqu&apos;à la mi-décembre. Le solde ({festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) sera facturé plus tard.
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </label>
+
+                                                {/* Option 2 : Totalité 100% */}
+                                                <label
+                                                    className={`block p-4 sm:p-5 rounded-xl border cursor-pointer transition-all ${
+                                                        validationMode === 'totalite_100'
+                                                            ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
+                                                            : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-start gap-3">
+                                                        <input
+                                                            type="radio"
+                                                            name="mode_validation_fetes"
+                                                            value="totalite_100"
+                                                            checked={validationMode === 'totalite_100'}
+                                                            onChange={() => setValidationMode('totalite_100')}
+                                                            className="mt-1 text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
+                                                        />
+                                                        <div className="space-y-1.5 flex-1">
+                                                            <div className="flex items-baseline justify-between flex-wrap gap-2">
+                                                                <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
+                                                                    Payer la totalité (100%)
+                                                                </span>
+                                                                <span className="font-serif font-bold text-sm sm:text-base text-black bg-neutral-100 px-2.5 py-0.5 rounded-full">
+                                                                    {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € total
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-xs text-neutral-600 leading-relaxed">
+                                                                Validation définitive de la commande (convives non ajustables).
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* RÉCAPITULATIF FINANCIER & PROMOTION EARLY BIRD */}
+                                    {isMenusFetes ? (
+                                        <div className="bg-[#FAF9F6] p-5 sm:p-6 rounded-2xl border border-[#D4AF37]/40 space-y-3">
+                                            <div className="flex justify-between items-center text-sm text-neutral-600">
+                                                <span>Sous-total articles Fêtes :</span>
+                                                <span className="font-medium text-neutral-900">
+                                                    {festivePricing.festiveSubtotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                </span>
+                                            </div>
+
+                                            {festivePricing.isEarlyBirdEligible && festivePricing.discountAmount > 0 && (
+                                                <div className="flex justify-between items-center text-sm font-semibold bg-[#D4AF37]/15 text-[#927116] px-3 py-2 rounded-xl border border-[#D4AF37]/30">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                                            -5%*
+                                                        </span>
+                                                        <span>Avantage Réservation Anticipée (jusqu&apos;au 01/12/2026) :</span>
+                                                    </div>
+                                                    <span className="font-bold">
+                                                        - {festivePricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            <div className="flex justify-between items-center pt-2 border-t border-neutral-200">
+                                                <span className="text-sm font-bold text-black uppercase tracking-wider">
+                                                    Total net de la commande :
+                                                </span>
+                                                <span className="font-serif text-2xl font-bold text-black">
+                                                    {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                </span>
+                                            </div>
+
+                                            {/* Décomposition selon le mode sélectionné */}
+                                            {validationMode === 'acompte_30' ? (
+                                                <div className="mt-3 pt-3 border-t border-dashed border-[#D4AF37]/40 space-y-2">
+                                                    <div className="flex justify-between items-center text-base sm:text-lg font-bold text-[#927116] bg-amber-50 p-3 rounded-xl border border-amber-200">
+                                                        <span>Acompte de 30% à verser sous 24h :</span>
+                                                        <span className="font-serif text-2xl text-black">
+                                                            {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-xs text-neutral-500 px-1">
+                                                        <span>Solde restant (facturé à mi-décembre) :</span>
+                                                        <span className="font-medium text-neutral-700">
+                                                            {festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="mt-3 pt-3 border-t border-dashed border-[#D4AF37]/40">
+                                                    <div className="flex justify-between items-center text-base sm:text-lg font-bold text-black bg-neutral-100 p-3 rounded-xl">
+                                                        <span>Montant total (100%) à régler sous 24h :</span>
+                                                        <span className="font-serif text-2xl text-[#927116]">
+                                                            {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <p className="text-[11px] text-neutral-500 text-center pt-1 italic">
+                                                Paiement par virement bancaire uniquement. Votre commande et la réduction de -5% sont définitivement réservées à réception du virement sur le compte de Traiteur Compère (IBAN et QR Code fournis à l&apos;étape suivante).
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-[#D4AF37]/10 p-4 rounded-xl border border-[#D4AF37]/30 text-center flex flex-col justify-center items-center gap-2">
+                                            <p className="text-neutral-800 font-bold text-lg">Total de votre commande : {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</p>
+                                            <p className="text-xs text-neutral-500 uppercase tracking-widest">Paiement par virement bancaire uniquement (QR Code sur la page suivante).</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
