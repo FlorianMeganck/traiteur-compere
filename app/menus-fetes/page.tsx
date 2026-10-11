@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Sparkles, Check, Plus, Minus, ShoppingCart, ArrowRight,
-    Utensils, ChefHat, Info, Award, Heart
+    Sparkles, Check, Plus, Minus, ShoppingCart, ArrowDown,
+    Utensils, ChefHat, Info, Award, Heart, ChevronDown
 } from "lucide-react";
 
 import {
@@ -22,23 +21,6 @@ import { useCart, CartItem } from "../hooks/useCart";
 export default function MenusFetesPage() {
     const { addToCart } = useCart();
 
-    // Mode d'achat actif : 'formules' (Mode A) ou 'carte' (Mode B)
-    const [activeTab, setActiveTab] = useState<'formules' | 'carte'>('formules');
-
-    // Synchronisation avec l'URL (?mode=carte ou ?formule=...)
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const mode = params.get("mode");
-        if (mode === "carte" || mode === "formules") {
-            setActiveTab(mode);
-        }
-        const f = params.get("formule");
-        if (f && FORMULES_FETES.some(item => item.id === f)) {
-            setSelectedFormuleId(f);
-        }
-    }, []);
-
-    // --- ÉTAT MODE A : LES FORMULES ---
     // Formule actuellement sélectionnée dans le configurateur
     const [selectedFormuleId, setSelectedFormuleId] = useState<string>("formule-reveillon");
 
@@ -61,14 +43,13 @@ export default function MenusFetesPage() {
         return initial;
     });
 
-    // Quantité pour chaque formule
+    // Quantité (nombre de convives) pour chaque formule
     const [formuleQuantities, setFormuleQuantities] = useState<Record<string, number>>(() => {
         const initial: Record<string, number> = {};
         FORMULES_FETES.forEach(f => { initial[f.id] = 2; }); // Défaut 2 convives
         return initial;
     });
 
-    // --- ÉTAT MODE B : LA CARTE LIBRE ---
     // Quantités sélectionnées pour chaque article à la carte : { [itemId]: number }
     const [carteQuantities, setCarteQuantities] = useState<Record<string, number>>(() => {
         const initial: Record<string, number> = {};
@@ -76,18 +57,27 @@ export default function MenusFetesPage() {
         return initial;
     });
 
-    // Filtre de catégorie pour la carte libre (optionnel, 'all' ou catégorie spécifique)
+    // Filtre de catégorie pour la carte libre ('all' ou catégorie spécifique)
     const [activeCarteCategory, setActiveCarteCategory] = useState<CarteCategoryKey | 'all'>('all');
 
     // Notification toast
     const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+    // Synchronisation avec l'URL (?formule=...)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const f = params.get("formule");
+        if (f && FORMULES_FETES.some(item => item.id === f)) {
+            setSelectedFormuleId(f);
+        }
+    }, []);
 
     const showToast = (message: string) => {
         setToastMessage(message);
         setTimeout(() => setToastMessage(null), 3500);
     };
 
-    // --- GESTIONNAIRES MODE A (FORMULES) ---
+    // Gestionnaires sélections Formules
     const handleSingleChoice = (formuleId: string, stepId: string, optionId: string) => {
         setFormuleSelections(prev => ({
             ...prev,
@@ -104,7 +94,6 @@ export default function MenusFetesPage() {
             let updated: string[];
 
             if (current.includes(optionId)) {
-                // Ne pas désélectionner si cela laisse moins de 1 choix pour le confort
                 if (current.length > 1) {
                     updated = current.filter(id => id !== optionId);
                 } else {
@@ -114,7 +103,6 @@ export default function MenusFetesPage() {
                 if (current.length < 2) {
                     updated = [...current, optionId];
                 } else {
-                    // Remplace le premier élément pour garder exactement 2 choix
                     updated = [current[1], optionId];
                 }
             }
@@ -136,11 +124,20 @@ export default function MenusFetesPage() {
         }));
     };
 
+    const handleSelectFormuleToConfigure = (formuleId: string) => {
+        setSelectedFormuleId(formuleId);
+        // Défilement doux vers le configurateur
+        const configElement = document.getElementById("configurateur-formule");
+        if (configElement) {
+            configElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
     const handleAddFormuleToCart = (formule: FestiveFormule) => {
         const selections = formuleSelections[formule.id] || {};
         const qty = formuleQuantities[formule.id] || 1;
 
-        // Construire le résumé des services choisis
+        // Résumé des services
         const coursesSummary: string[] = [];
 
         formule.steps.forEach(step => {
@@ -156,7 +153,6 @@ export default function MenusFetesPage() {
             }
         });
 
-        // Générer un identifiant unique représentatif de la composition choisie
         const selectionHash = Object.values(selections)
             .map(v => Array.isArray(v) ? v.sort().join('_') : v)
             .join('-');
@@ -178,10 +174,10 @@ export default function MenusFetesPage() {
         };
 
         addToCart(cartItem);
-        showToast(`${qty}x "${formule.title}" ajouté(s) à votre panier !`);
+        showToast(`${qty}x "${formule.title}" ajouté(s) à votre commande !`);
     };
 
-    // --- GESTIONNAIRES MODE B (CARTE LIBRE) ---
+    // Gestionnaires Carte Libre
     const handleCarteQuantityDelta = (itemId: string, delta: number) => {
         setCarteQuantities(prev => ({
             ...prev,
@@ -193,9 +189,9 @@ export default function MenusFetesPage() {
         const qty = carteQuantities[item.id] || 1;
 
         const cartItem: CartItem = {
-            id: `carte-${item.id}`,
+            id: item.id,
             semaineId: "menus-fetes",
-            jour: "À la carte",
+            jour: "Réveillon",
             nomPlat: item.title,
             prixUnitairePlat: item.price,
             quantitePlat: qty,
@@ -244,50 +240,30 @@ export default function MenusFetesPage() {
                 )}
             </AnimatePresence>
 
-            {/* ÉLÉMENTS DÉCORATIFS D'ARRIÈRE-PLAN */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[500px] bg-gradient-to-b from-[#D4AF37]/10 via-[#D4AF37]/5 to-transparent blur-3xl pointer-events-none -z-10" />
+            {/* Décoration d'arrière-plan dorée */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[550px] bg-gradient-to-b from-[#D4AF37]/10 via-[#D4AF37]/5 to-transparent blur-3xl pointer-events-none -z-10" />
 
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
                 {/* ==================================================== */}
-                {/* 1. EN-TÊTE ÉLÉGANT & AMBIANCE DU FLYER */}
+                {/* 1. HERO HEADER - AMBIANCE NOËL & RÉVEILLON           */}
                 {/* ==================================================== */}
-                <header className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
-                    <motion.div
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#927116] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] mb-4"
-                    >
+                <header className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#927116] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] mb-4">
                         <Sparkles size={13} className="text-[#D4AF37]" />
                         <span>Maison Compère • Réveillon 2026</span>
-                    </motion.div>
+                    </div>
 
-                    <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.1 }}
-                        className="text-4xl sm:text-6xl md:text-7xl font-serif text-black tracking-tight mb-4"
-                    >
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif text-black tracking-tight mb-4 font-bold">
                         Menus des Fêtes
-                    </motion.h1>
+                    </h1>
 
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.2 }}
-                        className="font-serif italic text-neutral-600 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed"
-                    >
+                    <p className="font-serif italic text-neutral-600 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
                         &ldquo;Pour vos réveillons de Noël et de Nouvel An, savourez l&apos;art de recevoir sans le stress des préparatifs.&rdquo;
-                    </motion.p>
+                    </p>
 
                     {/* BANDEAU PROMOTION EARLY BIRD (-5%) */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
-                        className="mt-8 bg-gradient-to-r from-neutral-900 via-black to-neutral-900 text-white rounded-2xl p-4 sm:p-5 border border-[#D4AF37]/40 shadow-xl relative overflow-hidden"
-                    >
+                    <div className="mt-8 bg-gradient-to-r from-neutral-900 via-black to-neutral-900 text-white rounded-2xl p-4 sm:p-5 border border-[#D4AF37]/40 shadow-xl relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-48 h-48 bg-[#D4AF37]/15 rounded-full blur-2xl pointer-events-none" />
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left relative z-10">
                             <div className="flex items-center gap-3">
@@ -307,348 +283,390 @@ export default function MenusFetesPage() {
                                 Noël & Nouvel An
                             </div>
                         </div>
-                    </motion.div>
+                    </div>
+
+                    {/* NAVIGATION RAPIDE PAR ANCRES */}
+                    <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
+                        <a
+                            href="#formules-festives"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-[#D4AF37] hover:bg-neutral-800 font-serif font-bold text-xs uppercase tracking-wider transition-all shadow-sm"
+                        >
+                            <Sparkles size={14} />
+                            <span>1. Les 3 Formules Festives</span>
+                        </a>
+                        <a
+                            href="#carte-fetes"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-neutral-800 hover:text-black hover:border-[#D4AF37] border border-neutral-300 font-serif font-bold text-xs uppercase tracking-wider transition-all shadow-2xs"
+                        >
+                            <Utensils size={14} />
+                            <span>2. La Carte Libre & Suppléments</span>
+                            <ArrowDown size={13} className="text-[#D4AF37]" />
+                        </a>
+                    </div>
                 </header>
 
                 {/* ==================================================== */}
-                {/* 2. LE PARCOURS UTILISATEUR : LES 2 MODES D'ACHATS    */}
+                {/* PREMIER TEMPS : LES 3 FORMULES FESTIVES (CLÉ EN MAIN)*/}
                 {/* ==================================================== */}
-                <div className="flex justify-center mb-10 sm:mb-14">
-                    <div className="inline-flex p-1.5 rounded-full bg-white border border-neutral-200/90 shadow-md">
-                        <button
-                            onClick={() => setActiveTab('formules')}
-                            className={`flex items-center gap-2.5 px-6 sm:px-8 py-3 rounded-full text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-300 ${
-                                activeTab === 'formules'
-                                    ? 'bg-black text-[#D4AF37] shadow-lg shadow-black/10 scale-100'
-                                    : 'text-neutral-600 hover:text-black hover:bg-neutral-100/60'
-                            }`}
-                        >
-                            <Sparkles size={16} className={activeTab === 'formules' ? 'text-[#D4AF37]' : 'text-neutral-400'} />
-                            <span>Mode Formules</span>
-                            <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full hidden sm:inline">
-                                Menu complet
-                            </span>
-                        </button>
+                <section id="formules-festives" className="scroll-mt-32 space-y-10">
 
-                        <button
-                            onClick={() => setActiveTab('carte')}
-                            className={`flex items-center gap-2.5 px-6 sm:px-8 py-3 rounded-full text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-300 ${
-                                activeTab === 'carte'
-                                    ? 'bg-black text-[#D4AF37] shadow-lg shadow-black/10 scale-100'
-                                    : 'text-neutral-600 hover:text-black hover:bg-neutral-100/60'
-                            }`}
-                        >
-                            <Utensils size={16} className={activeTab === 'carte' ? 'text-[#D4AF37]' : 'text-neutral-400'} />
-                            <span>Mode À la Carte</span>
-                            <span className="text-[10px] bg-white/20 text-white px-2 py-0.5 rounded-full hidden sm:inline">
-                                Libre
-                            </span>
-                        </button>
+                    {/* En-tête de section Formules */}
+                    <div className="text-center max-w-2xl mx-auto">
+                        <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#927116] bg-[#D4AF37]/15 px-3 py-1 rounded-full">
+                            Menu Complet Clé en Main
+                        </span>
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-black mt-3 mb-2 font-bold">
+                            Nos 3 Formules Festives
+                        </h2>
+                        <p className="font-serif italic text-neutral-600 text-sm sm:text-base">
+                            Choisissez votre formule, personnalisez les plats pour vos convives et profitez d&apos;un réveillon gastronomique sans stress.
+                        </p>
                     </div>
-                </div>
 
-                {/* ==================================================== */}
-                {/* MODE A : CONFIGURATEUR DES FORMULES (49€, 59€, 69€)  */}
-                {/* ==================================================== */}
-                {activeTab === 'formules' && (
-                    <div className="space-y-12">
-                        {/* 1. SÉLECTEUR DE FORMULE (3 CADRES ÉLÉGANTS DU FLYER) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-                            {FORMULES_FETES.map((formule) => {
-                                const isSelected = selectedFormuleId === formule.id;
+                    {/* LES 3 CARTES CÔTE À CÔTE (GRILLE 3 COLONNES) */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
+                        {FORMULES_FETES.map((formule) => {
+                            const isConfiguring = selectedFormuleId === formule.id;
 
-                                return (
-                                    <div
-                                        key={formule.id}
-                                        onClick={() => setSelectedFormuleId(formule.id)}
-                                        className={`cursor-pointer rounded-3xl p-6 sm:p-7 transition-all duration-300 relative flex flex-col justify-between ${
-                                            isSelected
-                                                ? 'bg-white border-2 border-[#D4AF37] shadow-xl ring-4 ring-[#D4AF37]/10 -translate-y-1'
-                                                : 'bg-white/80 border border-neutral-200/90 hover:border-[#D4AF37]/60 hover:bg-white hover:shadow-md'
-                                        }`}
-                                    >
-                                        {/* Badge d'en-tête */}
-                                        <div className="flex items-center justify-between mb-4">
+                            return (
+                                <div
+                                    key={formule.id}
+                                    className={`rounded-3xl p-6 sm:p-7 flex flex-col justify-between transition-all duration-300 relative bg-white border-2 ${
+                                        isConfiguring
+                                            ? 'border-[#D4AF37] shadow-2xl ring-4 ring-[#D4AF37]/15 -translate-y-1'
+                                            : 'border-neutral-200/90 hover:border-[#D4AF37]/60 shadow-md hover:shadow-xl'
+                                    }`}
+                                >
+                                    {/* En-tête carte */}
+                                    <div>
+                                        <div className="flex items-center justify-between gap-2 mb-3">
                                             <span className="text-[10px] uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-2.5 py-1 rounded-full">
                                                 {formule.badge}
                                             </span>
-                                            {isSelected && (
-                                                <span className="w-5 h-5 rounded-full bg-[#D4AF37] text-black flex items-center justify-center text-xs font-bold shadow-xs">
-                                                    ✓
+                                            <span className="text-[11px] font-serif font-bold text-neutral-500 uppercase tracking-wider">
+                                                {formule.tagline}
+                                            </span>
+                                        </div>
+
+                                        <h3 className="font-serif text-2xl sm:text-3xl font-bold text-black mb-1">
+                                            {formule.title}
+                                        </h3>
+                                        <p className="font-serif italic text-xs sm:text-sm text-neutral-500 mb-4 min-h-[2.5rem]">
+                                            {formule.subtitle}
+                                        </p>
+
+                                        {/* Prix & Badge -5% */}
+                                        <div className="flex items-baseline gap-2 mb-5 pb-5 border-b border-neutral-100">
+                                            <span className="font-serif text-3xl sm:text-4xl font-bold text-black">
+                                                {formule.price} €
+                                            </span>
+                                            <span className="text-xs text-neutral-500 font-medium">
+                                                / convive TVAC
+                                            </span>
+                                            <span className="bg-black text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ml-auto">
+                                                -5%*
+                                            </span>
+                                        </div>
+
+                                        {/* Composition détaillée des services */}
+                                        <div className="space-y-3.5 mb-8">
+                                            <p className="text-[11px] uppercase tracking-wider font-bold text-neutral-400">
+                                                Composition du menu :
+                                            </p>
+                                            {formule.steps.map((st, sIdx) => (
+                                                <div key={sIdx} className="text-xs bg-[#FAF9F6] p-2.5 rounded-xl border border-neutral-150">
+                                                    <div className="flex items-center gap-1.5 font-bold text-neutral-900 mb-0.5">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
+                                                        <span>{st.stepTitle}</span>
+                                                    </div>
+                                                    <p className="text-neutral-500 font-serif italic text-[11px] pl-3 leading-snug">
+                                                        {st.selectionType === 'fixed'
+                                                            ? st.fixedItem?.title
+                                                            : st.options.map(o => o.title).join(' • ')}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Bouton d'action pour configurer cette formule */}
+                                    <div className="pt-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleSelectFormuleToConfigure(formule.id)}
+                                            className={`w-full py-3.5 px-4 rounded-full text-xs font-serif font-bold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-sm ${
+                                                isConfiguring
+                                                    ? 'bg-[#D4AF37] text-black shadow-md'
+                                                    : 'bg-black text-white hover:bg-[#D4AF37] hover:text-black'
+                                            }`}
+                                        >
+                                            <ChefHat size={15} />
+                                            <span>{isConfiguring ? 'Personnalisation en cours' : 'Choisir & Personnaliser'}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* CONFIGURATEUR INTERACTIF DE LA FORMULE SÉLECTIONNÉE */}
+                    <div id="configurateur-formule" className="bg-white rounded-3xl border-2 border-[#D4AF37] shadow-xl p-6 sm:p-10 md:p-12 relative scroll-mt-28">
+
+                        {/* Onglets de sélection directe de la formule dans le configurateur */}
+                        <div className="flex flex-wrap items-center justify-center gap-2 mb-8 pb-6 border-b border-neutral-100">
+                            <span className="text-xs uppercase tracking-wider font-bold text-neutral-400 mr-2 hidden sm:inline">
+                                Formule active :
+                            </span>
+                            {FORMULES_FETES.map((f) => {
+                                const isFSelected = selectedFormuleId === f.id;
+                                return (
+                                    <button
+                                        key={f.id}
+                                        onClick={() => setSelectedFormuleId(f.id)}
+                                        className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold tracking-wider font-serif uppercase transition-all ${
+                                            isFSelected
+                                                ? 'bg-black text-[#D4AF37] shadow-md scale-105'
+                                                : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                                        }`}
+                                    >
+                                        {f.title} ({f.price} €)
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* En-tête du configurateur */}
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-6 border-b border-neutral-100">
+                            <div>
+                                <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#927116] mb-1">
+                                    <ChefHat size={15} />
+                                    <span>Étape de personnalisation</span>
+                                </div>
+                                <h3 className="text-3xl sm:text-4xl font-serif text-black font-bold">
+                                    {currentFormule.title}
+                                </h3>
+                                <p className="font-serif italic text-sm text-neutral-500 mt-1">
+                                    {currentFormule.subtitle}
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-3 bg-[#FAF9F6] p-3.5 rounded-2xl border border-neutral-200 self-start md:self-center">
+                                <div className="text-right">
+                                    <div className="flex items-center gap-1.5 justify-end">
+                                        <span className="font-serif text-2xl sm:text-3xl font-bold text-black">
+                                            {currentFormule.price} €
+                                        </span>
+                                        <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                            -5%*
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] text-neutral-500 block">par convive TVAC</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ÉTAPES DE SÉLECTION DES PLATS */}
+                        <div className="space-y-6">
+                            {currentFormule.steps.map((step) => {
+                                const currentSelection = formuleSelections[currentFormule.id]?.[step.id];
+
+                                return (
+                                    <div key={step.id} className="bg-[#FAF9F6]/80 rounded-2xl p-5 sm:p-6 border border-neutral-200/80">
+                                        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className="w-6 h-6 rounded-full bg-black text-[#D4AF37] font-bold text-xs flex items-center justify-center shrink-0">
+                                                    {step.stepNumber}
+                                                </span>
+                                                <h4 className="font-serif font-bold text-base sm:text-lg text-black">
+                                                    {step.stepTitle}
+                                                </h4>
+                                            </div>
+
+                                            {step.selectionType === 'multiple_2' && (
+                                                <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#927116]">
+                                                    {Array.isArray(currentSelection) ? currentSelection.length : 0}/2 zakouskis choisis
+                                                </span>
+                                            )}
+
+                                            {step.selectionType === 'fixed' && (
+                                                <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-green-100 text-green-800">
+                                                    Inclus d&apos;office
                                                 </span>
                                             )}
                                         </div>
 
-                                        {/* Titre & Prix */}
-                                        <div>
-                                            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-black mb-1">
-                                                {formule.title}
-                                            </h3>
-                                            <p className="font-serif italic text-xs sm:text-sm text-neutral-500 mb-4 line-clamp-2">
-                                                {formule.subtitle}
-                                            </p>
-
-                                            <div className="flex items-baseline gap-2 mb-4 pb-4 border-b border-neutral-100">
-                                                <span className="font-serif text-3xl sm:text-4xl font-bold text-black">
-                                                    {formule.price} €
-                                                </span>
-                                                <span className="text-xs text-neutral-500 font-medium">
-                                                    / pers. TVAC
-                                                </span>
-                                                {/* BADGE NOIR -5%* */}
-                                                <span className="bg-black text-[#D4AF37] border border-[#D4AF37]/40 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ml-1 shadow-2xs">
-                                                    -5%*
-                                                </span>
+                                        {/* Grille des options du step */}
+                                        {step.selectionType === 'fixed' ? (
+                                            <div className="bg-white p-4 rounded-xl border-2 border-[#D4AF37]/50 flex items-start gap-3 shadow-xs">
+                                                <div className="w-5 h-5 rounded-full bg-[#D4AF37] text-black flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
+                                                    ✓
+                                                </div>
+                                                <div>
+                                                    <p className="font-serif font-bold text-neutral-900 text-base">
+                                                        {step.fixedItem?.title}
+                                                    </p>
+                                                    <p className="text-xs text-neutral-500 font-serif italic mt-0.5">
+                                                        {step.fixedItem?.description}
+                                                    </p>
+                                                </div>
                                             </div>
+                                        ) : (
+                                            <div className={`grid grid-cols-1 ${step.options.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-3`}>
+                                                {step.options.map((option) => {
+                                                    const isSelected = step.selectionType === 'multiple_2'
+                                                        ? Array.isArray(currentSelection) && currentSelection.includes(option.id)
+                                                        : currentSelection === option.id;
 
-                                            {/* Liste concise des services inclus */}
-                                            <div className="space-y-1.5 text-xs text-neutral-600 mb-6">
-                                                {formule.steps.map((st, sIdx) => (
-                                                    <div key={sIdx} className="flex items-start gap-2">
-                                                        <span className="text-[#D4AF37] font-bold">•</span>
-                                                        <span className="font-medium text-neutral-800">{st.stepTitle}</span>
-                                                    </div>
-                                                ))}
+                                                    return (
+                                                        <div
+                                                            key={option.id}
+                                                            onClick={() => {
+                                                                if (step.selectionType === 'multiple_2') {
+                                                                    handleMultiple2Choice(currentFormule.id, step.id, option.id);
+                                                                } else {
+                                                                    handleSingleChoice(currentFormule.id, step.id, option.id);
+                                                                }
+                                                            }}
+                                                            className={`cursor-pointer p-4 rounded-xl transition-all duration-200 border text-left flex flex-col justify-between ${
+                                                                isSelected
+                                                                    ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-sm'
+                                                                    : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40 hover:bg-white'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-start justify-between gap-2 mb-2">
+                                                                <p className="font-serif font-bold text-sm sm:text-base text-neutral-900 leading-snug">
+                                                                    {option.title}
+                                                                </p>
+                                                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                                                                    isSelected
+                                                                        ? 'bg-[#D4AF37] border-[#D4AF37] text-black text-xs font-bold'
+                                                                        : 'border-neutral-300'
+                                                                }`}>
+                                                                    {isSelected && '✓'}
+                                                                </div>
+                                                            </div>
+
+                                                            {option.description && (
+                                                                <p className="text-xs text-neutral-500 font-serif italic leading-relaxed">
+                                                                    {option.description}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
-                                        </div>
-
-                                        {/* Bouton de sélection */}
-                                        <button
-                                            type="button"
-                                            className={`w-full py-3 rounded-full text-xs uppercase tracking-widest font-bold transition-colors ${
-                                                isSelected
-                                                    ? 'bg-[#D4AF37] text-black shadow-md'
-                                                    : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                                            }`}
-                                        >
-                                            {isSelected ? 'Formule sélectionnée' : 'Choisir cette formule'}
-                                        </button>
+                                        )}
                                     </div>
                                 );
                             })}
                         </div>
 
-                        {/* 2. LE CONFIGURATEUR DÉTAILLÉ DE LA FORMULE ACTIVE */}
-                        <div className="bg-white rounded-3xl border border-[#D4AF37]/40 shadow-xl p-6 sm:p-10 md:p-12 relative">
-                            {/* En-tête du configurateur */}
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-8 mb-8 border-b border-neutral-100">
-                                <div>
-                                    <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#927116] mb-1">
-                                        <ChefHat size={15} />
-                                        <span>Personnalisation de vos plats</span>
-                                    </div>
-                                    <h2 className="text-3xl sm:text-4xl font-serif text-black font-bold">
-                                        {currentFormule.title}
-                                    </h2>
-                                    <p className="font-serif italic text-sm text-neutral-500 mt-1">
-                                        {currentFormule.subtitle}
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center gap-3 bg-[#FAF9F6] p-3 rounded-2xl border border-neutral-200 self-start md:self-center">
-                                    <div className="text-right">
-                                        <div className="flex items-center gap-1.5 justify-end">
-                                            <span className="font-serif text-2xl sm:text-3xl font-bold text-black">
-                                                {currentFormule.price} €
-                                            </span>
-                                            <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                                -5%*
-                                            </span>
-                                        </div>
-                                        <span className="text-[11px] text-neutral-500 block">par convive TVAC</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* ÉTAPES DE SÉLECTION */}
-                            <div className="space-y-8">
-                                {currentFormule.steps.map((step) => {
-                                    const currentSelection = formuleSelections[currentFormule.id]?.[step.id];
-
-                                    return (
-                                        <div key={step.id} className="bg-[#FAF9F6]/80 rounded-2xl p-5 sm:p-6 border border-neutral-200/80">
-                                            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                                                <div className="flex items-center gap-2.5">
-                                                    <span className="w-6 h-6 rounded-full bg-black text-[#D4AF37] font-bold text-xs flex items-center justify-center shrink-0">
-                                                        {step.stepNumber}
-                                                    </span>
-                                                    <h4 className="font-serif font-bold text-base sm:text-lg text-black">
-                                                        {step.stepTitle}
-                                                    </h4>
-                                                </div>
-
-                                                {step.selectionType === 'multiple_2' && (
-                                                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#927116]">
-                                                        {Array.isArray(currentSelection) ? currentSelection.length : 0}/2 zakouskis choisis
-                                                    </span>
-                                                )}
-
-                                                {step.selectionType === 'fixed' && (
-                                                    <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-green-100 text-green-800">
-                                                        Inclus d&apos;office
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            {/* Grille des options du step */}
-                                            {step.selectionType === 'fixed' ? (
-                                                <div className="bg-white p-4 rounded-xl border-2 border-[#D4AF37]/50 flex items-start gap-3 shadow-xs">
-                                                    <div className="w-5 h-5 rounded-full bg-[#D4AF37] text-black flex items-center justify-center text-xs font-bold mt-0.5 shrink-0">
-                                                        ✓
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-serif font-bold text-neutral-900 text-base">
-                                                            {step.fixedItem?.title}
-                                                        </p>
-                                                        <p className="text-xs text-neutral-500 font-serif italic mt-0.5">
-                                                            {step.fixedItem?.description}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div className={`grid grid-cols-1 ${step.options.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-3`}>
-                                                    {step.options.map((option) => {
-                                                        const isSelected = step.selectionType === 'multiple_2'
-                                                            ? Array.isArray(currentSelection) && currentSelection.includes(option.id)
-                                                            : currentSelection === option.id;
-
-                                                        return (
-                                                            <div
-                                                                key={option.id}
-                                                                onClick={() => {
-                                                                    if (step.selectionType === 'multiple_2') {
-                                                                        handleMultiple2Choice(currentFormule.id, step.id, option.id);
-                                                                    } else {
-                                                                        handleSingleChoice(currentFormule.id, step.id, option.id);
-                                                                    }
-                                                                }}
-                                                                className={`cursor-pointer p-4 rounded-xl transition-all duration-200 border text-left flex flex-col justify-between ${
-                                                                    isSelected
-                                                                        ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-sm'
-                                                                        : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40 hover:bg-white'
-                                                                }`}
-                                                            >
-                                                                <div className="flex items-start justify-between gap-2 mb-2">
-                                                                    <p className="font-serif font-bold text-sm sm:text-base text-neutral-900 leading-snug">
-                                                                        {option.title}
-                                                                    </p>
-                                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
-                                                                        isSelected
-                                                                            ? 'bg-[#D4AF37] border-[#D4AF37] text-black text-xs font-bold'
-                                                                            : 'border-neutral-300'
-                                                                    }`}>
-                                                                        {isSelected && '✓'}
-                                                                    </div>
-                                                                </div>
-
-                                                                {option.description && (
-                                                                    <p className="text-xs text-neutral-500 font-serif italic leading-relaxed">
-                                                                        {option.description}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            {/* BARRE D'ACTION INFÉRIEURE : QUANTITÉ & AJOUT AU PANIER */}
-                            <div className="mt-10 pt-8 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-6 bg-[#FAF9F6] -mx-6 sm:-mx-10 md:-mx-12 -mb-6 sm:-mb-10 md:-mb-12 p-6 sm:p-8 rounded-b-3xl">
-                                <div>
-                                    <span className="text-xs uppercase tracking-widest text-neutral-500 block mb-1 font-bold">
-                                        Nombre de convives
-                                    </span>
-                                    <div className="inline-flex items-center gap-3 bg-white border border-neutral-300 px-3 py-1.5 rounded-full shadow-xs">
-                                        <button
-                                            onClick={() => handleFormuleQuantityDelta(currentFormule.id, -1)}
-                                            className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold transition-colors"
-                                            aria-label="Diminuer le nombre de convives"
-                                        >
-                                            <Minus size={14} />
-                                        </button>
-                                        <span className="font-serif font-bold text-lg text-black w-8 text-center">
-                                            {formuleQuantities[currentFormule.id] || 1}
-                                        </span>
-                                        <button
-                                            onClick={() => handleFormuleQuantityDelta(currentFormule.id, 1)}
-                                            className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold transition-colors"
-                                            aria-label="Augmenter le nombre de convives"
-                                        >
-                                            <Plus size={14} />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
-                                    <div className="text-center sm:text-right">
-                                        <div className="flex items-baseline justify-center sm:justify-end gap-2">
-                                            <span className="text-xs text-neutral-500 font-semibold uppercase">Total formule :</span>
-                                            <span className="font-serif text-3xl font-bold text-black">
-                                                {((formuleQuantities[currentFormule.id] || 1) * currentFormule.price).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                            </span>
-                                        </div>
-                                        <span className="text-[11px] text-[#927116] font-medium block">
-                                            Remise -5%* déduite lors de la finalisation
-                                        </span>
-                                    </div>
-
+                        {/* BARRE D'ACTION : QUANTITÉ & AJOUT AU PANIER */}
+                        <div className="mt-8 pt-8 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-6 bg-[#FAF9F6] -mx-6 sm:-mx-10 md:-mx-12 -mb-6 sm:-mb-10 md:-mb-12 p-6 sm:p-8 rounded-b-3xl">
+                            <div>
+                                <span className="text-xs uppercase tracking-widest text-neutral-500 block mb-1 font-bold">
+                                    Nombre de convives
+                                </span>
+                                <div className="inline-flex items-center gap-3 bg-white border border-neutral-300 px-3 py-1.5 rounded-full shadow-xs">
                                     <button
-                                        onClick={() => handleAddFormuleToCart(currentFormule)}
-                                        className="w-full sm:w-auto bg-black hover:bg-[#D4AF37] text-white hover:text-black px-8 py-4 rounded-full font-serif font-bold text-sm tracking-wider uppercase transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center gap-3 group"
+                                        onClick={() => handleFormuleQuantityDelta(currentFormule.id, -1)}
+                                        className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold transition-colors"
+                                        aria-label="Diminuer le nombre de convives"
                                     >
-                                        <ShoppingCart size={18} />
-                                        <span>Ajouter au panier</span>
+                                        <Minus size={14} />
+                                    </button>
+                                    <span className="font-serif font-bold text-lg text-black w-8 text-center">
+                                        {formuleQuantities[currentFormule.id] || 1}
+                                    </span>
+                                    <button
+                                        onClick={() => handleFormuleQuantityDelta(currentFormule.id, 1)}
+                                        className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold transition-colors"
+                                        aria-label="Augmenter le nombre de convives"
+                                    >
+                                        <Plus size={14} />
                                     </button>
                                 </div>
                             </div>
+
+                            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                                <div className="text-center sm:text-right">
+                                    <div className="flex items-baseline justify-center sm:justify-end gap-2">
+                                        <span className="text-xs text-neutral-500 font-semibold uppercase">Total formule :</span>
+                                        <span className="font-serif text-3xl font-bold text-black">
+                                            {((formuleQuantities[currentFormule.id] || 1) * currentFormule.price).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                        </span>
+                                    </div>
+                                    <span className="text-[11px] text-[#927116] font-medium block">
+                                        Remise -5%* déduite lors de la finalisation
+                                    </span>
+                                </div>
+
+                                <button
+                                    onClick={() => handleAddFormuleToCart(currentFormule)}
+                                    className="w-full sm:w-auto bg-black hover:bg-[#D4AF37] text-white hover:text-black px-8 py-4 rounded-full font-serif font-bold text-sm tracking-wider uppercase transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center justify-center gap-3 group"
+                                >
+                                    <ShoppingCart size={18} />
+                                    <span>Ajouter la formule au panier</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                )}
+                </section>
 
                 {/* ==================================================== */}
-                {/* MODE B : LA CARTE LIBRE (PRIX UNITAIRES TVAC)       */}
+                {/* DEUXIÈME TEMPS : LA CARTE LIBRE & PLATS INDIVIDUELS  */}
                 {/* ==================================================== */}
-                {activeTab === 'carte' && (
-                    <div className="space-y-12">
-                        {/* Filtres de catégorie rapides */}
-                        <div className="flex flex-wrap items-center justify-center gap-2 pb-4">
+                <section id="carte-fetes" className="mt-20 sm:mt-28 pt-16 border-t-2 border-[#D4AF37]/30 scroll-mt-28 space-y-10">
+
+                    {/* En-tête de section Carte */}
+                    <div className="text-center max-w-2xl mx-auto">
+                        <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#927116] bg-[#D4AF37]/15 px-3 py-1 rounded-full">
+                            Choix Libre à la Pièce
+                        </span>
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-black mt-3 mb-2 font-bold">
+                            La Carte de Fêtes
+                        </h2>
+                        <p className="font-serif italic text-neutral-600 text-sm sm:text-base">
+                            Composez votre repas sur-mesure ou complétez vos formules : zakouskis apéritifs, entrées raffinées, plats nobles, desserts et fromages du terroir.
+                        </p>
+                    </div>
+
+                    {/* Filtres de catégorie rapides */}
+                    <div className="flex flex-wrap items-center justify-center gap-2 pb-2">
+                        <button
+                            onClick={() => setActiveCarteCategory('all')}
+                            className={`px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all ${
+                                activeCarteCategory === 'all'
+                                    ? 'bg-black text-[#D4AF37] shadow-sm scale-105'
+                                    : 'bg-white text-neutral-600 border border-neutral-200 hover:border-[#D4AF37]'
+                            }`}
+                        >
+                            Tous les plats
+                        </button>
+                        {CARTE_CATEGORIES.map(cat => (
                             <button
-                                onClick={() => setActiveCarteCategory('all')}
-                                className={`px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all ${
-                                    activeCarteCategory === 'all'
-                                        ? 'bg-black text-[#D4AF37] shadow-sm'
+                                key={cat.id}
+                                onClick={() => setActiveCarteCategory(cat.id)}
+                                className={`px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1.5 ${
+                                    activeCarteCategory === cat.id
+                                        ? 'bg-black text-[#D4AF37] shadow-sm scale-105'
                                         : 'bg-white text-neutral-600 border border-neutral-200 hover:border-[#D4AF37]'
                                 }`}
                             >
-                                Tous les plats
+                                <span>{cat.icon}</span>
+                                <span>{cat.label}</span>
                             </button>
-                            {CARTE_CATEGORIES.map(cat => (
-                                <button
-                                    key={cat.id}
-                                    onClick={() => setActiveCarteCategory(cat.id)}
-                                    className={`px-4 py-2 rounded-full text-xs font-bold tracking-wider uppercase transition-all flex items-center gap-1.5 ${
-                                        activeCarteCategory === cat.id
-                                            ? 'bg-black text-[#D4AF37] shadow-sm'
-                                            : 'bg-white text-neutral-600 border border-neutral-200 hover:border-[#D4AF37]'
-                                    }`}
-                                >
-                                    <span>{cat.icon}</span>
-                                    <span>{cat.label}</span>
-                                </button>
-                            ))}
-                        </div>
+                        ))}
+                    </div>
 
-                        {/* Parcourir chaque catégorie de la carte */}
+                    {/* Parcourir chaque catégorie de la carte */}
+                    <div className="space-y-12">
                         {CARTE_CATEGORIES.filter(cat => activeCarteCategory === 'all' || activeCarteCategory === cat.id).map(category => {
                             const items = CARTE_FETES_ITEMS.filter(item => item.category === category.id);
                             if (items.length === 0) return null;
 
                             return (
-                                <div key={category.id} className="space-y-4">
+                                <div key={category.id} className="space-y-5">
                                     {/* Titre de catégorie de la carte */}
                                     <div className="flex items-center justify-between border-b border-neutral-200/80 pb-3">
                                         <div className="flex items-center gap-3">
@@ -741,7 +759,7 @@ export default function MenusFetesPage() {
                             );
                         })}
                     </div>
-                )}
+                </section>
 
                 {/* ==================================================== */}
                 {/* 3. MENTION EXACTE DU FLYER & INFOS PRATIQUES          */}
