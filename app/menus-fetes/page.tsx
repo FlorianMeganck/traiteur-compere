@@ -6,22 +6,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Sparkles, Check, Plus, Minus, ShoppingCart, X,
     ChefHat, Calendar, Clock, MapPin, Award, FileText, ArrowRight,
-    UtensilsCrossed, CreditCard, Star, ShoppingBag, Info
+    UtensilsCrossed, CreditCard, Star, ShoppingBag, Info,
+    ChevronLeft, ChevronRight, BookOpen
 } from "lucide-react";
 
 import {
     FORMULES_FETES,
     FestiveFormule,
     MenuOption,
-    CARTE_CATEGORIES,
-    CARTE_FETES_ITEMS,
-    CarteItem,
-    CarteCategoryKey
+    BOOKLET_PAGES,
+    BookletPage,
+    BookletDish,
+    isEarlyBirdFestivePromoActive
 } from "../data/menus-fetes";
 import { useCart, CartItem } from "../hooks/useCart";
 
 export default function MenusFetesPage() {
-    const { addToCart, totalItems } = useCart();
+    const { addToCart, addMultipleToCart, totalItems } = useCart();
 
     // Modale de composition active (formule en cours de configuration)
     const [activeFormuleModal, setActiveFormuleModal] = useState<FestiveFormule | null>(null);
@@ -30,9 +31,12 @@ export default function MenusFetesPage() {
     const [modalQuantity, setModalQuantity] = useState<number>(1);
     const [modalSelections, setModalSelections] = useState<Record<string, string | string[]>>({});
 
-    // État quantité pour les articles à la carte
+    // État du Livret de Table (Page active 1 à 4 et direction de transition)
+    const [activeBookletPage, setActiveBookletPage] = useState<number>(1);
+    const [bookletSlideDirection, setBookletSlideDirection] = useState<number>(1);
+
+    // État des quantités sélectionnées dans le Livret de Table { [dishId]: quantity }
     const [carteQuantities, setCarteQuantities] = useState<Record<string, number>>({});
-    const [activeCategoryFilter, setActiveCategoryFilter] = useState<CarteCategoryKey | 'all'>('all');
 
     // Toast de confirmation discret après ajout
     const [addedConfirmation, setAddedConfirmation] = useState<{
@@ -173,50 +177,112 @@ export default function MenusFetesPage() {
         setActiveFormuleModal(null);
     };
 
-    // Gestion des quantités pour La Carte Libre
-    const getCarteItemQty = (id: string) => carteQuantities[id] || 1;
+    // Navigation dans le Livret de Table
+    const goToBookletPage = (pageNumber: number) => {
+        if (pageNumber < 1 || pageNumber > BOOKLET_PAGES.length) return;
+        setBookletSlideDirection(pageNumber > activeBookletPage ? 1 : -1);
+        setActiveBookletPage(pageNumber);
+    };
 
-    const setCarteItemQty = (id: string, delta: number) => {
+    // Gestion des quantités dans le Livret de Table
+    const getBookletDishQty = (dishId: string) => carteQuantities[dishId] || 0;
+
+    const setBookletDishQty = (dishId: string, delta: number) => {
         setCarteQuantities(prev => {
-            const current = prev[id] || 1;
-            const updated = Math.max(1, current + delta);
-            return { ...prev, [id]: updated };
+            const current = prev[dishId] || 0;
+            const updated = Math.max(0, current + delta);
+            if (updated === 0) {
+                const { [dishId]: _, ...rest } = prev;
+                return rest;
+            }
+            return { ...prev, [dishId]: updated };
         });
     };
 
-    // Ajouter un article de La Carte Libre au panier
-    const handleAddCarteItem = (item: CarteItem) => {
-        const qty = getCarteItemQty(item.id);
-        const cartItem: CartItem = {
-            id: `carte-${item.id}`,
+    // Ensemble de tous les mets du livret
+    const allBookletDishes: BookletDish[] = BOOKLET_PAGES.flatMap(p => p.subsections.flatMap(s => s.dishes));
+
+    // Liste des mets sélectionnés avec quantité > 0
+    const selectedBookletDishes = allBookletDishes
+        .map(dish => ({ dish, qty: carteQuantities[dish.id] || 0 }))
+        .filter(item => item.qty > 0);
+
+    const totalBookletItemsCount = selectedBookletDishes.reduce((acc, item) => acc + item.qty, 0);
+    const rawBookletSubtotal = selectedBookletDishes.reduce((acc, item) => acc + item.dish.price * item.qty, 0);
+
+    // Calcul remise Early Bird -5%
+    const isEarlyBirdActive = isEarlyBirdFestivePromoActive();
+    const bookletDiscountAmount = isEarlyBirdActive ? Math.round(rawBookletSubtotal * 0.05 * 100) / 100 : 0;
+    const finalBookletTotal = Math.max(0, rawBookletSubtotal - bookletDiscountAmount);
+
+    // Décompte textuel des mets sélectionnés (ex : « 4 zakouskis, 2 plats, 2 bûchettes »)
+    const categoryCounts: Record<string, number> = {};
+    selectedBookletDishes.forEach(item => {
+        const cat = item.dish.categoryLabel.toLowerCase();
+        categoryCounts[cat] = (categoryCounts[cat] || 0) + item.qty;
+    });
+
+    const breakdownParts: string[] = [];
+    if (categoryCounts["zakouskis"]) {
+        breakdownParts.push(`${categoryCounts["zakouskis"]} zakouski${categoryCounts["zakouskis"] > 1 ? "s" : ""}`);
+    }
+    if (categoryCounts["potages"]) {
+        breakdownParts.push(`${categoryCounts["potages"]} potage${categoryCounts["potages"] > 1 ? "s" : ""}`);
+    }
+    const totalEntrees = (categoryCounts["entrées froides"] || 0) + (categoryCounts["entrées chaudes"] || 0);
+    if (totalEntrees > 0) {
+        breakdownParts.push(`${totalEntrees} entrée${totalEntrees > 1 ? "s" : ""}`);
+    }
+    if (categoryCounts["plats"]) {
+        breakdownParts.push(`${categoryCounts["plats"]} plat${categoryCounts["plats"] > 1 ? "s" : ""}`);
+    }
+    if (categoryCounts["bûchettes"]) {
+        breakdownParts.push(`${categoryCounts["bûchettes"]} bûchette${categoryCounts["bûchettes"] > 1 ? "s" : ""}`);
+    }
+
+    const summaryBreakdownText = breakdownParts.length > 0
+        ? `Votre sélection : ${breakdownParts.join(", ")}`
+        : "Feuilletez le livret et composez vos mets pour les fêtes";
+
+    // Nombre d'articles sélectionnés par page de livret (pour le badge de l'onglet)
+    const getPageSelectedCount = (page: BookletPage) => {
+        const pageDishIds = page.subsections.flatMap(s => s.dishes.map(d => d.id));
+        return pageDishIds.reduce((sum, id) => sum + (carteQuantities[id] || 0), 0);
+    };
+
+    // Page de livret courante
+    const currentBookletPage = BOOKLET_PAGES.find(p => p.pageNumber === activeBookletPage) || BOOKLET_PAGES[0];
+
+    // Ajouter toute la sélection du livret en un seul clic au panier
+    const handleAddAllBookletItems = () => {
+        if (selectedBookletDishes.length === 0) return;
+
+        const cartItemsToAdd: CartItem[] = selectedBookletDishes.map(({ dish, qty }) => ({
+            id: `carte-${dish.id}`,
             semaineId: "menus-fetes",
             jour: "Fêtes",
-            nomPlat: item.title,
-            prixUnitairePlat: item.price,
+            nomPlat: dish.title,
+            prixUnitairePlat: dish.price,
             quantitePlat: qty,
             soupes: {},
             prixUnitaireSoupe: 0,
-            prixTotalLigne: item.price * qty,
+            prixTotalLigne: dish.price * qty,
             itemType: "menu_fete",
-            badge: item.categoryLabel,
-            coursesDescription: `${item.categoryLabel} • ${item.priceFormatted} / ${item.unitLabel}`
-        };
+            badge: dish.categoryLabel,
+            coursesDescription: `${dish.categoryLabel} • ${dish.priceFormatted} / ${dish.unitLabel}`
+        }));
 
-        addToCart(cartItem);
+        addMultipleToCart(cartItemsToAdd);
 
         // Feedback
         setAddedConfirmation({
-            formuleTitle: `${qty}x ${item.title}`,
-            quantity: qty
+            formuleTitle: `${totalBookletItemsCount} mets à la carte`,
+            quantity: totalBookletItemsCount
         });
 
-        // Reset quantité à 1 pour ce plat
-        setCarteQuantities(prev => ({ ...prev, [item.id]: 1 }));
+        // Vider la sélection du livret après ajout
+        setCarteQuantities({});
     };
-
-    const filteredCarteItems = activeCategoryFilter === 'all'
-        ? CARTE_FETES_ITEMS
-        : CARTE_FETES_ITEMS.filter(item => item.category === activeCategoryFilter);
 
     return (
         <main className="min-h-screen bg-[#FAF9F6] text-[#111111] font-sans selection:bg-[#D4AF37] selection:text-white pt-44 sm:pt-48 md:pt-52 pb-24 relative overflow-hidden">
@@ -493,148 +559,387 @@ export default function MenusFetesPage() {
                 </section>
 
                 {/* ==================================================== */}
-                {/* 4. SECTION "LA CARTE LIBRE" (SOUS LES FORMULES)      */}
+                {/* 4. SECTION "LIVRET DE TABLE / MENU TOURNANT"         */}
                 {/* ==================================================== */}
-                <section className="pt-8 space-y-10 border-t border-neutral-200">
+                <section id="livret-de-table" className="pt-10 space-y-8 border-t border-neutral-200">
+                    {/* En-tête de section */}
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#927116] text-xs font-bold uppercase tracking-wider mb-2">
-                                <ShoppingBag size={14} />
-                                <span>Composez selon vos envies</span>
+                                <BookOpen size={14} />
+                                <span>Livret de table • Carte Gastronomique</span>
                             </div>
                             <h2 className="text-3xl sm:text-4xl font-serif text-black font-bold">
-                                La Carte Libre
+                                Le Livret de Table
                             </h2>
                             <p className="font-serif italic text-neutral-600 text-sm sm:text-base mt-1">
-                                Commandez des pièces à l&apos;unité pour compléter votre buffet ou composer votre repas sur-mesure.
+                                Tournez les pages de notre carte et composez librement vos mets pour vos réveillons et tables de fête.
                             </p>
                         </div>
 
                         {/* Remise -5% rappel carte */}
-                        <div className="bg-black text-white px-5 py-3 rounded-2xl border border-[#D4AF37]/40 flex items-center gap-3 shrink-0">
+                        <div className="bg-black text-white px-5 py-3 rounded-2xl border border-[#D4AF37]/40 flex items-center gap-3 shrink-0 shadow-sm">
                             <span className="text-[#D4AF37] text-xl">✨</span>
                             <div className="text-xs">
-                                <p className="font-bold text-[#D4AF37]">Remise de -5 % également valable à la carte</p>
+                                <p className="font-bold text-[#D4AF37]">Remise de -5 % Early Bird également sur la carte</p>
                                 <p className="text-neutral-400">Pour toute commande validée avant le 1er décembre 2026.</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Filtres de catégories de la carte */}
-                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    {/* LE CONTENEUR LIVRET DE TABLE */}
+                    <div className="relative max-w-4xl mx-auto">
+                        {/* Flèches latérales desktop (pour tourner les pages d'un clic) */}
                         <button
                             type="button"
-                            onClick={() => setActiveCategoryFilter('all')}
-                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
-                                activeCategoryFilter === 'all'
-                                    ? 'bg-black text-white shadow-sm'
-                                    : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
+                            onClick={() => goToBookletPage(activeBookletPage - 1)}
+                            disabled={activeBookletPage === 1}
+                            className={`hidden lg:flex absolute -left-14 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full items-center justify-center border transition-all z-20 ${
+                                activeBookletPage === 1
+                                    ? "bg-white/40 border-neutral-200 text-neutral-300 cursor-not-allowed"
+                                    : "bg-white hover:bg-black text-neutral-800 hover:text-white border-[#D4AF37]/40 hover:border-black shadow-md hover:scale-105 active:scale-95"
                             }`}
+                            aria-label="Page précédente"
                         >
-                            Tous les mets ({CARTE_FETES_ITEMS.length})
+                            <ChevronLeft size={20} />
                         </button>
-                        {CARTE_CATEGORIES.map(cat => (
-                            <button
-                                key={cat.id}
-                                type="button"
-                                onClick={() => setActiveCategoryFilter(cat.id)}
-                                className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
-                                    activeCategoryFilter === cat.id
-                                        ? 'bg-black text-white shadow-sm'
-                                        : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
-                                }`}
-                            >
-                                <span>{cat.icon}</span>
-                                <span>{cat.label}</span>
-                            </button>
-                        ))}
-                    </div>
+                        <button
+                            type="button"
+                            onClick={() => goToBookletPage(activeBookletPage + 1)}
+                            disabled={activeBookletPage === BOOKLET_PAGES.length}
+                            className={`hidden lg:flex absolute -right-14 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full items-center justify-center border transition-all z-20 ${
+                                activeBookletPage === BOOKLET_PAGES.length
+                                    ? "bg-white/40 border-neutral-200 text-neutral-300 cursor-not-allowed"
+                                    : "bg-white hover:bg-black text-neutral-800 hover:text-white border-[#D4AF37]/40 hover:border-black shadow-md hover:scale-105 active:scale-95"
+                            }`}
+                            aria-label="Page suivante"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
 
-                    {/* Grille des articles à la carte */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredCarteItems.map((item) => {
-                            const currentQty = getCarteItemQty(item.id);
+                        {/* Livret Cartonné Central */}
+                        <div className="bg-[#FAF9F6] rounded-3xl border border-[#D4AF37]/35 shadow-[0_22px_60px_-15px_rgba(20,20,20,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
 
-                            return (
-                                <div
-                                    key={item.id}
-                                    className="bg-white rounded-3xl p-6 border border-neutral-200 hover:border-[#D4AF37]/60 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
-                                >
-                                    <div>
-                                        {/* Catégorie & Badge */}
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#927116] bg-[#D4AF37]/15 px-2.5 py-1 rounded-full">
-                                                {item.categoryLabel}
+                            {/* En-tête du livret : Les 4 intercalaires / onglets */}
+                            <div className="bg-[#F3EFE6] border-b border-[#D4AF37]/25 px-2 sm:px-6 pt-3 flex items-center justify-start sm:justify-center gap-1.5 sm:gap-3 overflow-x-auto scrollbar-none">
+                                {BOOKLET_PAGES.map((page) => {
+                                    const isActive = page.pageNumber === activeBookletPage;
+                                    const pageCount = getPageSelectedCount(page);
+
+                                    return (
+                                        <button
+                                            key={page.pageNumber}
+                                            type="button"
+                                            onClick={() => goToBookletPage(page.pageNumber)}
+                                            className={`group relative px-3 sm:px-5 py-2.5 rounded-t-xl text-xs sm:text-sm font-serif font-bold transition-all flex items-center gap-2 whitespace-nowrap -mb-px ${
+                                                isActive
+                                                    ? "bg-[#FAF9F6] text-black border-t-2 border-l border-r border-[#D4AF37]/50 shadow-sm"
+                                                    : "text-neutral-500 hover:text-neutral-900 hover:bg-white/40"
+                                            }`}
+                                        >
+                                            <span className={isActive ? "text-[#927116]" : "text-neutral-400 group-hover:text-neutral-600"}>
+                                                {page.tabNumber}.
                                             </span>
-                                            <span className="text-[10px] font-bold bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-full">
-                                                -5%* Early Bird
-                                            </span>
-                                        </div>
+                                            <span>{page.tabShort}</span>
 
-                                        <h3 className="font-serif font-bold text-lg text-black mb-2 leading-snug">
-                                            {item.title}
-                                        </h3>
-
-                                        {item.description && (
-                                            <p className="text-xs text-neutral-600 font-serif italic mb-5 leading-relaxed min-h-[2.5rem]">
-                                                {item.description}
-                                            </p>
-                                        )}
-                                    </div>
-
-                                    <div className="pt-4 border-t border-neutral-100 mt-2">
-                                        <div className="flex items-baseline justify-between mb-4">
-                                            <div>
-                                                <span className="font-serif font-bold text-2xl text-black">
-                                                    {item.priceFormatted}
+                                            {/* Badge compte de sélection sur cette page */}
+                                            {pageCount > 0 && (
+                                                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-sans font-bold bg-[#D4AF37] text-black shadow-2xs">
+                                                    {pageCount}
                                                 </span>
-                                                <span className="text-xs text-neutral-500 ml-1.5">
-                                                    / {item.unitLabel} TVAC
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Corps du livret avec cadre doré et transition fluide Framer Motion */}
+                            <div className="p-4 sm:p-8 md:p-10">
+                                <div className="border border-[#D4AF37]/30 rounded-2xl p-4 sm:p-8 relative bg-gradient-to-b from-[#FAF9F6] via-[#FCFBF8] to-[#FAF9F6]">
+
+                                    {/* Coins dorés discrets */}
+                                    <div className="absolute top-2 left-2 text-[#D4AF37]/50 text-xs select-none pointer-events-none">⌜</div>
+                                    <div className="absolute top-2 right-2 text-[#D4AF37]/50 text-xs select-none pointer-events-none">⌝</div>
+                                    <div className="absolute bottom-2 left-2 text-[#D4AF37]/50 text-xs select-none pointer-events-none">⌞</div>
+                                    <div className="absolute bottom-2 right-2 text-[#D4AF37]/50 text-xs select-none pointer-events-none">⌟</div>
+
+                                    {/* Animation de page avec support swipe horizontal */}
+                                    <AnimatePresence mode="wait" custom={bookletSlideDirection}>
+                                        <motion.div
+                                            key={activeBookletPage}
+                                            custom={bookletSlideDirection}
+                                            variants={{
+                                                enter: (dir: number) => ({
+                                                    x: dir > 0 ? 40 : -40,
+                                                    opacity: 0,
+                                                }),
+                                                center: {
+                                                    x: 0,
+                                                    opacity: 1,
+                                                    transition: { duration: 0.32, ease: [0.25, 1, 0.5, 1] }
+                                                },
+                                                exit: (dir: number) => ({
+                                                    x: dir > 0 ? -40 : 40,
+                                                    opacity: 0,
+                                                    transition: { duration: 0.22, ease: [0.25, 1, 0.5, 1] }
+                                                })
+                                            }}
+                                            initial="enter"
+                                            animate="center"
+                                            exit="exit"
+                                            drag="x"
+                                            dragConstraints={{ left: 0, right: 0 }}
+                                            dragElastic={0.15}
+                                            onDragEnd={(_, info) => {
+                                                if (info.offset.x < -60 && activeBookletPage < BOOKLET_PAGES.length) {
+                                                    goToBookletPage(activeBookletPage + 1);
+                                                } else if (info.offset.x > 60 && activeBookletPage > 1) {
+                                                    goToBookletPage(activeBookletPage - 1);
+                                                }
+                                            }}
+                                            className="touch-pan-y"
+                                        >
+                                            {/* En-tête de la page */}
+                                            <div className="text-center mb-8 pb-5 border-b border-[#D4AF37]/20">
+                                                <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#927116]">
+                                                    Maison Compère • Réveillons & Fêtes 2026
                                                 </span>
+                                                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-neutral-900 mt-1 tracking-tight">
+                                                    {currentBookletPage.pageTitle}
+                                                </h3>
+                                                <p className="font-serif italic text-xs sm:text-sm text-neutral-600 mt-1.5 max-w-lg mx-auto">
+                                                    {currentBookletPage.pageTagline}
+                                                </p>
                                             </div>
 
-                                            <span className="text-xs font-semibold text-neutral-400">
-                                                Total : {(item.price * currentQty).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                            </span>
-                                        </div>
+                                            {/* Sous-sections et mets sous forme de lignes élégantes horizontales */}
+                                            <div className="space-y-8">
+                                                {currentBookletPage.subsections.map((sub, sIdx) => (
+                                                    <div key={sIdx} className="space-y-3">
+                                                        {/* Titre de sous-catégorie */}
+                                                        <div className="flex items-baseline justify-between gap-4 pb-1.5 border-b border-neutral-200/80">
+                                                            <h4 className="font-serif font-bold text-sm sm:text-base text-neutral-900 uppercase tracking-wider">
+                                                                {sub.subtitle}
+                                                            </h4>
+                                                            {sub.note && (
+                                                                <span className="text-xs text-[#927116] font-serif italic font-medium shrink-0">
+                                                                    {sub.note}
+                                                                </span>
+                                                            )}
+                                                        </div>
 
-                                        {/* Sélecteur de quantité simple + / - & Bouton Ajouter */}
-                                        <div className="flex items-center gap-3">
-                                            <div className="inline-flex items-center gap-2 bg-[#FAF9F6] border border-neutral-300 p-1.5 rounded-full shadow-2xs">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setCarteItemQty(item.id, -1)}
-                                                    className="w-7 h-7 rounded-full bg-white hover:bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xs transition-colors shadow-2xs"
-                                                    aria-label="Diminuer"
-                                                >
-                                                    <Minus size={12} />
-                                                </button>
-                                                <span className="font-bold text-sm text-black w-6 text-center">
-                                                    {currentQty}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setCarteItemQty(item.id, 1)}
-                                                    className="w-7 h-7 rounded-full bg-white hover:bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xs transition-colors shadow-2xs"
-                                                    aria-label="Augmenter"
-                                                >
-                                                    <Plus size={12} />
-                                                </button>
+                                                        {/* Lignes de mets façon restaurant étoilé */}
+                                                        <div className="divide-y divide-neutral-200/60">
+                                                            {sub.dishes.map((dish) => {
+                                                                const qty = getBookletDishQty(dish.id);
+                                                                const isSelected = qty > 0;
+
+                                                                return (
+                                                                    <div
+                                                                        key={dish.id}
+                                                                        className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 px-3 sm:px-4 rounded-xl transition-all duration-200 ${
+                                                                            isSelected
+                                                                                ? "bg-[#D4AF37]/10 border border-[#D4AF37]/35 shadow-2xs"
+                                                                                : "hover:bg-white/80 border border-transparent"
+                                                                        }`}
+                                                                    >
+                                                                        {/* Intitulé et description en italique fin */}
+                                                                        <div className="flex-1 pr-3">
+                                                                            <h5 className="font-serif font-semibold text-base sm:text-lg text-neutral-900 group-hover:text-[#927116] transition-colors leading-snug">
+                                                                                {dish.title}
+                                                                            </h5>
+                                                                            {dish.description && (
+                                                                                <p className="font-serif italic text-xs sm:text-sm text-neutral-600 mt-0.5 leading-relaxed">
+                                                                                    {dish.description}
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {/* Prix sobre & Mini-compteur compact */}
+                                                                        <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/40">
+                                                                            <div className="text-right">
+                                                                                <span className="font-serif font-bold text-base sm:text-lg text-neutral-900">
+                                                                                    {dish.priceFormatted}
+                                                                                </span>
+                                                                                <span className="text-[11px] text-neutral-500 ml-1">
+                                                                                    / {dish.unitLabel}
+                                                                                </span>
+                                                                            </div>
+
+                                                                            {/* Mini-compteur [ – ] Q [ + ] ou bouton sobre [ + Choisir ] */}
+                                                                            {qty === 0 ? (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => setBookletDishQty(dish.id, 1)}
+                                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif font-bold text-neutral-800 bg-white hover:bg-black hover:text-white border border-[#D4AF37]/50 shadow-2xs transition-all duration-200"
+                                                                                    aria-label={`Choisir ${dish.title}`}
+                                                                                >
+                                                                                    <Plus size={13} className="text-[#927116] group-hover:text-white" />
+                                                                                    <span>Choisir</span>
+                                                                                </button>
+                                                                            ) : (
+                                                                                <div className="inline-flex items-center gap-1.5 bg-white border border-[#D4AF37] p-1 rounded-full shadow-2xs">
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => setBookletDishQty(dish.id, -1)}
+                                                                                        className="w-6 h-6 rounded-full bg-[#FAF9F6] hover:bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xs transition-colors"
+                                                                                        aria-label="Diminuer la quantité"
+                                                                                    >
+                                                                                        <Minus size={11} />
+                                                                                    </button>
+                                                                                    <span className="font-bold text-xs text-black w-6 text-center font-serif">
+                                                                                        {qty}
+                                                                                    </span>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => setBookletDishQty(dish.id, 1)}
+                                                                                        className="w-6 h-6 rounded-full bg-black hover:bg-[#927116] text-white flex items-center justify-center font-bold text-xs transition-colors"
+                                                                                        aria-label="Augmenter la quantité"
+                                                                                    >
+                                                                                        <Plus size={11} />
+                                                                                    </button>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
 
+                                            {/* Mention sobre en bas de page (ex. Page 4) */}
+                                            {currentBookletPage.footnote && (
+                                                <div className="mt-8 pt-4 border-t border-[#D4AF37]/30 text-center">
+                                                    <p className="font-serif italic text-xs sm:text-sm text-neutral-700 font-medium">
+                                                        « {currentBookletPage.footnote} »
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    </AnimatePresence>
+                                </div>
+                            </div>
+
+                            {/* Bas du Livret : Numérotation & Boutons de navigation */}
+                            <div className="bg-[#F3EFE6] border-t border-[#D4AF37]/25 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
+                                {/* Bouton Précédent */}
+                                <div className="w-1/3 text-left">
+                                    {activeBookletPage > 1 ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => goToBookletPage(activeBookletPage - 1)}
+                                            className="inline-flex items-center gap-1.5 text-xs font-serif font-bold text-neutral-700 hover:text-black transition-colors px-2.5 py-1.5 rounded-lg hover:bg-white/60"
+                                        >
+                                            <ChevronLeft size={16} />
+                                            <span className="hidden sm:inline">
+                                                {currentBookletPage.prevPageTitle ? currentBookletPage.prevPageTitle : "Précédent"}
+                                            </span>
+                                            <span className="sm:hidden">Préc.</span>
+                                        </button>
+                                    ) : (
+                                        <div />
+                                    )}
+                                </div>
+
+                                {/* Rappel du numéro de page & points */}
+                                <div className="w-1/3 flex flex-col items-center justify-center text-center">
+                                    <span className="font-serif text-xs text-neutral-700 font-bold tracking-wider">
+                                        — Page {activeBookletPage} sur {BOOKLET_PAGES.length} —
+                                    </span>
+                                    <div className="flex items-center gap-1.5 mt-1">
+                                        {BOOKLET_PAGES.map((p) => (
                                             <button
+                                                key={p.pageNumber}
                                                 type="button"
-                                                onClick={() => handleAddCarteItem(item)}
-                                                className="flex-1 bg-black hover:bg-[#D4AF37] text-white hover:text-black py-2.5 px-4 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-sm flex items-center justify-center gap-2"
-                                            >
-                                                <ShoppingCart size={14} />
-                                                <span>Ajouter</span>
-                                            </button>
-                                        </div>
+                                                onClick={() => goToBookletPage(p.pageNumber)}
+                                                className={`h-1.5 rounded-full transition-all ${
+                                                    p.pageNumber === activeBookletPage
+                                                        ? "w-4 bg-[#927116]"
+                                                        : "w-1.5 bg-neutral-300 hover:bg-neutral-400"
+                                                }`}
+                                                aria-label={`Aller à la page ${p.pageNumber}`}
+                                            />
+                                        ))}
                                     </div>
                                 </div>
-                            );
-                        })}
+
+                                {/* Bouton Suivant */}
+                                <div className="w-1/3 text-right">
+                                    {activeBookletPage < BOOKLET_PAGES.length ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => goToBookletPage(activeBookletPage + 1)}
+                                            className="inline-flex items-center gap-1.5 text-xs font-serif font-bold text-neutral-900 hover:text-[#927116] transition-colors px-2.5 py-1.5 rounded-lg hover:bg-white/60 ml-auto"
+                                        >
+                                            <span className="hidden sm:inline">
+                                                {currentBookletPage.nextPageTitle ? `${currentBookletPage.nextPageTitle}` : "Suivant"}
+                                            </span>
+                                            <span className="sm:hidden">Suiv.</span>
+                                            <ChevronRight size={16} />
+                                        </button>
+                                    ) : (
+                                        <div />
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ENCART RÉCAPITULATIF & AJOUT GLOBAL (SOUS LE LIVRET) */}
+                        <div className="mt-6 bg-gradient-to-r from-neutral-950 via-neutral-900 to-black text-white p-6 sm:p-7 rounded-3xl border border-[#D4AF37]/40 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            {/* Récapitulatif en temps réel */}
+                            <div className="space-y-1.5 flex-1">
+                                <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-bold uppercase tracking-wider">
+                                    <Sparkles size={14} />
+                                    <span>Votre sélection du livret</span>
+                                </div>
+                                <p className="font-serif text-base sm:text-lg text-white font-medium">
+                                    {summaryBreakdownText}
+                                </p>
+                                {isEarlyBirdActive && totalBookletItemsCount > 0 && (
+                                    <div className="inline-flex items-center gap-1.5 text-xs text-[#D4AF37] font-medium bg-[#D4AF37]/15 border border-[#D4AF37]/30 px-2.5 py-0.5 rounded-full mt-1">
+                                        <span>✨ Remise Early Bird -5 % incluse (-{bookletDiscountAmount.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €)</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Prix total & Bouton d'action principal */}
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-5 shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-neutral-800">
+                                <div className="text-left sm:text-right">
+                                    <div className="text-xs text-neutral-400 font-medium">Total sélection</div>
+                                    <div className="flex items-baseline gap-2 sm:justify-end">
+                                        {isEarlyBirdActive && bookletDiscountAmount > 0 && (
+                                            <span className="text-xs line-through text-neutral-500">
+                                                {rawBookletSubtotal.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €
+                                            </span>
+                                        )}
+                                        <span className="font-serif font-bold text-2xl sm:text-3xl text-white">
+                                            {finalBookletTotal.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €
+                                        </span>
+                                    </div>
+                                    <div className="text-[11px] text-neutral-400">TVAC • Remise déduite</div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={handleAddAllBookletItems}
+                                    disabled={totalBookletItemsCount === 0}
+                                    className={`px-7 py-3.5 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
+                                        totalBookletItemsCount > 0
+                                            ? "bg-[#D4AF37] hover:bg-[#F3E5AB] text-black cursor-pointer hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                                            : "bg-neutral-800 text-neutral-500 border border-neutral-700 cursor-not-allowed"
+                                    }`}
+                                >
+                                    <ShoppingCart size={15} />
+                                    <span>
+                                        {totalBookletItemsCount > 0
+                                            ? `Ajouter ma sélection au panier`
+                                            : `Sélectionnez vos mets`}
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </section>
 

@@ -255,6 +255,256 @@ export const CARTE_FETES_ITEMS: CarteItem[] = [
     }
 ];
 
+export interface BookletDish {
+    id: string;
+    title: string;
+    description: string;
+    price: number;
+    priceFormatted: string;
+    unitLabel: string;
+    categoryLabel: string;
+}
+
+export interface BookletSubSection {
+    subtitle: string;
+    note?: string;
+    dishes: BookletDish[];
+}
+
+export interface BookletPage {
+    pageNumber: number;
+    tabNumber: string;
+    tabLabel: string;
+    tabShort: string;
+    pageTitle: string;
+    pageTagline: string;
+    subsections: BookletSubSection[];
+    footnote?: string;
+    nextPageTitle?: string;
+    prevPageTitle?: string;
+}
+
+export const BOOKLET_PAGES: BookletPage[] = [
+    {
+        pageNumber: 1,
+        tabNumber: "1",
+        tabLabel: "1. Zakouskis & Potages",
+        tabShort: "Zakouskis & Potages",
+        pageTitle: "L'Apéritif & Les Potages",
+        pageTagline: "Pour éveiller les papilles et débuter les festivités tout en délicatesse",
+        nextPageTitle: "Découvrir les Entrées",
+        subsections: [
+            {
+                subtitle: "Les Zakouskis Froids",
+                note: "4,00 € / pièce TVAC",
+                dishes: [
+                    {
+                        id: "zak-volaille",
+                        title: "Cuillère de mousse de volaille Périgord",
+                        description: "Mousse légère et parfumée, noisettes torréfiées et pointe de réduction",
+                        price: 4.00,
+                        priceFormatted: "4,00 €",
+                        unitLabel: "pièce",
+                        categoryLabel: "Zakouskis"
+                    },
+                    {
+                        id: "zak-maquereau",
+                        title: "Blini de maquereau fumé",
+                        description: "Maquereau fumé artisanalement, raifort doux et fraîcheur acidulée de pomme verte",
+                        price: 4.00,
+                        priceFormatted: "4,00 €",
+                        unitLabel: "pièce",
+                        categoryLabel: "Zakouskis"
+                    },
+                    {
+                        id: "zak-jambon",
+                        title: "Roulé de jambon d'Ardenne",
+                        description: "Jambon d'Ardenne affiné, fromage de Herve doux et pointe de sirop de Liège",
+                        price: 4.00,
+                        priceFormatted: "4,00 €",
+                        unitLabel: "pièce",
+                        categoryLabel: "Zakouskis"
+                    }
+                ]
+            },
+            {
+                subtitle: "Les Potages Veloutés",
+                note: "4,00 € / portion TVAC",
+                dishes: [
+                    {
+                        id: "pot-cresson",
+                        title: "Velouté de cresson",
+                        description: "Cresson de fontaine fraîchement lié à la crème double et pointe de muscade",
+                        price: 4.00,
+                        priceFormatted: "4,00 €",
+                        unitLabel: "portion",
+                        categoryLabel: "Potages"
+                    },
+                    {
+                        id: "pot-potiron",
+                        title: "Velouté de potiron et châtaignes",
+                        description: "Douceur de potiron rôti au beurre et brisures de châtaignes moelleuses",
+                        price: 4.00,
+                        priceFormatted: "4,00 €",
+                        unitLabel: "portion",
+                        categoryLabel: "Potages"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        pageNumber: 2,
+        tabNumber: "2",
+        tabLabel: "2. Entrées",
+        tabShort: "Entrées",
+        pageTitle: "Les Entrées de Fête",
+        pageTagline: "Le raffinement de la terre et de la mer pour sublimer vos tables",
+        prevPageTitle: "Zakouskis & Potages",
+        nextPageTitle: "Découvrir les Plats",
+        subsections: [
+            {
+                subtitle: "Les Entrées Froides",
+                note: "Fraîcheur noble & dressage délicat",
+                dishes: [
+                    {
+                        id: "ef-foie-gras",
+                        title: "Foie gras de canard mi-cuit",
+                        description: "Terrine maison au poivre de Sichuan, chutney de figues au Porto et brioche toastée",
+                        price: 22.00,
+                        priceFormatted: "22,00 €",
+                        unitLabel: "portion",
+                        categoryLabel: "Entrées froides"
+                    },
+                    {
+                        id: "ef-st-jacques",
+                        title: "Carpaccio de noix de Saint-Jacques",
+                        description: "Noix tranchées minute, suprêmes d'agrumes, confit de pamplemousse et huile vierge extra",
+                        price: 24.00,
+                        priceFormatted: "24,00 €",
+                        unitLabel: "portion",
+                        categoryLabel: "Entrées froides"
+                    }
+                ]
+            },
+            {
+                subtitle: "Les Entrées Chaudes",
+                note: "À réchauffer délicatement avant le service",
+                dishes: [
+                    {
+                        id: "ec-ris-de-veau",
+                        title: "Cassolette de ris de veau dorés au beurre",
+                        description: "Ris de veau de cœur croustillants, girolles, chanterelles et crème fine réduite",
+                        price: 24.00,
+                        priceFormatted: "24,00 €",
+                        unitLabel: "portion",
+                        categoryLabel: "Entrées chaudes"
+                    },
+                    {
+                        id: "ec-raviolis",
+                        title: "Raviolis farcis aux girolles",
+                        description: "Pâtes fraîches farcies aux sous-bois, crème de parmesan affiné et girolles poêlées",
+                        price: 22.00,
+                        priceFormatted: "22,00 €",
+                        unitLabel: "portion",
+                        categoryLabel: "Entrées chaudes"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        pageNumber: 3,
+        tabNumber: "3",
+        tabLabel: "3. Plats",
+        tabShort: "Plats",
+        pageTitle: "Les Plats de Fête",
+        pageTagline: "Grandes pièces généreuses (±250g) mijotées ou saisies à point avec leurs garnitures",
+        prevPageTitle: "Les Entrées",
+        nextPageTitle: "Découvrir les Bûchettes",
+        subsections: [
+            {
+                subtitle: "Les Grandes Pièces Cuisinées",
+                note: "Portion généreuse ±250g avec sauce et garnitures maison",
+                dishes: [
+                    {
+                        id: "plat-chevreuil",
+                        title: "Filet de chevreuil rôti",
+                        description: "Gibier noble saisi au sautoir (±250g), sauce aux agrumes et chocolat noir amer",
+                        price: 36.00,
+                        priceFormatted: "36,00 €",
+                        unitLabel: "portion",
+                        categoryLabel: "Plats"
+                    },
+                    {
+                        id: "plat-pintadeau",
+                        title: "Suprême de pintadeau laqué au miel",
+                        description: "Volaille fermière dorée au miel d'acacia (±250g), mandarines rôties et jus corsé",
+                        price: 30.00,
+                        priceFormatted: "30,00 €",
+                        unitLabel: "portion",
+                        categoryLabel: "Plats"
+                    },
+                    {
+                        id: "plat-saumon",
+                        title: "Pavé de saumon à l'oseille en cuisson lente",
+                        description: "Cœur de filet de saumon fondant (±250g), émulsion légère au champagne et julienne de légumes",
+                        price: 30.00,
+                        priceFormatted: "30,00 €",
+                        unitLabel: "portion",
+                        categoryLabel: "Plats"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        pageNumber: 4,
+        tabNumber: "4",
+        tabLabel: "4. Bûchettes",
+        tabShort: "Bûchettes",
+        pageTitle: "La Touche Sucrée",
+        pageTagline: "L'élégance pâtissière artisanale pour clore votre repas en apothéose",
+        prevPageTitle: "Les Plats",
+        footnote: "Tout est préparé maison • Bûchettes artisanales de chez La Pavée",
+        subsections: [
+            {
+                subtitle: "Bûchettes de chez La Pavée",
+                note: "Créations individuelles d'exception signées par la pâtisserie La Pavée • 8,00 € / pièce TVAC",
+                dishes: [
+                    {
+                        id: "buch-framboise",
+                        title: "Crème fraîche & framboise",
+                        description: "Biscuit roulé aérien, crème fraîche légère et compotée de framboises acidulées",
+                        price: 8.00,
+                        priceFormatted: "8,00 €",
+                        unitLabel: "pièce",
+                        categoryLabel: "Bûchettes"
+                    },
+                    {
+                        id: "buch-chocolat",
+                        title: "Mousse au chocolat cœur framboise",
+                        description: "Mousse intense au chocolat noir belge, insert fruité framboise et croustillant praliné",
+                        price: 8.00,
+                        priceFormatted: "8,00 €",
+                        unitLabel: "pièce",
+                        categoryLabel: "Bûchettes"
+                    },
+                    {
+                        id: "buch-moka",
+                        title: "Beurre moka",
+                        description: "La recette festive traditionnelle : crème au beurre au café pur arabica et génoise moelleuse",
+                        price: 8.00,
+                        priceFormatted: "8,00 €",
+                        unitLabel: "pièce",
+                        categoryLabel: "Bûchettes"
+                    }
+                ]
+            }
+        ]
+    }
+];
+
 // ==========================================
 // 2. LES FORMULES (Configurateur 49€, 59€, 69€)
 // ==========================================

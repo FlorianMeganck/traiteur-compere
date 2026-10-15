@@ -107,27 +107,34 @@ export function useCart() {
         window.dispatchEvent(new Event('cart-updated'));
     };
 
-    const addToCart = (item: CartItem) => {
-        const existingIndex = cartItems.findIndex(i => i.id === item.id);
-        const newCart = [...cartItems];
+    const addMultipleToCart = (newItems: CartItem[]) => {
+        if (!newItems || newItems.length === 0) return;
+        let currentCart = [...cartItems];
 
-        if (existingIndex >= 0) {
-            // Cumul de la quantité pour le même plat / même configuration
-            const existing = newCart[existingIndex];
-            const newQty = existing.quantitePlat + item.quantitePlat;
-            const totalSoupes = Object.values(existing.soupes || {}).reduce((a, b) => a + b, 0);
-            const soupesTotalCost = totalSoupes * (existing.prixUnitaireSoupe || 0);
-            const newTotal = (existing.prixUnitairePlat * newQty) + soupesTotalCost;
+        for (const item of newItems) {
+            const existingIndex = currentCart.findIndex(i => i.id === item.id);
+            if (existingIndex >= 0) {
+                const existing = currentCart[existingIndex];
+                const newQty = existing.quantitePlat + item.quantitePlat;
+                const totalSoupes = Object.values(existing.soupes || {}).reduce((a, b) => a + b, 0);
+                const soupesTotalCost = totalSoupes * (existing.prixUnitaireSoupe || 0);
+                const newTotal = (existing.prixUnitairePlat * newQty) + soupesTotalCost;
 
-            newCart[existingIndex] = {
-                ...existing,
-                quantitePlat: newQty,
-                prixTotalLigne: newTotal
-            };
-        } else {
-            newCart.push(item);
+                currentCart[existingIndex] = {
+                    ...existing,
+                    quantitePlat: newQty,
+                    prixTotalLigne: newTotal
+                };
+            } else {
+                currentCart.push(item);
+            }
         }
-        saveCart(newCart);
+
+        saveCart(currentCart);
+    };
+
+    const addToCart = (item: CartItem) => {
+        addMultipleToCart([item]);
     };
 
     const updateQuantity = (id: string, delta: number) => {
@@ -175,6 +182,7 @@ export function useCart() {
         cartItems,
         isLoaded,
         addToCart,
+        addMultipleToCart,
         updateQuantity,
         removeFromCart,
         clearCart,
