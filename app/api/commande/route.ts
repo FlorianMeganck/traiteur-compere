@@ -60,10 +60,24 @@ export async function POST(req: Request) {
             typeCommande === 'menu_fetes' ||
             cartItems.some(i => isFestiveCartItem(i));
 
+        const cleanDishTitle = (raw: any): string => {
+            let str = String(raw || '').trim();
+            const colonIdx = str.indexOf(':');
+            if (colonIdx !== -1) {
+                str = str.substring(colonIdx + 1).trim();
+            }
+            return str.replace(/^[•\-\*]\s*/, '').trim();
+        };
+
+        const cleanCapitalize = (str: string): string => {
+            if (!str) return '';
+            const trimmed = String(str).trim();
+            return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+        };
+
         for (const item of cartItems) {
             const isFestive = isFestiveCartItem(item) || isOrderFestiveContext;
             const itemQty = Number(item.quantitePlat) || 1;
-            const itemId = String(item.id || '').toLowerCase();
             const itemNom = String(item.nomPlat || '');
 
             if (isFestive) {
@@ -76,64 +90,40 @@ export async function POST(req: Request) {
                 const itemTotal = unitPrice * itemQty;
                 finalTotalPrice += itemTotal;
 
-                let coursesList = '-';
+                let dishes: string[] = [];
                 if (item.coursesSummary && Array.isArray(item.coursesSummary) && item.coursesSummary.length > 0) {
-                    coursesList = item.coursesSummary.map((c: any) => {
-                        const str = String(c || '');
-                        const parts = str.split(':');
-                        if (parts.length > 1) {
-                            return `<strong>${parts[0].trim()} :</strong>${parts.slice(1).join(':')}`;
-                        }
-                        return `• ${str.trim()}`;
-                    }).join('<br/>');
+                    dishes = item.coursesSummary.map(cleanDishTitle).filter(Boolean);
                 } else if (item.coursesDescription) {
-                    coursesList = `<em>${item.coursesDescription}</em>`;
+                    dishes = [String(item.coursesDescription).trim()];
                 } else if (festiveMenu && festiveMenu.courses) {
-                    coursesList = [
-                        festiveMenu.courses.entrees?.[0] ? `<strong>Entrée :</strong> ${festiveMenu.courses.entrees[0].title}` : '',
-                        festiveMenu.courses.potages?.[0] ? `<strong>Potage :</strong> ${festiveMenu.courses.potages[0].title}` : '',
-                        festiveMenu.courses.plats?.[0] ? `<strong>Plat :</strong> ${festiveMenu.courses.plats[0].title}` : '',
-                        festiveMenu.courses.desserts?.[0] ? `<strong>Dessert :</strong> ${festiveMenu.courses.desserts[0].title}` : ''
-                    ].filter(Boolean).join('<br/>') || '-';
+                    dishes = [
+                        festiveMenu.courses.entrees?.[0]?.title,
+                        festiveMenu.courses.potages?.[0]?.title,
+                        festiveMenu.courses.plats?.[0]?.title,
+                        festiveMenu.courses.desserts?.[0]?.title
+                    ].filter(Boolean) as string[];
                 }
 
-                const isNoel = itemId.includes('noel') || itemId.includes('prestige') || itemNom.toLowerCase().includes('noël') || itemNom.toLowerCase().includes('noel');
-                const isNouvelAn = itemId.includes('sylvestre') || itemNom.toLowerCase().includes('sylvestre') || itemNom.toLowerCase().includes('nouvel an');
-
-                let itemPickupNotice = '';
-                if (creneauRetrait && typeof creneauRetrait === 'string') {
-                    if (creneauRetrait.includes(' | ')) {
-                        const parts = creneauRetrait.split(' | ');
-                        const noelPart = parts.find((p: string) => p.toLowerCase().includes('noël') || p.toLowerCase().includes('noel')) || parts[0] || '';
-                        const naPart = parts.find((p: string) => p.toLowerCase().includes('nouvel an')) || parts[1] || '';
-
-                        const cleanNoel = noelPart ? noelPart.replace(/^(Retrait\s+)?Noël\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '') : '';
-                        const cleanNa = naPart ? naPart.replace(/^(Retrait\s+)?Nouvel An\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '') : '';
-
-                        if (isNoel) {
-                            itemPickupNotice = cleanNoel;
-                        } else if (isNouvelAn) {
-                            itemPickupNotice = cleanNa;
-                        } else {
-                            itemPickupNotice = cleanNoel || cleanNa;
-                        }
-                    } else {
-                        itemPickupNotice = creneauRetrait.replace(/^Retrait possible\s*:\s*/i, '');
-                    }
-                } else {
-                    itemPickupNotice = festiveMenu ? festiveMenu.badge : (item.badge || item.jour || '24 ou 31 Décembre');
-                }
+                const coursesHtml = dishes.length > 0 ? `
+                    <ul style="margin: 6px 0 0 0; padding: 0 0 0 14px; list-style-type: none; font-size: 12px; color: #555555; line-height: 1.55;">
+                        ${dishes.map(d => `<li style="margin-bottom: 2px;"><span style="color: #D4AF37; margin-right: 6px;">•</span>${d}</li>`).join('')}
+                    </ul>
+                ` : '';
 
                 htmlCartDetails += `
                     <tr>
-                        <td style="width: 25%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
-                            <strong style="color: #000; font-size: 13px;">${itemNom || 'Menu de Fêtes'}</strong><br/>
-                            <span style="color: #D4AF37; font-size: 11px; font-weight: bold;">${item.badge || 'Menu de Fêtes'}</span>
+                        <td style="padding: 12px 14px; border-bottom: 1px solid #EFECE6; vertical-align: top;">
+                            <div style="font-size: 13px; font-weight: bold; color: #1A1A1A;">
+                                ${itemNom || 'Menu de Fêtes'} <span style="font-weight: normal; color: #777777; font-size: 12px;">(${unitPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €)</span>
+                            </div>
+                            ${coursesHtml}
                         </td>
-                        <td style="width: 8%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${itemQty}</td>
-                        <td style="width: 42%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${coursesList}</td>
-                        <td style="width: 15%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 11px; color: #333; line-height: 1.35; vertical-align: top; word-break: break-word;"><strong>${itemPickupNotice}</strong></td>
-                        <td style="width: 10%; padding: 10px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                        <td style="padding: 12px 14px; border-bottom: 1px solid #EFECE6; text-align: center; font-weight: bold; font-size: 13px; color: #1A1A1A; vertical-align: top;">
+                            ${itemQty}
+                        </td>
+                        <td style="padding: 12px 14px; border-bottom: 1px solid #EFECE6; text-align: right; font-weight: bold; font-size: 13px; color: #1A1A1A; vertical-align: top; white-space: nowrap;">
+                            ${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                        </td>
                     </tr>
                 `;
             } else {
@@ -148,30 +138,30 @@ export async function POST(req: Request) {
                 const itemTotal = (pricePlat * itemQty) + (totalSoupes * pricePotage);
                 finalTotalPrice += itemTotal;
 
-                const getPickupDay = (j: string) => {
-                    const day = (j || '').toLowerCase();
-                    if (day === 'lundi' || day === 'mardi') return 'Mardi après 11h';
-                    if (day === 'mercredi' || day === 'jeudi') return 'Jeudi après 11h';
-                    if (day === 'vendredi' || day === 'samedi') return 'Samedi après 11h';
-                    return j || 'À convenir';
-                };
-                const jourRetrait = getPickupDay(item.jour);
-
-                const soupesList = item.soupes ? Object.entries(item.soupes)
-                    .filter(([_, q]) => Number(q) > 0)
-                    .map(([s, q]) => `${q}x ${s}`)
-                    .join('<br/>') : '-';
+                const soupesEntries = item.soupes ? Object.entries(item.soupes).filter(([_, q]) => Number(q) > 0) : [];
+                const soupesHtml = soupesEntries.length > 0 ? `
+                    <ul style="margin: 6px 0 0 0; padding: 0 0 0 14px; list-style-type: none; font-size: 12px; color: #555555; line-height: 1.55;">
+                        ${soupesEntries.map(([s, q]) => `<li style="margin-bottom: 2px;"><span style="color: #D4AF37; margin-right: 6px;">•</span>${q}x ${s}</li>`).join('')}
+                    </ul>
+                ` : '';
 
                 htmlCartDetails += `
                     <tr>
-                        <td style="width: 25%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
-                            <strong style="color: #000; font-size: 13px;">${dayData?.meal || itemNom}</strong><br/>
-                            <span style="color: #666; font-size: 11px;">${dayData?.day || item.jour}</span>
+                        <td style="padding: 12px 14px; border-bottom: 1px solid #EFECE6; vertical-align: top;">
+                            <div style="font-size: 13px; font-weight: bold; color: #1A1A1A;">
+                                ${dayData?.meal || itemNom}
+                            </div>
+                            <div style="font-size: 11px; color: #777777; margin-top: 2px;">
+                                ${dayData?.day || item.jour || 'Plat du jour'}
+                            </div>
+                            ${soupesHtml}
                         </td>
-                        <td style="width: 8%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${itemQty}</td>
-                        <td style="width: 42%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${soupesList || '-'}</td>
-                        <td style="width: 15%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; color: #D4AF37; font-weight: bold; vertical-align: top;">${jourRetrait}</td>
-                        <td style="width: 10%; padding: 10px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                        <td style="padding: 12px 14px; border-bottom: 1px solid #EFECE6; text-align: center; font-weight: bold; font-size: 13px; color: #1A1A1A; vertical-align: top;">
+                            ${itemQty}
+                        </td>
+                        <td style="padding: 12px 14px; border-bottom: 1px solid #EFECE6; text-align: right; font-weight: bold; font-size: 13px; color: #1A1A1A; vertical-align: top; white-space: nowrap;">
+                            ${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                        </td>
                     </tr>
                 `;
             }
@@ -243,23 +233,23 @@ export async function POST(req: Request) {
             .sort((a, b) => a[1].category.localeCompare(b[1].category) || a[0].localeCompare(b[0]))
             .map(([dish, info]) => `
                 <tr>
-                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 12px; color: #666; font-weight: bold;">${info.category}</td>
-                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #111;">${dish}</td>
-                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 14px; font-weight: bold; text-align: right; color: #D4AF37;">${info.count}</td>
+                    <td style="padding: 8px 12px; border-bottom: 1px solid #EFECE6; font-size: 11px; color: #777777; font-weight: bold; text-transform: uppercase;">${info.category}</td>
+                    <td style="padding: 8px 12px; border-bottom: 1px solid #EFECE6; font-size: 13px; color: #1A1A1A;">${dish}</td>
+                    <td style="padding: 8px 12px; border-bottom: 1px solid #EFECE6; font-size: 14px; font-weight: bold; text-align: right; color: #B89327;">${info.count}</td>
                 </tr>
             `).join('');
 
         const kitchenSummaryTableHTML = isFestiveOrder && Object.keys(kitchenTotals).length > 0 ? `
-            <div style="margin-top: 25px; border: 2px solid #000; border-radius: 8px; overflow: hidden; background: #fff;">
-                <div style="background: #000; color: #D4AF37; padding: 10px 14px; font-weight: bold; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase;">
-                    🔪 Totalisation de la Production Cuisine
+            <div style="margin-top: 28px; border: 1px solid #E8E2D5; border-radius: 8px; overflow: hidden; background-color: #FFFFFF;">
+                <div style="background-color: #F7F5F0; border-bottom: 1px solid #E8E2D5; padding: 10px 14px;">
+                    <span style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327;">TOTALISATION DE LA PRODUCTION CUISINE</span>
                 </div>
-                <table style="width: 100%; border-collapse: collapse; font-family: sans-serif;">
+                <table style="width: 100%; border-collapse: collapse; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                     <thead>
-                        <tr style="background-color: #f7f7f7; border-bottom: 2px solid #ddd;">
-                            <th style="padding: 8px 10px; text-align: left; font-size: 12px; color: #555; width: 25%;">Poste</th>
-                            <th style="padding: 8px 10px; text-align: left; font-size: 12px; color: #555;">Préparation / Plat</th>
-                            <th style="padding: 8px 10px; text-align: right; font-size: 12px; color: #555; width: 20%;">Total Portions</th>
+                        <tr style="background-color: #FAF9F6; border-bottom: 1px solid #EFECE6;">
+                            <th style="padding: 8px 12px; text-align: left; font-size: 11px; color: #666666; font-weight: 700; width: 25%; text-transform: uppercase;">Poste</th>
+                            <th style="padding: 8px 12px; text-align: left; font-size: 11px; color: #666666; font-weight: 700; text-transform: uppercase;">Préparation / Plat</th>
+                            <th style="padding: 8px 12px; text-align: right; font-size: 11px; color: #666666; font-weight: 700; width: 20%; text-transform: uppercase;">Portions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -273,49 +263,41 @@ export async function POST(req: Request) {
             <tfoot>
                 ${festivePricing.isEarlyBirdEligible && festivePricing.discountAmount > 0 ? `
                     <tr>
-                        <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 13px; color: #555;">Sous-total brut :</td>
-                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; color: #333; white-space: nowrap;">${(festivePricing.rawTotal || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                        <td colspan="2" style="padding: 10px 14px 4px 14px; text-align: right; font-size: 13px; color: #666666;">Sous-total brut :</td>
+                        <td style="padding: 10px 14px 4px 14px; text-align: right; font-size: 13px; color: #1A1A1A; white-space: nowrap;">${(festivePricing.rawTotal || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 13px; color: #927116; font-weight: bold; background-color: #fffdf5;">
-                            🎁 Remise Early Bird (-5% avant le 01/12) :
+                        <td colspan="2" style="padding: 4px 14px 8px 14px; text-align: right; font-size: 12px; color: #B89327; font-weight: bold;">
+                            Avantage réservation anticipée (-5%) :
                         </td>
-                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; color: #927116; font-weight: bold; background-color: #fffdf5; white-space: nowrap;">
+                        <td style="padding: 4px 14px 8px 14px; text-align: right; font-size: 12px; color: #B89327; font-weight: bold; white-space: nowrap;">
                             - ${(festivePricing.discountAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                         </td>
                     </tr>
                 ` : ''}
-                <tr>
-                    <td colspan="4" style="padding: 10px 10px; text-align: right; font-size: 14px; font-weight: bold; border-top: 1px solid #ddd;">Total final TTC :</td>
-                    <td style="padding: 10px 10px; text-align: right; font-size: 15px; font-weight: bold; border-top: 1px solid #ddd; white-space: nowrap;">${(festivePricing.totalNet || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                <tr style="border-top: 1px solid #E8E2D5;">
+                    <td colspan="2" style="padding: 12px 14px; text-align: right; font-size: 14px; font-weight: bold; color: #1A1A1A;">Total final TTC :</td>
+                    <td style="padding: 12px 14px; text-align: right; font-size: 16px; font-weight: bold; color: #1A1A1A; white-space: nowrap;">${(festivePricing.totalNet || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                 </tr>
                 ${festivePricing.validationMode === 'acompte_30' ? `
-                    <tr>
-                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #666;">Mode de règlement choisi :</td>
-                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Acompte 30% (convives ajustables jusqu'à 7 jours avant le retrait)</td>
-                    </tr>
-                    <tr style="background-color: #fff9e6;">
-                        <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 14px; color: #000; border-top: 2px solid #D4AF37;">
-                            <strong>ACOMPTE DE 30% À VERSER SOUS 48H :</strong>
+                    <tr style="background-color: #FAF6EB;">
+                        <td colspan="2" style="padding: 10px 14px; text-align: right; font-size: 13px; font-weight: bold; color: #8A6D1F; border-top: 1px solid #E8D8A6;">
+                            Acompte de 30 % à verser sous 48h :
                         </td>
-                        <td style="padding: 12px 10px; text-align: right; font-size: 17px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
+                        <td style="padding: 10px 14px; text-align: right; font-size: 16px; color: #B89327; font-weight: bold; border-top: 1px solid #E8D8A6; white-space: nowrap;">
                             ${(festivePricing.depositAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777;">Solde restant dû (au plus tard 7 jours avant le retrait) :</td>
-                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777; white-space: nowrap;">${(festivePricing.remainingBalance || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                        <td colspan="2" style="padding: 6px 14px 10px 14px; text-align: right; font-size: 11px; color: #777777;">Solde restant (au plus tard 7 jours avant le retrait) :</td>
+                        <td style="padding: 6px 14px 10px 14px; text-align: right; font-size: 11px; color: #777777; white-space: nowrap;">${(festivePricing.remainingBalance || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
                 ` : `
-                    <tr>
-                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #666;">Mode de règlement choisi :</td>
-                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Règlement intégral (100% ferme)</td>
-                    </tr>
-                    <tr style="background-color: #fff9e6;">
-                        <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 14px; color: #000; border-top: 2px solid #D4AF37;">
-                            <strong>MONTANT TOTAL (100%) À RÉGLER SOUS 48H :</strong>
+                    <tr style="background-color: #FAF6EB;">
+                        <td colspan="2" style="padding: 10px 14px; text-align: right; font-size: 13px; font-weight: bold; color: #8A6D1F; border-top: 1px solid #E8D8A6;">
+                            Montant total (100 %) à verser sous 48h :
                         </td>
-                        <td style="padding: 12px 10px; text-align: right; font-size: 17px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
+                        <td style="padding: 10px 14px; text-align: right; font-size: 16px; color: #B89327; font-weight: bold; border-top: 1px solid #E8D8A6; white-space: nowrap;">
                             ${(festivePricing.totalNet || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                         </td>
                     </tr>
@@ -323,29 +305,29 @@ export async function POST(req: Request) {
             </tfoot>
         ` : `
             <tfoot>
-                <tr>
-                    <td colspan="4" style="padding: 15px 10px; text-align: right; font-size: 15px;"><strong>TOTAL À PAYER :</strong></td>
-                    <td style="padding: 15px 10px; text-align: right; font-size: 17px; color: #D4AF37; white-space: nowrap;"><strong>${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
+                <tr style="border-top: 1px solid #E8E2D5;">
+                    <td colspan="2" style="padding: 12px 14px; text-align: right; font-size: 14px; font-weight: bold; color: #1A1A1A;">Total TTC :</td>
+                    <td style="padding: 12px 14px; text-align: right; font-size: 16px; font-weight: bold; color: #1A1A1A; white-space: nowrap;">${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                 </tr>
             </tfoot>
         `;
 
         const cartTableHTML = `
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-family: sans-serif; table-layout: fixed;">
-                <thead>
-                    <tr style="background-color: #f9f9f9;">
-                        <th style="width: 25%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Article</th>
-                        <th style="width: 8%; padding: 10px; border-bottom: 2px solid #ddd; text-align: center; font-size: 13px;">Qté</th>
-                        <th style="width: 42%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Détails (Composition)</th>
-                        <th style="width: 15%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Retrait</th>
-                        <th style="width: 10%; padding: 10px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px;">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${htmlCartDetails}
-                </tbody>
-                ${tableFooterHTML}
-            </table>
+            <div style="border: 1px solid #EFECE6; border-radius: 8px; overflow: hidden; margin: 12px 0 24px 0; background-color: #FFFFFF;">
+                <table style="width: 100%; border-collapse: collapse; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                    <thead>
+                        <tr style="background-color: #F7F5F0; border-bottom: 1px solid #E8E2D5;">
+                            <th style="width: 65%; padding: 10px 14px; text-align: left; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #666666; font-weight: 700;">Article &amp; Composition</th>
+                            <th style="width: 15%; padding: 10px 14px; text-align: center; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #666666; font-weight: 700;">Qté</th>
+                            <th style="width: 20%; padding: 10px 14px; text-align: right; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #666666; font-weight: 700;">Prix</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${htmlCartDetails}
+                    </tbody>
+                    ${tableFooterHTML}
+                </table>
+            </div>
         `;
 
         // 3. Préparation et envoi des emails via Resend (Sécurisé et non-bloquant)
@@ -354,36 +336,122 @@ export async function POST(req: Request) {
                 const fromAddress = 'Traiteur Compère <contact@traiteur-compere.be>';
                 const traiteurEmail = process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com';
 
-                // Email au Traiteur
+                // Email au Traiteur (Atelier)
                 const { error: errTraiteur } = await resend.emails.send({
                     from: fromAddress,
                     to: traiteurEmail,
                     replyTo: Mail,
-                    subject: `[${formattedOrderNumber}] ${isFestiveOrder ? '🎉 FETES' : '🍽️ PLATS'} - ${cleanNom} ${cleanPrenom} - ${dateSoumission || dateEvenement || 'Fêtes'}`,
+                    subject: `[${formattedOrderNumber}] ${isFestiveOrder ? 'COMMANDE FETES' : 'COMMANDE PLATS'} - ${cleanNom} ${cleanPrenom} - ${dateSoumission || dateEvenement || 'Fêtes'}`,
                     html: `
-                        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                            <h2>Nouvelle commande ${orderTitle} (${formattedOrderNumber})</h2>
-                            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                                <p style="margin: 5px 0;"><strong>Client :</strong> ${Nom} ${Prenom}</p>
-                                <p style="margin: 5px 0;"><strong>Email :</strong> ${Mail}</p>
-                                <p style="margin: 5px 0;"><strong>Téléphone :</strong> ${Tel}</p>
-                                <p style="margin: 5px 0;"><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
-                                ${dateEvenement ? `<p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>🎉 Date(s) du repas :</strong> ${dateEvenement}</p>` : ''}
-                                ${creneauRetrait ? `<p style="margin: 5px 0; line-height: 1.4;"><strong>⏰ Retrait à l'atelier :</strong><br/>${String(creneauRetrait).split(' | ').join('<br/>')}</p>` : ''}
-                                <p style="margin: 5px 0;"><strong>Date de saisie :</strong> ${dateSoumission || new Date().toLocaleDateString('fr-BE')}</p>
-                                ${isFestiveOrder ? `<p style="margin: 5px 0;"><strong>Mode choisi :</strong> ${festivePricing.validationMode === 'acompte_30' ? 'Acompte 30% (' + (festivePricing.depositAmount || 0).toFixed(2) + ' €) - solde dû : ' + (festivePricing.remainingBalance || 0).toFixed(2) + ' €' : 'Totalité 100% (' + (festivePricing.totalNet || 0).toFixed(2) + ' €)'}</p>` : ''}
-                            </div>
-                            
-                            <h3>Détail du panier</h3>
-                            ${cartTableHTML}
+                        <!DOCTYPE html>
+                        <html lang="fr">
+                        <head>
+                            <meta charset="utf-8">
+                            <title>Commande Atelier - ${formattedOrderNumber}</title>
+                        </head>
+                        <body style="margin: 0; padding: 0; background-color: #F7F5F0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1A1A1A;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F7F5F0; padding: 30px 12px;">
+                                <tr>
+                                    <td align="center">
+                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #FFFFFF; border-radius: 12px; border: 1px solid #E8E2D5; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+                                            <!-- EN-TETE ATELIER -->
+                                            <tr>
+                                                <td style="padding: 32px 32px 20px 32px; text-align: center; border-bottom: 1px solid #F0ECE4;">
+                                                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #B89327; margin-bottom: 6px;">
+                                                        COMMANDE ATELIER
+                                                    </div>
+                                                    <h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 22px; font-weight: 700; letter-spacing: 2px; color: #1A1A1A; text-transform: uppercase;">
+                                                        NOUVELLE COMMANDE ${orderTitle.toUpperCase()}
+                                                    </h1>
+                                                    <div style="margin-top: 12px; display: inline-block; background-color: #F7F5F0; border: 1px solid #E8E2D5; border-radius: 9999px; padding: 5px 16px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #1A1A1A;">
+                                                        RÉFÉRENCE • ${formattedOrderNumber}
+                                                    </div>
+                                                </td>
+                                            </tr>
 
-                            ${kitchenSummaryTableHTML}
-                            
-                            ${details_projet ? `
-                            <div style="background: #fff8e1; padding: 15px; border-left: 4px solid #fbc02d; margin-top: 20px;">
-                                <p style="margin: 0;"><strong>Commentaires supplémentaires / Allergies :</strong><br/>${details_projet}</p>
-                            </div>` : ''}
-                        </div>
+                                            <!-- CORPS ATELIER -->
+                                            <tr>
+                                                <td style="padding: 28px 32px;">
+                                                    <!-- BLOC INFOS CLIENT -->
+                                                    <div style="background-color: #FBFBF9; border: 1px solid #EFECE6; border-radius: 8px; padding: 18px 20px; margin-bottom: 24px;">
+                                                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 12px;">
+                                                            COORDONNÉES CLIENT &amp; MODALITÉS
+                                                        </div>
+                                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 13px; line-height: 1.6;">
+                                                            <tr>
+                                                                <td style="padding: 2px 0; width: 35%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Client :</td>
+                                                                <td style="padding: 2px 0; color: #1A1A1A; font-weight: 700;">${Nom} ${Prenom}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding: 2px 0; width: 35%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Email :</td>
+                                                                <td style="padding: 2px 0; color: #1A1A1A;"><a href="mailto:${Mail}" style="color: #1A1A1A; text-decoration: none;">${Mail}</a></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding: 2px 0; width: 35%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Téléphone :</td>
+                                                                <td style="padding: 2px 0; color: #1A1A1A;"><a href="tel:${Tel}" style="color: #1A1A1A; text-decoration: none; font-weight: 600;">${Tel}</a></td>
+                                                            </tr>
+                                                            ${Societe === 'Oui' ? `
+                                                            <tr>
+                                                                <td style="padding: 2px 0; width: 35%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Société :</td>
+                                                                <td style="padding: 2px 0; color: #1A1A1A; font-weight: 600;">${Nom_Societe || 'Oui'}</td>
+                                                            </tr>` : ''}
+                                                            ${dateEvenement ? `
+                                                            <tr>
+                                                                <td style="padding: 4px 0; width: 35%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Date du repas :</td>
+                                                                <td style="padding: 4px 0; color: #B89327; font-weight: 700;">${dateEvenement}</td>
+                                                            </tr>` : ''}
+                                                            ${creneauRetrait ? `
+                                                            <tr>
+                                                                <td style="padding: 4px 0; width: 35%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Retrait à l'atelier :</td>
+                                                                <td style="padding: 4px 0; color: #1A1A1A; font-weight: 600; line-height: 1.45;">${String(creneauRetrait).split(' | ').join('<br/>')}</td>
+                                                            </tr>` : ''}
+                                                            <tr>
+                                                                <td style="padding: 2px 0; width: 35%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Date de saisie :</td>
+                                                                <td style="padding: 2px 0; color: #555555;">${dateSoumission || new Date().toLocaleDateString('fr-BE')}</td>
+                                                            </tr>
+                                                            ${isFestiveOrder ? `
+                                                            <tr>
+                                                                <td style="padding: 4px 0; width: 35%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Mode choisi :</td>
+                                                                <td style="padding: 4px 0; color: #1A1A1A; font-weight: 600;">
+                                                                    ${festivePricing.validationMode === 'acompte_30'
+                                                                        ? `Acompte 30% (${(festivePricing.depositAmount || 0).toFixed(2)} €) — Solde dû : ${(festivePricing.remainingBalance || 0).toFixed(2)} €`
+                                                                        : `Totalité 100% (${(festivePricing.totalNet || 0).toFixed(2)} €)`}
+                                                                </td>
+                                                            </tr>` : ''}
+                                                        </table>
+                                                    </div>
+
+                                                    <!-- DETAIL DU PANIER -->
+                                                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 8px;">
+                                                        DÉTAIL DU PANIER
+                                                    </div>
+                                                    ${cartTableHTML}
+
+                                                    <!-- PRODUCTION CUISINE -->
+                                                    ${kitchenSummaryTableHTML}
+
+                                                    ${details_projet ? `
+                                                    <div style="background-color: #FAF6EB; border: 1px solid #E8D8A6; border-radius: 8px; padding: 16px; margin-top: 24px;">
+                                                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #B89327; margin-bottom: 6px;">
+                                                            REMARQUES DU CLIENT / ALLERGIES
+                                                        </div>
+                                                        <div style="font-size: 13px; color: #1A1A1A; line-height: 1.5; white-space: pre-line;">${details_projet}</div>
+                                                    </div>` : ''}
+                                                </td>
+                                            </tr>
+
+                                            <!-- PIED ATELIER -->
+                                            <tr>
+                                                <td style="padding: 18px 32px; background-color: #FAF9F6; border-top: 1px solid #F0ECE4; text-align: center; font-size: 11px; color: #888888;">
+                                                    Système de commande Traiteur Compère • Atelier Rue Potay 3, Saint-Georges-sur-Meuse
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </body>
+                        </html>
                     `
                 });
 
@@ -391,70 +459,174 @@ export async function POST(req: Request) {
                     console.error("Erreur Resend email traiteur :", errTraiteur);
                 }
 
-                // Email au Client
+                // Email au Client (Maison Compère — Raffiné et Gastronomique)
                 const { error: errClient } = await resend.emails.send({
                     from: fromAddress,
                     to: Mail,
                     replyTo: 'contact@traiteur-compere.be',
-                    subject: `Confirmation de votre commande ${formattedOrderNumber} - Traiteur Compère`,
+                    subject: `Confirmation de votre réservation ${formattedOrderNumber} - Maison Compère`,
                     html: `
-                        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-                            <h2 style="color: #000;">Merci pour votre commande, ${Prenom} !</h2>
-                            <p>Votre commande de <strong>${orderTitle}</strong> a bien été enregistrée sous la référence <strong>${formattedOrderNumber}</strong>.</p>
-                            
-                            <!-- Bandeau d'alerte et mention explicite -->
-                            <div style="background-color: #fff9e6; border: 2px solid #D4AF37; border-left: 6px solid #D4AF37; border-radius: 8px; padding: 16px 18px; margin: 20px 0; color: #333;">
-                                <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #856404;">
-                                    Votre réservation est enregistrée.
-                                </p>
-                                <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #222; font-weight: bold;">
-                                    Elle sera définitivement confirmée à la réception de votre virement bancaire sous 48h.
-                                </p>
-                                <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #444;">
-                                    ${isFestiveOrder && festivePricing.validationMode === 'acompte_30'
-                                        ? `Merci de verser votre acompte de <strong>${(festivePricing.depositAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h. Vos convives et votre commande restent ajustables jusqu'à 7 jours avant le retrait. Le solde de <strong>${(festivePricing.remainingBalance || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sera à régler au plus tard 7 jours avant le retrait.`
-                                        : `Merci de verser votre règlement intégral de <strong>${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h.`}
-                                </p>
-                                <p style="margin: 0; font-size: 12px; font-weight: bold; color: #b71c1c; line-height: 1.4;">
-                                    Passé ce délai de 48h sans réception du paiement, la réservation des créneaux et l'avantage réservation anticipée de -5% seront libérés.
-                                </p>
-                            </div>
+                        <!DOCTYPE html>
+                        <html lang="fr">
+                        <head>
+                            <meta charset="utf-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Confirmation de commande - Maison Compère</title>
+                        </head>
+                        <body style="margin: 0; padding: 0; background-color: #F7F5F0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1A1A1A; -webkit-font-smoothing: antialiased;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F7F5F0; padding: 30px 12px;">
+                                <tr>
+                                    <td align="center">
+                                        <!-- CARTE CENTRALE -->
+                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #FFFFFF; border-radius: 12px; border: 1px solid #E8E2D5; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+                                            <!-- EN-TETE MAISON COMPERE -->
+                                            <tr>
+                                                <td style="padding: 36px 32px 24px 32px; text-align: center; border-bottom: 1px solid #F0ECE4;">
+                                                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #B89327; margin-bottom: 6px;">
+                                                        MAISON DE BOUCHE
+                                                    </div>
+                                                    <h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; letter-spacing: 3px; color: #1A1A1A; text-transform: uppercase;">
+                                                        MAISON COMPÈRE
+                                                    </h1>
+                                                    <div style="margin-top: 6px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #777777;">
+                                                        Depuis 1821
+                                                    </div>
+                                                    <div style="width: 48px; height: 1px; background-color: #D4AF37; margin: 16px auto;"></div>
+                                                    
+                                                    <!-- BADGE STATUT -->
+                                                    <div style="display: inline-block; background-color: #F7F5F0; border: 1px solid #E8E2D5; border-radius: 9999px; padding: 6px 18px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #1A1A1A;">
+                                                        RÉSERVATION ENREGISTRÉE • N° ${formattedOrderNumber}
+                                                    </div>
+                                                </td>
+                                            </tr>
 
-                            ${dateEvenement ? `
-                            <div style="background-color: #fff8e1; padding: 15px; border-left: 4px solid #D4AF37; border-radius: 4px; margin: 20px 0;">
-                                <p style="margin: 4px 0; font-size: 15px;"><strong>🎉 Date(s) de votre repas :</strong> ${dateEvenement}</p>
-                                <p style="margin: 4px 0; font-size: 14px; line-height: 1.4;"><strong>⏰ Créneau(x) de retrait à l'atelier :</strong><br/>${creneauRetrait ? String(creneauRetrait).split(' | ').join('<br/>') : 'Selon créneau sélectionné'}</p>
-                                <p style="margin: 6px 0 0 0; font-size: 12px; color: #666;">📍 Rue Potay 3, 4470 Saint-Georges-sur-Meuse</p>
-                                <p style="margin: 6px 0 0 0; font-size: 12px; color: #D4AF37; font-weight: bold;">✨ Notice détaillée de réchauffage et dressage fournie avec chaque commande à notre atelier.</p>
-                            </div>` : ''}
+                                            <!-- CORPS DU MESSAGE -->
+                                            <tr>
+                                                <td style="padding: 32px 32px 24px 32px;">
+                                                    <p style="margin: 0 0 16px 0; font-size: 15px; color: #1A1A1A; line-height: 1.5;">
+                                                        Bonjour <strong>${cleanCapitalize(Prenom)}</strong>,
+                                                    </p>
+                                                    <p style="margin: 0 0 24px 0; font-size: 14px; color: #555555; line-height: 1.6;">
+                                                        Nous vous remercions chaleureusement pour votre commande. Votre réservation pour vos <strong>${orderTitle}</strong> a bien été enregistrée sous la référence <strong>${formattedOrderNumber}</strong>.
+                                                    </p>
 
-                            ${cartTableHTML}
-                            
-                            <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #D4AF37; border-radius: 0 8px 8px 0; margin-top: 30px;">
-                                <h3 style="margin-top: 0; color: #000;">Infos pratiques de retrait</h3>
-                                <p style="margin: 5px 0;"><strong>📞 Téléphone :</strong> <a href="tel:+32468385082" style="color: #000; text-decoration: none;">+32 468 38 50 82</a></p>
-                                <p style="margin: 5px 0;"><strong>📍 Atelier de retrait :</strong> Rue Potay 3, 4470 Saint-Georges-sur-Meuse, Belgique</p>
-                                <p style="margin: 5px 0;"><a href="https://maps.google.com/?q=Traiteur+Compere,+Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique" style="color: #D4AF37; text-decoration: none; font-weight: bold;">🗺️ Voir sur Google Maps</a></p>
-                            </div>
-                            
-                            <!-- Coordonnées bancaires officielles avec IBAN -->
-                            <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #D4AF37; border-radius: 0 8px 8px 0; margin-top: 20px;">
-                                <h3 style="margin-top: 0; color: #000;">Informations de paiement (Virement bancaire)</h3>
-                                <p style="margin: 5px 0;"><strong>Bénéficiaire :</strong> ${BENEFICIAIRE}</p>
-                                <p style="margin: 5px 0; font-size: 15px;"><strong>IBAN :</strong> <code style="font-size: 16px; font-weight: bold; color: #000; letter-spacing: 0.5px;">${IBAN}</code></p>
-                                <p style="margin: 5px 0;"><strong>BIC :</strong> ${BIC}</p>
-                                <p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>Communication du virement :</strong> <strong>${COMMUNICATION}</strong></p>
-                                <p style="margin: 10px 0 0 0; font-size: 16px; color: #000; border-top: 1px solid #e0e0e0; padding-top: 10px;">
-                                    <strong>Montant à verser sous 48h :</strong> <span style="color: #D4AF37; font-weight: bold; font-size: 18px;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
-                                    ${isFestiveOrder && festivePricing.validationMode === 'acompte_30' ? `<br/><span style="font-size: 13px; color: #666;">(Acompte de 30% • Solde restant de ${(festivePricing.remainingBalance || 0).toFixed(2)} € au plus tard 7 jours avant le retrait)</span>` : '<br/><span style="font-size: 13px; color: #666;">(Paiement intégral 100%)</span>'}
-                                </p>
-                            </div>
-                            <p style="margin-top: 20px; font-size: 13px; color: #555;">
-                                <strong>Rappel :</strong> Votre réservation est enregistrée. Elle sera définitivement confirmée à la réception de votre virement bancaire sous 48h.
-                            </p>
-                            <br/>
-                            <p>L'équipe Traiteur Compère vous remercie de votre confiance et vous souhaite d'excellentes fêtes !</p>
-                        </div>
+                                                    <!-- ENCART ACOMPTE (ACTION REQUISE) -->
+                                                    <div style="background-color: #FAF6EB; border: 1px solid #E8D8A6; border-radius: 8px; padding: 20px; margin: 0 0 28px 0;">
+                                                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 6px;">
+                                                            VALIDATION SOUS RÉSERVE DE VIREMENT SOUS 48H
+                                                        </div>
+                                                        <div style="font-size: 15px; font-weight: 700; color: #1A1A1A; margin-bottom: 8px;">
+                                                            ${isFestiveOrder && festivePricing.validationMode === 'acompte_30'
+                                                                ? `Acompte de 30 % : <span style="color: #B89327; font-size: 19px;">${(festivePricing.depositAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>`
+                                                                : `Règlement total : <span style="color: #B89327; font-size: 19px;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>`}
+                                                        </div>
+                                                        <p style="margin: 0; font-size: 13px; color: #555555; line-height: 1.55;">
+                                                            ${isFestiveOrder && festivePricing.validationMode === 'acompte_30'
+                                                                ? `Le solde de <strong>${(festivePricing.remainingBalance || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sera à régler au plus tard 7 jours avant le retrait. Vos convives restent ajustables jusqu'à 7 jours avant le retrait.`
+                                                                : `Merci de bien vouloir effectuer votre virement intégral sous 48h afin de valider définitivement votre réservation.`}
+                                                        </p>
+                                                    </div>
+
+                                                    <!-- RENDEZ-VOUS DE RETRAIT & MODALITES -->
+                                                    <div style="background-color: #FBFBF9; border: 1px solid #EFECE6; border-radius: 8px; padding: 20px; margin: 0 0 28px 0;">
+                                                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 14px;">
+                                                            MODALITÉS DE RETRAIT
+                                                        </div>
+                                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 13px; line-height: 1.55;">
+                                                            ${dateEvenement ? `
+                                                            <tr>
+                                                                <td style="padding: 4px 0; width: 38%; color: #777777; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; vertical-align: top; font-weight: 600;">Date du repas :</td>
+                                                                <td style="padding: 4px 0; color: #1A1A1A; font-weight: 600; vertical-align: top;">${dateEvenement}</td>
+                                                            </tr>` : ''}
+                                                            ${creneauRetrait ? `
+                                                            <tr>
+                                                                <td style="padding: 6px 0; width: 38%; color: #777777; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; vertical-align: top; font-weight: 600;">Créneau de retrait :</td>
+                                                                <td style="padding: 6px 0; color: #1A1A1A; font-weight: 600; vertical-align: top; line-height: 1.45;">${String(creneauRetrait).split(' | ').join('<br/>')}</td>
+                                                            </tr>` : ''}
+                                                            <tr>
+                                                                <td style="padding: 6px 0; width: 38%; color: #777777; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; vertical-align: top; font-weight: 600;">Lieu de retrait :</td>
+                                                                <td style="padding: 6px 0; color: #1A1A1A; vertical-align: top;">
+                                                                    Rue Potay 3, 4470 Saint-Georges-sur-Meuse
+                                                                    <div style="margin-top: 4px;">
+                                                                        <a href="https://maps.google.com/?q=Traiteur+Compere,+Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique" style="color: #B89327; font-size: 12px; text-decoration: none; font-weight: 600;">Itinéraire Google Maps →</a>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #E8E2D5; font-size: 12px; color: #666666; font-style: italic; line-height: 1.5;">
+                                                            « Toutes les explications nécessaires pour un réchauffage et un dressage parfaits vous seront fournies lors du retrait. »
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- RECAPITULATIF DE LA TABLE -->
+                                                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 8px;">
+                                                        RÉCAPITULATIF DE VOTRE TABLE
+                                                    </div>
+                                                    ${cartTableHTML}
+
+                                                    <!-- ENCART COORDONNEES BANCAIRES -->
+                                                    <div style="background-color: #FBFBF9; border: 1px solid #EFECE6; border-radius: 8px; padding: 22px; margin: 28px 0 20px 0;">
+                                                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 12px;">
+                                                            COORDONNÉES BANCAIRES POUR VIREMENT
+                                                        </div>
+                                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 13px; line-height: 1.6;">
+                                                            <tr>
+                                                                <td style="padding: 3px 0; width: 38%; color: #777777; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600;">Bénéficiaire :</td>
+                                                                <td style="padding: 3px 0; color: #1A1A1A; font-weight: 600;">${BENEFICIAIRE}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding: 5px 0; width: 38%; color: #777777; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600;">IBAN :</td>
+                                                                <td style="padding: 5px 0;">
+                                                                    <code style="font-family: monospace; font-size: 14px; font-weight: 700; color: #1A1A1A; background-color: #EDE8DF; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px;">${IBAN}</code>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td style="padding: 3px 0; width: 38%; color: #777777; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600;">BIC :</td>
+                                                                <td style="padding: 3px 0; color: #1A1A1A; font-weight: 600;">${BIC}</td>
+                                                            </tr>
+                                                        </table>
+
+                                                        <!-- COMMUNICATION OBLIGATOIRE MISE EN EVIDENCE -->
+                                                        <div style="margin-top: 14px; padding: 12px 14px; background-color: #FAF6EB; border: 1px solid #E8D8A6; border-radius: 6px;">
+                                                            <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #B89327; margin-bottom: 4px;">
+                                                                Communication obligatoire du virement :
+                                                            </div>
+                                                            <div style="font-family: monospace; font-size: 15px; font-weight: 700; color: #1A1A1A; letter-spacing: 0.5px;">
+                                                                ${COMMUNICATION}
+                                                            </div>
+                                                        </div>
+
+                                                        <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #E8E2D5; font-size: 14px; color: #1A1A1A;">
+                                                            <strong>Montant à verser sous 48h :</strong> <span style="font-size: 18px; font-weight: 700; color: #B89327;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <p style="margin: 24px 0 0 0; font-size: 13px; color: #666666; line-height: 1.5; text-align: center;">
+                                                        Pour toute question concernant votre commande, vous pouvez joindre notre atelier au <a href="tel:+32468385082" style="color: #1A1A1A; font-weight: 600; text-decoration: none;">+32 468 38 50 82</a> ou par retour de cet email.
+                                                    </p>
+                                                </td>
+                                            </tr>
+
+                                            <!-- PIED DE CARTE MAISON COMPERE -->
+                                            <tr>
+                                                <td style="padding: 24px 32px 32px 32px; background-color: #FAF9F6; border-top: 1px solid #F0ECE4; text-align: center;">
+                                                    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 16px; font-weight: 700; letter-spacing: 2px; color: #1A1A1A; text-transform: uppercase; margin-bottom: 6px;">
+                                                        MAISON COMPÈRE
+                                                    </div>
+                                                    <div style="font-size: 12px; color: #777777; margin-bottom: 12px;">
+                                                        Rue Potay 3, 4470 Saint-Georges-sur-Meuse, Belgique
+                                                    </div>
+                                                    <div style="font-size: 12px; color: #888888; line-height: 1.5; font-style: italic;">
+                                                        L'équipe Traiteur Compère vous remercie de votre confiance et vous souhaite d'excellentes fêtes de fin d'année.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </body>
+                        </html>
                     `
                 });
 
