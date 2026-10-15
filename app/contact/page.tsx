@@ -2958,8 +2958,8 @@ function ContactForm() {
                                                         <span className="w-2 h-2 rounded-full bg-[#D4AF37] inline-block"></span>
                                                         <span>Réveillons</span>
                                                     </span>
-                                                    <span className="flex items-center gap-1">
-                                                        <span className="w-2.5 h-2.5 rounded bg-neutral-100 text-red-500 text-[8px] font-bold flex items-center justify-center">J-4</span>
+                                                    <span className="flex items-center gap-1.5">
+                                                        <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shrink-0"></span>
                                                         <span>Verrouillé (&lt; 4j)</span>
                                                     </span>
                                                 </div>
