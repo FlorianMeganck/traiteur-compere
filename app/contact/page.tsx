@@ -7,10 +7,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle, Phone } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import {
-    FESTIVE_DATE_OPTIONS,
-    NOEL_DATE_OPTIONS,
-    NOUVEL_AN_DATE_OPTIONS,
-    getFestiveMenuDateRestrictions,
+    FESTIVE_CALENDAR_DAYS,
+    getFestivePickupOptions,
+    isFestiveDateJ4Locked,
+    isDepositAllowed,
     calculateFestiveOrderPricing,
     FestiveValidationMode
 } from "../data/menus-fetes";
@@ -546,75 +546,26 @@ function ContactForm() {
     const isPlatPrepare = typeParam === 'plat_prepare' || isMenusFetes;
 
     // Mode de validation spécifique aux Menus de Fêtes (Acompte 30% vs Totalité 100%)
-    const [validationMode, setValidationMode] = useState<FestiveValidationMode>('acompte_30');
+    // Jusqu'au 10 décembre inclus : Acompte de 30% disponible et recommandé
+    // À partir du 11 décembre : Totalité 100% uniquement
+    const depositAvailable = isDepositAllowed();
+    const [validationMode, setValidationMode] = useState<FestiveValidationMode>(depositAvailable ? 'acompte_30' : 'totalite_100');
 
     // Synthèse financière dynamique (Early Bird -5% et décomposition acompte/totalité)
     const festivePricing = useMemo(() => {
         return calculateFestiveOrderPricing(cartItems, validationMode);
     }, [cartItems, validationMode]);
 
-    // Matrice des restrictions de dates Fêtes
-    const festiveRestrictions = useMemo(() => getFestiveMenuDateRestrictions(cartItems), [cartItems]);
-    const hasEnfant = festiveRestrictions.hasEnfant;
-    const enfantItem = cartItems.find(i => i.id === 'menu-enfant-fetes' || i.nomPlat.toLowerCase().includes('enfant'));
-    const enfantQty = enfantItem ? enfantItem.quantitePlat : 0;
-
-    // Synchronisation automatique des quantités de menus enfants (Noël vs Nouvel An)
+    // Forcer le mode 100% si l'acompte n'est plus autorisé (après le 10 décembre)
     useEffect(() => {
-        if (hasEnfant && enfantQty > 0) {
-            setFormData(prev => {
-                const currentNoel = prev.Menu_Enfant_Qty_Noel;
-                const currentNouvelAn = prev.Menu_Enfant_Qty_NouvelAn;
-
-                if (currentNoel === -1 || (currentNoel + currentNouvelAn !== enfantQty)) {
-                    return {
-                        ...prev,
-                        Menu_Enfant_Qty_Noel: enfantQty,
-                        Menu_Enfant_Qty_NouvelAn: 0
-                    };
-                }
-                return prev;
-            });
+        if (!depositAvailable && validationMode !== 'totalite_100') {
+            setValidationMode('totalite_100');
         }
-    }, [hasEnfant, enfantQty]);
+    }, [depositAvailable, validationMode]);
 
-    const enfantQtyNoel = formData.Menu_Enfant_Qty_Noel === -1 ? enfantQty : formData.Menu_Enfant_Qty_Noel;
-    const enfantQtyNouvelAn = formData.Menu_Enfant_Qty_NouvelAn;
-
-    const handleEnfantQtyChange = (target: 'noel' | 'nouvel_an', delta: number) => {
-        setFormData(prev => {
-            let noel = prev.Menu_Enfant_Qty_Noel === -1 ? enfantQty : prev.Menu_Enfant_Qty_Noel;
-            let nouvelAn = prev.Menu_Enfant_Qty_NouvelAn;
-
-            if (target === 'noel') {
-                if (delta > 0 && nouvelAn > 0) {
-                    noel = Math.min(enfantQty, noel + 1);
-                    nouvelAn = enfantQty - noel;
-                } else if (delta < 0 && noel > 0) {
-                    noel = Math.max(0, noel - 1);
-                    nouvelAn = enfantQty - noel;
-                }
-            } else {
-                if (delta > 0 && noel > 0) {
-                    nouvelAn = Math.min(enfantQty, nouvelAn + 1);
-                    noel = enfantQty - nouvelAn;
-                } else if (delta < 0 && nouvelAn > 0) {
-                    nouvelAn = Math.max(0, nouvelAn - 1);
-                    noel = enfantQty - nouvelAn;
-                }
-            }
-
-            return {
-                ...prev,
-                Menu_Enfant_Qty_Noel: noel,
-                Menu_Enfant_Qty_NouvelAn: nouvelAn
-            };
-        });
-    };
-
-    // Auto-désélection de la date si elle devient incompatible suite à une modification du panier
+    // Vérification dynamique du verrou J-4 pour la date choisie
     useEffect(() => {
-        if (isMenusFetes && formData.Date_Fete && !festiveRestrictions.allowedOptionIds.includes(formData.Date_Fete)) {
+        if (isMenusFetes && formData.Date_Fete && isFestiveDateJ4Locked(formData.Date_Fete)) {
             setFormData(prev => ({
                 ...prev,
                 Date_Fete: "",
@@ -622,7 +573,7 @@ function ContactForm() {
                 Creneau_Retrait: ""
             }));
         }
-    }, [isMenusFetes, festiveRestrictions.allowedOptionIds, formData.Date_Fete]);
+    }, [isMenusFetes, formData.Date_Fete]);
 
     const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || isBuffetChaudMode;
     const showMenuFirst = isCustomMode;
@@ -1077,22 +1028,13 @@ function ContactForm() {
 
         // Dynamic Validation
         if (isMenusFetes) {
-            if (festiveRestrictions.isMixed) {
-                if (!formData.Date_Fete_Noel) {
-                    newErrors.Date_Fete_Noel = "Veuillez sélectionner la date pour vos repas de Noël (24 ou 25 Décembre)";
-                }
-                if (!formData.Date_Fete_NouvelAn) {
-                    newErrors.Date_Fete_NouvelAn = "Veuillez sélectionner la date pour vos repas de Nouvel An (31 Décembre ou 1er Janvier)";
-                }
-                if (hasEnfant && (enfantQtyNoel + enfantQtyNouvelAn !== enfantQty)) {
-                    newErrors.Menu_Enfant_Ventilation = "Veuillez ventiler la totalité des menus enfants de votre panier";
-                }
-            } else {
-                if (!formData.Date_Fete && !formData.Date) {
-                    newErrors.Date_Fete = "Veuillez sélectionner la date de votre repas de fête";
-                } else if (!festiveRestrictions.allowedOptionIds.includes(formData.Date_Fete)) {
-                    newErrors.Date_Fete = "Cette date n'est pas compatible avec les menus sélectionnés dans votre panier";
-                }
+            if (!formData.Date_Fete && !formData.Date) {
+                newErrors.Date_Fete = "Veuillez sélectionner la date de votre repas de fête";
+            } else if (isFestiveDateJ4Locked(formData.Date_Fete)) {
+                newErrors.Date_Fete = "Cette date n'est plus disponible (commande au plus tard 4 jours avant le retrait J-4)";
+            }
+            if (!formData.Creneau_Retrait) {
+                newErrors.Creneau_Retrait = "Veuillez choisir votre créneau de retrait à l'atelier";
             }
         } else if (isPlatPrepare) {
             if (!formData.Plat_Prepare_Quantite || parseInt(formData.Plat_Prepare_Quantite) < 1) newErrors.Plat_Prepare_Quantite = "Requis";
@@ -1385,36 +1327,11 @@ function ContactForm() {
                 let creneauRetraitFormatted = "";
 
                 if (isMenusFetes) {
-                    if (festiveRestrictions.isMixed) {
-                        const noelOpt = NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel || o.dayFormatted === formData.Date_Fete_Noel);
-                        const naOpt = NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn);
-
-                        const noelDay = noelOpt?.dayFormatted || formData.Date_Fete_Noel;
-                        const naDay = naOpt?.dayFormatted || formData.Date_Fete_NouvelAn;
-                        const noelPickup = noelOpt?.pickupWindow || formData.Creneau_Retrait_Noel || "Retrait le 23 ou 24 Décembre";
-                        const naPickup = naOpt?.pickupWindow || formData.Creneau_Retrait_NouvelAn || "Retrait le 30 ou 31 Décembre";
-
-                        let enfantNotice = "";
-                        if (hasEnfant) {
-                            const noelQty = formData.Menu_Enfant_Qty_Noel === -1 ? enfantQty : formData.Menu_Enfant_Qty_Noel;
-                            const naQty = formData.Menu_Enfant_Qty_NouvelAn;
-
-                            if (noelQty > 0 && naQty > 0) {
-                                enfantNotice = ` (Menu Enfant : ${noelQty} pour Noël, ${naQty} pour Nouvel An)`;
-                            } else if (noelQty > 0) {
-                                enfantNotice = ` (Menu Enfant : ${noelQty} pour Noël)`;
-                            } else if (naQty > 0) {
-                                enfantNotice = ` (Menu Enfant : ${naQty} pour Nouvel An)`;
-                            }
-                        }
-
-                        dateEvenementFormatted = `Noël : ${noelDay} | Nouvel An : ${naDay}${enfantNotice}`;
-                        creneauRetraitFormatted = `Noël : ${noelPickup} | Nouvel An : ${naPickup}`;
-                    } else {
-                        const selectedOption = FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete);
-                        dateEvenementFormatted = selectedOption ? `${selectedOption.label} (${selectedOption.dayFormatted})` : (formData.Date_Fete || formData.Date);
-                        creneauRetraitFormatted = selectedOption ? selectedOption.pickupWindow : formData.Creneau_Retrait;
-                    }
+                    const dayObj = FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === formData.Date_Fete);
+                    dateEvenementFormatted = dayObj ? dayObj.dayFormatted : (formData.Date_Fete || formData.Date);
+                    const slots = getFestivePickupOptions(formData.Date_Fete);
+                    const chosenSlot = slots.find(s => s.id === formData.Creneau_Retrait);
+                    creneauRetraitFormatted = chosenSlot ? chosenSlot.fullLabel : (formData.Creneau_Retrait || "À notre atelier (Rue Potay 3)");
                 }
 
                 const targetTotalPrice = isMenusFetes ? festivePricing.totalNet : cartTotal;
@@ -2760,7 +2677,7 @@ function ContactForm() {
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-8">
-                            {/* 1. Sélecteur de date pour les Menus de Fêtes */}
+                            {/* 1. Sélection de Date, Créneau & Règle J-4 */}
                             {isMenusFetes && (
                                 <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-[#D4AF37]/40 shadow-sm mb-10 space-y-8">
                                     <div className="flex items-start gap-3 border-b border-neutral-100 pb-4">
@@ -2769,354 +2686,194 @@ function ContactForm() {
                                         </div>
                                         <div>
                                             <h3 className="font-serif font-bold text-xl md:text-2xl text-black">
-                                                {festiveRestrictions.isMixed ? "Dates de vos repas de fêtes" : "Date de votre repas de fête"} <span className="text-red-500">*</span>
+                                                Date de votre repas de fête <span className="text-red-500">*</span>
                                             </h3>
                                             <p className="text-xs md:text-sm text-neutral-500 font-light mt-0.5">
-                                                {festiveRestrictions.allowedPeriodLabel || "Sélectionnez la date de votre réveillon ou repas pour déterminer votre créneau de retrait à l'atelier."}
+                                                Menus disponibles du 20 décembre au 5 janvier inclus. Commandes acceptées au plus tard 4 jours avant la date de retrait (J-4).
                                             </p>
                                         </div>
                                     </div>
 
-                                    {festiveRestrictions.isMixed ? (
-                                        <div className="space-y-8">
-                                            {/* --- BLOC 1 : NOËL --- */}
-                                            <div className="space-y-4 bg-[#FAF9F6] p-5 md:p-6 rounded-2xl border border-[#D4AF37]/30">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-black text-[#D4AF37]">
-                                                            🎄 Menus de Noël
-                                                        </span>
-                                                        <span className="text-xs font-medium text-neutral-600">
-                                                            (Noël / Prestige)
-                                                        </span>
-                                                    </div>
-                                                    <span className="text-xs text-neutral-400 font-medium italic">Choix obligatoire</span>
-                                                </div>
-
-                                                {errors.Date_Fete_Noel && (
-                                                    <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3 rounded-xl border border-red-200 flex items-center gap-2">
-                                                        <span>⚠️</span> {errors.Date_Fete_Noel}
-                                                    </div>
-                                                )}
-
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                                    {NOEL_DATE_OPTIONS.map((option) => {
-                                                        const isSelected = formData.Date_Fete_Noel === option.id || formData.Date_Fete_Noel === option.dayFormatted;
-                                                        return (
-                                                            <button
-                                                                key={option.id}
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setFormData(prev => ({
-                                                                        ...prev,
-                                                                        Date_Fete_Noel: option.id,
-                                                                        Creneau_Retrait_Noel: option.pickupWindow
-                                                                    }));
-                                                                    if (errors.Date_Fete_Noel) {
-                                                                        setErrors(prev => {
-                                                                            const newErr = { ...prev };
-                                                                            delete newErr.Date_Fete_Noel;
-                                                                            return newErr;
-                                                                        });
-                                                                    }
-                                                                }}
-                                                                className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${
-                                                                    isSelected
-                                                                        ? "border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/50 shadow-md"
-                                                                        : "border-neutral-200 bg-white/70 hover:bg-white hover:border-neutral-300"
-                                                                }`}
-                                                            >
-                                                                <div className="flex justify-between items-start">
-                                                                    <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37]">
-                                                                        {option.badge}
-                                                                    </span>
-                                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                                                        isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
-                                                                    }`}>
-                                                                        {isSelected && <Check size={12} strokeWidth={3} />}
-                                                                    </div>
-                                                                </div>
-                                                                <div>
-                                                                    <h4 className="font-serif font-bold text-neutral-900 text-base">{option.label}</h4>
-                                                                    <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">{option.dayFormatted}</p>
-                                                                </div>
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-
-                                                {formData.Date_Fete_Noel && (
-                                                    <div className="bg-white border border-[#D4AF37]/30 p-3.5 rounded-xl flex items-start gap-3 shadow-2xs">
-                                                        <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={18} />
-                                                        <div className="text-xs text-neutral-700">
-                                                            <span className="font-bold text-neutral-900">Retrait Noël : </span>
-                                                            {NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel || o.dayFormatted === formData.Date_Fete_Noel)?.pickupWindow || formData.Creneau_Retrait_Noel}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* --- BLOC 2 : NOUVEL AN --- */}
-                                            <div className="space-y-4 bg-[#FAF9F6] p-5 md:p-6 rounded-2xl border border-[#D4AF37]/30">
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-black text-[#D4AF37]">
-                                                            🍾 Menus de Nouvel An
-                                                        </span>
-                                                        <span className="text-xs font-medium text-neutral-600">
-                                                            (Saint-Sylvestre)
-                                                        </span>
-                                                    </div>
-                                                    <span className="text-xs text-neutral-400 font-medium italic">Choix obligatoire</span>
-                                                </div>
-
-                                                {errors.Date_Fete_NouvelAn && (
-                                                    <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3 rounded-xl border border-red-200 flex items-center gap-2">
-                                                        <span>⚠️</span> {errors.Date_Fete_NouvelAn}
-                                                    </div>
-                                                )}
-
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                                    {NOUVEL_AN_DATE_OPTIONS.map((option) => {
-                                                        const isSelected = formData.Date_Fete_NouvelAn === option.id || formData.Date_Fete_NouvelAn === option.dayFormatted;
-                                                        return (
-                                                            <button
-                                                                key={option.id}
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setFormData(prev => ({
-                                                                        ...prev,
-                                                                        Date_Fete_NouvelAn: option.id,
-                                                                        Creneau_Retrait_NouvelAn: option.pickupWindow
-                                                                    }));
-                                                                    if (errors.Date_Fete_NouvelAn) {
-                                                                        setErrors(prev => {
-                                                                            const newErr = { ...prev };
-                                                                            delete newErr.Date_Fete_NouvelAn;
-                                                                            return newErr;
-                                                                        });
-                                                                    }
-                                                                }}
-                                                                className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${
-                                                                    isSelected
-                                                                        ? "border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/50 shadow-md"
-                                                                        : "border-neutral-200 bg-white/70 hover:bg-white hover:border-neutral-300"
-                                                                }`}
-                                                            >
-                                                                <div className="flex justify-between items-start">
-                                                                    <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#D4AF37]/15 text-[#D4AF37]">
-                                                                        {option.badge}
-                                                                    </span>
-                                                                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                                                        isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
-                                                                    }`}>
-                                                                        {isSelected && <Check size={12} strokeWidth={3} />}
-                                                                    </div>
-                                                                </div>
-                                                                <div>
-                                                                    <h4 className="font-serif font-bold text-neutral-900 text-base">{option.label}</h4>
-                                                                    <p className="text-xs font-semibold text-[#D4AF37] mt-0.5">{option.dayFormatted}</p>
-                                                                </div>
-                                                            </button>
-                                                        );
-                                                    })}
-                                                </div>
-
-                                                {formData.Date_Fete_NouvelAn && (
-                                                    <div className="bg-white border border-[#D4AF37]/30 p-3.5 rounded-xl flex items-start gap-3 shadow-2xs">
-                                                        <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={18} />
-                                                        <div className="text-xs text-neutral-700">
-                                                            <span className="font-bold text-neutral-900">Retrait Nouvel An : </span>
-                                                            {NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn)?.pickupWindow || formData.Creneau_Retrait_NouvelAn}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* --- VENTILATION DYNAMIQUE MENU ENFANT --- */}
-                                            {hasEnfant && (
-                                                <div className="space-y-4 bg-amber-50/70 border border-amber-200/90 p-5 md:p-6 rounded-2xl shadow-xs">
-                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200/60 pb-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#D4AF37] text-white shadow-2xs">
-                                                                👶 Menu(s) Enfant : {enfantQty} au total
-                                                            </span>
-                                                            <span className="text-sm font-bold text-neutral-900">
-                                                                Répartition des menus enfants par repas <span className="text-red-500">*</span>
-                                                            </span>
-                                                        </div>
-                                                        <span className="text-xs text-neutral-500 font-medium">
-                                                            Total à ventiler : <strong className="text-black font-bold">{enfantQty}</strong>
-                                                        </span>
-                                                    </div>
-
-                                                    <p className="text-xs text-neutral-600 leading-relaxed">
-                                                        Votre commande comprend des menus pour Noël et pour Nouvel An. Veuillez ventiler le nombre de menus enfants souhaités pour chaque repas :
-                                                    </p>
-
-                                                    {errors.Menu_Enfant_Ventilation && (
-                                                        <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3 rounded-xl border border-red-200 flex items-center gap-2">
-                                                            <span>⚠️</span> {errors.Menu_Enfant_Ventilation}
-                                                        </div>
-                                                    )}
-
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                                                        {/* Compteur Noël */}
-                                                        <div className="p-4 rounded-xl border border-neutral-200 bg-white shadow-2xs flex items-center justify-between">
-                                                            <div>
-                                                                <h5 className="font-bold text-neutral-900 text-sm flex items-center gap-1.5">
-                                                                    <span>🎄</span> Pour le repas de Noël
-                                                                </h5>
-                                                                <p className="text-[11px] text-[#D4AF37] font-semibold mt-0.5">
-                                                                    {formData.Date_Fete_Noel ? (NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel)?.dayFormatted || formData.Date_Fete_Noel) : 'Date de Noël sélectionnée'}
-                                                                </p>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-2.5 bg-neutral-50 p-1.5 rounded-xl border border-neutral-200">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleEnfantQtyChange('noel', -1)}
-                                                                    disabled={enfantQtyNoel <= 0}
-                                                                    className="w-8 h-8 rounded-lg bg-white border border-neutral-200 text-black font-bold flex items-center justify-center hover:bg-[#D4AF37] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-2xs"
-                                                                >
-                                                                    -
-                                                                </button>
-                                                                <span className="font-bold text-base min-w-[20px] text-center text-black">
-                                                                    {enfantQtyNoel}
-                                                                </span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleEnfantQtyChange('noel', 1)}
-                                                                    disabled={enfantQtyNoel >= enfantQty}
-                                                                    className="w-8 h-8 rounded-lg bg-white border border-neutral-200 text-black font-bold flex items-center justify-center hover:bg-[#D4AF37] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-2xs"
-                                                                >
-                                                                    +
-                                                                </button>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Compteur Nouvel An */}
-                                                        <div className="p-4 rounded-xl border border-neutral-200 bg-white shadow-2xs flex items-center justify-between">
-                                                            <div>
-                                                                <h5 className="font-bold text-neutral-900 text-sm flex items-center gap-1.5">
-                                                                    <span>🍾</span> Pour le repas de Nouvel An
-                                                                </h5>
-                                                                <p className="text-[11px] text-[#D4AF37] font-semibold mt-0.5">
-                                                                    {formData.Date_Fete_NouvelAn ? (NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn)?.dayFormatted || formData.Date_Fete_NouvelAn) : 'Date de Nouvel An sélectionnée'}
-                                                                </p>
-                                                            </div>
-
-                                                            <div className="flex items-center gap-2.5 bg-neutral-50 p-1.5 rounded-xl border border-neutral-200">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleEnfantQtyChange('nouvel_an', -1)}
-                                                                    disabled={enfantQtyNouvelAn <= 0}
-                                                                    className="w-8 h-8 rounded-lg bg-white border border-neutral-200 text-black font-bold flex items-center justify-center hover:bg-[#D4AF37] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-2xs"
-                                                                >
-                                                                    -
-                                                                </button>
-                                                                <span className="font-bold text-base min-w-[20px] text-center text-black">
-                                                                    {enfantQtyNouvelAn}
-                                                                </span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleEnfantQtyChange('nouvel_an', 1)}
-                                                                    disabled={enfantQtyNouvelAn >= enfantQty}
-                                                                    className="w-8 h-8 rounded-lg bg-white border border-neutral-200 text-black font-bold flex items-center justify-center hover:bg-[#D4AF37] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors shadow-2xs"
-                                                                >
-                                                                    +
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )}
+                                    {errors.Date_Fete && (
+                                        <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
+                                            <span>⚠️</span> {errors.Date_Fete}
                                         </div>
-                                    ) : (
-                                        // --- CAS STANDARD (UN SEUL EVENEMENT) ---
-                                        <div className="space-y-6">
-                                            {errors.Date_Fete && (
+                                    )}
+
+                                    {/* 1.1 Les 4 boutons rapides */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs uppercase tracking-wider font-bold text-neutral-700 block">
+                                            Dates principales des réveillons (accès rapide) :
+                                        </label>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                            {FESTIVE_CALENDAR_DAYS.filter(d => d.isQuickButton).map((day) => {
+                                                const isLocked = isFestiveDateJ4Locked(day.dateValue);
+                                                const isSelected = formData.Date_Fete === day.dateValue;
+
+                                                return (
+                                                    <button
+                                                        key={day.dateValue}
+                                                        type="button"
+                                                        disabled={isLocked}
+                                                        onClick={() => {
+                                                            if (isLocked) return;
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                Date_Fete: day.dateValue,
+                                                                Date: day.dayFormatted,
+                                                                Creneau_Retrait: prev.Creneau_Retrait || "veille"
+                                                            }));
+                                                            if (errors.Date_Fete) {
+                                                                setErrors(prev => {
+                                                                    const newErr = { ...prev };
+                                                                    delete newErr.Date_Fete;
+                                                                    return newErr;
+                                                                });
+                                                            }
+                                                        }}
+                                                        className={`p-4 rounded-2xl border text-center transition-all relative flex flex-col items-center justify-center gap-1 ${
+                                                            isLocked
+                                                                ? "border-neutral-200 bg-neutral-100 text-neutral-400 opacity-50 cursor-not-allowed"
+                                                                : isSelected
+                                                                ? "border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/50 shadow-md text-black"
+                                                                : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-[#D4AF37]/50 text-neutral-800"
+                                                        }`}
+                                                    >
+                                                        <span className="text-base font-bold font-serif">
+                                                            {day.quickButtonLabel}
+                                                        </span>
+                                                        <span className="text-[11px] text-[#927116] font-semibold">
+                                                            {day.dayFormatted.split(' ')[0]}
+                                                        </span>
+                                                        {isSelected && (
+                                                            <span className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-[#D4AF37] text-black flex items-center justify-center text-xs font-bold">
+                                                                ✓
+                                                            </span>
+                                                        )}
+                                                        {isLocked && (
+                                                            <span className="text-[9px] text-red-500 font-medium">Délai J-4 expiré</span>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* 1.2 Sélecteur de date (calendrier couvrant la plage du 20 décembre au 5 janvier inclus) */}
+                                    <div className="space-y-2 pt-2">
+                                        <label className="text-xs uppercase tracking-wider font-bold text-neutral-700 block">
+                                            Ou sélectionnez une autre date (plage du 20 décembre au 5 janvier inclus) :
+                                        </label>
+                                        <select
+                                            value={formData.Date_Fete || ""}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                const dayObj = FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === val);
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    Date_Fete: val,
+                                                    Date: dayObj ? dayObj.dayFormatted : val,
+                                                    Creneau_Retrait: prev.Creneau_Retrait || "veille"
+                                                }));
+                                                if (errors.Date_Fete) {
+                                                    setErrors(prev => {
+                                                        const newErr = { ...prev };
+                                                        delete newErr.Date_Fete;
+                                                        return newErr;
+                                                    });
+                                                }
+                                            }}
+                                            className="w-full bg-[#FAF9F6] border border-neutral-300 rounded-2xl p-3.5 text-sm font-medium text-neutral-800 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]"
+                                        >
+                                            <option value="">-- Choisir une date dans le calendrier --</option>
+                                            {FESTIVE_CALENDAR_DAYS.map((day) => {
+                                                const isLocked = isFestiveDateJ4Locked(day.dateValue);
+                                                return (
+                                                    <option
+                                                        key={day.dateValue}
+                                                        value={day.dateValue}
+                                                        disabled={isLocked}
+                                                    >
+                                                        {day.dayFormatted} {isLocked ? '(Verrouillé - délai J-4 expiré)' : ''}
+                                                    </option>
+                                                );
+                                            })}
+                                        </select>
+                                    </div>
+
+                                    {/* 2. Choix du créneau de retrait à l'atelier (Rue Potay 3) */}
+                                    {formData.Date_Fete && (
+                                        <div className="space-y-4 pt-4 border-t border-neutral-100">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/15 text-[#927116] flex items-center justify-center shrink-0 mt-0.5">
+                                                    <Clock size={17} />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-serif font-bold text-lg text-black">
+                                                        Créneau de retrait à l&apos;atelier (Rue Potay 3, Saint-Georges-sur-Meuse) <span className="text-red-500">*</span>
+                                                    </h4>
+                                                    <p className="text-xs text-neutral-500 mt-0.5">
+                                                        Choisissez votre moment de retrait. Notice détaillée de réchauffage et dressage fournie avec chaque commande.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {errors.Creneau_Retrait && (
                                                 <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
-                                                    <span>⚠️</span> {errors.Date_Fete}
+                                                    <span>⚠️</span> {errors.Creneau_Retrait}
                                                 </div>
                                             )}
 
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                                {FESTIVE_DATE_OPTIONS.map((option) => {
-                                                    const isAllowed = festiveRestrictions.allowedOptionIds.includes(option.id);
-                                                    const isSelected = formData.Date_Fete === option.id || formData.Date_Fete === option.dayFormatted;
+                                                {getFestivePickupOptions(formData.Date_Fete).map((slot) => {
+                                                    const isSelected = formData.Creneau_Retrait === slot.id || formData.Creneau_Retrait === slot.fullLabel;
 
                                                     return (
-                                                        <button
-                                                            key={option.id}
-                                                            type="button"
-                                                            disabled={!isAllowed}
-                                                            onClick={() => {
-                                                                if (!isAllowed) return;
-                                                                setFormData(prev => ({
-                                                                    ...prev,
-                                                                    Date_Fete: option.id,
-                                                                    Date: option.dayFormatted,
-                                                                    Creneau_Retrait: option.pickupWindow
-                                                                }));
-                                                                if (errors.Date_Fete) {
-                                                                    setErrors(prev => {
-                                                                        const newErr = { ...prev };
-                                                                        delete newErr.Date_Fete;
-                                                                        return newErr;
-                                                                    });
-                                                                }
-                                                            }}
-                                                            className={`p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between gap-3 ${
-                                                                !isAllowed
-                                                                    ? "border-neutral-200 bg-neutral-100/70 opacity-40 cursor-not-allowed"
-                                                                    : isSelected
-                                                                    ? "border-[#D4AF37] bg-[#D4AF37]/10 ring-2 ring-[#D4AF37]/40 shadow-md"
-                                                                    : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-neutral-300"
+                                                        <label
+                                                            key={slot.id}
+                                                            className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-2.5 ${
+                                                                isSelected
+                                                                    ? "bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/40 shadow-sm"
+                                                                    : "bg-[#FAF9F6] border-neutral-200 hover:bg-white hover:border-[#D4AF37]/40"
                                                             }`}
                                                         >
-                                                            <div className="flex justify-between items-start">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
-                                                                        !isAllowed ? "bg-neutral-300 text-neutral-600" : "bg-black text-[#D4AF37]"
-                                                                    }`}>
-                                                                        {option.badge}
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-2.5">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="creneau_retrait_option"
+                                                                        value={slot.id}
+                                                                        checked={isSelected}
+                                                                        onChange={() => {
+                                                                            setFormData(prev => ({
+                                                                                ...prev,
+                                                                                Creneau_Retrait: slot.id
+                                                                            }));
+                                                                            if (errors.Creneau_Retrait) {
+                                                                                setErrors(prev => {
+                                                                                    const newErr = { ...prev };
+                                                                                    delete newErr.Creneau_Retrait;
+                                                                                    return newErr;
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        className="text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
+                                                                    />
+                                                                    <span className="font-bold text-sm text-neutral-900 font-serif">
+                                                                        {slot.label}
                                                                     </span>
-                                                                    {!isAllowed && (
-                                                                        <span className="text-[10px] text-neutral-500 font-medium italic">Incompatible</span>
-                                                                    )}
                                                                 </div>
-                                                                <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                                                    !isAllowed ? "border-neutral-300 bg-neutral-200" : isSelected ? "border-[#D4AF37] bg-[#D4AF37] text-black" : "border-neutral-300 bg-white"
-                                                                }`}>
-                                                                    {isSelected && <Check size={12} strokeWidth={3} />}
-                                                                </div>
+                                                                <span className="text-[11px] font-bold text-[#927116] bg-[#D4AF37]/15 px-2.5 py-0.5 rounded-full">
+                                                                    {slot.hours}
+                                                                </span>
                                                             </div>
-                                                            <div>
-                                                                <h4 className={`font-serif font-bold text-base ${!isAllowed ? "text-neutral-400" : "text-neutral-900"}`}>{option.label}</h4>
-                                                                <p className={`text-xs font-semibold mt-0.5 ${!isAllowed ? "text-neutral-400" : "text-[#D4AF37]"}`}>{option.dayFormatted}</p>
-                                                            </div>
-                                                        </button>
+                                                            <p className="text-xs text-neutral-600 pl-6 leading-relaxed">
+                                                                Retrait le <strong>{slot.targetDateFormatted}</strong> entre <strong>{slot.hours}</strong> à l&apos;atelier Traiteur Compère (Rue Potay 3).
+                                                            </p>
+                                                        </label>
                                                     );
                                                 })}
                                             </div>
-
-                                            {formData.Date_Fete && (
-                                                <div className="bg-[#FAF9F6] border border-[#D4AF37]/40 p-4 md:p-5 rounded-2xl flex items-start gap-3.5 shadow-sm">
-                                                    <Clock className="text-[#D4AF37] shrink-0 mt-0.5" size={22} />
-                                                    <div className="space-y-1 text-sm">
-                                                        <p className="font-bold text-neutral-900">
-                                                            Créneau de retrait à l'atelier :
-                                                        </p>
-                                                        <p className="text-neutral-700 font-medium leading-relaxed">
-                                                            {FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete)?.pickupWindow || formData.Creneau_Retrait}
-                                                        </p>
-                                                        <p className="text-xs text-neutral-500 pt-0.5">
-                                                            📍 Atelier Traiteur Compère : Rue Potay 3, 4470 Saint-Georges-sur-Meuse
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -3188,38 +2945,15 @@ function ContactForm() {
                                             <tbody>
                                                 {cartItems.map((item, idx) => {
                                                     const isFestive = item.itemType === 'menu_fete' || item.semaineId.startsWith('menu') || item.semaineId.startsWith('fetes');
-                                                    const itemId = (item.id || "").toLowerCase();
-                                                    const itemNom = (item.nomPlat || "").toLowerCase();
-                                                    const isNoelMenu = itemId === 'menu-reveillon-noel' || itemId === 'menu-prestige-fetes' || itemNom.includes('noël') || itemNom.includes('noel') || itemNom.includes('prestige');
-                                                    const isNouvelAnMenu = itemId === 'menu-saint-sylvestre' || itemNom.includes('sylvestre') || itemNom.includes('nouvel an');
-                                                    const isEnfantMenu = itemId === 'menu-enfant-fetes' || itemNom.includes('enfant');
 
                                                     let displayDate = item.badge || item.jour;
                                                     if (isFestive) {
-                                                        if (festiveRestrictions.isMixed) {
-                                                            if (isNoelMenu) {
-                                                                const noelOpt = NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel || o.dayFormatted === formData.Date_Fete_Noel);
-                                                                displayDate = `🎄 ${noelOpt ? noelOpt.dayFormatted : 'Noël (24/25 Déc)'}`;
-                                                            } else if (isNouvelAnMenu) {
-                                                                const naOpt = NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn);
-                                                                displayDate = `🍾 ${naOpt ? naOpt.dayFormatted : 'Nouvel An (31 Déc/1er Janv)'}`;
-                                                            } else if (isEnfantMenu) {
-                                                                const noelQty = formData.Menu_Enfant_Qty_Noel === -1 ? enfantQty : formData.Menu_Enfant_Qty_Noel;
-                                                                const naQty = formData.Menu_Enfant_Qty_NouvelAn;
-
-                                                                if (noelQty > 0 && naQty > 0) {
-                                                                    displayDate = `🎄 ${noelQty}x Noël & 🍾 ${naQty}x Nouvel An`;
-                                                                } else if (noelQty > 0) {
-                                                                    const noelOpt = NOEL_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_Noel || o.dayFormatted === formData.Date_Fete_Noel);
-                                                                    displayDate = `🎄 Noël (${noelOpt ? noelOpt.dayFormatted : '24/25 Déc'})`;
-                                                                } else {
-                                                                    const naOpt = NOUVEL_AN_DATE_OPTIONS.find(o => o.id === formData.Date_Fete_NouvelAn || o.dayFormatted === formData.Date_Fete_NouvelAn);
-                                                                    displayDate = `🍾 Nouvel An (${naOpt ? naOpt.dayFormatted : '31 Déc/1er Janv'})`;
-                                                                }
-                                                            }
-                                                        } else if (formData.Date_Fete) {
-                                                            const opt = FESTIVE_DATE_OPTIONS.find(o => o.id === formData.Date_Fete || o.dayFormatted === formData.Date_Fete);
-                                                            displayDate = opt ? opt.dayFormatted : formData.Date_Fete;
+                                                        if (formData.Date_Fete) {
+                                                            const dayObj = FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === formData.Date_Fete);
+                                                            const slot = formData.Creneau_Retrait ? getFestivePickupOptions(formData.Date_Fete).find(s => s.id === formData.Creneau_Retrait) : null;
+                                                            displayDate = dayObj ? `${dayObj.shortLabel}${slot ? ` (${slot.badge})` : ''}` : formData.Date_Fete;
+                                                        } else {
+                                                            displayDate = "À sélectionner ci-dessous";
                                                         }
                                                     }
 
@@ -3258,47 +2992,56 @@ function ContactForm() {
                                                 </div>
                                                 <div>
                                                     <h4 className="font-serif font-bold text-lg text-black">
-                                                        Mode de validation de votre commande
+                                                        Mode de règlement de votre commande
                                                     </h4>
                                                     <p className="text-xs text-neutral-600 font-serif italic mt-0.5">
-                                                        Choisissez comment vous souhaitez valider votre réservation pour les réveillons.
+                                                        {depositAvailable
+                                                            ? "Choisissez l'acompte pour bloquer votre réservation tout en gardant vos convives ajustables, ou réglez la totalité."
+                                                            : "À partir du 11 décembre, seul le règlement intégral (100 %) est proposé pour finaliser votre commande."}
                                                     </p>
                                                 </div>
                                             </div>
 
                                             <div className="space-y-3 pt-1">
-                                                {/* Option 1 : Acompte 30% */}
-                                                <label
-                                                    className={`block p-4 sm:p-5 rounded-xl border cursor-pointer transition-all ${
-                                                        validationMode === 'acompte_30'
-                                                            ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
-                                                            : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40'
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start gap-3">
-                                                        <input
-                                                            type="radio"
-                                                            name="mode_validation_fetes"
-                                                            value="acompte_30"
-                                                            checked={validationMode === 'acompte_30'}
-                                                            onChange={() => setValidationMode('acompte_30')}
-                                                            className="mt-1 text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
-                                                        />
-                                                        <div className="space-y-1.5 flex-1">
-                                                            <div className="flex items-baseline justify-between flex-wrap gap-2">
-                                                                <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
-                                                                    Payer l&apos;acompte de 30 %
-                                                                </span>
-                                                                <span className="font-serif font-bold text-sm sm:text-base text-[#927116] bg-[#D4AF37]/15 px-2.5 py-0.5 rounded-full">
-                                                                    {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € à verser
-                                                                </span>
+                                                {/* Option 1 : Acompte 30% (Disponible uniquement jusqu'au 10 décembre inclus) */}
+                                                {depositAvailable && (
+                                                    <label
+                                                        className={`block p-4 sm:p-5 rounded-xl border cursor-pointer transition-all ${
+                                                            validationMode === 'acompte_30'
+                                                                ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
+                                                                : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-start gap-3">
+                                                            <input
+                                                                type="radio"
+                                                                name="mode_validation_fetes"
+                                                                value="acompte_30"
+                                                                checked={validationMode === 'acompte_30'}
+                                                                onChange={() => setValidationMode('acompte_30')}
+                                                                className="mt-1 text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
+                                                            />
+                                                            <div className="space-y-1.5 flex-1">
+                                                                <div className="flex items-baseline justify-between flex-wrap gap-2">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
+                                                                            Verser un acompte de 30 %
+                                                                        </span>
+                                                                        <span className="text-[10px] bg-[#D4AF37] text-black font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
+                                                                            Recommandé
+                                                                        </span>
+                                                                    </div>
+                                                                    <span className="font-serif font-bold text-sm sm:text-base text-[#927116] bg-[#D4AF37]/15 px-2.5 py-0.5 rounded-full">
+                                                                        {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                                    </span>
+                                                                </div>
+                                                                <p className="text-xs text-neutral-600 leading-relaxed">
+                                                                    Montant de l&apos;acompte calculé au centime près. Bloque la commande et la remise de -5 %. Convives et commande ajustables par email/téléphone jusqu&apos;à 7 jours avant le retrait. Solde obligatoire au plus tard 7 jours avant le retrait ({festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €).
+                                                                </p>
                                                             </div>
-                                                            <p className="text-xs text-neutral-600 leading-relaxed">
-                                                                Bloque votre commande et la remise de -5%. Le nombre de convives reste ajustable jusqu&apos;à 4 jours avant le retrait. Le solde ({festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) sera réglé ultérieurement.
-                                                            </p>
                                                         </div>
-                                                    </div>
-                                                </label>
+                                                    </label>
+                                                )}
 
                                                 {/* Option 2 : Totalité 100% */}
                                                 <label
@@ -3320,14 +3063,14 @@ function ContactForm() {
                                                         <div className="space-y-1.5 flex-1">
                                                             <div className="flex items-baseline justify-between flex-wrap gap-2">
                                                                 <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
-                                                                    Payer la totalité (100 %)
+                                                                    Régler la totalité (100 %)
                                                                 </span>
                                                                 <span className="font-serif font-bold text-sm sm:text-base text-black bg-neutral-100 px-2.5 py-0.5 rounded-full">
-                                                                    {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € total
+                                                                    {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                                 </span>
                                                             </div>
                                                             <p className="text-xs text-neutral-600 leading-relaxed">
-                                                                Validation définitive et figée de la commande.
+                                                                Montant intégral. Commande ferme et définitive (convives non modifiables).
                                                             </p>
                                                         </div>
                                                     </div>
@@ -3340,7 +3083,7 @@ function ContactForm() {
                                     {isMenusFetes ? (
                                         <div className="bg-[#FAF9F6] p-5 sm:p-6 rounded-2xl border border-[#D4AF37]/40 space-y-3">
                                             <div className="flex justify-between items-center text-sm text-neutral-600">
-                                                <span>Sous-total articles Fêtes :</span>
+                                                <span>Sous-total brut :</span>
                                                 <span className="font-medium text-neutral-900">
                                                     {festivePricing.festiveSubtotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                 </span>
@@ -3352,7 +3095,7 @@ function ContactForm() {
                                                         <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-1.5 py-0.5 rounded">
                                                             -5%*
                                                         </span>
-                                                        <span>Avantage Réservation Anticipée (jusqu&apos;au 01/12/2026) :</span>
+                                                        <span>Remise Early Bird (-5% avant le 01/12) :</span>
                                                     </div>
                                                     <span className="font-bold">
                                                         - {festivePricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
@@ -3362,7 +3105,7 @@ function ContactForm() {
 
                                             <div className="flex justify-between items-center pt-2 border-t border-neutral-200">
                                                 <span className="text-sm font-bold text-black uppercase tracking-wider">
-                                                    Total net de la commande :
+                                                    Total final TTC :
                                                 </span>
                                                 <span className="font-serif text-2xl font-bold text-black">
                                                     {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
@@ -3378,9 +3121,9 @@ function ContactForm() {
                                                             {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                         </span>
                                                     </div>
-                                                    <div className="flex justify-between items-center text-xs text-neutral-500 px-1">
-                                                        <span>Solde restant (ajustable jusqu&apos;à 4 jours avant retrait) :</span>
-                                                        <span className="font-medium text-neutral-700">
+                                                    <div className="flex justify-between items-center text-xs text-neutral-600 px-1">
+                                                        <span>Solde restant dû (au plus tard 7 jours avant le retrait) :</span>
+                                                        <span className="font-semibold text-neutral-800">
                                                             {festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                         </span>
                                                     </div>
@@ -3397,7 +3140,7 @@ function ContactForm() {
                                             )}
 
                                             <p className="text-[11px] text-neutral-500 text-center pt-1 italic">
-                                                Paiement par virement bancaire sous 48h. Votre commande et la réduction de -5% sont définitivement réservées dès réception du virement sur le compte bancaire de Traiteur Compère (coordonnées IBAN et QR Code fournis à l&apos;étape suivante).
+                                                Réservation validée dès versement de votre règlement sous 48h par virement bancaire. Instructions et QR Code EPC fournis à l&apos;étape suivante.
                                             </p>
                                         </div>
                                     ) : (

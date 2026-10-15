@@ -188,18 +188,20 @@ export async function POST(req: Request) {
             }
         }
 
-        // Génère un numéro unique à 5 chiffres pour chaque commande
-        const orderNumber = Math.floor(Math.random() * 90000) + 10000;
-        const formattedOrderNumber = String(orderNumber);
+        const isFestiveOrder = typeCommande === 'menus_fetes' || hasFestiveItem;
+        const orderTitle = isFestiveOrder ? 'Menus de Fêtes 2026' : 'Plats Préparés';
+
+        // Génère un numéro unique à 5 chiffres (préfixé NOEL- pour les fêtes)
+        const randomDigits = Math.floor(Math.random() * 90000) + 10000;
+        const formattedOrderNumber = isFestiveOrder ? `NOEL-${randomDigits}` : String(randomDigits);
 
         // Informations bancaires pour le client
         const IBAN = "BE22 0689 4683 8447";
         const BIC = "GKCCBEBB";
         const BENEFICIAIRE = "JEAN COMPERE";
-        const COMMUNICATION = `COMMANDE #${formattedOrderNumber} ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`;
-
-        const isFestiveOrder = typeCommande === 'menus_fetes' || hasFestiveItem;
-        const orderTitle = isFestiveOrder ? 'Menus de Fêtes 2026' : 'Plats Préparés';
+        const COMMUNICATION = isFestiveOrder
+            ? `${formattedOrderNumber} - ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`
+            : `COMMANDE #${formattedOrderNumber} ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`;
 
         // Calcul tarifaire certifié côté serveur (Early Bird -5% et acompte 30% / 100%)
         const festivePricing = calculateFestiveOrderPricing(
@@ -211,16 +213,79 @@ export async function POST(req: Request) {
         const amountToPayNow = isFestiveOrder ? festivePricing.amountToPayNow : finalTotalPrice;
         const totalNetPrice = isFestiveOrder ? festivePricing.totalNet : finalTotalPrice;
 
+        // Totalisation de la production cuisine pour le traiteur
+        const kitchenTotals: Record<string, { category: string; count: number }> = {};
+        const recordKitchenDish = (dishName: string, category: string, qty: number) => {
+            const cleanName = dishName.trim();
+            if (!cleanName) return;
+            if (!kitchenTotals[cleanName]) {
+                kitchenTotals[cleanName] = { category, count: 0 };
+            }
+            kitchenTotals[cleanName].count += qty;
+        };
+
+        for (const item of cartItems) {
+            const isFestive = item.itemType === 'menu_fete' || item.semaineId?.startsWith('menu') || item.semaineId?.startsWith('fetes') || item.semaineId === 'menus-fetes';
+            const qty = item.quantitePlat || 1;
+
+            if (isFestive) {
+                if (item.coursesSummary && Array.isArray(item.coursesSummary) && item.coursesSummary.length > 0) {
+                    for (const courseStr of item.coursesSummary) {
+                        const colonIdx = courseStr.indexOf(':');
+                        if (colonIdx !== -1) {
+                            const category = courseStr.substring(0, colonIdx).trim();
+                            const dish = courseStr.substring(colonIdx + 1).trim();
+                            recordKitchenDish(dish, category, qty);
+                        } else {
+                            recordKitchenDish(courseStr, 'Choix menu', qty);
+                        }
+                    }
+                } else {
+                    recordKitchenDish(item.nomPlat, 'À la carte / Formule', qty);
+                }
+            }
+        }
+
+        const kitchenRowsHTML = Object.entries(kitchenTotals)
+            .sort((a, b) => a[1].category.localeCompare(b[1].category) || a[0].localeCompare(b[0]))
+            .map(([dish, info]) => `
+                <tr>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 12px; color: #666; font-weight: bold;">${info.category}</td>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #111;">${dish}</td>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 14px; font-weight: bold; text-align: right; color: #D4AF37;">${info.count}</td>
+                </tr>
+            `).join('');
+
+        const kitchenSummaryTableHTML = isFestiveOrder && Object.keys(kitchenTotals).length > 0 ? `
+            <div style="margin-top: 25px; border: 2px solid #000; border-radius: 8px; overflow: hidden; background: #fff;">
+                <div style="background: #000; color: #D4AF37; padding: 10px 14px; font-weight: bold; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase;">
+                    🔪 Totalisation de la Production Cuisine
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-family: sans-serif;">
+                    <thead>
+                        <tr style="background-color: #f7f7f7; border-bottom: 2px solid #ddd;">
+                            <th style="padding: 8px 10px; text-align: left; font-size: 12px; color: #555; width: 25%;">Poste</th>
+                            <th style="padding: 8px 10px; text-align: left; font-size: 12px; color: #555;">Préparation / Plat</th>
+                            <th style="padding: 8px 10px; text-align: right; font-size: 12px; color: #555; width: 20%;">Total Portions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${kitchenRowsHTML}
+                    </tbody>
+                </table>
+            </div>
+        ` : '';
+
         const tableFooterHTML = isFestiveOrder ? `
             <tfoot>
                 ${festivePricing.isEarlyBirdEligible && festivePricing.discountAmount > 0 ? `
                     <tr>
-                        <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 13px; color: #555;">Sous-total articles Fêtes :</td>
+                        <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 13px; color: #555;">Sous-total brut :</td>
                         <td style="padding: 8px 10px; text-align: right; font-size: 13px; color: #333; white-space: nowrap;">${festivePricing.rawTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
                     <tr>
                         <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 13px; color: #927116; font-weight: bold; background-color: #fffdf5;">
-                            🎁 Avantage Réservation Anticipée (-5%*) :
+                            🎁 Remise Early Bird (-5% avant le 01/12) :
                         </td>
                         <td style="padding: 8px 10px; text-align: right; font-size: 13px; color: #927116; font-weight: bold; background-color: #fffdf5; white-space: nowrap;">
                             - ${festivePricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
@@ -228,36 +293,36 @@ export async function POST(req: Request) {
                     </tr>
                 ` : ''}
                 <tr>
-                    <td colspan="4" style="padding: 10px 10px; text-align: right; font-size: 14px; font-weight: bold; border-top: 1px solid #ddd;">Total net de la commande :</td>
+                    <td colspan="4" style="padding: 10px 10px; text-align: right; font-size: 14px; font-weight: bold; border-top: 1px solid #ddd;">Total final TTC :</td>
                     <td style="padding: 10px 10px; text-align: right; font-size: 15px; font-weight: bold; border-top: 1px solid #ddd; white-space: nowrap;">${festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                 </tr>
                 ${festivePricing.validationMode === 'acompte_30' ? `
                     <tr>
-                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #666;">Mode de validation choisi :</td>
-                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Acompte 30% (convives ajustables jusqu'à 4 jours avant le retrait)</td>
+                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #666;">Mode de règlement choisi :</td>
+                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Acompte 30% (convives ajustables jusqu'à 7 jours avant le retrait)</td>
                     </tr>
                     <tr style="background-color: #fff9e6;">
-                        <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 15px; color: #000; border-top: 2px solid #D4AF37;">
-                            <strong>MONTANT DE L'ACOMPTE À VERSER MAINTENANT (30%) :</strong>
+                        <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 14px; color: #000; border-top: 2px solid #D4AF37;">
+                            <strong>ACOMPTE DE 30% À VERSER SOUS 48H :</strong>
                         </td>
-                        <td style="padding: 12px 10px; text-align: right; font-size: 18px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
+                        <td style="padding: 12px 10px; text-align: right; font-size: 17px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
                             ${festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777;">Solde restant dû (ajustable jusqu'à 4 jours avant retrait) :</td>
+                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777;">Solde restant dû (au plus tard 7 jours avant le retrait) :</td>
                         <td style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777; white-space: nowrap;">${festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
                 ` : `
                     <tr>
-                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #666;">Mode de validation choisi :</td>
-                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Paiement intégral (100% ferme)</td>
+                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #666;">Mode de règlement choisi :</td>
+                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Règlement intégral (100% ferme)</td>
                     </tr>
                     <tr style="background-color: #fff9e6;">
-                        <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 15px; color: #000; border-top: 2px solid #D4AF37;">
-                            <strong>MONTANT TOTAL À RÉGLER MAINTENANT :</strong>
+                        <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 14px; color: #000; border-top: 2px solid #D4AF37;">
+                            <strong>MONTANT TOTAL (100%) À RÉGLER SOUS 48H :</strong>
                         </td>
-                        <td style="padding: 12px 10px; text-align: right; font-size: 18px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
+                        <td style="padding: 12px 10px; text-align: right; font-size: 17px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
                             ${festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                         </td>
                     </tr>
@@ -297,23 +362,25 @@ export async function POST(req: Request) {
                 await resend.emails.send({
                     from: 'Traiteur Compère <commande@traiteur-compere.be>',
                     to: process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com',
-                    subject: `[COMMANDE #${formattedOrderNumber}] ${isFestiveOrder ? '🎉 FETES' : '🍽️ PLATS'} - ${Nom} ${Prenom} - ${Date}`,
+                    subject: `[${formattedOrderNumber}] ${isFestiveOrder ? '🎉 FETES' : '🍽️ PLATS'} - ${Nom} ${Prenom} - ${Date}`,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                            <h2>Nouvelle commande ${orderTitle} (N° ${formattedOrderNumber})</h2>
+                            <h2>Nouvelle commande ${orderTitle} (${formattedOrderNumber})</h2>
                             <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                                 <p style="margin: 5px 0;"><strong>Client :</strong> ${Nom} ${Prenom}</p>
                                 <p style="margin: 5px 0;"><strong>Email :</strong> ${Mail}</p>
                                 <p style="margin: 5px 0;"><strong>Téléphone :</strong> ${Tel}</p>
                                 <p style="margin: 5px 0;"><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
                                 ${dateEvenement ? `<p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>🎉 Date(s) du repas :</strong> ${dateEvenement}</p>` : ''}
-                                ${creneauRetrait ? `<p style="margin: 5px 0; line-height: 1.4;"><strong>⏰ Créneau(x) de retrait :</strong><br/>${creneauRetrait.split(' | ').join('<br/>')}</p>` : ''}
+                                ${creneauRetrait ? `<p style="margin: 5px 0; line-height: 1.4;"><strong>⏰ Retrait à l'atelier :</strong><br/>${creneauRetrait.split(' | ').join('<br/>')}</p>` : ''}
                                 <p style="margin: 5px 0;"><strong>Date de saisie :</strong> ${Date}</p>
-                                ${isFestiveOrder ? `<p style="margin: 5px 0;"><strong>Mode choisi :</strong> ${festivePricing.validationMode === 'acompte_30' ? 'Acompte 30% (' + festivePricing.depositAmount.toFixed(2) + ' €)' : 'Totalité 100% (' + festivePricing.totalNet.toFixed(2) + ' €)'}</p>` : ''}
+                                ${isFestiveOrder ? `<p style="margin: 5px 0;"><strong>Mode choisi :</strong> ${festivePricing.validationMode === 'acompte_30' ? 'Acompte 30% (' + festivePricing.depositAmount.toFixed(2) + ' €) - solde dû : ' + festivePricing.remainingBalance.toFixed(2) + ' €' : 'Totalité 100% (' + festivePricing.totalNet.toFixed(2) + ' €)'}</p>` : ''}
                             </div>
                             
                             <h3>Détail du panier</h3>
                             ${cartTableHTML}
+
+                            ${kitchenSummaryTableHTML}
                             
                             ${details_projet ? `
                             <div style="background: #fff8e1; padding: 15px; border-left: 4px solid #fbc02d; margin-top: 20px;">
@@ -327,22 +394,27 @@ export async function POST(req: Request) {
                 await resend.emails.send({
                     from: 'Traiteur Compère <commande@traiteur-compere.be>',
                     to: Mail,
-                    subject: `Confirmation de votre commande #${formattedOrderNumber} - Traiteur Compère`,
+                    subject: `Confirmation de votre commande ${formattedOrderNumber} - Traiteur Compère`,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
                             <h2 style="color: #000;">Merci pour votre commande, ${Prenom} !</h2>
-                            <p>Votre commande de <strong>${orderTitle}</strong> a bien été enregistrée sous la référence <strong>N° ${formattedOrderNumber}</strong>.</p>
+                            <p>Votre commande de <strong>${orderTitle}</strong> a bien été enregistrée sous la référence <strong>${formattedOrderNumber}</strong>.</p>
                             
-                            <!-- Bandeau d'alerte et rappel obligatoire du virement -->
+                            <!-- Bandeau d'alerte et mention explicite -->
                             <div style="background-color: #fff9e6; border: 2px solid #D4AF37; border-left: 6px solid #D4AF37; border-radius: 8px; padding: 16px 18px; margin: 20px 0; color: #333;">
                                 <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #856404;">
-                                    ⚠️ Important – Enregistrement définitif de votre commande :
+                                    Votre réservation est enregistrée.
+                                </p>
+                                <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #222; font-weight: bold;">
+                                    Elle sera définitivement confirmée à la réception de votre virement bancaire sous 48h.
                                 </p>
                                 <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #444;">
-                                    Veuillez noter que votre commande n'est <strong>définitivement enregistrée qu'à la réception effective de votre virement bancaire</strong> (${isFestiveOrder && festivePricing.validationMode === 'acompte_30' ? `de votre acompte de <strong>${festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong>` : `du montant de <strong>${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong>`}) sur le compte bancaire de Traiteur Compère sous 48 heures.
+                                    ${isFestiveOrder && festivePricing.validationMode === 'acompte_30'
+                                        ? `Merci de verser votre acompte de <strong>${festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h. Vos convives et votre commande restent ajustables jusqu'à 7 jours avant le retrait. Le solde de <strong>${festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sera à régler au plus tard 7 jours avant le retrait.`
+                                        : `Merci de verser votre règlement intégral de <strong>${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h.`}
                                 </p>
-                                <p style="margin: 0; font-size: 13px; font-weight: bold; color: #b71c1c; line-height: 1.4;">
-                                    Passé ce délai de 48h sans réception du paiement, la réservation des créneaux et la réduction de -5% seront automatiquement libérées.
+                                <p style="margin: 0; font-size: 12px; font-weight: bold; color: #b71c1c; line-height: 1.4;">
+                                    Passé ce délai de 48h sans réception du paiement, la réservation des créneaux et l'avantage réservation anticipée de -5% seront libérés.
                                 </p>
                             </div>
 
@@ -351,6 +423,7 @@ export async function POST(req: Request) {
                                 <p style="margin: 4px 0; font-size: 15px;"><strong>🎉 Date(s) de votre repas :</strong> ${dateEvenement}</p>
                                 <p style="margin: 4px 0; font-size: 14px; line-height: 1.4;"><strong>⏰ Créneau(x) de retrait à l'atelier :</strong><br/>${creneauRetrait ? creneauRetrait.split(' | ').join('<br/>') : 'Selon créneau sélectionné'}</p>
                                 <p style="margin: 6px 0 0 0; font-size: 12px; color: #666;">📍 Rue Potay 3, 4470 Saint-Georges-sur-Meuse</p>
+                                <p style="margin: 6px 0 0 0; font-size: 12px; color: #D4AF37; font-weight: bold;">✨ Notice détaillée de réchauffage et dressage fournie avec chaque commande à notre atelier.</p>
                             </div>` : ''}
 
                             ${cartTableHTML}
@@ -368,17 +441,17 @@ export async function POST(req: Request) {
                                 <p style="margin: 5px 0;"><strong>Bénéficiaire :</strong> ${BENEFICIAIRE}</p>
                                 <p style="margin: 5px 0; font-size: 15px;"><strong>IBAN :</strong> <code style="font-size: 16px; font-weight: bold; color: #000; letter-spacing: 0.5px;">${IBAN}</code></p>
                                 <p style="margin: 5px 0;"><strong>BIC :</strong> ${BIC}</p>
-                                <p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>Communication structurée :</strong> <strong>${COMMUNICATION}</strong></p>
+                                <p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>Communication du virement :</strong> <strong>${COMMUNICATION}</strong></p>
                                 <p style="margin: 10px 0 0 0; font-size: 16px; color: #000; border-top: 1px solid #e0e0e0; padding-top: 10px;">
-                                    <strong>Montant à virer :</strong> <span style="color: #D4AF37; font-weight: bold; font-size: 18px;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
-                                    ${isFestiveOrder && festivePricing.validationMode === 'acompte_30' ? '<span style="font-size: 12px; color: #666;"> (Acompte de 30% - solde de ' + festivePricing.remainingBalance.toFixed(2) + ' € facturé ultérieurement)</span>' : '<span style="font-size: 12px; color: #666;"> (Paiement intégral 100%)</span>'}
+                                    <strong>Montant à verser sous 48h :</strong> <span style="color: #D4AF37; font-weight: bold; font-size: 18px;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                    ${isFestiveOrder && festivePricing.validationMode === 'acompte_30' ? `<br/><span style="font-size: 13px; color: #666;">(Acompte de 30% • Solde restant de ${festivePricing.remainingBalance.toFixed(2)} € au plus tard 7 jours avant le retrait)</span>` : '<br/><span style="font-size: 13px; color: #666;">(Paiement intégral 100%)</span>'}
                                 </p>
                             </div>
                             <p style="margin-top: 20px; font-size: 13px; color: #555;">
-                                <strong>Rappel :</strong> Votre commande n'est définitivement confirmée qu'à la réception de votre virement sur notre compte bancaire.
+                                <strong>Rappel :</strong> Votre réservation est enregistrée. Elle sera définitivement confirmée à la réception de votre virement bancaire sous 48h.
                             </p>
                             <br/>
-                            <p>L'équipe Traiteur Compère vous souhaite d'excellentes fêtes !</p>
+                            <p>L'équipe Traiteur Compère vous remercie de votre confiance et vous souhaite d'excellentes fêtes !</p>
                         </div>
                     `
                 });

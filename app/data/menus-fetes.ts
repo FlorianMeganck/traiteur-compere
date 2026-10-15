@@ -574,15 +574,130 @@ export function getFestiveMenuDateRestrictions(cartItems: Array<{ id?: string; n
 export type FestiveValidationMode = 'acompte_30' | 'totalite_100';
 
 /**
- * Date limite de la promotion Early Bird : jusqu'au 1er décembre 2026 inclus (23h59:59)
+ * Promotion Early Bird -5% : Valable pour toute commande validée avant le 1er décembre 2026 (strictement < 01/12/2026 00:00:00).
  */
-export const EARLY_BIRD_DEADLINE = new Date(2026, 11, 1, 23, 59, 59, 999); // 1er décembre 2026
+export const EARLY_BIRD_DEADLINE = new Date(2026, 11, 1, 0, 0, 0, 0); // 1er décembre 2026 00:00:00
+
+export function isEarlyBirdFestivePromoActive(date: Date = new Date()): boolean {
+    return date.getTime() < EARLY_BIRD_DEADLINE.getTime();
+}
 
 /**
- * Vérifie si la date spécifiée (ou actuelle) donne droit à la promotion Early Bird -5%
+ * Option Acompte 30% : Disponible jusqu'au 10 décembre 2026 inclus (23h59:59).
+ * À partir du 11 décembre 2026, seul le règlement à 100% est proposé.
  */
-export function isEarlyBirdFestivePromoActive(date: Date = new Date()): boolean {
-    return date.getTime() <= EARLY_BIRD_DEADLINE.getTime();
+export const DEPOSIT_DEADLINE = new Date(2026, 11, 10, 23, 59, 59, 999);
+
+export function isDepositAllowed(date: Date = new Date()): boolean {
+    return date.getTime() <= DEPOSIT_DEADLINE.getTime();
+}
+
+// ==========================================
+// 7. CALENDRIER 20 DÉCEMBRE AU 5 JANVIER & J-4
+// ==========================================
+
+export interface FestiveCalendarDay {
+    dateValue: string; // "2026-12-24"
+    dayFormatted: string; // "Jeudi 24 Décembre 2026"
+    shortLabel: string; // "24 Décembre"
+    displayLabel?: string;
+    isQuickButton: boolean;
+    quickButtonLabel?: string;
+}
+
+export const FESTIVE_CALENDAR_DAYS: FestiveCalendarDay[] = [
+    { dateValue: "2026-12-20", dayFormatted: "Dimanche 20 Décembre 2026", shortLabel: "20 Décembre", isQuickButton: false },
+    { dateValue: "2026-12-21", dayFormatted: "Lundi 21 Décembre 2026", shortLabel: "21 Décembre", isQuickButton: false },
+    { dateValue: "2026-12-22", dayFormatted: "Mardi 22 Décembre 2026", shortLabel: "22 Décembre", isQuickButton: false },
+    { dateValue: "2026-12-23", dayFormatted: "Mercredi 23 Décembre 2026", shortLabel: "23 Décembre", isQuickButton: false },
+    { dateValue: "2026-12-24", dayFormatted: "Jeudi 24 Décembre 2026", shortLabel: "24 Décembre", isQuickButton: true, quickButtonLabel: "24 Décembre" },
+    { dateValue: "2026-12-25", dayFormatted: "Vendredi 25 Décembre 2026", shortLabel: "25 Décembre", isQuickButton: true, quickButtonLabel: "25 Décembre" },
+    { dateValue: "2026-12-26", dayFormatted: "Samedi 26 Décembre 2026", shortLabel: "26 Décembre", isQuickButton: false },
+    { dateValue: "2026-12-27", dayFormatted: "Dimanche 27 Décembre 2026", shortLabel: "27 Décembre", isQuickButton: false },
+    { dateValue: "2026-12-28", dayFormatted: "Lundi 28 Décembre 2026", shortLabel: "28 Décembre", isQuickButton: false },
+    { dateValue: "2026-12-29", dayFormatted: "Mardi 29 Décembre 2026", shortLabel: "29 Décembre", isQuickButton: false },
+    { dateValue: "2026-12-30", dayFormatted: "Mercredi 30 Décembre 2026", shortLabel: "30 Décembre", isQuickButton: false },
+    { dateValue: "2026-12-31", dayFormatted: "Jeudi 31 Décembre 2026", shortLabel: "31 Décembre", isQuickButton: true, quickButtonLabel: "31 Décembre" },
+    { dateValue: "2027-01-01", dayFormatted: "Vendredi 1er Janvier 2027", shortLabel: "1er Janvier", isQuickButton: true, quickButtonLabel: "1er Janvier" },
+    { dateValue: "2027-01-02", dayFormatted: "Samedi 2 Janvier 2027", shortLabel: "2 Janvier", isQuickButton: false },
+    { dateValue: "2027-01-03", dayFormatted: "Dimanche 3 Janvier 2027", shortLabel: "3 Janvier", isQuickButton: false },
+    { dateValue: "2027-01-04", dayFormatted: "Lundi 4 Janvier 2027", shortLabel: "4 Janvier", isQuickButton: false },
+    { dateValue: "2027-01-05", dayFormatted: "Mardi 5 Janvier 2027", shortLabel: "5 Janvier", isQuickButton: false }
+];
+
+export interface FestivePickupSlot {
+    id: 'veille' | 'jour_meme';
+    label: string;
+    hours: string;
+    fullLabel: string;
+    shortNotice: string;
+    badge?: string;
+    targetDateFormatted: string;
+}
+
+/**
+ * Calcule les deux créneaux de retrait possibles pour une date de repas donnée :
+ * - La veille de 14h00 à 18h00
+ * - Le jour même de 08h00 à 12h00
+ */
+export function getFestivePickupOptions(dateValue: string): FestivePickupSlot[] {
+    if (!dateValue) return [];
+    const [y, m, d] = dateValue.split('-').map(Number);
+    const mealDate = new Date(y, m - 1, d, 12, 0, 0);
+
+    const eveDate = new Date(mealDate);
+    eveDate.setDate(eveDate.getDate() - 1);
+
+    const formatEve = eveDate.toLocaleDateString('fr-BE', { day: 'numeric', month: 'numeric' });
+    const formatEveFull = eveDate.toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long' });
+    const formatMeal = mealDate.toLocaleDateString('fr-BE', { day: 'numeric', month: 'numeric' });
+    const formatMealFull = mealDate.toLocaleDateString('fr-BE', { weekday: 'long', day: 'numeric', month: 'long' });
+
+    const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+    return [
+        {
+            id: 'veille',
+            label: 'La veille du repas',
+            hours: 'entre 14h00 et 18h00',
+            fullLabel: `La veille du repas (${capitalize(formatEveFull)}) : entre 14h00 et 18h00`,
+            shortNotice: `Retrait la veille (${formatEve}) de 14h à 18h`,
+            badge: `Retrait veille 14h-18h`,
+            targetDateFormatted: capitalize(formatEveFull)
+        },
+        {
+            id: 'jour_meme',
+            label: 'Le jour même du repas',
+            hours: 'entre 08h00 et 12h00',
+            fullLabel: `Le jour même du repas (${capitalize(formatMealFull)}) : entre 08h00 et 12h00`,
+            shortNotice: `Retrait le jour même (${formatMeal}) de 8h à 12h`,
+            badge: `Retrait jour même 8h-12h`,
+            targetDateFormatted: capitalize(formatMealFull)
+        }
+    ];
+}
+
+/**
+ * Règle J-4 dynamique : Commandes acceptées au plus tard 4 jours avant la date de retrait.
+ * La date de retrait la plus hâtive est la veille du repas.
+ */
+export function isFestiveDateJ4Locked(dateValue: string, currentDate: Date = new Date()): boolean {
+    if (!dateValue) return false;
+    const [y, m, d] = dateValue.split('-').map(Number);
+    const targetMeal = new Date(y, m - 1, d, 12, 0, 0);
+
+    // Date de retrait la plus proche = la veille du repas
+    const earliestPickup = new Date(targetMeal);
+    earliestPickup.setDate(earliestPickup.getDate() - 1);
+
+    const todayMidnight = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+    const earliestMidnight = new Date(earliestPickup.getFullYear(), earliestPickup.getMonth(), earliestPickup.getDate());
+
+    const diffMs = earliestMidnight.getTime() - todayMidnight.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    // Verrouillé si moins de 4 jours (diffDays < 4)
+    return diffDays < 4;
 }
 
 /**
@@ -596,6 +711,7 @@ export function isFestiveCartItem(item: { id?: string; itemType?: string; semain
     const id = (item.id || '').toLowerCase();
     if (
         id.startsWith('formule-') ||
+        id.startsWith('carte-') ||
         id.startsWith('zak-') ||
         id.startsWith('pot-') ||
         id.startsWith('ef-') ||
@@ -628,7 +744,7 @@ export interface FestiveOrderPricingSummary {
  */
 export function calculateFestiveOrderPricing(
     cartItems: Array<{ id?: string; itemType?: string; semaineId?: string; nomPlat?: string; prixTotalLigne: number }>,
-    validationMode: FestiveValidationMode = 'totalite_100',
+    validationMode: FestiveValidationMode = 'acompte_30',
     currentDate: Date = new Date()
 ): FestiveOrderPricingSummary {
     let festiveSubtotal = 0;
@@ -655,7 +771,9 @@ export function calculateFestiveOrderPricing(
     const rawTotal = classicSubtotal + festiveSubtotal;
 
     // Si pas d'articles fêtes, le mode de validation est toujours 100%
-    const effectiveMode: FestiveValidationMode = hasFestiveItems ? validationMode : 'totalite_100';
+    // Si la date dépasse le 10 décembre 2026, l'acompte n'est plus autorisé
+    const depositPermitted = isDepositAllowed(currentDate);
+    const effectiveMode: FestiveValidationMode = (hasFestiveItems && depositPermitted) ? validationMode : 'totalite_100';
 
     let depositAmount = 0;
     let remainingBalance = 0;

@@ -49,7 +49,10 @@ function CommandeConfirmeeContent() {
     const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE22 0689 4683 8447";
     const BIC = process.env.NEXT_PUBLIC_TRAITEUR_BIC || "GKCCBEBB";
     const BENEFICIAIRE = process.env.NEXT_PUBLIC_TRAITEUR_BENEFICIAIRE || "JEAN COMPERE";
-    const COMMUNICATION = `COMMANDE #${orderId} ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
+    const isNoel = orderId.startsWith("NOEL-");
+    const COMMUNICATION = isNoel
+        ? `${orderId} - ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim()
+        : `COMMANDE #${orderId} ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
     const TOTAL_NUM = parseFloat(total);
     const TOPAY_NUM = toPayParam ? parseFloat(toPayParam) : TOTAL_NUM;
     const SOLDE_NUM = parseFloat(solde);
@@ -102,7 +105,9 @@ function CommandeConfirmeeContent() {
                         <Check className="w-12 h-12 text-green-600" strokeWidth={4} />
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Commande #{orderId}</h1>
+                    <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">
+                        {isNoel ? `Commande ${orderId}` : `Commande #${orderId}`}
+                    </h1>
 
                     <p className="text-neutral-600 text-lg mb-8 max-w-2xl mx-auto">
                         Merci <span className="font-bold text-black">{prenom} {nom}</span>, votre commande a bien été enregistrée.
@@ -115,13 +120,13 @@ function CommandeConfirmeeContent() {
                             <div className="text-sm">
                                 <p className="font-bold text-neutral-900 font-serif">Option Acompte de 30% sélectionnée</p>
                                 <p className="text-neutral-700 mt-0.5">
-                                    Le paiement de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> bloque votre commande et garantit vos tarifs préférentiels. Vous pourrez ajuster le nombre exact de convives jusqu&apos;à 4 jours avant la date de retrait. Le solde restant sera réglé ultérieurement.
+                                    Le versement de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> bloque votre commande et la remise de -5 %. Le solde ({SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) et le nombre de convives sont ajustables jusqu&apos;à 7 jours avant le retrait.
                                 </p>
                             </div>
                         </div>
                     )}
 
-                    {/* Bandeau d'alerte Paiement 48h */}
+                    {/* Bandeau d'alerte Paiement 48h & Mention explicite */}
                     <div className="bg-amber-50/90 border-2 border-amber-300 rounded-2xl p-5 md:p-6 mb-10 text-left shadow-sm">
                         <div className="flex items-start gap-3.5">
                             <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
@@ -129,17 +134,20 @@ function CommandeConfirmeeContent() {
                             </div>
                             <div className="space-y-1.5 text-sm md:text-base">
                                 <h4 className="font-bold text-amber-950 font-serif text-base md:text-lg">
-                                    ⚠️ Important – Validation définitive de votre réservation :
+                                    Votre réservation est enregistrée.
                                 </h4>
-                                <p className="text-neutral-700 leading-relaxed">
+                                <p className="text-neutral-900 font-semibold leading-relaxed">
+                                    Elle sera définitivement confirmée à la réception de votre virement bancaire sous 48h.
+                                </p>
+                                <p className="text-neutral-700 leading-relaxed text-xs md:text-sm">
                                     {isAcompte ? (
-                                        <>Merci de bien vouloir procéder au règlement de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous <strong>48 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).</>
+                                        <>Merci de verser votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous <strong>48 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).</>
                                     ) : (
-                                        <>Merci de bien vouloir procéder au règlement de votre commande sous <strong>48 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).</>
+                                        <>Merci de verser votre règlement de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous <strong>48 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).</>
                                     )}
                                 </p>
-                                <p className="text-red-600 font-bold text-xs md:text-sm pt-0.5">
-                                    La commande n&apos;est définitivement prise en compte qu&apos;à réception du virement sur le compte bancaire de Traiteur Compère. Passé ce délai de 48h sans confirmation, la réservation sera automatiquement annulée.
+                                <p className="text-neutral-500 text-xs pt-1 italic">
+                                    Notice détaillée de réchauffage et dressage fournie avec chaque commande à notre atelier (Rue Potay 3).
                                 </p>
                             </div>
                         </div>
@@ -231,7 +239,7 @@ function CommandeConfirmeeContent() {
                                             <span className="text-3xl font-serif font-bold text-[#D4AF37]">{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
                                         </div>
                                         <div className="flex justify-between items-center text-xs text-neutral-500 pt-1">
-                                            <span>Solde restant dû (ajustable jusqu&apos;à 4 jours avant retrait)</span>
+                                            <span>Solde restant dû (au plus tard 7 jours avant le retrait)</span>
                                             <span className="font-medium text-neutral-700">{SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
                                         </div>
                                     </>

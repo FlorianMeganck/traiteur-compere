@@ -6,13 +6,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
     Sparkles, Check, Plus, Minus, ShoppingCart, X,
     ChefHat, Calendar, Clock, MapPin, Award, FileText, ArrowRight,
-    UtensilsCrossed, CreditCard
+    UtensilsCrossed, CreditCard, Star, ShoppingBag, Info
 } from "lucide-react";
 
 import {
     FORMULES_FETES,
     FestiveFormule,
-    MenuOption
+    MenuOption,
+    CARTE_CATEGORIES,
+    CARTE_FETES_ITEMS,
+    CarteItem,
+    CarteCategoryKey
 } from "../data/menus-fetes";
 import { useCart, CartItem } from "../hooks/useCart";
 
@@ -25,6 +29,10 @@ export default function MenusFetesPage() {
     // État de composition dans la modale : quantité et sélections
     const [modalQuantity, setModalQuantity] = useState<number>(1);
     const [modalSelections, setModalSelections] = useState<Record<string, string | string[]>>({});
+
+    // État quantité pour les articles à la carte
+    const [carteQuantities, setCarteQuantities] = useState<Record<string, number>>({});
+    const [activeCategoryFilter, setActiveCategoryFilter] = useState<CarteCategoryKey | 'all'>('all');
 
     // Toast de confirmation discret après ajout
     const [addedConfirmation, setAddedConfirmation] = useState<{
@@ -102,12 +110,11 @@ export default function MenusFetesPage() {
         });
     };
 
-    // Valider et ajouter au panier
+    // Valider et ajouter une Formule au panier
     const handleConfirmAddToCart = () => {
         if (!activeFormuleModal) return;
 
-        // Extraire les noms courts choisis pour le résumé par convive
-        // Format demandé : "Potiron / Foie gras / Pintadeau / Moka"
+        // Format demandé : "Cresson / Foie gras / Pintadeau / Mousse chocolat"
         const selectedDishesShort: string[] = [];
         const coursesSummaryLines: string[] = [];
 
@@ -123,7 +130,6 @@ export default function MenusFetesPage() {
             } else if (typeof val === 'string') {
                 const opt = step.options.find(o => o.id === val) || step.fixedItem;
                 if (opt) {
-                    // Nom court et nettoyé
                     const shortName = opt.title.split(',')[0].replace(/\(.*?\)/g, '').trim();
                     selectedDishesShort.push(shortName);
                     coursesSummaryLines.push(`${step.stepTitle.replace(/^\d+\s*/, '')}: ${opt.title}`);
@@ -157,15 +163,60 @@ export default function MenusFetesPage() {
 
         addToCart(cartItem);
 
-        // Enregistrer la confirmation discrète
+        // Confirmation visuelle
         setAddedConfirmation({
-            formuleTitle: activeFormuleModal.title,
+            formuleTitle: `${modalQuantity}x ${activeFormuleModal.title}`,
             quantity: modalQuantity
         });
 
-        // Fermer la modale
+        // Fermer la modale pour permettre de composer un autre menu
         setActiveFormuleModal(null);
     };
+
+    // Gestion des quantités pour La Carte Libre
+    const getCarteItemQty = (id: string) => carteQuantities[id] || 1;
+
+    const setCarteItemQty = (id: string, delta: number) => {
+        setCarteQuantities(prev => {
+            const current = prev[id] || 1;
+            const updated = Math.max(1, current + delta);
+            return { ...prev, [id]: updated };
+        });
+    };
+
+    // Ajouter un article de La Carte Libre au panier
+    const handleAddCarteItem = (item: CarteItem) => {
+        const qty = getCarteItemQty(item.id);
+        const cartItem: CartItem = {
+            id: `carte-${item.id}`,
+            semaineId: "menus-fetes",
+            jour: "Fêtes",
+            nomPlat: item.title,
+            prixUnitairePlat: item.price,
+            quantitePlat: qty,
+            soupes: {},
+            prixUnitaireSoupe: 0,
+            prixTotalLigne: item.price * qty,
+            itemType: "menu_fete",
+            badge: item.categoryLabel,
+            coursesDescription: `${item.categoryLabel} • ${item.priceFormatted} / ${item.unitLabel}`
+        };
+
+        addToCart(cartItem);
+
+        // Feedback
+        setAddedConfirmation({
+            formuleTitle: `${qty}x ${item.title}`,
+            quantity: qty
+        });
+
+        // Reset quantité à 1 pour ce plat
+        setCarteQuantities(prev => ({ ...prev, [item.id]: 1 }));
+    };
+
+    const filteredCarteItems = activeCategoryFilter === 'all'
+        ? CARTE_FETES_ITEMS
+        : CARTE_FETES_ITEMS.filter(item => item.category === activeCategoryFilter);
 
     return (
         <main className="min-h-screen bg-[#FAF9F6] text-[#111111] font-sans selection:bg-[#D4AF37] selection:text-white pt-28 md:pt-36 pb-24 relative overflow-hidden">
@@ -177,7 +228,7 @@ export default function MenusFetesPage() {
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        className="fixed top-24 left-1/2 -translate-x-1/2 z-[80] w-[90%] max-w-lg bg-black text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3 border border-[#D4AF37]/50 backdrop-blur-md"
+                        className="fixed top-24 left-1/2 -translate-x-1/2 z-[80] w-[92%] max-w-lg bg-black text-white px-5 py-4 rounded-2xl shadow-2xl flex items-center justify-between gap-3 border border-[#D4AF37]/50 backdrop-blur-md"
                     >
                         <div className="flex items-center gap-3">
                             <span className="w-7 h-7 rounded-full bg-[#D4AF37] text-black flex items-center justify-center font-bold text-xs shrink-0">
@@ -185,10 +236,10 @@ export default function MenusFetesPage() {
                             </span>
                             <div className="text-xs sm:text-sm">
                                 <p className="font-bold text-white font-serif">
-                                    {addedConfirmation.quantity}x {addedConfirmation.formuleTitle} ajouté(e) !
+                                    {addedConfirmation.formuleTitle} ajouté au panier !
                                 </p>
                                 <p className="text-neutral-300 text-xs mt-0.5">
-                                    Votre sélection a été ajoutée à votre panier.
+                                    Votre sélection a été ajoutée. Vous pouvez composer un autre menu pour un autre convive.
                                 </p>
                             </div>
                         </div>
@@ -199,7 +250,7 @@ export default function MenusFetesPage() {
                                     setAddedConfirmation(null);
                                     window.dispatchEvent(new CustomEvent('open-cart-drawer'));
                                 }}
-                                className="bg-[#D4AF37] hover:bg-[#b89528] text-black font-serif font-bold text-xs px-3.5 py-2 rounded-full transition-colors flex items-center gap-1.5"
+                                className="bg-[#D4AF37] hover:bg-[#b89528] text-black font-serif font-bold text-xs px-3.5 py-2 rounded-full transition-colors flex items-center gap-1.5 shadow-sm"
                             >
                                 <ShoppingCart size={13} />
                                 <span>Voir le panier</span>
@@ -225,13 +276,13 @@ export default function MenusFetesPage() {
                 {/* 1. EN-TÊTE HERO                                      */}
                 {/* ==================================================== */}
                 <header className="text-center max-w-3xl mx-auto">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#927116] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] mb-4">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#927116] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] mb-4 shadow-xs">
                         <Sparkles size={13} className="text-[#D4AF37]" />
-                        <span>Maison Compère • Réveillon 2026</span>
+                        <span>Maison Compère • Réveillons & Fêtes 2026</span>
                     </div>
 
                     <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif text-black tracking-tight mb-4 font-bold">
-                        Menus des Fêtes
+                        Menus des Fêtes 2026
                     </h1>
 
                     <p className="font-serif italic text-neutral-600 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
@@ -240,70 +291,70 @@ export default function MenusFetesPage() {
                 </header>
 
                 {/* ==================================================== */}
-                {/* 2. BLOC DE RÉASSURANCE EN 2 COLONNES (STYLE PLATS)   */}
+                {/* 2. BANDEAU DE RÉASSURANCE EN 2 COLONNES (STYLE PLATS) */}
                 {/* ==================================================== */}
-                <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Colonne de gauche : Comment commander */}
-                    <div className="lg:col-span-2 bg-white p-8 sm:p-10 rounded-3xl shadow-sm border border-neutral-200 flex flex-col justify-between">
+                <section className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+                    {/* Colonne Gauche (Fond crème / clair) – "Comment commander vos menus de fêtes ?" */}
+                    <div className="lg:col-span-2 bg-[#FAF8F5] p-8 sm:p-10 rounded-3xl shadow-sm border border-neutral-200/90 flex flex-col justify-between">
                         <div>
                             <h2 className="text-2xl sm:text-3xl font-serif text-black mb-8 flex items-center gap-3">
-                                <span className="w-8 h-1 bg-[#D4AF37]"></span>
+                                <span className="w-8 h-1 bg-[#D4AF37] rounded-full"></span>
                                 Comment commander vos menus de fêtes ?
                             </h2>
 
                             <ul className="space-y-6">
                                 <li className="flex items-start gap-4">
-                                    <div className="bg-[#FAF9F6] p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shrink-0">
+                                    <div className="bg-white p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shadow-xs shrink-0">
                                         <UtensilsCrossed size={20} />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-neutral-900 mb-1 text-base">
-                                            1. Choisissez vos formules & plats
+                                            Composez vos menus & plats
                                         </h3>
                                         <p className="text-neutral-600 text-sm leading-relaxed">
-                                            Composez vos menus festifs directement sur cette page pour l&apos;ensemble de vos convives.
+                                            Choisissez parmi nos 3 formules ou composez votre table librement avec la carte à l&apos;unité.
                                         </p>
                                     </div>
                                 </li>
 
                                 <li className="flex items-start gap-4">
-                                    <div className="bg-[#FAF9F6] p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shrink-0">
+                                    <div className="bg-white p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shadow-xs shrink-0">
                                         <CreditCard size={20} />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-neutral-900 mb-1 text-base">
-                                            2. Validation & Acompte (30 %)
+                                            Acompte de 30 % ou Paiement total
                                         </h3>
                                         <p className="text-neutral-600 text-sm leading-relaxed">
-                                            Validez votre commande avec un acompte de 30 %. Le nombre de convives reste ajustable jusqu&apos;au 15 décembre.
+                                            Versez 30 % d&apos;acompte pour bloquer votre commande (option disponible jusqu&apos;au 10 décembre). Le solde et le nombre de convives sont ajustables jusqu&apos;à 7 jours avant le retrait.
                                         </p>
                                     </div>
                                 </li>
 
                                 <li className="flex items-start gap-4">
-                                    <div className="bg-[#FAF9F6] p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shrink-0">
+                                    <div className="bg-white p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shadow-xs shrink-0">
                                         <Clock size={20} />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-neutral-900 mb-1 text-base">
-                                            3. Délais de réservation
+                                            Dates & Délais de réservation
                                         </h3>
                                         <p className="text-neutral-600 text-sm leading-relaxed">
-                                            Commandes ouvertes du 20 décembre au 5 janvier, au plus tard 4 jours avant la date de retrait.
+                                            Menus disponibles du 20 décembre au 5 janvier inclus. Commandes acceptées au plus tard 4 jours avant la date de retrait (J-4).
                                         </p>
                                     </div>
                                 </li>
 
                                 <li className="flex items-start gap-4">
-                                    <div className="bg-[#FAF9F6] p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shrink-0">
+                                    <div className="bg-white p-3 rounded-2xl text-[#927116] border border-[#D4AF37]/30 shadow-xs shrink-0">
                                         <MapPin size={20} />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-neutral-900 mb-1 text-base">
-                                            4. Retrait à l&apos;atelier
+                                            Retrait à l&apos;atelier
                                         </h3>
                                         <p className="text-neutral-600 text-sm leading-relaxed">
-                                            Retrait à notre atelier à Saint-Georges-sur-Meuse (Rue Potay 3) selon les créneaux habituels de réveillon. Notice de réchauffage et dressage fournie.
+                                            Retrait à notre atelier (Saint-Georges-sur-Meuse, Rue Potay 3) la veille de 14h à 18h ou le jour même de 8h à 12h. Notice détaillée de réchauffage et dressage fournie avec chaque commande.
                                         </p>
                                     </div>
                                 </li>
@@ -311,51 +362,55 @@ export default function MenusFetesPage() {
                         </div>
                     </div>
 
-                    {/* Colonne de droite : Encart sombre noir & or élégant */}
+                    {/* Colonne Droite (Encart sombre noir & or élégant) – "Offre Réservation Anticipée" */}
                     <div className="lg:col-span-1 bg-black text-white p-8 sm:p-10 rounded-3xl shadow-xl relative overflow-hidden flex flex-col justify-between border border-[#D4AF37]/40">
                         {/* Halo doré décoratif */}
                         <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
 
                         <div className="relative z-10 flex flex-col items-center text-center space-y-6 my-auto">
-                            <div className="bg-[#D4AF37]/20 p-4 rounded-full text-[#D4AF37] border border-[#D4AF37]/30 shadow-inner">
-                                <Sparkles size={38} />
+                            {/* Icône étoile dorée / macaron */}
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#927116] p-0.5 shadow-lg">
+                                <div className="w-full h-full rounded-full bg-black flex items-center justify-center text-[#D4AF37]">
+                                    <Star size={30} fill="#D4AF37" />
+                                </div>
                             </div>
 
                             <div className="space-y-2">
-                                <span className="text-[11px] uppercase tracking-widest font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1 rounded-full">
+                                <span className="text-[11px] uppercase tracking-widest font-bold text-[#D4AF37] bg-[#D4AF37]/15 px-3 py-1 rounded-full border border-[#D4AF37]/30">
                                     Offre Réservation Anticipée
                                 </span>
-                                <h3 className="text-3xl sm:text-4xl font-serif font-bold text-white pt-2">
-                                    -5 %
+                                <h3 className="text-3xl sm:text-4xl font-serif font-bold text-white pt-2 leading-tight">
+                                    -5 % sur toute votre commande de fêtes
                                 </h3>
-                                <p className="text-lg sm:text-xl font-serif text-[#D4AF37]">
-                                    sur vos menus de fêtes
-                                </p>
                             </div>
 
                             <p className="text-neutral-300 text-sm leading-relaxed font-light max-w-xs">
-                                Pour toute réservation effectuée et validée avant le <strong>1er décembre</strong>.
+                                Valable sur l&apos;ensemble des formules et des plats à la carte pour toute commande validée avant le <strong>1er décembre 2026</strong>.
                             </p>
                         </div>
 
                         <div className="relative z-10 mt-6 pt-6 border-t border-white/20 w-full text-center">
                             <p className="text-neutral-400 text-xs leading-relaxed">
-                                Remise déduite automatiquement lors de la validation. Seul l&apos;acompte de 30 % est requis à la commande.
+                                Remise déduite automatiquement dans votre panier. Réservation validée dès versement de votre acompte de 30 % sous 48h par virement.
                             </p>
                         </div>
                     </div>
                 </section>
 
                 {/* ==================================================== */}
-                {/* 3. VITRINE DES 3 FORMULES (STYLE FLYER - GRANDES)    */}
+                {/* 3. VITRINE DES 3 FORMULES (CARTES GRAND FORMAT)      */}
                 {/* ==================================================== */}
                 <section className="space-y-10">
                     <div className="text-center max-w-2xl mx-auto">
-                        <h2 className="text-3xl sm:text-4xl font-serif text-black font-bold">
-                            Nos 3 Formules Festives
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-[#D4AF37] text-xs font-bold uppercase tracking-wider mb-3">
+                            <Award size={14} />
+                            <span>Sélection Gastronomique 4 Services</span>
+                        </div>
+                        <h2 className="text-3xl sm:text-5xl font-serif text-black font-bold">
+                            Nos 3 Formules de Fêtes
                         </h2>
-                        <p className="font-serif italic text-neutral-500 text-sm sm:text-base mt-2">
-                            Menus 4 services harmonieux • Cliquez sur &laquo; Composer ce menu &raquo; pour choisir vos plats
+                        <p className="font-serif italic text-neutral-600 text-sm sm:text-base mt-2">
+                            Harmonie de saveurs et réchauffage facile • Cliquez sur &laquo; Composer ce menu &raquo; pour choisir vos déclinaisons
                         </p>
                     </div>
 
@@ -364,12 +419,12 @@ export default function MenusFetesPage() {
                             return (
                                 <div
                                     key={formule.id}
-                                    className="bg-white rounded-3xl p-8 sm:p-9 border-2 border-neutral-200 hover:border-[#D4AF37] shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group"
+                                    className="bg-white rounded-3xl p-8 sm:p-9 border-2 border-neutral-200/90 hover:border-[#D4AF37] shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
                                 >
                                     <div>
                                         {/* Badge et titre */}
                                         <div className="flex items-center justify-between mb-4">
-                                            <span className="text-xs uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-3 py-1 rounded-full">
+                                            <span className="text-xs uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-3 py-1 rounded-full border border-[#D4AF37]/30">
                                                 {formule.badge}
                                             </span>
                                             <span className="text-xs font-serif font-bold text-neutral-400 uppercase tracking-wider">
@@ -384,20 +439,20 @@ export default function MenusFetesPage() {
                                             {formule.subtitle}
                                         </p>
 
-                                        {/* Tarif avec badge -5% : Prix grossi à fort impact */}
+                                        {/* Tarif avec badge -5% : Prix mis en avant */}
                                         <div className="flex items-baseline gap-2 mb-7 pb-6 border-b border-neutral-200">
                                             <span className="font-serif text-5xl sm:text-6xl font-extrabold text-black tracking-tight">
                                                 {formule.price} €
                                             </span>
                                             <span className="text-xs sm:text-sm text-neutral-500 font-medium">
-                                                / pers. TVAC
+                                                TVAC / pers.
                                             </span>
-                                            <span className="bg-black text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ml-auto shadow-xs">
+                                            <span className="bg-black text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ml-auto shadow-xs">
                                                 -5%*
                                             </span>
                                         </div>
 
-                                        {/* Décomposition des services du flyer avec espacement aéré */}
+                                        {/* Décomposition des services avec espacement aéré */}
                                         <div className="space-y-4 mb-8">
                                             <p className="text-[11px] uppercase tracking-wider font-bold text-neutral-400">
                                                 Composition du menu :
@@ -419,7 +474,7 @@ export default function MenusFetesPage() {
                                         </div>
                                     </div>
 
-                                    {/* Unique CTA clair */}
+                                    {/* Bouton CTA sous chaque formule */}
                                     <div className="pt-2">
                                         <button
                                             type="button"
@@ -438,12 +493,158 @@ export default function MenusFetesPage() {
                 </section>
 
                 {/* ==================================================== */}
-                {/* 4. MENTION OFFICIELLE DU FLYER & INFOS PRATIQUES     */}
+                {/* 4. SECTION "LA CARTE LIBRE" (SOUS LES FORMULES)      */}
+                {/* ==================================================== */}
+                <section className="pt-8 space-y-10 border-t border-neutral-200">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                        <div>
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#927116] text-xs font-bold uppercase tracking-wider mb-2">
+                                <ShoppingBag size={14} />
+                                <span>Composez selon vos envies</span>
+                            </div>
+                            <h2 className="text-3xl sm:text-4xl font-serif text-black font-bold">
+                                La Carte Libre
+                            </h2>
+                            <p className="font-serif italic text-neutral-600 text-sm sm:text-base mt-1">
+                                Commandez des pièces à l&apos;unité pour compléter votre buffet ou composer votre repas sur-mesure.
+                            </p>
+                        </div>
+
+                        {/* Remise -5% rappel carte */}
+                        <div className="bg-black text-white px-5 py-3 rounded-2xl border border-[#D4AF37]/40 flex items-center gap-3 shrink-0">
+                            <span className="text-[#D4AF37] text-xl">✨</span>
+                            <div className="text-xs">
+                                <p className="font-bold text-[#D4AF37]">Remise de -5 % également valable à la carte</p>
+                                <p className="text-neutral-400">Pour toute commande validée avant le 1er décembre 2026.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Filtres de catégories de la carte */}
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+                        <button
+                            type="button"
+                            onClick={() => setActiveCategoryFilter('all')}
+                            className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                                activeCategoryFilter === 'all'
+                                    ? 'bg-black text-white shadow-sm'
+                                    : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
+                            }`}
+                        >
+                            Tous les mets ({CARTE_FETES_ITEMS.length})
+                        </button>
+                        {CARTE_CATEGORIES.map(cat => (
+                            <button
+                                key={cat.id}
+                                type="button"
+                                onClick={() => setActiveCategoryFilter(cat.id)}
+                                className={`px-4 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                                    activeCategoryFilter === cat.id
+                                        ? 'bg-black text-white shadow-sm'
+                                        : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
+                                }`}
+                            >
+                                <span>{cat.icon}</span>
+                                <span>{cat.label}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Grille des articles à la carte */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredCarteItems.map((item) => {
+                            const currentQty = getCarteItemQty(item.id);
+
+                            return (
+                                <div
+                                    key={item.id}
+                                    className="bg-white rounded-3xl p-6 border border-neutral-200 hover:border-[#D4AF37]/60 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                                >
+                                    <div>
+                                        {/* Catégorie & Badge */}
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#927116] bg-[#D4AF37]/15 px-2.5 py-1 rounded-full">
+                                                {item.categoryLabel}
+                                            </span>
+                                            <span className="text-[10px] font-bold bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-full">
+                                                -5%* Early Bird
+                                            </span>
+                                        </div>
+
+                                        <h3 className="font-serif font-bold text-lg text-black mb-2 leading-snug">
+                                            {item.title}
+                                        </h3>
+
+                                        {item.description && (
+                                            <p className="text-xs text-neutral-600 font-serif italic mb-5 leading-relaxed min-h-[2.5rem]">
+                                                {item.description}
+                                            </p>
+                                        )}
+                                    </div>
+
+                                    <div className="pt-4 border-t border-neutral-100 mt-2">
+                                        <div className="flex items-baseline justify-between mb-4">
+                                            <div>
+                                                <span className="font-serif font-bold text-2xl text-black">
+                                                    {item.priceFormatted}
+                                                </span>
+                                                <span className="text-xs text-neutral-500 ml-1.5">
+                                                    / {item.unitLabel} TVAC
+                                                </span>
+                                            </div>
+
+                                            <span className="text-xs font-semibold text-neutral-400">
+                                                Total : {(item.price * currentQty).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                            </span>
+                                        </div>
+
+                                        {/* Sélecteur de quantité simple + / - & Bouton Ajouter */}
+                                        <div className="flex items-center gap-3">
+                                            <div className="inline-flex items-center gap-2 bg-[#FAF9F6] border border-neutral-300 p-1.5 rounded-full shadow-2xs">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCarteItemQty(item.id, -1)}
+                                                    className="w-7 h-7 rounded-full bg-white hover:bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xs transition-colors shadow-2xs"
+                                                    aria-label="Diminuer"
+                                                >
+                                                    <Minus size={12} />
+                                                </button>
+                                                <span className="font-bold text-sm text-black w-6 text-center">
+                                                    {currentQty}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCarteItemQty(item.id, 1)}
+                                                    className="w-7 h-7 rounded-full bg-white hover:bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xs transition-colors shadow-2xs"
+                                                    aria-label="Augmenter"
+                                                >
+                                                    <Plus size={12} />
+                                                </button>
+                                            </div>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => handleAddCarteItem(item)}
+                                                className="flex-1 bg-black hover:bg-[#D4AF37] text-white hover:text-black py-2.5 px-4 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-sm flex items-center justify-center gap-2"
+                                            >
+                                                <ShoppingCart size={14} />
+                                                <span>Ajouter</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
+
+                {/* ==================================================== */}
+                {/* 5. MENTION OFFICIELLE DU FLYER & INFOS PRATIQUES     */}
                 {/* ==================================================== */}
                 <footer className="pt-12 border-t border-[#D4AF37]/30 text-center space-y-6">
                     <div className="inline-block bg-white px-8 sm:px-12 py-4 rounded-2xl border border-[#D4AF37]/50 shadow-sm">
                         <p className="font-serif italic font-semibold text-neutral-800 text-sm sm:text-base tracking-wide">
-                            &ldquo;Tout est préparé maison • bûchettes de chez La Pavée • prix par personne&rdquo;
+                            &ldquo;Tout est préparé maison • bûchettes de chez La Pavée • notice de réchauffage fournie&rdquo;
                         </p>
                     </div>
 
@@ -455,7 +656,7 @@ export default function MenusFetesPage() {
             </div>
 
             {/* ==================================================== */}
-            {/* 5. MODALE DE COMPOSITION D'UN MENU (1 À LA FOIS)    */}
+            {/* 6. MODALE DE COMPOSITION D'UN MENU (POP-UP)          */}
             {/* ==================================================== */}
             <AnimatePresence>
                 {activeFormuleModal && (
@@ -493,7 +694,7 @@ export default function MenusFetesPage() {
                                         </span>
                                         <span className="text-xs text-neutral-500">/ convive TVAC</span>
                                         <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                            -5%*
+                                            -5%* Early Bird
                                         </span>
                                     </div>
                                 </div>
@@ -507,7 +708,7 @@ export default function MenusFetesPage() {
                                 </button>
                             </div>
 
-                            {/* Sélecteur de convives pour ce choix */}
+                            {/* Sélecteur de convives réglé par défaut sur 1 (+ / - pour dupliquer à l'identique) */}
                             <div className="py-4 border-b border-neutral-100 flex items-center justify-between bg-[#FAF9F6] -mx-6 sm:-mx-8 px-6 sm:px-8 shrink-0">
                                 <div>
                                     <span className="text-xs uppercase tracking-wider font-bold text-neutral-700 block">
@@ -520,6 +721,7 @@ export default function MenusFetesPage() {
 
                                 <div className="inline-flex items-center gap-3 bg-white border border-neutral-300 px-3 py-1.5 rounded-full shadow-2xs">
                                     <button
+                                        type="button"
                                         onClick={() => setModalQuantity(prev => Math.max(1, prev - 1))}
                                         className="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs transition-colors"
                                         aria-label="Diminuer"
@@ -530,6 +732,7 @@ export default function MenusFetesPage() {
                                         {modalQuantity}
                                     </span>
                                     <button
+                                        type="button"
                                         onClick={() => setModalQuantity(prev => prev + 1)}
                                         className="w-7 h-7 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs transition-colors"
                                         aria-label="Augmenter"
@@ -539,7 +742,7 @@ export default function MenusFetesPage() {
                                 </div>
                             </div>
 
-                            {/* Zone de défilement des choix des plats */}
+                            {/* Zone de défilement des choix des options selon la formule */}
                             <div className="overflow-y-auto py-5 space-y-6 pr-1 flex-1">
                                 {activeFormuleModal.steps.map((step) => {
                                     const currentVal = modalSelections[step.id];
@@ -641,7 +844,7 @@ export default function MenusFetesPage() {
                                         </span>
                                     </div>
                                     <span className="text-[10px] text-[#927116] block">
-                                        Remise -5%* déduite lors de la finalisation
+                                        Remise -5%* déduite lors de la validation
                                     </span>
                                 </div>
 

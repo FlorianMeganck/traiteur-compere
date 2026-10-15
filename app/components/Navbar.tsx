@@ -452,35 +452,40 @@ export default function Navbar() {
                                 return (
                                     <div className="sticky bottom-0 bg-white border-t border-neutral-100 p-6 space-y-4 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] shrink-0">
                                         {isFestive && pricing.isEarlyBirdEligible && pricing.discountAmount > 0 ? (
-                                            <div className="space-y-1.5 pb-2 border-b border-neutral-100">
-                                                <div className="flex justify-between items-center text-xs text-neutral-500">
-                                                    <span>Sous-total articles</span>
-                                                    <span>{pricing.rawTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                            <div className="space-y-2 pb-2 border-b border-neutral-100">
+                                                <div className="flex justify-between items-center text-xs text-neutral-600">
+                                                    <span>Sous-total brut :</span>
+                                                    <span className="font-semibold text-neutral-900">{pricing.rawTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
                                                 </div>
-                                                <div className="flex justify-between items-center text-xs text-[#927116] font-semibold bg-[#D4AF37]/10 px-2 py-1 rounded">
-                                                    <span>Offre Early Bird (-5%)</span>
-                                                    <span>- {pricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                                <div className="flex justify-between items-center text-xs text-[#927116] font-semibold bg-[#D4AF37]/15 px-2.5 py-1.5 rounded-lg border border-[#D4AF37]/30">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                                            -5%*
+                                                        </span>
+                                                        <span>Remise Early Bird :</span>
+                                                    </div>
+                                                    <span className="font-bold">- {pricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
                                                 </div>
                                                 <div className="flex justify-between items-baseline pt-1">
                                                     <div>
-                                                        <span className="text-sm font-bold text-neutral-900 block">Total TTC</span>
-                                                        <span className="text-[10px] text-green-700 font-medium">Remise -5% déduite</span>
+                                                        <span className="text-sm font-bold text-neutral-900 block">Total final TTC</span>
+                                                        <span className="text-[10px] text-[#927116] font-medium">Remise -5% déduite automatiquement</span>
                                                     </div>
-                                                    <span className="text-3xl font-serif font-bold text-[#D4AF37]">
+                                                    <span className="text-3xl font-serif font-bold text-black">
                                                         {pricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                     </span>
                                                 </div>
-                                                <p className="text-[11px] text-neutral-400 italic pt-1">
-                                                    Choix d&apos;acompte (30%) ou totalité (100%) à la validation.
+                                                <p className="text-[11px] text-neutral-500 italic pt-0.5">
+                                                    Option acompte 30% ou totalité 100% au choix à la validation.
                                                 </p>
                                             </div>
                                         ) : (
                                             <div className="flex justify-between items-baseline">
                                                 <div>
-                                                    <span className="text-sm font-bold text-neutral-900 block">Total TTC</span>
+                                                    <span className="text-sm font-bold text-neutral-900 block">Total final TTC</span>
                                                     <span className="text-[11px] text-neutral-400">TVA incluse</span>
                                                 </div>
-                                                <span className="text-3xl font-serif font-bold text-[#D4AF37]">
+                                                <span className="text-3xl font-serif font-bold text-black">
                                                     {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                 </span>
                                             </div>
