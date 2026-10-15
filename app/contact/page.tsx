@@ -1,12 +1,19 @@
 "use client";
 
-import { useState, useLayoutEffect, Suspense, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useLayoutEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Leaf, Check, ShoppingCart, ChevronDown, ChevronRight } from "lucide-react";
+import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle, Phone, ChevronDown, ChevronRight } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
-import { MENU_DATA } from "../data/plats-prepares";
+import {
+    FESTIVE_CALENDAR_DAYS,
+    getFestivePickupOptions,
+    isFestiveDateJ4Locked,
+    isDepositAllowed,
+    calculateFestiveOrderPricing,
+    FestiveValidationMode
+} from "../data/menus-fetes";
 import { useCart } from "../hooks/useCart";
 
 export default function Contact() {
@@ -217,7 +224,9 @@ const feculentsBBQ = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenail
 
 const BUFFET_FROID_PRICES: Record<string, { small: number; medium: number }> = {
     buffet_campagnard: { small: 17, medium: 14 },
-    buffet_ardenais: { small: 17, medium: 15 },
+    buffet_ardenais: { small: 17, medium: 16 },
+    buffet_ardennais: { small: 17, medium: 16 },
+    ardennais: { small: 17, medium: 16 },
     buffet_reception: { small: 20, medium: 18 },
     buffet_gala: { small: 24, medium: 22 }
 };
@@ -595,6 +604,8 @@ function ContactForm() {
         Location_Verrerie_Vin: "0",
         Location_Verrerie_Soft: "0",
         Location_Verrerie_Flute: "0",
+        Option_Brasserie_Check: "Non",
+        Option_Brasserie_Details: "",
         plat_1: "",
         plat_2: "",
         plat_3: "",
@@ -647,7 +658,15 @@ function ContactForm() {
         Buffet_Chaud_Entree_1: "",
         Buffet_Chaud_Entree_2: "",
         Buffet_Chaud_Plat: "",
-        Buffet_Chaud_Dessert: ""
+        Buffet_Chaud_Dessert: "",
+        Date_Fete: "",
+        Creneau_Retrait: "",
+        Date_Fete_Noel: "",
+        Creneau_Retrait_Noel: "",
+        Date_Fete_NouvelAn: "",
+        Creneau_Retrait_NouvelAn: "",
+        Menu_Enfant_Qty_Noel: -1,
+        Menu_Enfant_Qty_NouvelAn: 0
     });
 
     const handleFormStart = () => {
@@ -702,7 +721,76 @@ function ContactForm() {
     const isVerrinesMode = menuParam === 'verrines';
     const isCollectiviteMode = menuParam === 'collectivite' || menuParam === 'collectivite_chaud' || menuParam === 'salad_bar' || menuParam === 'collectivite_saladbar' || menuParam === 'collectivite_salad_bar' || searchParams.get('formule') === 'collectivite' || searchParams.get('formule') === 'salad_bar';
     const isBuffetChaudMode = searchParams.get('formule') === 'buffet-chaud';
-    const isPlatPrepare = typeParam === 'plat_prepare';
+    const isMenusFetes = typeParam === 'menus_fetes' || typeParam === 'menu_fetes' || (isLoaded && cartItems.some(i => i.itemType === 'menu_fete' || i.semaineId?.startsWith('menu') || i.semaineId?.startsWith('fetes') || i.semaineId === 'menus-fetes'));
+    const isPlatPrepare = typeParam === 'plat_prepare' || isMenusFetes;
+
+    // Mode de validation spécifique aux Menus de Fêtes (Acompte 30% vs Totalité 100%)
+    // Jusqu'au 10 décembre inclus : Acompte de 30% disponible et recommandé
+    // À partir du 11 décembre : Totalité 100% uniquement
+    const depositAvailable = isDepositAllowed();
+    const [validationMode, setValidationMode] = useState<FestiveValidationMode>(depositAvailable ? 'acompte_30' : 'totalite_100');
+
+    // Synthèse financière dynamique (Early Bird -5% et décomposition acompte/totalité)
+    const festivePricing = useMemo(() => {
+        return calculateFestiveOrderPricing(cartItems, validationMode);
+    }, [cartItems, validationMode]);
+
+    // Forcer le mode 100% si l'acompte n'est plus autorisé (après le 10 décembre)
+    useEffect(() => {
+        if (!depositAvailable && validationMode !== 'totalite_100') {
+            setValidationMode('totalite_100');
+        }
+    }, [depositAvailable, validationMode]);
+
+    // Vérification dynamique du verrou J-4 pour la date choisie
+    useEffect(() => {
+        if (isMenusFetes && formData.Date_Fete && isFestiveDateJ4Locked(formData.Date_Fete)) {
+            setFormData(prev => ({
+                ...prev,
+                Date_Fete: "",
+                Date: "",
+                Creneau_Retrait: ""
+            }));
+        }
+    }, [isMenusFetes, formData.Date_Fete]);
+
+    // Onglet actif du calendrier interactif festif (Décembre 2026 vs Janvier 2027)
+    const [calendarMonth, setCalendarMonth] = useState<'decembre' | 'janvier'>('decembre');
+
+    useEffect(() => {
+        if (formData.Date_Fete?.startsWith("2027-01")) {
+            setCalendarMonth('janvier');
+        } else if (formData.Date_Fete?.startsWith("2026-12")) {
+            setCalendarMonth('decembre');
+        }
+    }, [formData.Date_Fete]);
+
+    const handleSelectFestiveDate = (dateVal: string) => {
+        const dayObj = FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === dateVal);
+        if (!dayObj) return;
+        if (isFestiveDateJ4Locked(dateVal)) return;
+
+        if (dateVal.startsWith("2027-01")) {
+            setCalendarMonth('janvier');
+        } else if (dateVal.startsWith("2026-12")) {
+            setCalendarMonth('decembre');
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            Date_Fete: dateVal,
+            Date: dayObj.dayFormatted,
+            Creneau_Retrait: prev.Creneau_Retrait || "veille"
+        }));
+
+        if (errors.Date_Fete) {
+            setErrors(prev => {
+                const newErr = { ...prev };
+                delete newErr.Date_Fete;
+                return newErr;
+            });
+        }
+    };
 
     const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || isBuffetChaudMode;
     const showMenuFirst = isCustomMode;
@@ -730,9 +818,13 @@ function ContactForm() {
     // --- HOOKS DEPENDING ON DECLARED MODE VARIABLES ---
     useLayoutEffect(() => {
         if (isPlatPrepare && isLoaded && cartItems.length === 0 && status !== "success") {
-            router.push('/plats-prepares');
+            if (isMenusFetes) {
+                router.push('/menus-fetes');
+            } else {
+                router.push('/plats-prepares');
+            }
         }
-    }, [isPlatPrepare, isLoaded, cartItems.length, router, status]);
+    }, [isPlatPrepare, isMenusFetes, isLoaded, cartItems.length, router, status]);
 
     // EFFECT: Handle URL params & Default Selection
     useLayoutEffect(() => {
@@ -786,8 +878,8 @@ function ContactForm() {
                     newData.Type_Evenement = 'Repas de collectivité';
                     newData.Collectivite_Volet = 'salad_bar';
                 }
-            } else if (typeParam === 'plat_prepare') {
-                newData.Type_Evenement = 'Plat Préparé';
+            } else if (typeParam === 'plat_prepare' || isMenusFetes) {
+                newData.Type_Evenement = isMenusFetes ? 'Menus de Fêtes' : 'Plat Préparé';
             }
 
             const formuleParam = searchParams.get('formule');
@@ -1185,7 +1277,8 @@ function ContactForm() {
                 ...(name === "Sauces_Chaudes_Check" && !checked ? { Sauces_Chaudes_Choix: [] } : {}),
                 ...(name === "Accompagnement_Chaud_Supplement_Check" && !checked ? { Accompagnement_Chaud_Supplement: "" } : {}),
                 ...(name === "Dessert_Check" && !checked ? { Dessert_Choix: "", Dessert_Type: "traditionnel", Mignardises_Quantite: "3", Mignardises_Varietes: [] } : {}),
-                ...(name === "Location_Verrerie_Check" && !checked ? { Location_Verrerie_Vin: "0", Location_Verrerie_Soft: "0", Location_Verrerie_Flute: "0" } : {})
+                ...(name === "Location_Verrerie_Check" && !checked ? { Location_Verrerie_Vin: "0", Location_Verrerie_Soft: "0", Location_Verrerie_Flute: "0" } : {}),
+                ...(name === "Option_Brasserie_Check" && !checked ? { Option_Brasserie_Details: "" } : {})
             }));
             return;
         }
@@ -1284,7 +1377,16 @@ function ContactForm() {
         if (!isPlatPrepare && !formData.Nombre_Convives.trim()) newErrors.Nombre_Convives = "Requis";
 
         // Dynamic Validation
-        if (isPlatPrepare) {
+        if (isMenusFetes) {
+            if (!formData.Date_Fete && !formData.Date) {
+                newErrors.Date_Fete = "Veuillez sélectionner la date de votre repas de fête";
+            } else if (isFestiveDateJ4Locked(formData.Date_Fete)) {
+                newErrors.Date_Fete = "Cette date n'est plus disponible (commande au plus tard 4 jours avant le retrait J-4)";
+            }
+            if (!formData.Creneau_Retrait) {
+                newErrors.Creneau_Retrait = "Veuillez choisir votre créneau de retrait à l'atelier";
+            }
+        } else if (isPlatPrepare) {
             if (!formData.Plat_Prepare_Quantite || parseInt(formData.Plat_Prepare_Quantite) < 1) newErrors.Plat_Prepare_Quantite = "Requis";
         } else if (isPlatUnique) {
             if (!formData.Plat_Associatif) newErrors.Plat_Associatif = "Requis";
@@ -1636,6 +1738,10 @@ function ContactForm() {
             // DIVERS
             "🍽️ Location de vaisselle": formData.Location_Vaisselle_Check === "Oui" ? "Oui (+1,50€/pers)" : "Non",
             "🍷 Location de verrerie": getVerrerieDetail(),
+            "🍺 Option Bar & Gestion des Boissons (Formule Brasserie)": formData.Option_Brasserie_Check === "Oui" ? "Oui (Fourniture frigo vitré, stock reprise des invendus & service à 18€/h HTVA)" : "Non",
+            ...(formData.Option_Brasserie_Check === "Oui" && formData.Option_Brasserie_Details ? { "📝 Précisions Boissons & Bar": formData.Option_Brasserie_Details } : {}),
+            brasserieOption: formData.Option_Brasserie_Check === "Oui",
+            brasserieDetails: formData.Option_Brasserie_Details || "",
             "💬 Message / Allergies": formData.details_projet || "Aucun message",
             "🔄 Souhaite être recontacté": formData.Souhaite_etre_recontacte === "Oui" ? "Oui" : "Non"
         };
@@ -1643,6 +1749,20 @@ function ContactForm() {
         // 4. Envoi à Web3Forms ou API Interne
         try {
             if (isPlatPrepare) {
+                let dateEvenementFormatted = "";
+                let creneauRetraitFormatted = "";
+
+                if (isMenusFetes) {
+                    const dayObj = FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === formData.Date_Fete);
+                    dateEvenementFormatted = dayObj ? dayObj.dayFormatted : (formData.Date_Fete || formData.Date);
+                    const slots = getFestivePickupOptions(formData.Date_Fete);
+                    const chosenSlot = slots.find(s => s.id === formData.Creneau_Retrait);
+                    creneauRetraitFormatted = chosenSlot ? chosenSlot.fullLabel : (formData.Creneau_Retrait || "À notre atelier (Rue Potay 3)");
+                }
+
+                const targetTotalPrice = isMenusFetes ? festivePricing.totalNet : cartTotal;
+                const targetAmountToPay = isMenusFetes ? festivePricing.amountToPayNow : cartTotal;
+
                 const apiPayload = {
                     Nom: formData.Nom,
                     Prenom: formData.Prenom,
@@ -1650,11 +1770,22 @@ function ContactForm() {
                     Tel: formData.Tel,
                     Societe: formData.Societe,
                     Nom_Societe: formData.Nom_Societe,
-                    Date: new Date().toLocaleDateString('fr-BE'),
+                    Date: isMenusFetes ? (dateEvenementFormatted || new Date().toLocaleDateString('fr-BE')) : new Date().toLocaleDateString('fr-BE'),
+                    dateEvenement: isMenusFetes ? dateEvenementFormatted : undefined,
+                    creneauRetrait: isMenusFetes ? creneauRetraitFormatted : undefined,
                     details_projet: formData.details_projet,
-                    totalPrice: cartTotal,
+                    brasserieOption: formData.Option_Brasserie_Check === "Oui",
+                    brasserieDetails: formData.Option_Brasserie_Details || undefined,
+                    totalPrice: targetTotalPrice,
+                    amountToPayNow: targetAmountToPay,
+                    validationMode: isMenusFetes ? validationMode : 'totalite_100',
+                    depositAmount: isMenusFetes ? festivePricing.depositAmount : 0,
+                    remainingBalance: isMenusFetes ? festivePricing.remainingBalance : 0,
+                    discountAmount: isMenusFetes ? festivePricing.discountAmount : 0,
+                    isEarlyBirdDiscount: isMenusFetes ? festivePricing.isEarlyBirdEligible : false,
                     cartItems: cartItems,
-                    captchaToken: captchaToken
+                    captchaToken: captchaToken,
+                    typeCommande: isMenusFetes ? 'menus_fetes' : 'plat_prepare'
                 };
 
                 const response = await fetch("/api/commande", {
@@ -1666,10 +1797,12 @@ function ContactForm() {
                 const result = await response.json();
                 if (response.ok && result.success) {
                     setStatus("success");
-                    const joursUniques = Array.from(new Set(cartItems.map(item => item.jour))).join(',');
+                    const joursUniques = Array.from(new Set(cartItems.map(item => item.badge || item.jour))).join(',');
+                    const redirectJours = isMenusFetes ? (dateEvenementFormatted || '24 Décembre') : joursUniques;
+                    const redirectCreneau = creneauRetraitFormatted ? `&creneau=${encodeURIComponent(creneauRetraitFormatted)}` : '';
                     clearCart();
                     setTimeout(() => {
-                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${cartTotal}&jours=${encodeURIComponent(joursUniques)}`;
+                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${targetTotalPrice}&toPay=${targetAmountToPay}&mode=${isMenusFetes ? validationMode : 'totalite_100'}&solde=${isMenusFetes ? festivePricing.remainingBalance : 0}&remise=${isMenusFetes ? festivePricing.discountAmount : 0}&jours=${encodeURIComponent(redirectJours)}${redirectCreneau}`;
                     }, 3000);
                 } else {
                     console.error("Erreur API Commande:", result);
@@ -2161,6 +2294,51 @@ function ContactForm() {
                                         />
                                     </div>
                                 </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* OPTION BAR & BOISSONS (FORMULE BRASSERIE) */}
+                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 max-w-lg mx-auto md:max-w-none">
+                    <div className="flex items-start sm:items-center gap-3 mb-2">
+                        <input
+                            type="checkbox"
+                            name="Option_Brasserie_Check"
+                            id="Option_Brasserie_Check"
+                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5 sm:mt-0 shrink-0"
+                            checked={formData.Option_Brasserie_Check === "Oui"}
+                            onChange={handleChange}
+                        />
+                        <label htmlFor="Option_Brasserie_Check" className="text-neutral-700 font-bold cursor-pointer select-none text-left leading-tight">
+                            Option Bar & Gestion des Boissons (Formule Brasserie)
+                        </label>
+                    </div>
+                    <p className="text-sm text-neutral-500 ml-8 italic">
+                        Fourniture du frigo, stock avec reprise des invendus et personnel de service à 18 €/h HTVA.
+                    </p>
+
+                    <AnimatePresence>
+                        {formData.Option_Brasserie_Check === "Oui" && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="overflow-hidden mt-4 pl-0 sm:pl-8"
+                            >
+                                <label htmlFor="Option_Brasserie_Details" className="block text-xs font-bold text-neutral-600 uppercase tracking-wider mb-2">
+                                    Précisions éventuelles sur vos boissons (optionnel)
+                                </label>
+                                <textarea
+                                    id="Option_Brasserie_Details"
+                                    name="Option_Brasserie_Details"
+                                    rows={3}
+                                    value={formData.Option_Brasserie_Details}
+                                    onChange={handleChange}
+                                    placeholder="Précisions éventuelles sur vos boissons (ex : bières régionales, softs, vins, durée estimée du service...)"
+                                    className="w-full px-4 py-3 rounded-xl border border-neutral-200 bg-white text-neutral-800 text-sm focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] outline-none transition-all placeholder:text-neutral-400 resize-y"
+                                />
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -3708,7 +3886,7 @@ function ContactForm() {
 
 
     return (
-        <main className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
+        <main className="min-h-screen pt-40 md:pt-48 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
             {/* Decorative Elements */}
             <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#D4AF37]/5 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3 z-0 pointer-events-none" />
@@ -3716,8 +3894,40 @@ function ContactForm() {
             <div className="w-full max-w-5xl mx-auto px-2 sm:px-4 md:px-6 relative z-10">
                 <div className="bg-white shadow-2xl p-4 sm:p-8 md:p-14 rounded-2xl md:rounded-[2rem] border-t-4 border-[#D4AF37]">
                     <header className="text-center mb-8 md:mb-10">
-                        <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Contactez-nous</h1>
-                        <p className="text-gray-500 font-light text-lg">Parlons de votre prochain événement.</p>
+                        <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">
+                            {isMenusFetes ? "Menus de Fêtes 2026" : (isPlatPrepare ? "Finaliser votre Commande" : "Contactez-nous")}
+                        </h1>
+                        <p className="text-gray-500 font-light text-lg">
+                            {isMenusFetes ? "Réveillon de Noël & Nouvel An — Réservation de votre repas" : (isPlatPrepare ? "Renseignez vos coordonnées pour valider votre commande." : "Parlons de votre prochain événement.")}
+                        </p>
+
+                        {/* Coordonnées directes */}
+                        <div className="mt-6 pt-5 border-t border-neutral-100 flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm text-neutral-600">
+                            <a
+                                href="tel:+32468385082"
+                                className="inline-flex items-center gap-2 font-medium hover:text-[#D4AF37] transition-colors group"
+                            >
+                                <span className="w-8 h-8 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    <Phone size={14} />
+                                </span>
+                                <span className="font-semibold text-neutral-800 group-hover:text-[#D4AF37]">+32 468 38 50 82</span>
+                            </a>
+                            <a
+                                href="mailto:contact@traiteur-compere.be"
+                                className="inline-flex items-center gap-2 font-medium hover:text-[#D4AF37] transition-colors group"
+                            >
+                                <span className="w-8 h-8 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                                    ✉️
+                                </span>
+                                <span>contact@traiteur-compere.be</span>
+                            </a>
+                            <span className="inline-flex items-center gap-2 font-medium text-neutral-500">
+                                <span className="w-8 h-8 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0">
+                                    📍
+                                </span>
+                                <span>Rue Potay 3, 4470 Saint-Georges</span>
+                            </span>
+                        </div>
                     </header>
 
                     {status === "success" ? (
@@ -3744,7 +3954,345 @@ function ContactForm() {
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit} className="space-y-10">
-                            {showMenuFirst ? (
+                            {/* 1. Sélection de Date, Créneau & Règle J-4 */}
+                            {isMenusFetes && (
+                                <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-[#D4AF37]/40 shadow-sm mb-10 space-y-8">
+                                    <div className="flex items-start gap-3 border-b border-neutral-100 pb-4">
+                                        <div className="w-10 h-10 rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] flex items-center justify-center shrink-0 mt-0.5">
+                                            <Calendar size={20} />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-serif font-bold text-xl md:text-2xl text-black">
+                                                Date de votre repas de fête <span className="text-red-500">*</span>
+                                            </h3>
+                                            <p className="text-xs md:text-sm text-neutral-500 font-light mt-0.5">
+                                                Menus disponibles du 20 décembre au 5 janvier inclus. Commandes acceptées au plus tard 4 jours avant la date de retrait (J-4).
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {errors.Date_Fete && (
+                                        <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
+                                            <span>⚠️</span> {errors.Date_Fete}
+                                        </div>
+                                    )}
+
+                                    {/* 1.1 Les 4 boutons d'accès rapide */}
+                                    <div className="space-y-2">
+                                        <label className="text-xs uppercase tracking-wider font-bold text-neutral-700 block">
+                                            Dates principales des réveillons (accès rapide) :
+                                        </label>
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                            {FESTIVE_CALENDAR_DAYS.filter(d => d.isQuickButton).map((day) => {
+                                                const isLocked = isFestiveDateJ4Locked(day.dateValue);
+                                                const isSelected = formData.Date_Fete === day.dateValue;
+
+                                                return (
+                                                    <button
+                                                        key={day.dateValue}
+                                                        type="button"
+                                                        disabled={isLocked}
+                                                        onClick={() => handleSelectFestiveDate(day.dateValue)}
+                                                        className={`p-4 rounded-2xl border text-center transition-all relative flex flex-col items-center justify-center gap-1 ${
+                                                            isLocked
+                                                                ? "border-neutral-200 bg-neutral-100 text-neutral-400 opacity-50 cursor-not-allowed"
+                                                                : isSelected
+                                                                ? "border-[#D4AF37] bg-white ring-2 ring-[#D4AF37]/50 shadow-md text-black"
+                                                                : "border-neutral-200 bg-neutral-50 hover:bg-white hover:border-[#D4AF37]/50 text-neutral-800"
+                                                        }`}
+                                                    >
+                                                        <span className="text-base font-bold font-serif">
+                                                            {day.quickButtonLabel}
+                                                        </span>
+                                                        <span className="text-[11px] text-[#927116] font-semibold">
+                                                            {day.dayFormatted.split(' ')[0]}
+                                                        </span>
+                                                        {isSelected && (
+                                                            <span className="absolute top-2.5 right-2.5 w-5 h-5 rounded-full bg-[#D4AF37] text-black flex items-center justify-center text-xs font-bold">
+                                                                ✓
+                                                            </span>
+                                                        )}
+                                                        {isLocked && (
+                                                            <span className="text-[9px] text-red-500 font-medium">Délai J-4 expiré</span>
+                                                        )}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* 1.2 Calendrier interactif visuel (Décembre 2026 / Janvier 2027) */}
+                                    <div className="space-y-3 pt-3">
+                                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                                            <label className="text-xs uppercase tracking-wider font-bold text-neutral-700 block">
+                                                Calendrier interactif des réveillons (20 déc. au 5 janv.) :
+                                            </label>
+                                            <span className="text-[11px] text-[#927116] font-serif italic">
+                                                Cliquez sur le jour souhaité
+                                            </span>
+                                        </div>
+
+                                        {/* Onglets des mois */}
+                                        <div className="flex items-center gap-2 bg-neutral-100 p-1.5 rounded-2xl border border-neutral-200">
+                                            <button
+                                                type="button"
+                                                onClick={() => setCalendarMonth('decembre')}
+                                                className={`flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+                                                    calendarMonth === 'decembre'
+                                                        ? 'bg-black text-[#D4AF37] shadow-sm'
+                                                        : 'text-neutral-600 hover:text-black hover:bg-white/60'
+                                                }`}
+                                            >
+                                                <span>🎄 Décembre 2026</span>
+                                                <span className="text-[10px] font-normal opacity-75 hidden sm:inline">(20 au 31 déc.)</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setCalendarMonth('janvier')}
+                                                className={`flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+                                                    calendarMonth === 'janvier'
+                                                        ? 'bg-black text-[#D4AF37] shadow-sm'
+                                                        : 'text-neutral-600 hover:text-black hover:bg-white/60'
+                                                }`}
+                                            >
+                                                <span>🍾 Janvier 2027</span>
+                                                <span className="text-[10px] font-normal opacity-75 hidden sm:inline">(1er au 5 janv.)</span>
+                                            </button>
+                                        </div>
+
+                                        {/* Grille du calendrier */}
+                                        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
+                                            {/* En-tête des jours de la semaine */}
+                                            <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-neutral-400 uppercase tracking-wider pb-2 border-b border-neutral-100">
+                                                <div>Lun</div>
+                                                <div>Mar</div>
+                                                <div>Mer</div>
+                                                <div>Jeu</div>
+                                                <div>Ven</div>
+                                                <div>Sam</div>
+                                                <div>Dim</div>
+                                            </div>
+
+                                            {/* Cases des jours */}
+                                            <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                                                {calendarMonth === 'decembre' ? (
+                                                    <>
+                                                        {/* Décembre 2026 débute un mardi -> 1 case vide le lundi */}
+                                                        <div className="h-10 sm:h-12"></div>
+
+                                                        {Array.from({ length: 31 }, (_, i) => i + 1).map((dayNum) => {
+                                                            const dateStr = `2026-12-${String(dayNum).padStart(2, '0')}`;
+                                                            const isFestive = dayNum >= 20 && dayNum <= 31;
+                                                            const isLocked = isFestive && isFestiveDateJ4Locked(dateStr);
+                                                            const isSelected = formData.Date_Fete === dateStr;
+                                                            const isQuick = dayNum === 24 || dayNum === 25 || dayNum === 31;
+
+                                                            if (!isFestive) {
+                                                                return (
+                                                                    <div
+                                                                        key={dayNum}
+                                                                        className="h-10 sm:h-12 flex flex-col items-center justify-center rounded-xl text-neutral-300 text-xs font-light select-none bg-neutral-50/50"
+                                                                        title="Non disponible (menus de fêtes du 20 déc. au 5 janv.)"
+                                                                    >
+                                                                        <span>{dayNum}</span>
+                                                                    </div>
+                                                                );
+                                                            }
+
+                                                            return (
+                                                                <button
+                                                                    key={dayNum}
+                                                                    type="button"
+                                                                    disabled={isLocked}
+                                                                    onClick={() => handleSelectFestiveDate(dateStr)}
+                                                                    className={`h-10 sm:h-12 flex flex-col items-center justify-center rounded-xl text-xs transition-all relative group ${
+                                                                        isLocked
+                                                                            ? 'bg-neutral-100 text-neutral-400 opacity-40 cursor-not-allowed border border-neutral-200'
+                                                                            : isSelected
+                                                                            ? 'bg-black text-[#D4AF37] border-2 border-[#D4AF37] shadow-md ring-2 ring-[#D4AF37]/30 font-bold scale-105 z-10'
+                                                                            : 'bg-[#FAF9F6] hover:bg-white text-neutral-900 font-semibold border border-neutral-200 hover:border-[#D4AF37] hover:shadow-xs'
+                                                                    }`}
+                                                                >
+                                                                    <span className="text-xs sm:text-sm">{dayNum}</span>
+                                                                    {isQuick && !isSelected && !isLocked && (
+                                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] absolute bottom-1"></span>
+                                                                    )}
+                                                                    {isSelected && (
+                                                                        <span className="text-[9px] font-bold text-[#D4AF37] leading-none">✓</span>
+                                                                    )}
+                                                                    {isLocked && (
+                                                                        <span className="text-[8px] text-red-500 font-semibold leading-none">J-4</span>
+                                                                    )}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {/* Janvier 2027 débute un vendredi -> 4 cases vides (Lun, Mar, Mer, Jeu) */}
+                                                        <div className="h-10 sm:h-12"></div>
+                                                        <div className="h-10 sm:h-12"></div>
+                                                        <div className="h-10 sm:h-12"></div>
+                                                        <div className="h-10 sm:h-12"></div>
+
+                                                        {Array.from({ length: 31 }, (_, i) => i + 1).map((dayNum) => {
+                                                            const dateStr = `2027-01-${String(dayNum).padStart(2, '0')}`;
+                                                            const isFestive = dayNum >= 1 && dayNum <= 5;
+                                                            const isLocked = isFestive && isFestiveDateJ4Locked(dateStr);
+                                                            const isSelected = formData.Date_Fete === dateStr;
+                                                            const isQuick = dayNum === 1;
+
+                                                            if (!isFestive) {
+                                                                return (
+                                                                    <div
+                                                                        key={dayNum}
+                                                                        className="h-10 sm:h-12 flex flex-col items-center justify-center rounded-xl text-neutral-300 text-xs font-light select-none bg-neutral-50/50"
+                                                                        title="Non disponible (menus de fêtes du 20 déc. au 5 janv.)"
+                                                                    >
+                                                                        <span>{dayNum}</span>
+                                                                    </div>
+                                                                );
+                                                            }
+
+                                                            return (
+                                                                <button
+                                                                    key={dayNum}
+                                                                    type="button"
+                                                                    disabled={isLocked}
+                                                                    onClick={() => handleSelectFestiveDate(dateStr)}
+                                                                    className={`h-10 sm:h-12 flex flex-col items-center justify-center rounded-xl text-xs transition-all relative group ${
+                                                                        isLocked
+                                                                            ? 'bg-neutral-100 text-neutral-400 opacity-40 cursor-not-allowed border border-neutral-200'
+                                                                            : isSelected
+                                                                            ? 'bg-black text-[#D4AF37] border-2 border-[#D4AF37] shadow-md ring-2 ring-[#D4AF37]/30 font-bold scale-105 z-10'
+                                                                            : 'bg-[#FAF9F6] hover:bg-white text-neutral-900 font-semibold border border-neutral-200 hover:border-[#D4AF37] hover:shadow-xs'
+                                                                    }`}
+                                                                >
+                                                                    <span className="text-xs sm:text-sm">{dayNum}</span>
+                                                                    {isQuick && !isSelected && !isLocked && (
+                                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] absolute bottom-1"></span>
+                                                                    )}
+                                                                    {isSelected && (
+                                                                        <span className="text-[9px] font-bold text-[#D4AF37] leading-none">✓</span>
+                                                                    )}
+                                                                    {isLocked && (
+                                                                        <span className="text-[8px] text-red-500 font-semibold leading-none">J-4</span>
+                                                                    )}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </>
+                                                )}
+                                            </div>
+
+                                            {/* Légende discrète et confirmation de date */}
+                                            <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-500">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="flex items-center gap-1">
+                                                        <span className="w-2.5 h-2.5 rounded bg-[#FAF9F6] border border-neutral-300 inline-block"></span>
+                                                        <span>Dates actives</span>
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <span className="w-2 h-2 rounded-full bg-[#D4AF37] inline-block"></span>
+                                                        <span>Réveillons</span>
+                                                    </span>
+                                                    <span className="flex items-center gap-1.5">
+                                                        <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shrink-0"></span>
+                                                        <span>Verrouillé (&lt; 4j)</span>
+                                                    </span>
+                                                </div>
+
+                                                {formData.Date_Fete && (
+                                                    <div className="font-bold text-black flex items-center gap-1 bg-[#D4AF37]/15 text-[#927116] px-2.5 py-1 rounded-full">
+                                                        <span>✨ Date sélectionnée :</span>
+                                                        <span>{FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === formData.Date_Fete)?.dayFormatted || formData.Date_Fete}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* 2. Choix du créneau de retrait à l'atelier (Rue Potay 3) */}
+                                    {formData.Date_Fete && (
+                                        <div className="space-y-4 pt-4 border-t border-neutral-100">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-8 h-8 rounded-xl bg-[#D4AF37]/15 text-[#927116] flex items-center justify-center shrink-0 mt-0.5">
+                                                    <Clock size={17} />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-serif font-bold text-lg text-black">
+                                                        Créneau de retrait à l&apos;atelier (Rue Potay 3, Saint-Georges-sur-Meuse) <span className="text-red-500">*</span>
+                                                    </h4>
+                                                    <p className="text-xs text-neutral-500 mt-0.5">
+                                                        Choisissez votre moment de retrait. Notice détaillée de réchauffage et dressage fournie avec chaque commande.
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {errors.Creneau_Retrait && (
+                                                <div className="bg-red-50 text-red-600 text-xs md:text-sm p-3.5 rounded-xl border border-red-200 flex items-center gap-2">
+                                                    <span>⚠️</span> {errors.Creneau_Retrait}
+                                                </div>
+                                            )}
+
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                                                {getFestivePickupOptions(formData.Date_Fete).map((slot) => {
+                                                    const isSelected = formData.Creneau_Retrait === slot.id || formData.Creneau_Retrait === slot.fullLabel;
+
+                                                    return (
+                                                        <label
+                                                            key={slot.id}
+                                                            className={`p-4 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between gap-2.5 ${
+                                                                isSelected
+                                                                    ? "bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/40 shadow-sm"
+                                                                    : "bg-[#FAF9F6] border-neutral-200 hover:bg-white hover:border-[#D4AF37]/40"
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="flex items-center gap-2.5">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="creneau_retrait_option"
+                                                                        value={slot.id}
+                                                                        checked={isSelected}
+                                                                        onChange={() => {
+                                                                            setFormData(prev => ({
+                                                                                ...prev,
+                                                                                Creneau_Retrait: slot.id
+                                                                            }));
+                                                                            if (errors.Creneau_Retrait) {
+                                                                                setErrors(prev => {
+                                                                                    const newErr = { ...prev };
+                                                                                    delete newErr.Creneau_Retrait;
+                                                                                    return newErr;
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                        className="text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
+                                                                    />
+                                                                    <span className="font-bold text-sm text-neutral-900 font-serif">
+                                                                        {slot.label}
+                                                                    </span>
+                                                                </div>
+                                                                <span className="text-[11px] font-bold text-[#927116] bg-[#D4AF37]/15 px-2.5 py-0.5 rounded-full">
+                                                                    {slot.hours}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-xs text-neutral-600 pl-6 leading-relaxed">
+                                                                Retrait le <strong>{slot.targetDateFormatted}</strong> entre <strong>{slot.hours}</strong> à l&apos;atelier Traiteur Compère (Rue Potay 3).
+                                                            </p>
+                                                        </label>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* 2. Autres Formules personnalisées (BBQ, Buffets, etc.) */}
+                            {showMenuFirst && !isPlatPrepare ? (
                                 <>
                                     {/* SECTION 1 : CONFIGURATION DE VOTRE FORMULE & OPTIONS */}
                                     <div className="space-y-8">
@@ -3773,10 +4321,10 @@ function ContactForm() {
                                     <div className="bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 shadow-sm">
                                         <div className="border-b border-neutral-200 pb-4">
                                             <h3 className="text-2xl font-serif text-neutral-900 font-bold">
-                                                Vos Coordonnées & Date de l&apos;Événement
+                                                {isPlatPrepare ? "Vos coordonnées" : "Vos Coordonnées & Date de l'Événement"}
                                             </h3>
                                             <p className="text-sm text-neutral-500 mt-1">
-                                                Renseignez vos coordonnées pour recevoir votre devis détaillé sous 24h.
+                                                {isPlatPrepare ? "Renseignez vos coordonnées pour finaliser votre commande." : "Renseignez vos coordonnées pour recevoir votre devis détaillé sous 24h."}
                                             </p>
                                         </div>
                                         {renderContactFields()}
@@ -3786,10 +4334,10 @@ function ContactForm() {
                                 <div className="bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 shadow-sm">
                                     <div className="border-b border-neutral-200 pb-4">
                                         <h3 className="text-2xl font-serif text-neutral-900 font-bold">
-                                            Vos Coordonnées & Date de l&apos;Événement
+                                            {isPlatPrepare ? "Vos coordonnées" : "Vos Coordonnées & Date de l'Événement"}
                                         </h3>
                                         <p className="text-sm text-neutral-500 mt-1">
-                                            Renseignez vos coordonnées pour nous transmettre votre demande.
+                                            {isPlatPrepare ? "Renseignez vos coordonnées pour finaliser votre commande." : "Renseignez vos coordonnées pour nous transmettre votre demande."}
                                         </p>
                                     </div>
                                     {renderContactFields()}
@@ -3845,32 +4393,220 @@ function ContactForm() {
                                         <table className="w-full text-left text-sm text-neutral-600">
                                             <thead className="bg-neutral-50 text-xs uppercase text-neutral-400">
                                                 <tr>
-                                                    <th className="px-4 py-3 rounded-tl-lg">Plat</th>
-                                                    <th className="px-4 py-3">Jour</th>
-                                                    <th className="px-4 py-3 text-center">Qte</th>
-                                                    <th className="px-4 py-3">Soupes</th>
+                                                    <th className="px-4 py-3 rounded-tl-lg">Article / Menu</th>
+                                                    <th className="px-4 py-3">Date / Service</th>
+                                                    <th className="px-4 py-3 text-center">Qté</th>
+                                                    <th className="px-4 py-3">Détails</th>
                                                     <th className="px-4 py-3 text-right rounded-tr-lg">S/Total</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {cartItems.map((item, idx) => (
-                                                    <tr key={idx} className="border-b border-neutral-100 last:border-0">
-                                                        <td className="px-4 py-3 font-medium text-black max-w-[200px] truncate" title={item.nomPlat}>{item.nomPlat}</td>
-                                                        <td className="px-4 py-3 capitalize">{item.jour}</td>
-                                                        <td className="px-4 py-3 text-center">{item.quantitePlat}</td>
-                                                        <td className="px-4 py-3">
-                                                            {Object.entries(item.soupes).map(([s, q]) => q > 0 ? <div key={s} className="text-xs">{q}x {s}</div> : null)}
-                                                        </td>
-                                                        <td className="px-4 py-3 text-right font-bold whitespace-nowrap">{item.prixTotalLigne} €</td>
-                                                    </tr>
-                                                ))}
+                                                {cartItems.map((item, idx) => {
+                                                    const isFestive = item.itemType === 'menu_fete' || item.semaineId.startsWith('menu') || item.semaineId.startsWith('fetes');
+
+                                                    let displayDate = item.badge || item.jour;
+                                                    if (isFestive) {
+                                                        if (formData.Date_Fete) {
+                                                            const dayObj = FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === formData.Date_Fete);
+                                                            const slot = formData.Creneau_Retrait ? getFestivePickupOptions(formData.Date_Fete).find(s => s.id === formData.Creneau_Retrait) : null;
+                                                            displayDate = dayObj ? `${dayObj.shortLabel}${slot ? ` (${slot.badge})` : ''}` : formData.Date_Fete;
+                                                        } else {
+                                                            displayDate = "À sélectionner ci-dessous";
+                                                        }
+                                                    }
+
+                                                    return (
+                                                        <tr key={idx} className="border-b border-neutral-100 last:border-0">
+                                                            <td className="px-4 py-3 font-medium text-black max-w-[220px]" title={item.nomPlat}>
+                                                                {isFestive && <span className="text-[10px] bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-bold px-1.5 py-0.5 rounded mr-1.5 uppercase">Fêtes</span>}
+                                                                {item.nomPlat}
+                                                            </td>
+                                                            <td className="px-4 py-3 capitalize text-xs md:text-sm text-[#D4AF37] font-medium">{displayDate}</td>
+                                                            <td className="px-4 py-3 text-center font-bold text-black">{item.quantitePlat}</td>
+                                                            <td className="px-4 py-3 text-xs text-neutral-500">
+                                                                {isFestive ? (
+                                                                    item.coursesSummary && item.coursesSummary.length > 0 ? (
+                                                                        <div className="space-y-0.5 max-w-[200px]">
+                                                                            {item.coursesSummary.map((c, cIdx) => <div key={cIdx} className="truncate text-[11px]">• {c}</div>)}
+                                                                        </div>
+                                                                    ) : '-'
+                                                                ) : (
+                                                                    item.soupes && Object.entries(item.soupes).map(([s, q]) => q > 0 ? <div key={s} className="text-xs">{q}x {s}</div> : null)
+                                                                )}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-right font-bold whitespace-nowrap text-black">{item.prixTotalLigne.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>
-                                    <div className="bg-[#D4AF37]/10 p-4 rounded-xl border border-[#D4AF37]/30 text-center flex flex-col justify-center items-center gap-2">
-                                        <p className="text-neutral-800 font-bold text-lg">Total de votre commande : {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</p>
-                                        <p className="text-xs text-neutral-500 uppercase tracking-widest">Paiement par virement bancaire uniquement.</p>
-                                    </div>
+                                    {/* SECTION SPÉCIFIQUE MENUS DES FÊTES : CHOIX ACOMPTE 30% OU TOTALITÉ 100% */}
+                                    {isMenusFetes && (
+                                        <div className="bg-[#FAF9F6] p-5 sm:p-6 rounded-2xl border border-[#D4AF37]/50 mt-6 mb-6 shadow-sm space-y-4">
+                                            <div className="flex items-start gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-black text-[#D4AF37] flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                                                    ✓
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-serif font-bold text-lg text-black">
+                                                        Mode de règlement de votre commande
+                                                    </h4>
+                                                    <p className="text-xs text-neutral-600 font-serif italic mt-0.5">
+                                                        {depositAvailable
+                                                            ? "Choisissez l'acompte pour bloquer votre réservation tout en gardant vos convives ajustables, ou réglez la totalité."
+                                                            : "À partir du 11 décembre, seul le règlement intégral (100 %) est proposé pour finaliser votre commande."}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-3 pt-1">
+                                                {/* Option 1 : Acompte 30% (Disponible uniquement jusqu'au 10 décembre inclus) */}
+                                                {depositAvailable && (
+                                                    <label
+                                                        className={`block p-4 sm:p-5 rounded-xl border cursor-pointer transition-all ${
+                                                            validationMode === 'acompte_30'
+                                                                ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
+                                                                : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40'
+                                                        }`}
+                                                    >
+                                                        <div className="flex items-start gap-3">
+                                                            <input
+                                                                type="radio"
+                                                                name="mode_validation_fetes"
+                                                                value="acompte_30"
+                                                                checked={validationMode === 'acompte_30'}
+                                                                onChange={() => setValidationMode('acompte_30')}
+                                                                className="mt-1 text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
+                                                            />
+                                                            <div className="space-y-1.5 flex-1">
+                                                                <div className="flex items-baseline justify-between flex-wrap gap-2">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
+                                                                            Verser un acompte de 30 %
+                                                                        </span>
+                                                                        <span className="text-[10px] bg-[#D4AF37] text-black font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
+                                                                            Recommandé
+                                                                        </span>
+                                                                    </div>
+                                                                    <span className="font-serif font-bold text-sm sm:text-base text-[#927116] bg-[#D4AF37]/15 px-2.5 py-0.5 rounded-full">
+                                                                        {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                                    </span>
+                                                                </div>
+                                                                <p className="text-xs text-neutral-600 leading-relaxed">
+                                                                    Montant de l&apos;acompte calculé au centime près. Bloque la commande et la remise de -5 %. Convives et commande ajustables par email/téléphone jusqu&apos;à 7 jours avant le retrait. Solde obligatoire au plus tard 7 jours avant le retrait ({festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €).
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </label>
+                                                )}
+
+                                                {/* Option 2 : Totalité 100% */}
+                                                <label
+                                                    className={`block p-4 sm:p-5 rounded-xl border cursor-pointer transition-all ${
+                                                        validationMode === 'totalite_100'
+                                                            ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
+                                                            : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-start gap-3">
+                                                        <input
+                                                            type="radio"
+                                                            name="mode_validation_fetes"
+                                                            value="totalite_100"
+                                                            checked={validationMode === 'totalite_100'}
+                                                            onChange={() => setValidationMode('totalite_100')}
+                                                            className="mt-1 text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
+                                                        />
+                                                        <div className="space-y-1.5 flex-1">
+                                                            <div className="flex items-baseline justify-between flex-wrap gap-2">
+                                                                <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
+                                                                    Régler la totalité (100 %)
+                                                                </span>
+                                                                <span className="font-serif font-bold text-sm sm:text-base text-black bg-neutral-100 px-2.5 py-0.5 rounded-full">
+                                                                    {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-xs text-neutral-600 leading-relaxed">
+                                                                Montant intégral. Commande ferme et définitive (convives non modifiables).
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* RÉCAPITULATIF FINANCIER & PROMOTION EARLY BIRD */}
+                                    {isMenusFetes ? (
+                                        <div className="bg-[#FAF9F6] p-5 sm:p-6 rounded-2xl border border-[#D4AF37]/40 space-y-3">
+                                            <div className="flex justify-between items-center text-sm text-neutral-600">
+                                                <span>Sous-total brut :</span>
+                                                <span className="font-medium text-neutral-900">
+                                                    {festivePricing.festiveSubtotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                </span>
+                                            </div>
+
+                                            {festivePricing.isEarlyBirdEligible && festivePricing.discountAmount > 0 && (
+                                                <div className="flex justify-between items-center text-sm font-semibold bg-[#D4AF37]/15 text-[#927116] px-3 py-2 rounded-xl border border-[#D4AF37]/30">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                                            -5%*
+                                                        </span>
+                                                        <span>Remise Early Bird (-5% avant le 01/12) :</span>
+                                                    </div>
+                                                    <span className="font-bold">
+                                                        - {festivePricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                    </span>
+                                                </div>
+                                            )}
+
+                                            <div className="flex justify-between items-center pt-2 border-t border-neutral-200">
+                                                <span className="text-sm font-bold text-black uppercase tracking-wider">
+                                                    Total final TTC :
+                                                </span>
+                                                <span className="font-serif text-2xl font-bold text-black">
+                                                    {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                </span>
+                                            </div>
+
+                                            {/* Décomposition selon le mode sélectionné */}
+                                            {validationMode === 'acompte_30' ? (
+                                                <div className="mt-3 pt-3 border-t border-dashed border-[#D4AF37]/40 space-y-2">
+                                                    <div className="flex justify-between items-center text-base sm:text-lg font-bold text-[#927116] bg-amber-50 p-3 rounded-xl border border-amber-200">
+                                                        <span>Acompte de 30% à verser sous 48h :</span>
+                                                        <span className="font-serif text-2xl text-black">
+                                                            {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between items-center text-xs text-neutral-600 px-1">
+                                                        <span>Solde restant dû (au plus tard 7 jours avant le retrait) :</span>
+                                                        <span className="font-semibold text-neutral-800">
+                                                            {festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="mt-3 pt-3 border-t border-dashed border-[#D4AF37]/40">
+                                                    <div className="flex justify-between items-center text-base sm:text-lg font-bold text-black bg-neutral-100 p-3 rounded-xl">
+                                                        <span>Montant total (100%) à régler sous 48h :</span>
+                                                        <span className="font-serif text-2xl text-[#927116]">
+                                                            {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <p className="text-[11px] text-neutral-500 text-center pt-1 italic">
+                                                Réservation validée dès versement de votre règlement sous 48h par virement bancaire. Instructions et QR Code EPC fournis à l&apos;étape suivante.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="bg-[#D4AF37]/10 p-4 rounded-xl border border-[#D4AF37]/30 text-center flex flex-col justify-center items-center gap-2">
+                                            <p className="text-neutral-800 font-bold text-lg">Total de votre commande : {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</p>
+                                            <p className="text-xs text-neutral-500 uppercase tracking-widest">Paiement par virement bancaire uniquement (QR Code sur la page suivante).</p>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -3885,7 +4621,11 @@ function ContactForm() {
                                 )}
                             </div>
 
-                            <button type="submit" disabled={status === "submitting"} className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all cursor-pointer">
+                            <button
+                                type="submit"
+                                disabled={status === "submitting"}
+                                className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all cursor-pointer"
+                            >
                                 {status === "submitting" ? "Envoi en cours..." : "Envoyer la demande"}
                             </button>
                         </form>

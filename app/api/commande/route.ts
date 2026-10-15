@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { MENU_DATA } from '../../data/plats-prepares';
+import {
+    MENUS_FETES_DATA,
+    FORMULES_FETES,
+    CARTE_FETES_ITEMS,
+    calculateFestiveOrderPricing,
+    FestiveValidationMode
+} from '../../data/menus-fetes';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789'); // Dummy if missing to prevent crash on init
 
@@ -10,7 +17,8 @@ export async function POST(req: Request) {
 
         const {
             Nom, Prenom, Mail, Tel, Societe, Nom_Societe, Date,
-            details_projet, captchaToken, cartItems
+            dateEvenement, creneauRetrait, details_projet, captchaToken, cartItems, typeCommande,
+            validationMode
         } = data;
 
         // 1. Validation de base
@@ -45,92 +53,305 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'Validation Captcha échouée' }, { status: 400 });
         }
 
-        // 2. Sécurité : Recalculer le prix côté serveur pour éviter la manipulation
+        // 2. Sécurité : Recalculer le prix côté serveur pour éviter toute manipulation
         let finalTotalPrice = 0;
         let htmlCartDetails = '';
+        let hasFestiveItem = false;
 
         for (const item of cartItems) {
-            const weekData = MENU_DATA.find(m => m.id === item.semaineId);
-            const dayData = weekData?.days.find(d => d.day.toLowerCase() === item.jour.toLowerCase());
+            const isFestive = item.itemType === 'menu_fete' || item.semaineId?.startsWith('menu') || item.semaineId?.startsWith('fetes') || item.semaineId === 'menus-fetes';
 
-            if (!weekData || !dayData) {
-                return NextResponse.json({ success: false, error: 'Un plat du panier est invalide ou expiré' }, { status: 400 });
+            if (isFestive) {
+                hasFestiveItem = true;
+                const formule = FORMULES_FETES.find(f => item.id.startsWith(f.id) || f.title.toLowerCase() === item.nomPlat.toLowerCase());
+                const carteItem = CARTE_FETES_ITEMS.find(c => c.id === item.id || c.title.toLowerCase() === item.nomPlat.toLowerCase());
+                const festiveMenu = MENUS_FETES_DATA.find(m => m.id === item.id || item.id.startsWith(m.id) || m.title.toLowerCase() === item.nomPlat.toLowerCase());
+
+                const unitPrice = formule ? formule.price : (carteItem ? carteItem.price : (festiveMenu ? festiveMenu.price : (item.prixUnitairePlat || 49)));
+                const itemTotal = unitPrice * item.quantitePlat;
+                finalTotalPrice += itemTotal;
+
+                const coursesList = item.coursesSummary && item.coursesSummary.length > 0
+                    ? item.coursesSummary.map((c: string) => {
+                        const parts = c.split(':');
+                        return `<strong>${parts[0].trim()} :</strong>${parts.slice(1).join(':')}`;
+                    }).join('<br/>')
+                    : (festiveMenu
+                        ? [
+                            `<strong>Entrée :</strong> ${festiveMenu.courses.entrees[0]?.title}`,
+                            festiveMenu.courses.potages?.[0] ? `<strong>Potage :</strong> ${festiveMenu.courses.potages[0]?.title}` : '',
+                            `<strong>Plat :</strong> ${festiveMenu.courses.plats[0]?.title}`,
+                            `<strong>Dessert :</strong> ${festiveMenu.courses.desserts[0]?.title}`
+                        ].filter(Boolean).join('<br/>')
+                        : '-');
+
+                const itemId = (item.id || '').toLowerCase();
+                const itemNom = (item.nomPlat || '').toLowerCase();
+                const isNoel = itemId === 'menu-reveillon-noel' || itemId === 'menu-prestige-fetes' || itemNom.includes('noël') || itemNom.includes('noel') || itemNom.includes('prestige');
+                const isNouvelAn = itemId === 'menu-saint-sylvestre' || itemNom.includes('sylvestre') || itemNom.includes('nouvel an');
+                const isEnfant = itemId === 'menu-enfant-fetes' || itemNom.includes('enfant');
+
+                let itemPickupNotice = '';
+
+                if (creneauRetrait && creneauRetrait.includes(' | ')) {
+                    const parts = creneauRetrait.split(' | ');
+                    const noelPart = parts.find((p: string) => p.toLowerCase().includes('noël') || p.toLowerCase().includes('noel')) || parts[0];
+                    const naPart = parts.find((p: string) => p.toLowerCase().includes('nouvel an')) || parts[1];
+
+                    const cleanNoel = noelPart.replace(/^(Retrait\s+)?Noël\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '');
+                    const cleanNa = naPart.replace(/^(Retrait\s+)?Nouvel An\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '');
+
+                    if (isNoel) {
+                        itemPickupNotice = cleanNoel;
+                    } else if (isNouvelAn) {
+                        itemPickupNotice = cleanNa;
+                    } else if (isEnfant) {
+                        if (dateEvenement && dateEvenement.includes('pour Noël') && dateEvenement.includes('pour Nouvel An')) {
+                            itemPickupNotice = `Noël : ${cleanNoel}<br/><br/>Nouvel An : ${cleanNa}`;
+                        } else if (dateEvenement && dateEvenement.includes('pour Nouvel An')) {
+                            itemPickupNotice = cleanNa;
+                        } else {
+                            itemPickupNotice = cleanNoel;
+                        }
+                    } else {
+                        itemPickupNotice = cleanNoel;
+                    }
+                } else if (creneauRetrait) {
+                    itemPickupNotice = creneauRetrait.replace(/^Retrait possible\s*:\s*/i, '');
+                } else {
+                    itemPickupNotice = festiveMenu ? festiveMenu.badge : (item.badge || item.jour || '24 ou 31 Décembre');
+                }
+
+                htmlCartDetails += `
+                    <tr>
+                        <td style="width: 20%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
+                            <strong style="color: #000; font-size: 13px;">${item.nomPlat}</strong><br/>
+                            <span style="color: #D4AF37; font-size: 11px; font-weight: bold;">Menu de Fêtes</span>
+                        </td>
+                        <td style="width: 7%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${item.quantitePlat}</td>
+                        <td style="width: 48%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${coursesList}</td>
+                        <td style="width: 15%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 11px; color: #333; line-height: 1.35; vertical-align: top; word-break: break-word;"><strong>${itemPickupNotice}</strong></td>
+                        <td style="width: 10%; padding: 10px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                    </tr>
+                `;
+            } else {
+                // Plats Préparés classiques
+                const weekData = MENU_DATA.find(m => m.id === item.semaineId);
+                const dayData = weekData?.days.find(d => d.day.toLowerCase() === item.jour.toLowerCase());
+
+                if (!weekData || !dayData) {
+                    return NextResponse.json({ success: false, error: 'Un plat du panier est invalide ou expiré' }, { status: 400 });
+                }
+
+                const pricePlat = parseFloat(dayData.price.replace(',', '.').replace(' €', ''));
+                const pricePotage = 4;
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const totalSoupes = Object.values(item.soupes || {}).reduce((a: any, b: any) => a + (b as number), 0) as number;
+
+                // Vérification de sécurité: totalSoupes <= quantitePlat
+                if (totalSoupes > item.quantitePlat) {
+                    return NextResponse.json({ success: false, error: 'Quantité de soupes invalide' }, { status: 400 });
+                }
+
+                const itemTotal = (pricePlat * item.quantitePlat) + (totalSoupes * pricePotage);
+                finalTotalPrice += itemTotal;
+
+                // Déterminer le jour de retrait
+                const getPickupDay = (j: string) => {
+                    const day = j.toLowerCase();
+                    if (day === 'lundi' || day === 'mardi') return 'Mardi après 11h';
+                    if (day === 'mercredi' || day === 'jeudi') return 'Jeudi après 11h';
+                    if (day === 'vendredi' || day === 'samedi') return 'Samedi après 11h';
+                    return j;
+                };
+                const jourRetrait = getPickupDay(item.jour);
+
+                // Construire la liste des soupes
+                const soupesList = item.soupes ? Object.entries(item.soupes)
+                    .filter(([_, q]) => (q as number) > 0)
+                    .map(([s, q]) => `${q}x ${s}`)
+                    .join('<br/>') : '-';
+
+                htmlCartDetails += `
+                    <tr>
+                        <td style="width: 20%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
+                            <strong style="color: #000; font-size: 13px;">${dayData.meal}</strong><br/>
+                            <span style="color: #666; font-size: 11px;">${dayData.day} - ${weekData.week.split(' :')[0]}</span>
+                        </td>
+                        <td style="width: 7%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${item.quantitePlat}</td>
+                        <td style="width: 48%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${soupesList || '-'}</td>
+                        <td style="width: 15%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; color: #D4AF37; font-weight: bold; vertical-align: top;">${jourRetrait}</td>
+                        <td style="width: 10%; padding: 10px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                    </tr>
+                `;
             }
-
-            const pricePlat = parseFloat(dayData.price.replace(',', '.').replace(' €', ''));
-            const pricePotage = 4;
-            
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const totalSoupes = Object.values(item.soupes).reduce((a: any, b: any) => a + (b as number), 0) as number;
-            
-            // Vérification de sécurité: totalSoupes <= quantitePlat
-            if (totalSoupes > item.quantitePlat) {
-                 return NextResponse.json({ success: false, error: 'Quantité de soupes invalide' }, { status: 400 });
-            }
-
-            const itemTotal = (pricePlat * item.quantitePlat) + (totalSoupes * pricePotage);
-            finalTotalPrice += itemTotal;
-
-            // Déterminer le jour de retrait
-            const getPickupDay = (j: string) => {
-                const day = j.toLowerCase();
-                if (day === 'lundi' || day === 'mardi') return 'Mardi après 11h';
-                if (day === 'mercredi' || day === 'jeudi') return 'Jeudi après 11h';
-                if (day === 'vendredi' || day === 'samedi') return 'Samedi après 11h';
-                return j;
-            };
-            const jourRetrait = getPickupDay(item.jour);
-
-            // Construire la liste des soupes
-            const soupesList = Object.entries(item.soupes)
-                .filter(([_, q]) => (q as number) > 0)
-                .map(([s, q]) => `${q}x ${s}`)
-                .join('<br/>');
-
-            htmlCartDetails += `
-                <tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-                        <strong>${dayData.meal}</strong><br/>
-                        <span style="color: #666; font-size: 12px;">${dayData.day} - ${weekData.week.split(' :')[0]}</span>
-                    </td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">${item.quantitePlat}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px;">${soupesList || '-'}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 13px; color: #D4AF37;"><strong>${jourRetrait}</strong></td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;"><strong>${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
-                </tr>
-            `;
         }
 
-        // Génère un numéro unique à 5 chiffres pour chaque commande
-        const orderNumber = Math.floor(Math.random() * 90000) + 10000;
-        const formattedOrderNumber = String(orderNumber);
+        const isFestiveOrder = typeCommande === 'menus_fetes' || hasFestiveItem;
+        const orderTitle = isFestiveOrder ? 'Menus de Fêtes 2026' : 'Plats Préparés';
+
+        // Génère un numéro unique à 5 chiffres (préfixé NOEL- pour les fêtes)
+        const randomDigits = Math.floor(Math.random() * 90000) + 10000;
+        const formattedOrderNumber = isFestiveOrder ? `NOEL-${randomDigits}` : String(randomDigits);
 
         // Informations bancaires pour le client
         const IBAN = "BE22 0689 4683 8447";
         const BIC = "GKCCBEBB";
         const BENEFICIAIRE = "JEAN COMPERE";
-        const COMMUNICATION = `COMMANDE #${formattedOrderNumber} ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`;
+        const COMMUNICATION = isFestiveOrder
+            ? `${formattedOrderNumber} - ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`
+            : `COMMANDE #${formattedOrderNumber} ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`;
+
+        // Calcul tarifaire certifié côté serveur (Early Bird -5% et acompte 30% / 100%)
+        const festivePricing = calculateFestiveOrderPricing(
+            cartItems,
+            (validationMode as FestiveValidationMode) || 'totalite_100',
+            new Date()
+        );
+
+        const amountToPayNow = isFestiveOrder ? festivePricing.amountToPayNow : finalTotalPrice;
+        const totalNetPrice = isFestiveOrder ? festivePricing.totalNet : finalTotalPrice;
+
+        // Totalisation de la production cuisine pour le traiteur
+        const kitchenTotals: Record<string, { category: string; count: number }> = {};
+        const recordKitchenDish = (dishName: string, category: string, qty: number) => {
+            const cleanName = dishName.trim();
+            if (!cleanName) return;
+            if (!kitchenTotals[cleanName]) {
+                kitchenTotals[cleanName] = { category, count: 0 };
+            }
+            kitchenTotals[cleanName].count += qty;
+        };
+
+        for (const item of cartItems) {
+            const isFestive = item.itemType === 'menu_fete' || item.semaineId?.startsWith('menu') || item.semaineId?.startsWith('fetes') || item.semaineId === 'menus-fetes';
+            const qty = item.quantitePlat || 1;
+
+            if (isFestive) {
+                if (item.coursesSummary && Array.isArray(item.coursesSummary) && item.coursesSummary.length > 0) {
+                    for (const courseStr of item.coursesSummary) {
+                        const colonIdx = courseStr.indexOf(':');
+                        if (colonIdx !== -1) {
+                            const category = courseStr.substring(0, colonIdx).trim();
+                            const dish = courseStr.substring(colonIdx + 1).trim();
+                            recordKitchenDish(dish, category, qty);
+                        } else {
+                            recordKitchenDish(courseStr, 'Choix menu', qty);
+                        }
+                    }
+                } else {
+                    recordKitchenDish(item.nomPlat, 'À la carte / Formule', qty);
+                }
+            }
+        }
+
+        const kitchenRowsHTML = Object.entries(kitchenTotals)
+            .sort((a, b) => a[1].category.localeCompare(b[1].category) || a[0].localeCompare(b[0]))
+            .map(([dish, info]) => `
+                <tr>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 12px; color: #666; font-weight: bold;">${info.category}</td>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 13px; color: #111;">${dish}</td>
+                    <td style="padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 14px; font-weight: bold; text-align: right; color: #D4AF37;">${info.count}</td>
+                </tr>
+            `).join('');
+
+        const kitchenSummaryTableHTML = isFestiveOrder && Object.keys(kitchenTotals).length > 0 ? `
+            <div style="margin-top: 25px; border: 2px solid #000; border-radius: 8px; overflow: hidden; background: #fff;">
+                <div style="background: #000; color: #D4AF37; padding: 10px 14px; font-weight: bold; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase;">
+                    🔪 Totalisation de la Production Cuisine
+                </div>
+                <table style="width: 100%; border-collapse: collapse; font-family: sans-serif;">
+                    <thead>
+                        <tr style="background-color: #f7f7f7; border-bottom: 2px solid #ddd;">
+                            <th style="padding: 8px 10px; text-align: left; font-size: 12px; color: #555; width: 25%;">Poste</th>
+                            <th style="padding: 8px 10px; text-align: left; font-size: 12px; color: #555;">Préparation / Plat</th>
+                            <th style="padding: 8px 10px; text-align: right; font-size: 12px; color: #555; width: 20%;">Total Portions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${kitchenRowsHTML}
+                    </tbody>
+                </table>
+            </div>
+        ` : '';
+
+        const tableFooterHTML = isFestiveOrder ? `
+            <tfoot>
+                ${festivePricing.isEarlyBirdEligible && festivePricing.discountAmount > 0 ? `
+                    <tr>
+                        <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 13px; color: #555;">Sous-total brut :</td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; color: #333; white-space: nowrap;">${festivePricing.rawTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 13px; color: #927116; font-weight: bold; background-color: #fffdf5;">
+                            🎁 Remise Early Bird (-5% avant le 01/12) :
+                        </td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; color: #927116; font-weight: bold; background-color: #fffdf5; white-space: nowrap;">
+                            - ${festivePricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                        </td>
+                    </tr>
+                ` : ''}
+                <tr>
+                    <td colspan="4" style="padding: 10px 10px; text-align: right; font-size: 14px; font-weight: bold; border-top: 1px solid #ddd;">Total final TTC :</td>
+                    <td style="padding: 10px 10px; text-align: right; font-size: 15px; font-weight: bold; border-top: 1px solid #ddd; white-space: nowrap;">${festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                </tr>
+                ${festivePricing.validationMode === 'acompte_30' ? `
+                    <tr>
+                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #666;">Mode de règlement choisi :</td>
+                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Acompte 30% (convives ajustables jusqu'à 7 jours avant le retrait)</td>
+                    </tr>
+                    <tr style="background-color: #fff9e6;">
+                        <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 14px; color: #000; border-top: 2px solid #D4AF37;">
+                            <strong>ACOMPTE DE 30% À VERSER SOUS 48H :</strong>
+                        </td>
+                        <td style="padding: 12px 10px; text-align: right; font-size: 17px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
+                            ${festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777;">Solde restant dû (au plus tard 7 jours avant le retrait) :</td>
+                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777; white-space: nowrap;">${festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                    </tr>
+                ` : `
+                    <tr>
+                        <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #666;">Mode de règlement choisi :</td>
+                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; font-weight: bold; color: #333;">Règlement intégral (100% ferme)</td>
+                    </tr>
+                    <tr style="background-color: #fff9e6;">
+                        <td colspan="4" style="padding: 12px 10px; text-align: right; font-size: 14px; color: #000; border-top: 2px solid #D4AF37;">
+                            <strong>MONTANT TOTAL (100%) À RÉGLER SOUS 48H :</strong>
+                        </td>
+                        <td style="padding: 12px 10px; text-align: right; font-size: 17px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
+                            ${festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                        </td>
+                    </tr>
+                `}
+            </tfoot>
+        ` : `
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="padding: 15px 10px; text-align: right; font-size: 15px;"><strong>TOTAL À PAYER :</strong></td>
+                    <td style="padding: 15px 10px; text-align: right; font-size: 17px; color: #D4AF37; white-space: nowrap;"><strong>${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
+                </tr>
+            </tfoot>
+        `;
 
         const cartTableHTML = `
-            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-family: sans-serif;">
+            <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-family: sans-serif; table-layout: fixed;">
                 <thead>
                     <tr style="background-color: #f9f9f9;">
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Plat</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: center;">Qté</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Soupes</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: left;">Retrait</th>
-                        <th style="padding: 10px; border-bottom: 2px solid #ddd; text-align: right;">S/Total</th>
+                        <th style="width: 20%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Article</th>
+                        <th style="width: 7%; padding: 10px; border-bottom: 2px solid #ddd; text-align: center; font-size: 13px;">Qté</th>
+                        <th style="width: 48%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Détails (Composition)</th>
+                        <th style="width: 15%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Retrait</th>
+                        <th style="width: 10%; padding: 10px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${htmlCartDetails}
                 </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="4" style="padding: 15px 10px; text-align: right; font-size: 16px;"><strong>TOTAL À PAYER :</strong></td>
-                        <td style="padding: 15px 10px; text-align: right; font-size: 18px; color: #D4AF37;"><strong>${finalTotalPrice.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong></td>
-                    </tr>
-                </tfoot>
+                ${tableFooterHTML}
             </table>
         `;
 
@@ -141,20 +362,25 @@ export async function POST(req: Request) {
                 await resend.emails.send({
                     from: 'Traiteur Compère <commande@traiteur-compere.be>',
                     to: process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com',
-                    subject: `[COMMANDE #${formattedOrderNumber}] ${Nom} ${Prenom} - ${Date}`,
+                    subject: `[${formattedOrderNumber}] ${isFestiveOrder ? '🎉 FETES' : '🍽️ PLATS'} - ${Nom} ${Prenom} - ${Date}`,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                            <h2>Nouvelle commande de Plats Préparés (N° ${formattedOrderNumber})</h2>
+                            <h2>Nouvelle commande ${orderTitle} (${formattedOrderNumber})</h2>
                             <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                                 <p style="margin: 5px 0;"><strong>Client :</strong> ${Nom} ${Prenom}</p>
                                 <p style="margin: 5px 0;"><strong>Email :</strong> ${Mail}</p>
                                 <p style="margin: 5px 0;"><strong>Téléphone :</strong> ${Tel}</p>
                                 <p style="margin: 5px 0;"><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
-                                <p style="margin: 5px 0;"><strong>Date de soumission :</strong> ${Date}</p>
+                                ${dateEvenement ? `<p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>🎉 Date(s) du repas :</strong> ${dateEvenement}</p>` : ''}
+                                ${creneauRetrait ? `<p style="margin: 5px 0; line-height: 1.4;"><strong>⏰ Retrait à l'atelier :</strong><br/>${creneauRetrait.split(' | ').join('<br/>')}</p>` : ''}
+                                <p style="margin: 5px 0;"><strong>Date de saisie :</strong> ${Date}</p>
+                                ${isFestiveOrder ? `<p style="margin: 5px 0;"><strong>Mode choisi :</strong> ${festivePricing.validationMode === 'acompte_30' ? 'Acompte 30% (' + festivePricing.depositAmount.toFixed(2) + ' €) - solde dû : ' + festivePricing.remainingBalance.toFixed(2) + ' €' : 'Totalité 100% (' + festivePricing.totalNet.toFixed(2) + ' €)'}</p>` : ''}
                             </div>
                             
                             <h3>Détail du panier</h3>
                             ${cartTableHTML}
+
+                            ${kitchenSummaryTableHTML}
                             
                             ${details_projet ? `
                             <div style="background: #fff8e1; padding: 15px; border-left: 4px solid #fbc02d; margin-top: 20px;">
@@ -168,32 +394,64 @@ export async function POST(req: Request) {
                 await resend.emails.send({
                     from: 'Traiteur Compère <commande@traiteur-compere.be>',
                     to: Mail,
-                    subject: `Confirmation de votre commande #${formattedOrderNumber} - Traiteur Compère`,
+                    subject: `Confirmation de votre commande ${formattedOrderNumber} - Traiteur Compère`,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
                             <h2 style="color: #000;">Merci pour votre commande, ${Prenom} !</h2>
-                            <p>Votre demande a bien été enregistrée. Voici le récapitulatif de votre commande (<strong>N° ${formattedOrderNumber}</strong>) :</p>
+                            <p>Votre commande de <strong>${orderTitle}</strong> a bien été enregistrée sous la référence <strong>${formattedOrderNumber}</strong>.</p>
                             
+                            <!-- Bandeau d'alerte et mention explicite -->
+                            <div style="background-color: #fff9e6; border: 2px solid #D4AF37; border-left: 6px solid #D4AF37; border-radius: 8px; padding: 16px 18px; margin: 20px 0; color: #333;">
+                                <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #856404;">
+                                    Votre réservation est enregistrée.
+                                </p>
+                                <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #222; font-weight: bold;">
+                                    Elle sera définitivement confirmée à la réception de votre virement bancaire sous 48h.
+                                </p>
+                                <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #444;">
+                                    ${isFestiveOrder && festivePricing.validationMode === 'acompte_30'
+                                        ? `Merci de verser votre acompte de <strong>${festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h. Vos convives et votre commande restent ajustables jusqu'à 7 jours avant le retrait. Le solde de <strong>${festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sera à régler au plus tard 7 jours avant le retrait.`
+                                        : `Merci de verser votre règlement intégral de <strong>${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h.`}
+                                </p>
+                                <p style="margin: 0; font-size: 12px; font-weight: bold; color: #b71c1c; line-height: 1.4;">
+                                    Passé ce délai de 48h sans réception du paiement, la réservation des créneaux et l'avantage réservation anticipée de -5% seront libérés.
+                                </p>
+                            </div>
+
+                            ${dateEvenement ? `
+                            <div style="background-color: #fff8e1; padding: 15px; border-left: 4px solid #D4AF37; border-radius: 4px; margin: 20px 0;">
+                                <p style="margin: 4px 0; font-size: 15px;"><strong>🎉 Date(s) de votre repas :</strong> ${dateEvenement}</p>
+                                <p style="margin: 4px 0; font-size: 14px; line-height: 1.4;"><strong>⏰ Créneau(x) de retrait à l'atelier :</strong><br/>${creneauRetrait ? creneauRetrait.split(' | ').join('<br/>') : 'Selon créneau sélectionné'}</p>
+                                <p style="margin: 6px 0 0 0; font-size: 12px; color: #666;">📍 Rue Potay 3, 4470 Saint-Georges-sur-Meuse</p>
+                                <p style="margin: 6px 0 0 0; font-size: 12px; color: #D4AF37; font-weight: bold;">✨ Notice détaillée de réchauffage et dressage fournie avec chaque commande à notre atelier.</p>
+                            </div>` : ''}
+
                             ${cartTableHTML}
                             
                             <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #D4AF37; border-radius: 0 8px 8px 0; margin-top: 30px;">
-                                <h3 style="margin-top: 0; color: #000;">Infos pratiques</h3>
-                                <p style="margin: 5px 0;"><strong>📞 Téléphone :</strong> +32 476 86 54 07</p>
-                                <p style="margin: 5px 0;"><strong>📍 Adresse de retrait :</strong> Rue Potay 3, 4470 Saint-Georges-sur-Meuse, Belgique</p>
+                                <h3 style="margin-top: 0; color: #000;">Infos pratiques de retrait</h3>
+                                <p style="margin: 5px 0;"><strong>📞 Téléphone :</strong> <a href="tel:+32468385082" style="color: #000; text-decoration: none;">+32 468 38 50 82</a></p>
+                                <p style="margin: 5px 0;"><strong>📍 Atelier de retrait :</strong> Rue Potay 3, 4470 Saint-Georges-sur-Meuse, Belgique</p>
                                 <p style="margin: 5px 0;"><a href="https://maps.google.com/?q=Traiteur+Compere,+Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique" style="color: #D4AF37; text-decoration: none; font-weight: bold;">🗺️ Voir sur Google Maps</a></p>
                             </div>
                             
+                            <!-- Coordonnées bancaires officielles avec IBAN -->
                             <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #D4AF37; border-radius: 0 8px 8px 0; margin-top: 20px;">
-                                <h3 style="margin-top: 0; color: #000;">Informations de paiement</h3>
-                                <p>Toute commande doit être passée minimum 4 jours à l'avance et le paiement s'effectue par virement bancaire uniquement.</p>
+                                <h3 style="margin-top: 0; color: #000;">Informations de paiement (Virement bancaire)</h3>
                                 <p style="margin: 5px 0;"><strong>Bénéficiaire :</strong> ${BENEFICIAIRE}</p>
-                                <p style="margin: 5px 0;"><strong>IBAN :</strong> ${IBAN}</p>
+                                <p style="margin: 5px 0; font-size: 15px;"><strong>IBAN :</strong> <code style="font-size: 16px; font-weight: bold; color: #000; letter-spacing: 0.5px;">${IBAN}</code></p>
                                 <p style="margin: 5px 0;"><strong>BIC :</strong> ${BIC}</p>
-                                <p style="margin: 5px 0; color: #D4AF37; font-size: 16px;"><strong>Communication :</strong> ${COMMUNICATION}</p>
+                                <p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>Communication du virement :</strong> <strong>${COMMUNICATION}</strong></p>
+                                <p style="margin: 10px 0 0 0; font-size: 16px; color: #000; border-top: 1px solid #e0e0e0; padding-top: 10px;">
+                                    <strong>Montant à verser sous 48h :</strong> <span style="color: #D4AF37; font-weight: bold; font-size: 18px;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                    ${isFestiveOrder && festivePricing.validationMode === 'acompte_30' ? `<br/><span style="font-size: 13px; color: #666;">(Acompte de 30% • Solde restant de ${festivePricing.remainingBalance.toFixed(2)} € au plus tard 7 jours avant le retrait)</span>` : '<br/><span style="font-size: 13px; color: #666;">(Paiement intégral 100%)</span>'}
+                                </p>
                             </div>
-                            <p style="margin-top: 20px;">Votre commande sera définitivement confirmée à la réception du paiement.</p>
+                            <p style="margin-top: 20px; font-size: 13px; color: #555;">
+                                <strong>Rappel :</strong> Votre réservation est enregistrée. Elle sera définitivement confirmée à la réception de votre virement bancaire sous 48h.
+                            </p>
                             <br/>
-                            <p>L'équipe Traiteur Compère</p>
+                            <p>L'équipe Traiteur Compère vous remercie de votre confiance et vous souhaite d'excellentes fêtes !</p>
                         </div>
                     `
                 });
@@ -201,13 +459,13 @@ export async function POST(req: Request) {
                 console.error("Erreur d'envoi d'email Resend :", emailError);
             }
         } else {
-            console.log("Mode dev ou pas de clé Resend : Emails non envoyés. Voici ce qui aurait été envoyé :");
-            console.log(`Prix calculé : ${finalTotalPrice}€ | Client: ${Mail}`);
+            console.log("Mode dev ou pas de clé Resend : Emails non envoyés. Montant à payer :", amountToPayNow);
         }
 
         return NextResponse.json({
             success: true,
-            totalPrice: finalTotalPrice,
+            totalPrice: totalNetPrice,
+            amountToPayNow: amountToPayNow,
             orderNumber: formattedOrderNumber,
             message: 'Commande enregistrée avec succès'
         });

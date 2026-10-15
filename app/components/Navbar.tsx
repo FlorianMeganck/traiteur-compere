@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, X, Trash2 } from "lucide-react";
+import { ShoppingCart, X, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 import Logo from "./Logo";
 import { useCart } from "../hooks/useCart";
 import { MENU_DATA } from "../data/plats-prepares";
+import { calculateFestiveOrderPricing } from "../data/menus-fetes";
 
 const NAV_LINKS = [
     { href: "/a-propos", label: "À Propos" },
     { href: "/services", label: "Services" },
     { href: "/plats-prepares", label: "Plats Préparés" },
     { href: "/formules", label: "Formules" },
+    { href: "/menus-fetes", label: "Menus de Fêtes" },
     { href: "/contact", label: "Contact" },
 ];
 
@@ -23,7 +25,18 @@ export default function Navbar() {
     const [scrolled, setScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
-    const { cartItems, removeFromCart, cartTotal, totalItems } = useCart();
+    const [isCartBouncing, setIsCartBouncing] = useState(false);
+    const { cartItems, removeFromCart, updateQuantity, cartTotal, totalItems } = useCart();
+    const prevTotalItems = useRef(totalItems);
+
+    useEffect(() => {
+        if (totalItems > prevTotalItems.current) {
+            setIsCartBouncing(true);
+            const timer = setTimeout(() => setIsCartBouncing(false), 800);
+            return () => clearTimeout(timer);
+        }
+        prevTotalItems.current = totalItems;
+    }, [totalItems]);
 
     // --- LOGIC ---
     // 1. Desktop / Base Logic
@@ -81,197 +94,199 @@ export default function Navbar() {
 
     return (
         <>
-        <nav
-            className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
-                }`}
-        >
-            {/* 
-               background logic: 
-               - transparent => transparent
-               - NOT transparent => white
-               - BUT if Menu is Open => transparent (because overlay is black/95, we don't want white bar on top)
-               Actually, usually the overlay is fixed inset-0 z-40, and navbar is z-50.
-               If navbar is white z-50, it covers the top of the black overlay.
-               Let's make navbar transparent if menu is open, so black overlay shines through.
-            */}
-
-            <div className="w-full max-w-7xl mx-auto px-6 relative">
-
-                {/* --- DESKTOP LAYOUT (Grid 3 Cols) --- */}
-                <div className="hidden md:grid grid-cols-3 items-center w-full relative">
-
-                    {/* LEFT ZONE: À Propos & Services (Aligned Right -> Center) */}
-                    <div className="flex justify-end items-center gap-6 pr-4">
-                        <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
-                        <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
-                    </div>
-
-                    {/* CENTER ZONE: Logo */}
-                    <div className="flex justify-center items-center">
-                        <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
-                            <Image
-                                src="/images/Logo_traiteur.png"
-                                alt="Logo Traiteur Compère"
-                                fill
-                                className="object-contain"
-                                sizes="(max-width: 768px) 128px, 192px"
-                            />
-                        </Link>
-                    </div>
-
-                    {/* RIGHT ZONE: Plats Préparés, Formules & Contact (Aligned Left -> Center) */}
-                    <div className="flex justify-start items-center gap-6 pl-4">
-                        <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
-                        <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
-                        <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} />
-                        
-                        {/* Desktop Cart Button */}
-                        <motion.button 
-                            onClick={() => setIsCartOpen(true)} 
-                            aria-label="Voir mon panier"
-                            animate={cartBump ? { scale: [1, 1.25, 0.9, 1.15, 1], rotate: [0, -12, 12, -6, 0] } : { scale: 1, rotate: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37]`}
-                        >
-                            <ShoppingCart size={24} />
-                            <AnimatePresence>
-                                {totalItems > 0 && (
-                                    <motion.span 
-                                        key={totalItems}
-                                        initial={{ scale: 0.5, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        exit={{ scale: 0.5, opacity: 0 }}
-                                        className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm"
-                                    >
-                                        {totalItems}
-                                    </motion.span>
-                                )}
-                            </AnimatePresence>
-                        </motion.button>
-                    </div>
-
-                    {/* SOCIALS (Absolute left) */}
-                    <div className="absolute left-0 flex items-center gap-4">
-                        <SocialLink
-                            href="https://www.facebook.com/profile.php?id=61582940090708"
-                            icon={<FacebookIcon />}
-                            className={desktopTextColor}
-                        />
-                        <SocialLink
-                            href="https://www.instagram.com/traiteurcompere8/"
-                            icon={<InstagramIcon />}
-                            className={desktopTextColor}
-                        />
-                    </div>
-                </div>
-
-                {/* --- MOBILE LAYOUT (Flex Between) --- */}
-                <div className="md:hidden flex justify-between items-center w-full">
-                    {/* LOGO */}
-                    <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
-                        <Image
-                            src="/images/Logo_traiteur.png"
-                            alt="Logo Traiteur Compère"
-                            fill
-                            className="object-contain"
-                            sizes="(max-width: 768px) 128px, 192px"
-                        />
+            <header className="fixed top-0 left-0 w-full z-50">
+                {/* Top-Bar Bandeau d'Annonce (Festive) */}
+                <div className="bg-[#111111] text-white py-3.5 md:py-4 px-4 text-center text-xs sm:text-sm md:text-base font-medium tracking-wide flex flex-wrap items-center justify-center gap-2 border-b border-[#D4AF37]/30 shadow-sm">
+                    <span className="text-[#D4AF37] text-sm md:text-base">✨</span>
+                    <span><strong>Menus de Fêtes 2026</strong> : Les réservations sont ouvertes !</span>
+                    <Link href="/menus-fetes" className="underline text-[#D4AF37] hover:text-white ml-1 font-bold transition-colors">
+                        Découvrez notre sélection →
                     </Link>
-
-                    <div className="flex items-center gap-4">
-                        {/* Mobile Cart Button */}
-                        <motion.button 
-                            onClick={() => { setIsMenuOpen(false); setIsCartOpen(true); }} 
-                            aria-label="Voir mon panier"
-                            animate={cartBump ? { scale: [1, 1.25, 0.9, 1.15, 1], rotate: [0, -12, 12, -6, 0] } : { scale: 1, rotate: 0 }}
-                            transition={{ duration: 0.5 }}
-                            className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-50`}
-                        >
-                            <ShoppingCart size={24} />
-                            <AnimatePresence>
-                                {totalItems > 0 && (
-                                    <motion.span 
-                                        key={totalItems}
-                                        initial={{ scale: 0.5, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        exit={{ scale: 0.5, opacity: 0 }}
-                                        className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm"
-                                    >
-                                        {totalItems}
-                                    </motion.span>
-                                )}
-                            </AnimatePresence>
-                        </motion.button>
-
-                        {/* BURGER */}
-                        <div className="relative z-50">
-                            <button
-                                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 focus:outline-none"
-                            >
-                            {/* Top Line */}
-                            <motion.span
-                                animate={isMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
-                                className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
-                            />
-                            {/* Middle Line */}
-                            <motion.span
-                                animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
-                                className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
-                            />
-                            {/* Bottom Line */}
-                            <motion.span
-                                animate={isMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
-                                className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
-                            />
-                        </button>
-                    </div>
                 </div>
-            </div>
 
-                {/* MOBILE OVERLAY */}
-                <AnimatePresence>
-                    {isMenuOpen && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className="fixed inset-0 bg-black/95 backdrop-blur-md z-40 flex flex-col items-center justify-center text-center"
-                        >
-                            <div className="flex flex-col gap-8 mb-12">
-                                {NAV_LINKS.map((link) => (
-                                    <MobileLink
-                                        key={link.href}
-                                        href={link.href}
-                                        label={link.label}
-                                        isActive={pathname === link.href}
-                                        onClick={() => setIsMenuOpen(false)}
-                                    />
-                                ))}
-                            </div>
+                <nav
+                    className={`w-full transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
+                        }`}
+                >
+                    <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12 relative">
 
-                            <div className="w-16 h-[1px] bg-white/20 mb-8"></div>
+                        {/* --- DESKTOP LAYOUT (Grid 3 Cols: Left links / Logo / Right links + Extremities) --- */}
+                        <div className="hidden md:grid grid-cols-[1fr_auto_1fr] items-center w-full relative">
 
-                            {/* Mobile Socials */}
-                            <div className="flex items-center gap-8">
+                            {/* SOCIALS (Pushed to the absolute far left) */}
+                            <div className="hidden lg:flex absolute left-0 items-center gap-3.5">
                                 <SocialLink
                                     href="https://www.facebook.com/profile.php?id=61582940090708"
-                                    icon={<FacebookIcon size={32} />}
-                                    className="text-white"
+                                    icon={<FacebookIcon />}
+                                    className={desktopTextColor}
                                 />
                                 <SocialLink
                                     href="https://www.instagram.com/traiteurcompere8/"
-                                    icon={<InstagramIcon size={32} />}
-                                    className="text-white"
+                                    icon={<InstagramIcon />}
+                                    className={desktopTextColor}
                                 />
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
-        </nav>
 
+                            {/* LEFT ZONE: À Propos, Services & Plats Préparés (Spaced out to the left of the logo) */}
+                            <div className="flex justify-end items-center gap-4 lg:gap-6 xl:gap-8 pr-6 lg:pr-10 xl:pr-14">
+                                <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
+                                <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
+                                <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
+                            </div>
+
+                            {/* CENTER ZONE: Logo avec respiration */}
+                            <div className="flex justify-center items-center px-4 lg:px-8">
+                                <Link href="/" className="relative block w-32 h-16 md:w-44 md:h-22 lg:w-48 lg:h-24 transition-transform hover:scale-105 z-50">
+                                    <Image
+                                        src="/images/Logo_traiteur.png"
+                                        alt="Traiteur Compère"
+                                        fill
+                                        className="object-contain"
+                                        priority
+                                    />
+                                </Link>
+                            </div>
+
+                            {/* RIGHT ZONE: Formules, Menus de Fêtes & Contact (Spaced out to the right of the logo) */}
+                            <div className="flex justify-start items-center gap-4 lg:gap-6 xl:gap-8 pl-6 lg:pl-10 xl:pl-14">
+                                <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
+                                <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} isFestive={true} />
+                                <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
+                            </div>
+
+                            {/* DESKTOP CART (Pushed to the absolute far right with Bounce animation) */}
+                            <div className="hidden md:flex absolute right-0 items-center">
+                                <motion.button
+                                    onClick={() => setIsCartOpen(true)}
+                                    animate={isCartBouncing ? {
+                                        scale: [1, 1.28, 0.92, 1.15, 1],
+                                        rotate: [0, -8, 8, -4, 4, 0],
+                                    } : { scale: 1, rotate: 0 }}
+                                    transition={{ duration: 0.55, ease: "easeInOut" }}
+                                    className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37] hover:bg-black/5`}
+                                    aria-label="Panier de commande"
+                                >
+                                    <ShoppingCart size={23} className={isCartBouncing ? "text-[#D4AF37]" : ""} />
+                                    {totalItems > 0 && (
+                                        <motion.span
+                                            key={totalItems}
+                                            initial={{ scale: 0.3 }}
+                                            animate={{ scale: 1 }}
+                                            className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white"
+                                        >
+                                            {totalItems}
+                                        </motion.span>
+                                    )}
+                                </motion.button>
+                            </div>
+                        </div>
+
+                        {/* --- MOBILE LAYOUT (Flex Between) --- */}
+                        <div className="md:hidden flex justify-between items-center w-full">
+                            {/* LOGO */}
+                            <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
+                                <Image
+                                    src="/images/Logo_traiteur.png"
+                                    alt="Traiteur Compère"
+                                    fill
+                                    className="object-contain"
+                                    priority
+                                />
+                            </Link>
+
+                            <div className="flex items-center gap-4">
+                                {/* Mobile Cart Button with Bounce */}
+                                <motion.button
+                                    onClick={() => { setIsMenuOpen(false); setIsCartOpen(true); }}
+                                    animate={isCartBouncing ? {
+                                        scale: [1, 1.25, 0.95, 1.15, 1],
+                                        rotate: [0, -8, 8, -4, 4, 0],
+                                    } : { scale: 1, rotate: 0 }}
+                                    transition={{ duration: 0.55, ease: "easeInOut" }}
+                                    className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-50`}
+                                >
+                                    <ShoppingCart size={24} className={isCartBouncing ? "text-[#D4AF37]" : ""} />
+                                    {totalItems > 0 && (
+                                        <motion.span
+                                            key={totalItems}
+                                            initial={{ scale: 0.3 }}
+                                            animate={{ scale: 1 }}
+                                            className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-sm ring-2 ring-black"
+                                        >
+                                            {totalItems}
+                                        </motion.span>
+                                    )}
+                                </motion.button>
+
+                                {/* BURGER */}
+                                <div className="relative z-50">
+                                    <button
+                                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                        className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 focus:outline-none"
+                                    >
+                                        {/* Top Line */}
+                                        <motion.span
+                                            animate={isMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
+                                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
+                                        />
+                                        {/* Middle Line */}
+                                        <motion.span
+                                            animate={isMenuOpen ? { opacity: 0 } : { opacity: 1 }}
+                                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
+                                        />
+                                        {/* Bottom Line */}
+                                        <motion.span
+                                            animate={isMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
+                                            className={`block w-8 h-[2px] rounded-full transition-colors duration-300 ${finalHamburgerColor}`}
+                                        />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* MOBILE OVERLAY */}
+                        <AnimatePresence>
+                            {isMenuOpen && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.4 }}
+                                    className="fixed inset-0 bg-black/95 backdrop-blur-md z-40 flex flex-col items-center justify-center text-center"
+                                >
+                                    <div className="flex flex-col gap-8 mb-12">
+                                        {NAV_LINKS.map((link) => (
+                                            <MobileLink
+                                                key={link.href}
+                                                href={link.href}
+                                                label={link.label}
+                                                isActive={pathname === link.href}
+                                                onClick={() => setIsMenuOpen(false)}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    <div className="w-16 h-[1px] bg-white/20 mb-8"></div>
+
+                                    {/* Mobile Socials */}
+                                    <div className="flex items-center gap-8">
+                                        <SocialLink
+                                            href="https://www.facebook.com/profile.php?id=61582940090708"
+                                            icon={<FacebookIcon size={32} />}
+                                            className="text-white"
+                                        />
+                                        <SocialLink
+                                            href="https://www.instagram.com/traiteurcompere8/"
+                                            icon={<InstagramIcon size={32} />}
+                                            className="text-white"
+                                        />
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </nav>
+            </header>
             {/* Cart Side Drawer */}
             <AnimatePresence>
                 {isCartOpen && (
@@ -288,76 +303,206 @@ export default function Navbar() {
                             animate={{ x: 0 }}
                             exit={{ x: "100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 h-[100dvh] w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
+                            className="fixed top-0 right-0 h-[100dvh] w-full sm:w-[500px] md:w-[530px] lg:w-[560px] max-w-full bg-white z-[70] shadow-2xl flex flex-col sm:rounded-l-3xl overflow-hidden"
                         >
-                            <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-50">
-                                <h2 className="text-2xl font-serif text-black flex items-center gap-3">
-                                    <ShoppingCart className="text-[#D4AF37]" />
-                                    Votre Panier
-                                </h2>
-                                <button onClick={() => setIsCartOpen(false)} className="text-neutral-400 hover:text-black transition-colors">
-                                    <X size={24} />
+                            {/* 1. HEADER COMPACT */}
+                            <div className="px-6 py-4.5 border-b border-neutral-100 flex justify-between items-center bg-[#FAF9F6] shrink-0">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center">
+                                        <ShoppingCart size={17} />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="font-serif font-bold text-lg text-neutral-900">
+                                            Panier
+                                        </h2>
+                                        <span className="text-xs bg-neutral-200/80 text-neutral-700 font-medium px-2.5 py-0.5 rounded-full">
+                                            {totalItems} {totalItems > 1 ? 'articles' : 'article'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setIsCartOpen(false)}
+                                    className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 hover:text-black flex items-center justify-center transition-all duration-200"
+                                    aria-label="Fermer le panier"
+                                >
+                                    <X size={16} />
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 pb-12 space-y-6">
+                            {/* 2. CORPS DÉFILABLE */}
+                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-4 sm:p-5 space-y-2.5 bg-[#FBFBFA]">
                                 {cartItems.length === 0 ? (
-                                    <div className="text-center text-neutral-500 py-12">
-                                        <ShoppingCart className="mx-auto mb-4 opacity-50" size={48} />
-                                        <p>Votre panier est vide.</p>
+                                    <div className="text-center text-neutral-400 py-16 px-4 space-y-3">
+                                        <div className="w-16 h-16 rounded-full bg-neutral-100 text-neutral-300 flex items-center justify-center mx-auto mb-2">
+                                            <ShoppingCart size={28} />
+                                        </div>
+                                        <h3 className="font-serif text-lg text-neutral-700">Votre panier est vide</h3>
+                                        <p className="text-xs text-neutral-400 max-w-xs mx-auto">
+                                            Explorez nos menus de fêtes et nos plats préparés pour commencer votre commande.
+                                        </p>
                                     </div>
                                 ) : (
-                                    cartItems.map((item) => (
-                                        <div key={item.id} className="bg-white border border-neutral-200 rounded-2xl p-4 shadow-sm relative">
-                                            <button 
-                                                onClick={() => removeFromCart(item.id)}
-                                                className="absolute top-4 right-4 text-neutral-300 hover:text-red-500 transition-colors"
+                                    cartItems.map((item) => {
+                                        const isFestive = item.itemType === 'menu_fete' || item.semaineId.startsWith('menu') || item.semaineId.startsWith('fetes');
+                                        const isFormule = isFestive && (item.badge?.toLowerCase().includes('formule') || item.id.startsWith('formule') || Boolean(item.coursesSummary && item.coursesSummary.length > 0));
+                                        const isCarte = isFestive && !isFormule;
+
+                                        return (
+                                            <div
+                                                key={item.id}
+                                                className="bg-white border border-neutral-200/90 rounded-2xl p-3 sm:p-3.5 shadow-2xs hover:shadow-xs transition-shadow"
                                             >
-                                                <Trash2 size={18} />
-                                            </button>
-                                            <div className="pr-8">
-                                                <h4 className="font-bold text-neutral-900 mb-1">{item.nomPlat}</h4>
-                                                <p className="text-sm text-[#D4AF37] font-medium capitalize mb-3">
-                                                    {item.jour} ({MENU_DATA.find(m => m.id === item.semaineId)?.week.split(' :')[0]})
-                                                </p>
-                                                
-                                                <div className="flex justify-between items-center text-sm mb-2">
-                                                    <span className="text-neutral-600">Quantité plat : <strong className="text-black">{item.quantitePlat}</strong></span>
-                                                    <span className="font-semibold">{item.prixUnitairePlat * item.quantitePlat} €</span>
+                                                {/* En-tête : Badge origine + Nom du plat + Bouton supprimer aligné à droite */}
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-1.5 mb-1">
+                                                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
+                                                                isFormule
+                                                                    ? "bg-[#D4AF37]/15 text-[#927116] border border-[#D4AF37]/35"
+                                                                    : isCarte
+                                                                    ? "bg-amber-50 text-amber-800 border border-amber-200"
+                                                                    : "bg-neutral-100 text-neutral-600"
+                                                            }`}>
+                                                                {isFormule ? "Formule" : isCarte ? "À la carte" : "Semaine"}
+                                                            </span>
+                                                            {!isFestive && (
+                                                                <span className="text-[10px] text-neutral-400 capitalize truncate">
+                                                                    {item.jour}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <h4 className="font-serif font-bold text-neutral-900 text-sm leading-snug">
+                                                            {item.nomPlat}
+                                                        </h4>
+                                                    </div>
+
+                                                    {/* Bouton corbeille discret aligné à droite */}
+                                                    <button
+                                                        onClick={() => removeFromCart(item.id)}
+                                                        className="w-6 h-6 flex items-center justify-center rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
+                                                        title="Supprimer l'article"
+                                                        aria-label="Supprimer"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
                                                 </div>
 
-                                                {Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
-                                                    <div key={soupe} className="flex justify-between items-center text-sm text-neutral-500 mb-1 pl-4 border-l-2 border-[#D4AF37]/30">
+                                                {/* Pour les Formules : Liste des 4 choix condensés en dessous */}
+                                                {isFormule && item.coursesSummary && item.coursesSummary.length > 0 && (
+                                                    <div className="mt-1.5 text-[11px] text-neutral-500 font-serif italic leading-snug space-y-0.5 pl-2 border-l border-[#D4AF37]/40">
+                                                        {item.coursesSummary.map((course, idx) => {
+                                                            const parts = course.split(':');
+                                                            const val = parts.slice(1).join(':').trim() || course;
+                                                            return (
+                                                                <p key={idx} className="line-clamp-1">
+                                                                    • {val}
+                                                                </p>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
+
+                                                {/* Soupes associées pour les plats préparés */}
+                                                {item.soupes && Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
+                                                    <div key={soupe} className="flex justify-between items-center text-[11px] text-neutral-600 mt-1 pl-2 border-l-2 border-[#D4AF37]/50 py-0.5">
                                                         <span>+ {qty}x {soupe}</span>
-                                                        <span>{qty * item.prixUnitaireSoupe} €</span>
+                                                        <span className="font-semibold text-neutral-900">{qty * (item.prixUnitaireSoupe || 0)} €</span>
                                                     </div>
                                                 ))}
-                                                
-                                                <div className="mt-4 pt-3 border-t border-neutral-100 flex justify-between items-center">
-                                                    <span className="text-xs uppercase tracking-widest text-neutral-400">Total ligne</span>
-                                                    <span className="font-bold text-lg text-black">{item.prixTotalLigne} €</span>
+
+                                                {/* Pied de l'item : Sélecteur quantité compact & Prix total calculé */}
+                                                <div className="flex justify-between items-center pt-2 mt-2 border-t border-neutral-100">
+                                                    {/* Sélecteur de quantité compact */}
+                                                    <div className="inline-flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/80 p-0.5 rounded-full shadow-2xs">
+                                                        <button
+                                                            onClick={() => updateQuantity(item.id, -1)}
+                                                            className="w-5 h-5 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:text-red-600 hover:bg-neutral-100 shadow-2xs transition-colors"
+                                                            title={item.quantitePlat === 1 ? "Supprimer" : "Diminuer"}
+                                                            aria-label="Diminuer"
+                                                        >
+                                                            <Minus size={10} />
+                                                        </button>
+                                                        <span className="w-5 text-center font-bold text-xs text-neutral-900 font-serif">{item.quantitePlat}</span>
+                                                        <button
+                                                            onClick={() => updateQuantity(item.id, 1)}
+                                                            className="w-5 h-5 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:text-black hover:bg-neutral-100 shadow-2xs transition-colors"
+                                                            title="Augmenter"
+                                                            aria-label="Augmenter"
+                                                        >
+                                                            <Plus size={10} />
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Prix total de la ligne */}
+                                                    <div className="text-right">
+                                                        <span className="text-sm font-bold text-neutral-900 font-serif">
+                                                            {item.prixTotalLigne.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    ))
+                                        );
+                                    })
                                 )}
                             </div>
 
-                            {cartItems.length > 0 && (
-                                <div className="p-6 pb-10 md:pb-6 border-t border-neutral-100 bg-neutral-50">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <span className="text-lg text-neutral-600 uppercase tracking-widest">Total</span>
-                                        <span className="text-3xl font-serif text-[#D4AF37]">{cartTotal} €</span>
+                            {/* 3. FOOTER COLLÉ EN BAS */}
+                            {cartItems.length > 0 && (() => {
+                                const pricing = calculateFestiveOrderPricing(cartItems);
+                                const isFestive = pricing.hasFestiveItems;
+
+                                return (
+                                    <div className="sticky bottom-0 bg-white border-t border-neutral-100 p-6 space-y-4 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] shrink-0">
+                                        {isFestive && pricing.isEarlyBirdEligible && pricing.discountAmount > 0 ? (
+                                            <div className="space-y-2 pb-2 border-b border-neutral-100">
+                                                <div className="flex justify-between items-center text-xs text-neutral-600">
+                                                    <span>Sous-total brut :</span>
+                                                    <span className="font-semibold text-neutral-900">{pricing.rawTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                                </div>
+                                                <div className="flex justify-between items-center text-xs text-[#927116] font-semibold bg-[#D4AF37]/15 px-2.5 py-1.5 rounded-lg border border-[#D4AF37]/30">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                                            -5%*
+                                                        </span>
+                                                        <span>Remise Early Bird :</span>
+                                                    </div>
+                                                    <span className="font-bold">- {pricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                                </div>
+                                                <div className="flex justify-between items-baseline pt-1">
+                                                    <div>
+                                                        <span className="text-sm font-bold text-neutral-900 block">Total final TTC</span>
+                                                        <span className="text-[10px] text-[#927116] font-medium">Remise -5% déduite automatiquement</span>
+                                                    </div>
+                                                    <span className="text-3xl font-serif font-bold text-black">
+                                                        {pricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                    </span>
+                                                </div>
+                                                <p className="text-[11px] text-neutral-500 italic pt-0.5">
+                                                    Option acompte 30% ou totalité 100% au choix à la validation.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="flex justify-between items-baseline">
+                                                <div>
+                                                    <span className="text-sm font-bold text-neutral-900 block">Total final TTC</span>
+                                                    <span className="text-[11px] text-neutral-400">TVA incluse</span>
+                                                </div>
+                                                <span className="text-3xl font-serif font-bold text-black">
+                                                    {cartTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                </span>
+                                            </div>
+                                        )}
+                                        <Link
+                                            href={isFestive ? "/contact?type=menus_fetes" : "/contact?type=plat_prepare"}
+                                            onClick={() => setIsCartOpen(false)}
+                                            className="w-full bg-black hover:bg-[#D4AF37] text-white font-bold text-center py-4 px-6 rounded-xl flex justify-center items-center gap-2.5 uppercase tracking-wider text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.01]"
+                                        >
+                                            <span>Valider ma commande</span>
+                                            <ArrowRight size={16} />
+                                        </Link>
                                     </div>
-                                    <Link 
-                                        href="/contact?type=plat_prepare" 
-                                        onClick={() => setIsCartOpen(false)}
-                                        className="w-full bg-black text-white font-bold text-center py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-[#D4AF37] transition-colors"
-                                    >
-                                        Finaliser ma commande
-                                    </Link>
-                                </div>
-                            )}
+                                );
+                            })()}
                         </motion.div>
                     </>
                 )}
@@ -368,13 +513,14 @@ export default function Navbar() {
 
 // --- SUB-COMPONENTS ---
 
-function NavLink({ href, label, textColor, isActive }: { href: string; label: string; textColor: string; isActive: boolean }) {
+function NavLink({ href, label, textColor, isActive, isFestive }: { href: string; label: string; textColor: string; isActive: boolean; isFestive?: boolean }) {
     return (
         <Link
             href={href}
-            className={`relative py-1 text-sm font-bold tracking-widest uppercase whitespace-nowrap transition-all duration-300 group ${textColor} ${isActive ? "opacity-70 border-b-2 border-[#D4AF37]" : "opacity-100 hover:text-[#D4AF37]"
+            className={`relative py-1 text-xs lg:text-sm font-bold tracking-wider lg:tracking-widest uppercase whitespace-nowrap transition-all duration-300 group flex items-center gap-1.5 ${textColor} ${isActive ? "opacity-70 border-b-2 border-[#D4AF37]" : "opacity-100 hover:text-[#D4AF37]"
                 }`}
         >
+            {isFestive && <span className="text-[#D4AF37] animate-pulse"></span>}
             {label}
             {/* Golden Underline Animation (Only for inactive state hover) */}
             {!isActive && (

@@ -204,7 +204,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Salades et féculents"
         ],
         smallPrice: 17,
-        mediumPrice: 15,
+        mediumPrice: 16,
         image: '/images/buffet_ardennais.jpeg'
     },
     reception: {
@@ -431,7 +431,7 @@ export default function Formules() {
     const [activeBuffetTab, setActiveBuffetTab] = useState<BuffetFroidType>('campagnard');
 
     return (
-        <main className="min-h-screen pt-32 pb-20 bg-gray-50">
+        <main className="min-h-screen pt-40 md:pt-48 pb-20 bg-gray-50">
             <div className="max-w-7xl mx-auto px-6">
 
                 {/* HEADER */}
@@ -650,6 +650,62 @@ export default function Formules() {
                 {/* SECTION COLLECTIVITÉS & SALAD BAR */}
                 <div className="mb-32">
                     <CollectiviteSection />
+                </div>
+
+                <SectionTitle title="Boissons & Service" />
+
+                {/* SECTION FORMULE BRASSERIE & BOISSONS */}
+                <div className="bg-gradient-to-br from-neutral-900 via-neutral-950 to-black text-white rounded-3xl p-8 md:p-12 shadow-2xl mb-24 border border-[#D4AF37]/30 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                    <div className="relative z-10 max-w-4xl">
+                        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[#D4AF37] text-xs uppercase tracking-widest font-bold mb-4">
+                            <span>🍺</span> Formule Brasserie Zéro Gaspillage
+                        </div>
+                        <h2 className="text-3xl md:text-5xl font-serif text-white mb-4">
+                            Service Bar & Boissons (Formule Brasserie)
+                        </h2>
+                        <p className="text-neutral-300 text-base md:text-lg font-light leading-relaxed mb-8">
+                            Profitez pleinement de votre événement : nous gérons les boissons et le service de A à Z.
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                                <div className="text-2xl mb-3">❄️</div>
+                                <h3 className="font-bold text-white text-base mb-2">Frigo professionnel fourni</h3>
+                                <p className="text-xs text-neutral-300 leading-relaxed">
+                                    Mise à disposition d&apos;un frigo vitré directement sur place pour garantir des boissons parfaitement fraîches.
+                                </p>
+                            </div>
+
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                                <div className="text-2xl mb-3">🔄</div>
+                                <h3 className="font-bold text-white text-base mb-2">Consommation au réel</h3>
+                                <p className="text-xs text-neutral-300 leading-relaxed">
+                                    Large sélection de bières, vins, softs et eaux. Reprise intégrale des invendus non entamés à la fin de l&apos;événement (aucun gaspillage, facturation au réel).
+                                </p>
+                            </div>
+
+                            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                                <div className="text-2xl mb-3">🤵</div>
+                                <h3 className="font-bold text-white text-base mb-2">Service au bar & en salle</h3>
+                                <p className="text-xs text-neutral-300 leading-relaxed">
+                                    Barman / serveur dédié pour assurer le service tout au long de la réception : <strong className="text-[#D4AF37]">18,00 € / h HTVA</strong>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center gap-4">
+                            <Link
+                                href="/contact"
+                                className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-full bg-[#D4AF37] hover:bg-white text-black font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg shadow-[#D4AF37]/20"
+                            >
+                                Intégrer à ma demande de devis →
+                            </Link>
+                            <span className="text-xs text-neutral-400 italic">
+                                Option activable d&apos;un simple clic dans notre configurateur de devis.
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 {/* BOTTOM LEGEND */}

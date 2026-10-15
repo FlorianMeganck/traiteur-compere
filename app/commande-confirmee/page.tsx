@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Check, ArrowLeft, Download } from "lucide-react";
+import { Check, ArrowLeft, Download, AlertCircle } from "lucide-react";
 import { Suspense, useRef } from "react";
 import QRCode from "react-qr-code";
 
@@ -14,38 +14,53 @@ function CommandeConfirmeeContent() {
     const orderId = searchParams.get('orderId') || "";
     const jour = searchParams.get('jour') || "";
     const joursParam = searchParams.get('jours') || "";
+    const creneauParam = searchParams.get('creneau') || "";
     const total = searchParams.get('total') || "0";
+
+    const toPayParam = searchParams.get('toPay');
+    const mode = searchParams.get('mode') || 'totalite_100';
+    const solde = searchParams.get('solde') || '0';
+    const remise = searchParams.get('remise') || '0';
+    const isAcompte = mode === 'acompte_30';
 
     const qrRef = useRef<HTMLDivElement>(null);
 
     // Logique pour déterminer le jour de retrait
     const getPickupDay = (j: string) => {
         const d = j.toLowerCase();
+        if (d.includes('24') || d.includes('noël') || d.includes('noel')) return '24 Décembre';
+        if (d.includes('25')) return '25 Décembre';
+        if (d.includes('31') || d.includes('nouvel') || d.includes('sylvestre')) return '31 Décembre';
+        if (d.includes('01') || d.includes('1er')) return '1er Janvier';
         if (d === 'lundi' || d === 'mardi') return 'Mardi';
         if (d === 'mercredi' || d === 'jeudi') return 'Jeudi';
         if (d === 'vendredi' || d === 'samedi') return 'Samedi';
         return j;
     };
-    
+
     let joursRetraitText = "À confirmer";
     if (joursParam) {
-        const joursList = joursParam.split(',');
-        const pickupDays = Array.from(new Set(joursList.map(getPickupDay)));
-        joursRetraitText = pickupDays.join(', ');
+        joursRetraitText = joursParam;
     } else if (jour) {
-        joursRetraitText = getPickupDay(jour) || "À confirmer";
+        joursRetraitText = jour;
     }
 
-    // Informations bancaires pour la génération du QR Code (à adapter)
+    // Informations bancaires pour la génération du QR Code
     const IBAN = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE22 0689 4683 8447";
     const BIC = process.env.NEXT_PUBLIC_TRAITEUR_BIC || "GKCCBEBB";
     const BENEFICIAIRE = process.env.NEXT_PUBLIC_TRAITEUR_BENEFICIAIRE || "JEAN COMPERE";
-    const COMMUNICATION = `COMMANDE #${orderId} ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
+    const isNoel = orderId.startsWith("NOEL-");
+    const COMMUNICATION = isNoel
+        ? `${orderId} - ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim()
+        : `COMMANDE #${orderId} ${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
     const TOTAL_NUM = parseFloat(total);
+    const TOPAY_NUM = toPayParam ? parseFloat(toPayParam) : TOTAL_NUM;
+    const SOLDE_NUM = parseFloat(solde);
+    const REMISE_NUM = parseFloat(remise);
 
     // Fonction pour générer la chaîne EPC pour le QR Code (Virement SEPA)
     const generateEPCString = () => {
-        const montantStr = TOTAL_NUM > 0 ? TOTAL_NUM.toFixed(2) : "";
+        const montantStr = TOPAY_NUM > 0 ? TOPAY_NUM.toFixed(2) : (TOTAL_NUM > 0 ? TOTAL_NUM.toFixed(2) : "");
         return `BCD\n002\n1\nSCT\n${BIC}\n${BENEFICIAIRE}\n${IBAN}\n${montantStr}\n\n\n${COMMUNICATION}\n\n`;
     };
 
@@ -75,7 +90,7 @@ function CommandeConfirmeeContent() {
     };
 
     return (
-        <main className="min-h-screen pt-32 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
+        <main className="min-h-screen pt-40 md:pt-48 pb-20 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-white via-neutral-50 to-neutral-100 relative overflow-hidden">
             {/* Decorative Elements */}
             <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" />
 
@@ -90,11 +105,53 @@ function CommandeConfirmeeContent() {
                         <Check className="w-12 h-12 text-green-600" strokeWidth={4} />
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">Commande #{orderId}</h1>
+                    <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">
+                        {isNoel ? `Commande ${orderId}` : `Commande #${orderId}`}
+                    </h1>
 
                     <p className="text-neutral-600 text-lg mb-8 max-w-2xl mx-auto">
                         Merci <span className="font-bold text-black">{prenom} {nom}</span>, votre commande a bien été enregistrée.
                     </p>
+
+                    {/* Mode Acompte ou Totalité Badge */}
+                    {isAcompte && (
+                        <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-2xl p-4 mb-6 text-left flex items-start gap-3">
+                            <span className="text-xl">✨</span>
+                            <div className="text-sm">
+                                <p className="font-bold text-neutral-900 font-serif">Option Acompte de 30% sélectionnée</p>
+                                <p className="text-neutral-700 mt-0.5">
+                                    Le versement de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> bloque votre commande et la remise de -5 %. Le solde ({SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) et le nombre de convives sont ajustables jusqu&apos;à 7 jours avant le retrait.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Bandeau d'alerte Paiement 48h & Mention explicite */}
+                    <div className="bg-amber-50/90 border-2 border-amber-300 rounded-2xl p-5 md:p-6 mb-10 text-left shadow-sm">
+                        <div className="flex items-start gap-3.5">
+                            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                                <AlertCircle size={22} className="text-amber-800" />
+                            </div>
+                            <div className="space-y-1.5 text-sm md:text-base">
+                                <h4 className="font-bold text-amber-950 font-serif text-base md:text-lg">
+                                    Votre réservation est enregistrée.
+                                </h4>
+                                <p className="text-neutral-900 font-semibold leading-relaxed">
+                                    Elle sera définitivement confirmée à la réception de votre virement bancaire sous 48h.
+                                </p>
+                                <p className="text-neutral-700 leading-relaxed text-xs md:text-sm">
+                                    {isAcompte ? (
+                                        <>Merci de verser votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous <strong>48 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).</>
+                                    ) : (
+                                        <>Merci de verser votre règlement de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous <strong>48 heures</strong> (via le QR Code ci-dessous ou par virement bancaire).</>
+                                    )}
+                                </p>
+                                <p className="text-neutral-500 text-xs pt-1 italic">
+                                    Notice détaillée de réchauffage et dressage fournie avec chaque commande à notre atelier (Rue Potay 3).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch mb-10 text-left">
                         {/* Bloc Récapitulatif Paiement */}
@@ -114,23 +171,84 @@ function CommandeConfirmeeContent() {
                                         <span className="font-mono text-black font-semibold text-base tracking-wider">{IBAN}</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Communication</span>
+                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">BIC</span>
+                                        <span className="font-mono text-black font-semibold text-base tracking-wider">{BIC}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Communication structurée / libre</span>
                                         <span className="font-medium text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1 rounded inline-block w-fit mt-1">{COMMUNICATION}</span>
                                     </div>
                                     <div className="flex flex-col">
-                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Jour de retrait</span>
-                                        <span className="font-bold text-black flex items-center gap-2">
-                                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                                            {joursRetraitText !== "À confirmer" ? `Le(s) ${joursRetraitText} après 11h` : "À confirmer"}
+                                        <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">
+                                            {creneauParam ? "Dates de vos repas & Retrait" : "Jour de retrait"}
                                         </span>
+                                        <div className="space-y-2">
+                                            {joursRetraitText.includes(" | ") ? (
+                                                joursRetraitText.split(" | ").map((evt, idx) => {
+                                                    const creneaux = creneauParam ? creneauParam.split(" | ") : [];
+                                                    return (
+                                                        <div key={idx} className="bg-neutral-50 p-2.5 rounded-xl border border-neutral-200">
+                                                            <span className="font-bold text-black flex items-center gap-2 text-sm">
+                                                                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                                                {evt}
+                                                            </span>
+                                                            {creneaux[idx] && (
+                                                                <p className="text-xs text-[#D4AF37] font-semibold mt-0.5 ml-4">
+                                                                    ⏰ {creneaux[idx]}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })
+                                            ) : (
+                                                <>
+                                                    <span className="font-bold text-black flex items-center gap-2">
+                                                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                                        {joursRetraitText !== "À confirmer" ? (creneauParam ? joursRetraitText : `Le(s) ${joursRetraitText} après 11h`) : "À confirmer"}
+                                                    </span>
+                                                    {creneauParam && (
+                                                        <p className="text-xs text-[#D4AF37] font-semibold">
+                                                            ⏰ {creneauParam}
+                                                        </p>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="mt-8 pt-6 border-t border-neutral-200">
-                                <div className="flex justify-between items-end">
-                                    <span className="uppercase tracking-widest font-bold text-neutral-500">Montant total</span>
-                                    <span className="text-3xl font-serif font-bold text-black">{TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+
+                            <div className="mt-8 pt-6 border-t border-neutral-200 space-y-3">
+                                {REMISE_NUM > 0 && (
+                                    <div className="flex justify-between items-center text-sm text-emerald-700">
+                                        <span>Promotion Early Bird (-5%)</span>
+                                        <span className="font-bold">-{REMISE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-center text-sm text-neutral-600">
+                                    <span>Total de la commande</span>
+                                    <span className="font-bold text-black">{TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
                                 </div>
+                                {isAcompte ? (
+                                    <>
+                                        <div className="flex justify-between items-end pt-2 border-t border-dashed border-neutral-200">
+                                            <div>
+                                                <span className="uppercase tracking-widest font-bold text-amber-800 text-xs block">Acompte à payer (30%)</span>
+                                                <span className="text-xs text-neutral-500">Sous 48h pour valider</span>
+                                            </div>
+                                            <span className="text-3xl font-serif font-bold text-[#D4AF37]">{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs text-neutral-500 pt-1">
+                                            <span>Solde restant dû (au plus tard 7 jours avant le retrait)</span>
+                                            <span className="font-medium text-neutral-700">{SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="flex justify-between items-end pt-2 border-t border-dashed border-neutral-200">
+                                        <span className="uppercase tracking-widest font-bold text-neutral-500">Montant à régler (100%)</span>
+                                        <span className="text-3xl font-serif font-bold text-black">{TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -138,10 +256,14 @@ function CommandeConfirmeeContent() {
                         <div className="bg-black text-white p-8 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4AF37]/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
 
-                            <h3 className="text-xl font-bold uppercase tracking-widest text-[#D4AF37] mb-6 z-10 text-center">
+                            <h3 className="text-xl font-bold uppercase tracking-widest text-[#D4AF37] mb-2 z-10 text-center">
                                 Scannez & Payez
                             </h3>
-                            <p className="text-sm text-neutral-400 mb-6 text-center z-10">Ouvrez votre application bancaire et scannez ce code pour pré-remplir le virement.</p>
+                            <p className="text-xs font-semibold text-neutral-300 mb-2 z-10 text-center">
+                                Montant : <span className="text-[#D4AF37] text-sm font-bold">{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                {isAcompte ? ' (Acompte 30%)' : ''}
+                            </p>
+                            <p className="text-xs text-neutral-400 mb-6 text-center z-10">Ouvrez votre application bancaire et scannez ce code pour pré-remplir le virement.</p>
 
                             <div className="bg-white p-4 rounded-xl z-10" ref={qrRef}>
                                 <QRCode
@@ -161,6 +283,7 @@ function CommandeConfirmeeContent() {
                         </div>
                     </div>
 
+
                     {/* Bloc Infos Pratiques */}
                     <div className="mt-10 mb-10 bg-white p-8 rounded-2xl border border-neutral-200 text-left">
                         <h3 className="text-xl font-bold uppercase tracking-widest text-neutral-800 mb-6 flex items-center gap-2">
@@ -175,7 +298,7 @@ function CommandeConfirmeeContent() {
                                     </div>
                                     <div>
                                         <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Téléphone</p>
-                                        <p className="font-bold text-black text-lg">+32 476 86 54 07</p>
+                                        <a href="tel:+32468385082" className="font-bold text-black text-lg hover:text-[#D4AF37] transition-colors">+32 468 38 50 82</a>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -184,18 +307,18 @@ function CommandeConfirmeeContent() {
                                     </div>
                                     <div>
                                         <p className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">Adresse de retrait</p>
-                                        <p className="font-medium text-neutral-600">Rue Potay 3, 4470 Saint-Georges-sur-Meuse<br/>Belgique</p>
+                                        <p className="font-medium text-neutral-600">Rue Potay 3, 4470 Saint-Georges-sur-Meuse<br />Belgique</p>
                                     </div>
                                 </div>
                             </div>
                             <div className="h-48 rounded-xl overflow-hidden shadow-inner border border-neutral-200">
-                                <iframe 
-                                    src="https://www.google.com/maps?q=Traiteur+Compere,+Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique&output=embed" 
-                                    width="100%" 
-                                    height="100%" 
-                                    style={{border:0}} 
-                                    allowFullScreen={false} 
-                                    loading="lazy" 
+                                <iframe
+                                    src="https://www.google.com/maps?q=Traiteur+Compere,+Rue+Potay+3,+4470+Saint-Georges-sur-Meuse,+Belgique&output=embed"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    allowFullScreen={false}
+                                    loading="lazy"
                                     referrerPolicy="no-referrer-when-downgrade">
                                 </iframe>
                             </div>

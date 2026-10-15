@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function About() {
     return (
-        <main className="min-h-screen bg-[#FCFCFC] pt-32 pb-24 font-sans text-neutral-800">
+        <main className="min-h-screen bg-[#FCFCFC] pt-40 md:pt-48 pb-24 font-sans text-neutral-800">
             {/* HERO / HEADER */}
             <section className="max-w-7xl mx-auto px-6 mb-24 text-center">
                 <motion.div
