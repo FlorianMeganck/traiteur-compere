@@ -76,10 +76,20 @@ export default function Navbar() {
         };
     }, [isMenuOpen]);
 
+    const [cartBump, setCartBump] = useState(false);
+
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
+        const handleCartBump = () => {
+            setCartBump(true);
+            setTimeout(() => setCartBump(false), 800);
+        };
         window.addEventListener('open-cart-drawer', handleOpenCart);
-        return () => window.removeEventListener('open-cart-drawer', handleOpenCart);
+        window.addEventListener('cart-bump', handleCartBump);
+        return () => {
+            window.removeEventListener('open-cart-drawer', handleOpenCart);
+            window.removeEventListener('cart-bump', handleCartBump);
+        };
     }, []);
 
     return (

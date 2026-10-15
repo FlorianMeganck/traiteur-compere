@@ -12,14 +12,13 @@ import { useCart, CartItem } from "../hooks/useCart";
 export default function PlatsPrepares() {
     const { cartItems, addToCart, removeFromCart, cartTotal, totalItems } = useCart();
     
-    const [toastMessage, setToastMessage] = useState("");
-    const [isAdding, setIsAdding] = useState(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'warning' } | null>(null);
     const [isCartOpen, setIsCartOpen] = useState(false);
 
     useEffect(() => {
         const handleCartCleaned = () => {
-            setToastMessage("Certains plats de votre panier ne sont plus disponibles dans les délais et ont été retirés.");
-            setTimeout(() => setToastMessage(""), 5000);
+            setToast({ message: "Certains plats de votre panier ne sont plus disponibles dans les délais et ont été retirés.", type: 'warning' });
+            setTimeout(() => setToast(null), 5000);
         };
         window.addEventListener('cart-cleaned', handleCartCleaned);
         return () => window.removeEventListener('cart-cleaned', handleCartCleaned);
@@ -119,30 +118,44 @@ export default function PlatsPrepares() {
             prixTotalLigne: (pricePlat * quantitePlat) + (totalSoupes * priceSoupe)
         };
         addToCart(item);
-        setIsAdding(true);
-        setTimeout(() => {
-            setIsAdding(false);
-            setSelectedMeal(null);
-            setToastMessage(`${quantitePlat}x "${dayData.meal}" ajouté(s) à votre panier !`);
-            setTimeout(() => setToastMessage(""), 3500);
-        }, 350);
+        setSelectedMeal(null);
+        setToast({ 
+            message: `${quantitePlat}x "${dayData.meal}" ajouté${quantitePlat > 1 ? 's' : ''} au panier !`, 
+            type: 'success' 
+        });
+        setTimeout(() => setToast(null), 3500);
+        window.dispatchEvent(new Event('open-cart-drawer'));
     };
 
     return (
         <main className="min-h-screen bg-gray-50 pb-24 relative">
             {/* Toast Notification */}
             <AnimatePresence>
-                {toastMessage && (
+                {toast && (
                     <motion.div
-                        initial={{ opacity: 0, y: -50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -50 }}
-                        className="fixed top-28 left-1/2 -translate-x-1/2 z-50 bg-[#111111] text-white border border-[#D4AF37] px-6 py-3.5 rounded-full shadow-2xl text-sm font-medium flex items-center gap-3"
+                        initial={{ opacity: 0, y: -40, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -40, scale: 0.95 }}
+                        className={`fixed top-24 left-1/2 -translate-x-1/2 z-50 text-white px-5 py-3 rounded-full shadow-2xl text-sm font-medium flex items-center gap-3 backdrop-blur-md border ${
+                            toast.type === 'success' 
+                                ? 'bg-neutral-900/95 border-[#D4AF37]/40 text-white' 
+                                : 'bg-red-600/95 border-red-500 text-white'
+                        }`}
                     >
-                        <span className="text-[#D4AF37] text-base">✨</span>
-                        {toastMessage}
-                        <button onClick={() => setToastMessage("")} className="ml-2 hover:text-[#D4AF37] transition-colors">
-                            <X size={16} />
+                        {toast.type === 'success' ? (
+                            <span className="w-5 h-5 rounded-full bg-[#D4AF37] flex items-center justify-center text-black">
+                                <Check size={13} strokeWidth={3} />
+                            </span>
+                        ) : (
+                            <UtensilsCrossed size={18} />
+                        )}
+                        <span className="max-w-xs md:max-w-md truncate">{toast.message}</span>
+                        <button 
+                            onClick={() => setToast(null)} 
+                            className="ml-1 opacity-70 hover:opacity-100 transition-opacity p-0.5 rounded-full hover:bg-white/10"
+                            aria-label="Fermer la notification"
+                        >
+                            <X size={15} />
                         </button>
                     </motion.div>
                 )}
@@ -254,25 +267,10 @@ export default function PlatsPrepares() {
                                         <div className="p-6 md:p-8 bg-white border-t border-neutral-100">
                                             <button 
                                                 onClick={handleAddToCart}
-                                                className={`w-full font-bold py-4 rounded-xl flex justify-center items-center gap-2 transition-all duration-300 shadow-md ${
-                                                    isAdding
-                                                        ? 'bg-emerald-600 text-white scale-[1.02]'
-                                                        : 'bg-black text-white hover:bg-[#D4AF37]'
-                                                }`}
+                                                className="w-full bg-black text-white font-bold py-4 rounded-xl flex justify-center items-center gap-2 hover:bg-[#D4AF37] transition-colors"
                                             >
-                                                {isAdding ? (
-                                                    <>
-                                                        <Check size={20} className="text-white" strokeWidth={3} />
-                                                        <span>Ajouté au panier ! ✓</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <ShoppingCart size={20} />
-                                                        <span>
-                                                            Ajouter au panier - {((parseFloat(dayData.price.replace(',', '.').replace(' €', '')) * quantitePlat) + (totalSoupes * 4)).toLocaleString('fr-BE')} €
-                                                        </span>
-                                                    </>
-                                                )}
+                                                <ShoppingCart size={20} />
+                                                Ajouter au panier - {((parseFloat(dayData.price.replace(',', '.').replace(' €', '')) * quantitePlat) + (totalSoupes * 4)).toLocaleString('fr-BE')} €
                                             </button>
                                         </div>
                                     </>
@@ -288,10 +286,11 @@ export default function PlatsPrepares() {
                 <div className="absolute inset-0">
                     <Image
                         src="https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=2070&auto=format&fit=crop"
-                        alt="Plats préparés maison"
+                        alt="Plats préparés maison de saison - Traiteur Compère"
                         fill
                         className="object-cover"
                         priority
+                        sizes="100vw"
                     />
                     <div className="absolute inset-0 bg-black/60" />
                 </div>

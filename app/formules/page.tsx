@@ -233,7 +233,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
         ],
         smallPrice: 24,
         mediumPrice: 22,
-        image: '/images/buffet_gala.jpeg'
+        image: '/images/buffet_gala.png'
     }
 };
 
@@ -284,7 +284,6 @@ const FORMULES = [
         price: "Dès 11€ / pers",
         image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?q=80&w=2070&auto=format&fit=crop",
         items: [],
-        allergens: ["fish", "crustace", "moutarde"],
         imageStyle: "rounded-t-2xl"
     }
 ];
@@ -352,7 +351,7 @@ function BuffetChaudSection() {
     };
 
     const images = {
-        2: "/images/buffet-2.jpg",
+        2: "/images/buffet-2.jpeg",
         3: "/images/buffet-3.jpg",
         4: "/images/buffet-4.jpg",
         5: "/images/buffet-5.jpg"
@@ -364,9 +363,10 @@ function BuffetChaudSection() {
             <div className="w-full lg:w-1/2 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl">
                 <Image
                     src={images[services as keyof typeof images]}
-                    alt={`Buffet Chaud ${services} services`}
+                    alt={`Buffet Chaud ${services} services - Traiteur Compère`}
                     fill
                     className="object-cover transition-all duration-300"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
                 />
             </div>
 
@@ -536,9 +536,11 @@ export default function Formules() {
                             <div className="lg:col-span-7 h-[500px] relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in lg:order-first">
                                 <Image
                                     src={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].image}
-                                    alt={aperitifsData[activeAperitifTab as keyof typeof aperitifsData].title}
+                                    alt={`Apéritif ${aperitifsData[activeAperitifTab as keyof typeof aperitifsData].title} - Traiteur Compère`}
                                     fill
+                                    priority
                                     className="object-cover"
+                                    sizes="(max-width: 1024px) 100vw, 58vw"
                                 />
                             </div>
                         </div>
@@ -625,9 +627,10 @@ export default function Formules() {
                             <div className="lg:col-span-7 h-[500px] relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in">
                                 <Image
                                     src={BUFFETS_FROIDS_OPTIONS[activeBuffetTab].image}
-                                    alt={BUFFETS_FROIDS_OPTIONS[activeBuffetTab].label}
+                                    alt={`Buffet froid ${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].label} - Traiteur Compère`}
                                     fill
                                     className="object-cover"
+                                    sizes="(max-width: 1024px) 100vw, 58vw"
                                 />
                             </div>
                         </div>
@@ -642,84 +645,11 @@ export default function Formules() {
                     </div>
                 </section>
 
-                <SectionTitle title="Plats Uniques & Associations" />
+                <SectionTitle title="Plats Uniques & Salad Bar" />
 
-                {/* SECTION COLLECTIVITÉS */}
-                <div className="flex flex-col lg:flex-row gap-12 items-center mb-32">
-                    {/* Colonne Image (À gauche ou à droite pour alterner) */}
-                    <div className="w-full lg:w-1/2 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-xl">
-                        <Image
-                            src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"
-                            alt="Repas de Collectivité"
-                            fill
-                            className="object-cover"
-                        />
-                    </div>
-
-                    {/* Colonne Contenu */}
-                    <div className="w-full lg:w-1/2 flex flex-col items-start">
-                        <h2 className="text-3xl md:text-4xl font-serif text-black mb-4">Repas de Collectivité & Plats Uniques</h2>
-                        <div className="w-12 h-1 bg-[#D4AF37] mb-6"></div>
-
-                        <p className="text-neutral-500 font-light mb-8 leading-relaxed">
-                            Des plats mijotés, généreux et réconfortants, pensés spécialement pour les grands groupes, les clubs sportifs et les associations. La convivialité au meilleur prix avec un plat unique pour tous.
-                        </p>
-
-                        <div className="mb-4">
-                            <div className="inline-block bg-neutral-100 text-neutral-600 px-4 py-2 rounded-lg font-bold text-sm tracking-widest">
-                                De 8,00€ à 14,00€ HTVA / personne
-                            </div>
-                        </div>
-
-                        {/* Encadré Composition / Plats */}
-                        <div className="w-full bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-neutral-100 mb-8">
-                            <h3 className="text-xs font-bold text-black uppercase tracking-widest mb-4">
-                                Nos Propositions
-                            </h3>
-                            <div className="text-neutral-600 leading-relaxed">
-                                <ul className="space-y-2">
-                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Carbonnade flamande, purée et compote</li>
-                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Lasagnes (Bœuf, Saumon, Légumes)</li>
-                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Boulettes sauce tomate ou chasseur</li>
-                                    <li className="flex items-center gap-2 text-sm text-neutral-700"><span className="text-[#D4AF37]">✓</span> Et bien d'autres (21 plats au choix)...</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div className="mb-6 -mt-2 w-full flex justify-center">
-                            <AllergenLink section="collectivite" />
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row flex-wrap gap-4 mt-8">
-                            {/* Bouton 1 : Petit groupe (+10%) */}
-                            <Link
-                                href="/contact?formule=collectivite&groupe=petit"
-                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
-                            >
-                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 30 pers.</p>
-                                <p className="text-xl font-bold text-neutral-800 font-serif">+10%</p>
-                            </Link>
-
-                            {/* Bouton 2 : Standard */}
-                            <Link
-                                href="/contact?formule=collectivite&groupe=standard"
-                                className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
-                            >
-                                <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
-                                <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">30 à 100 pers.</p>
-                                <p className="text-2xl font-bold text-white font-serif">Devis Standard</p>
-                            </Link>
-
-                            {/* Bouton 3 : Grand groupe (Dégressif) */}
-                            <Link
-                                href="/contact?formule=collectivite&groupe=grand"
-                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
-                            >
-                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
-                                <p className="text-xl font-bold text-neutral-800 font-serif">Dégressif</p>
-                            </Link>
-                        </div>
-                    </div>
+                {/* SECTION COLLECTIVITÉS & SALAD BAR */}
+                <div className="mb-32">
+                    <CollectiviteSection />
                 </div>
 
                 <SectionTitle title="Boissons & Service" />
@@ -799,9 +729,10 @@ export default function Formules() {
                                             <div className="relative w-6 h-6">
                                                 <Image
                                                     src={data.image}
-                                                    alt={data.label}
+                                                    alt={`Allergène ${data.label}`}
                                                     fill
                                                     className="object-contain"
+                                                    sizes="24px"
                                                 />
                                             </div>
                                         ) : (
@@ -843,9 +774,11 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
             <div className="w-full md:w-1/2 relative h-[280px] md:h-[500px] flex-shrink-0 overflow-hidden rounded-2xl shadow-xl">
                 <Image
                     src={formule.image}
-                    alt={formule.title}
+                    alt={`${formule.title} - Traiteur Compère`}
                     fill
                     className="object-cover transition-transform duration-700"
+                    priority={index === 0}
+                    sizes="(max-width: 768px) 100vw, 50vw"
                 />
             </div>
 
@@ -907,35 +840,8 @@ function FormuleSection({ formule, index }: { formule: FormuleType, index: numbe
                     </ul>
                 </div>
 
-                {/* ALLERGENS FOR THIS ITEM */}
-                <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <span className="uppercase tracking-widest text-xs font-bold">Contient :</span>
-                    <div className="flex gap-3">
-                        {formule.allergens?.map((alg) => {
-                            const data = ALLERGEN_ICONS[alg];
-                            if (!data) return null;
-
-                            return (
-                                <div key={alg} className="flex items-center gap-1.5" title={data.label}>
-                                    {data.image ? (
-                                        <Image
-                                            src={data.image}
-                                            alt={data.label}
-                                            width={20}
-                                            height={20}
-                                            className="object-contain"
-                                        />
-                                    ) : (
-                                        data.icon && <data.icon size={20} strokeWidth={1.5} className="text-neutral-500" />
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
                 {formule.tag === "BBQ & Feu de bois" && (
-                    <div className="mt-6 mb-2">
+                    <div className="mt-4 mb-2">
                         <AllergenLink section="bbq" />
                     </div>
                 )}
@@ -1125,6 +1031,248 @@ function PricingBlock({ price, tag, selectedBBQ }: { price: string, tag: string,
                 <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
                 <p className="text-xl font-bold text-neutral-800 font-serif">Sur devis</p>
             </Link>
+        </div>
+    );
+}
+
+// --- SALAD BAR & BOWLS DATA ---
+export interface SaladBowlItem {
+    name: string;
+    price: number;
+    desc: string;
+}
+
+export const SALADS_BOWLS_DATA: SaladBowlItem[] = [
+    {
+        name: "La Buddha Bowl Maison",
+        price: 10.50,
+        desc: "Riz complet, lentilles corail, patate douce au cumin, chou rouge mariné, carottes à l'orange, avocat, pois chiches"
+    },
+    {
+        name: "La Jardinière du Compère",
+        price: 13.00,
+        desc: "Boulgour aux herbes, chèvre frais, betterave rôtie, noix, pomme verte, roquette, miel-balsamique, parmesan"
+    },
+    {
+        name: "La Fraîcheur Méditerranéenne",
+        price: 14.50,
+        desc: "Mesclun, poulet grillé, tomates confites, concombre, radis, quinoa, feta, graines de courge, vinaigrette citron"
+    },
+    {
+        name: "La César Revisitée du Compère",
+        price: 16.00,
+        desc: "Romaine, poulet rôti, lardons fumés, parmesan, croûtons à l'ail, œuf mollet, sauce César maison"
+    },
+    {
+        name: "La Caprese du Compère",
+        price: 18.00,
+        desc: "Orecchiette, mozzarella di bufala, tomates anciennes, roquette, pesto maison, olives taggiasche, tomates séchées, pignons"
+    },
+    {
+        name: "La Compère Campagnarde",
+        price: 21.00,
+        desc: "Mesclun, magret fumé, lardons fermiers, jambon cru d'Ardenne, œuf poché, grenailles tièdes, oignons confits, croûtons"
+    },
+    {
+        name: "La Power Bowl",
+        price: 22.50,
+        desc: "Filet de bœuf émincé ou saumon grillé, œuf dur, edamame, pois chiches paprika, quinoa, épinards, avocat, chia"
+    },
+    {
+        name: "La Nordique",
+        price: 25.00,
+        desc: "Saumon fumé, crevettes grises, œuf dur, avocat, grenailles tièdes, concombre, jeunes pousses, câpres, oignons rouges"
+    }
+];
+
+function CollectiviteSection() {
+    const [activeCollectiviteTab, setActiveCollectiviteTab] = useState<'chaud' | 'salad_bar'>('chaud');
+
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            {/* Colonne Gauche : Onglets & Infos */}
+            <div className="lg:col-span-5 space-y-8">
+                {/* Navigation des onglets (Style standard identique aux Buffets Froids) */}
+                <div className="grid grid-cols-2 gap-2">
+                    <button
+                        type="button"
+                        onClick={() => setActiveCollectiviteTab('chaud')}
+                        className={`px-4 py-3 rounded-lg text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 cursor-pointer ${activeCollectiviteTab === 'chaud'
+                            ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
+                            : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
+                            }`}
+                    >
+                        Plats Uniques Chauds
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setActiveCollectiviteTab('salad_bar')}
+                        className={`px-4 py-3 rounded-lg text-xs md:text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 cursor-pointer ${activeCollectiviteTab === 'salad_bar'
+                            ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
+                            : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
+                            }`}
+                    >
+                        Salad Bar & Bowls
+                    </button>
+                </div>
+
+                {/* Contenu Dynamique Volet 1 : Plats Uniques Chauds */}
+                {activeCollectiviteTab === 'chaud' ? (
+                    <div className="animate-fade-in space-y-6">
+                        <div>
+                            <h3 className="text-2xl font-bold text-neutral-800 mb-2">Plats Uniques Chauds</h3>
+                            <p className="text-neutral-600 mb-4 leading-relaxed text-sm">
+                                Des plats mijotés, généreux et réconfortants, pensés spécialement pour les grands groupes, les clubs sportifs et les associations. La convivialité au meilleur prix avec un plat unique pour tous.
+                            </p>
+                            <div className="mb-6">
+                                <span className="inline-block bg-neutral-100 text-neutral-700 px-4 py-2 rounded-lg font-bold text-xs tracking-widest border border-neutral-200">
+                                    De 8,00€ à 14,00€ HTVA / personne
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 mb-8">
+                            <h4 className="text-sm font-bold text-black uppercase tracking-widest mb-4">
+                                Nos Propositions Phares (21 plats au choix)
+                            </h4>
+                            <ul className="grid grid-cols-1 gap-3">
+                                <li className="flex items-start gap-3 text-neutral-700 text-sm">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                    <span>Carbonnade flamande, purée et compote de pomme</span>
+                                </li>
+                                <li className="flex items-start gap-3 text-neutral-700 text-sm">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                    <span>Lasagnes artisanales (Bœuf, Saumon, Légumes du soleil)</span>
+                                </li>
+                                <li className="flex items-start gap-3 text-neutral-700 text-sm">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                    <span>Boulettes maison (Sauce tomate, liégeoise ou chasseur)</span>
+                                </li>
+                                <li className="flex items-start gap-3 text-neutral-700 text-sm">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                    <span>Blanquette de veau à l&apos;ancienne, tartiflette, potées...</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <AllergenLink section="collectivite" />
+
+                        {/* Boutons d'action Devis / Convives */}
+                        <div className="flex flex-wrap gap-4 mt-8">
+                            <Link
+                                href="/contact?menu=collectivite_chaud&convives=Moins de 30"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                            >
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 30 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">+10%</p>
+                            </Link>
+
+                            <Link
+                                href="/contact?menu=collectivite_chaud&convives=30 à 100"
+                                className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
+                            >
+                                <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
+                                <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">30 à 100 pers.</p>
+                                <p className="text-xl font-bold text-white font-serif">Demander un devis</p>
+                            </Link>
+
+                            <Link
+                                href="/contact?menu=collectivite_chaud&convives=Plus de 100"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                            >
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">Dégressif</p>
+                            </Link>
+                        </div>
+                    </div>
+                ) : (
+                    /* Contenu Dynamique Volet 2 : Salad Bar & Bowls Fraîcheur */
+                    <div className="animate-fade-in space-y-6">
+                        <div>
+                            <h3 className="text-2xl font-bold text-neutral-800 mb-2">Salad Bar & Bowls Fraîcheur</h3>
+                            <p className="text-neutral-600 mb-4 leading-relaxed text-sm">
+                                Une sélection complète de salades repas et bowls gourmands préparés maison avec des produits frais, sains et colorés. Idéal pour vos déjeuners d&apos;entreprise, séminaires, clubs et buffets fraîcheur.
+                            </p>
+                            <div className="space-y-2 mb-6">
+                                <div className="inline-block bg-neutral-100 text-neutral-700 px-4 py-2 rounded-lg font-bold text-xs tracking-widest border border-neutral-200">
+                                    Dès 10,50€ HTVA / personne
+                                </div>
+                                <p className="text-xs text-[#D4AF37] bg-[#D4AF37]/10 border border-[#D4AF37]/30 p-2.5 rounded-xl font-medium leading-relaxed">
+                                    ℹ️ Tarif de référence (25 à 150 pers.) – <strong>Minimum 6 portions par référence sélectionnée.</strong>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-100 mb-8">
+                            <h4 className="text-sm font-bold text-black uppercase tracking-widest mb-4">
+                                Aperçu des Recettes Signatures (8 au choix)
+                            </h4>
+                            <ul className="grid grid-cols-1 gap-3">
+                                <li className="flex items-start gap-3 text-neutral-700 text-sm">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                    <span><strong>La Buddha Bowl Maison</strong> (10,50€) – Riz complet, lentilles, patate douce, avocat...</span>
+                                </li>
+                                <li className="flex items-start gap-3 text-neutral-700 text-sm">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                    <span><strong>La César Revisitée</strong> (16,00€) – Poulet rôti, parmesan, œuf mollet, croûtons...</span>
+                                </li>
+                                <li className="flex items-start gap-3 text-neutral-700 text-sm">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                    <span><strong>La Caprese du Compère</strong> (18,00€) – Orecchiette, mozzarella di bufala, pesto...</span>
+                                </li>
+                                <li className="flex items-start gap-3 text-neutral-700 text-sm">
+                                    <span className="text-[#D4AF37] font-bold mt-0.5">✓</span>
+                                    <span><strong>La Nordique, Méditerranéenne, Campagnarde...</strong> (Dès 13,00€)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <AllergenLink section="collectivite" />
+
+                        {/* Boutons d'action Devis / Convives */}
+                        <div className="flex flex-wrap gap-4 mt-8">
+                            <Link
+                                href="/contact?menu=collectivite_saladbar&convives=Moins de 30"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                            >
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 30 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">+10%</p>
+                            </Link>
+
+                            <Link
+                                href="/contact?menu=collectivite_saladbar&convives=30 à 100"
+                                className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
+                            >
+                                <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
+                                <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">30 à 100 pers.</p>
+                                <p className="text-xl font-bold text-white font-serif">Demander un devis</p>
+                            </Link>
+
+                            <Link
+                                href="/contact?menu=collectivite_saladbar&convives=Plus de 100"
+                                className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                            >
+                                <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 100 pers.</p>
+                                <p className="text-xl font-bold text-neutral-800 font-serif">Dégressif</p>
+                            </Link>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Colonne Droite : Image Dynamique */}
+            <div className="lg:col-span-7 h-[520px] relative rounded-3xl overflow-hidden shadow-2xl animate-fade-in">
+                <Image
+                    src={activeCollectiviteTab === 'chaud'
+                        ? "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop"
+                        : "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop"
+                    }
+                    alt={activeCollectiviteTab === 'chaud' ? "Plats Uniques Chauds - Traiteur Compère" : "Salad Bar & Bowls Fraîcheur - Traiteur Compère"}
+                    fill
+                    className="object-cover transition-all duration-500"
+                    sizes="(max-width: 1024px) 100vw, 58vw"
+                />
+            </div>
         </div>
     );
 }

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useLayoutEffect, Suspense } from "react";
+import { useState, useEffect, useMemo, useLayoutEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle, Phone } from "lucide-react";
+import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle, Phone, ChevronDown, ChevronRight } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import {
     FESTIVE_CALENDAR_DAYS,
@@ -26,18 +26,103 @@ export default function Contact() {
 
 // --- DATA CONSTANTS ---
 
-const viandesClassiques = [
-    "Saucisse (nature)", "Saucisse (campagne)", "Saucisse (barbecue)", "Saucisse (italienne)",
-    "Chipolata (nature)", "Chipolata (fines herbes)", "Chipolata (poivre)", "Chipolata (piment d'Espelette)",
-    "Merguez", "Mini boudin blanc", "Saucisse de volaille (nature)", "Saucisse de volaille (fromage)",
-    "Brochette nature aux oignons", "Brochette de bœuf marinée", "Brochette de porc aux oignons",
-    "Brochette de porc marinée", "Brochette de volaille nature aux oignons", "Brochette de volaille marinée",
-    "Brochette de dinde nature aux oignons", "Brochette de dinde marinée", "Brochette de mini boulettes marinées",
-    "Brochette de mini boudins", "Braisade de bœuf marinée", "Braisade de canard aux trois poivres (+2€)",
-    "Braisade de porc marinée", "Filet de poulet mariné", "Lard mariné (ail et fines herbes)",
-    "Lard mariné (paprika)", "Spare ribs marinés au miel (+1€)", "Jambon barbecue en tranche",
-    "Côte d'agneau marinée ail et fines herbes (+1€)", "Tranche de gigot d'agneau marinée (+2€)", "Pilon de poulet mariné"
+export type CascadeMeatItem =
+    | string
+    | {
+        label: string;
+        variants: string[];
+    };
+
+const viandesClassiquesCascade: CascadeMeatItem[] = [
+    { label: "Saucisse", variants: ["Nature", "Campagne", "Barbecue", "Italienne"] },
+    { label: "Chipolata", variants: ["Nature", "Fines herbes", "Poivre", "Piment d'Espelette"] },
+    "Merguez",
+    "Mini boudin blanc",
+    { label: "Saucisse de volaille", variants: ["Nature", "Fromage"] },
+    "Brochette de mini boulettes marinées",
+    "Brochette de mini boudins",
+    "Filet de poulet mariné",
+    "Pilon de poulet mariné",
+    "Brochette de volaille marinée",
+    "Brochette de volaille nature garnie aux oignons",
+    "Brochette de dinde nature garnie aux oignons",
+    "Brochette de dinde marinée",
+    "Brochette nature garnie d'oignons",
+    "Brochette de porc garnie aux oignons",
+    "Brochette de porc marinée",
+    "Braisade de porc marinée",
+    { label: "Lard mariné", variants: ["Ail & fines herbes", "Paprika"] },
+    "Jambon barbecue en tranche",
+    "Brochette de bœuf marinée (+1,00 € / pers.)",
+    "Braisade de bœuf marinée (+1,00 € / pers.)",
+    "Spare ribs marinés au miel (+1,00 € / pers.)",
+    "Côte d'agneau marinée ail & fines herbes (+1,00 € / pers.)",
+    "Braisade de canard aux trois poivres (+2,00 € / pers.)",
+    "Tranche de gigot d'agneau marinée ail & fines herbes (+2,00 € / pers.)",
+    "Spare ribs de bœuf (+2,50 € / pers.)"
 ];
+
+const viandesComposeCascade: CascadeMeatItem[] = [
+    "Brochette de scampi (+2,00 € / pers.)",
+    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
+    ...viandesClassiquesCascade
+];
+
+const dinatoireViandesCascade: CascadeMeatItem[] = [
+    "Brochette de scampi (+2,00 € / pers.)",
+    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
+    ...viandesClassiquesCascade
+];
+
+const viandesClassiques = [
+    "Saucisse (nature, campagne, barbecue, italienne)",
+    "Chipolata (nature, fines herbes, poivre, piment d'Espelette)",
+    "Merguez",
+    "Mini boudin blanc",
+    "Saucisse de volaille (nature, fromage)",
+    "Brochette de mini boulettes marinées",
+    "Brochette de mini boudins",
+    "Filet de poulet mariné",
+    "Pilon de poulet mariné",
+    "Brochette de volaille marinée",
+    "Brochette de volaille nature garnie aux oignons",
+    "Brochette de dinde nature garnie aux oignons",
+    "Brochette de dinde marinée",
+    "Brochette nature garnie d'oignons",
+    "Brochette de porc garnie aux oignons",
+    "Brochette de porc marinée",
+    "Braisade de porc marinée",
+    "Lard mariné (ail & fines herbes ou paprika)",
+    "Jambon barbecue en tranche",
+    "Brochette de bœuf marinée (+1,00 € / pers.)",
+    "Braisade de bœuf marinée (+1,00 € / pers.)",
+    "Spare ribs marinés au miel (+1,00 € / pers.)",
+    "Côte d'agneau marinée ail & fines herbes (+1,00 € / pers.)",
+    "Braisade de canard aux trois poivres (+2,00 € / pers.)",
+    "Tranche de gigot d'agneau marinée ail & fines herbes (+2,00 € / pers.)",
+    "Spare ribs de bœuf (+2,50 € / pers.)"
+];
+
+const viandesCompose = [
+    "Brochette de scampi (+2,00 € / pers.)",
+    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
+    ...viandesClassiques
+];
+
+const dinatoireViandes = [
+    "Brochette de scampi (+2,00 € / pers.)",
+    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
+    ...viandesClassiques
+];
+
+const getMeatSupplementPrice = (meatName: string): number => {
+    if (!meatName) return 0;
+    if (meatName.includes("+2,50 €") || meatName.includes("+2.50 €") || meatName.includes("+2,5€") || meatName.includes("+2.5€")) return 2.5;
+    if (meatName.includes("+2,00 €") || meatName.includes("+2.00 €") || meatName.includes("+2€")) return 2.0;
+    if (meatName.includes("+1,00 €") || meatName.includes("+1.00 €") || meatName.includes("+1€")) return 1.0;
+    if (meatName.includes("+3,00 €") || meatName.includes("+3.00 €") || meatName.includes("+3€")) return 3.0;
+    return 0;
+};
 
 const optionsVegetariennes = [
     "Halloumi grillé au miel", "Brochettes de légumes méditerranéens",
@@ -53,9 +138,7 @@ const entreesCompose = [
     "Tartare de bœuf aux herbes fines"
 ];
 
-const viandesCompose = ["Côte d'agneau", "Contrefilet de bœuf étranger", "Merguez", "Chipolata", "Brochette de bœuf"];
 const dinatoireServices = ["Lasagnes", "Chili", "Tortellini", "Paëlla"];
-const dinatoireViandes = ["Brochette de scampi", "Côte d'agneau", "Contrefilet de bœuf étranger", "Merguez et saucisse", "Brochette de bœuf"];
 
 const fruitsDeMer = [
     "Brochette de scampi", "Calamar mariné au cumin", "Brochette de Saint-Jacques",
@@ -68,6 +151,24 @@ const dessertsList = [
     "Dôme de chocolat noir avec son cœur praliné", "Carpaccio d'ananas rôti, citron vert et menthe",
     "Panna cotta vanille et coulis framboise", "Financier aux amandes et fruits frais"
 ];
+
+const MIGNARDISES_LIST = [
+    "Mini bavarois framboises & passion",
+    "Mini javanais",
+    "Mini éclairs",
+    "Mini choux crème fraîche & chocolat",
+    "Mini choux crème fraîche",
+    "Mini croûte aux fraises",
+    "Mini verrine mousses chocolat"
+];
+
+const getMignardisesPricePerPerson = (qty: number): number => {
+    if (!qty || qty <= 0) return 0;
+    if (qty <= 2) {
+        return qty * 2.75;
+    }
+    return qty * 2.50;
+};
 
 const NOBLES = ["Tomahawk", "Côte à l'os", "Entrecôte Irlandaise", "Entrecôte Simmental", "Entrecôte Black Angus", "Filet Pur"];
 
@@ -268,6 +369,66 @@ const getVerrineBasePrices = (itemName: string): { price6cl: number, price12cl: 
     return null;
 };
 
+export interface SaladBowlItem {
+    name: string;
+    price: number;
+    desc: string;
+}
+
+const SALADS_BOWLS_DATA: SaladBowlItem[] = [
+    {
+        name: "La Buddha Bowl Maison",
+        price: 10.50,
+        desc: "Riz complet, lentilles corail, patate douce au cumin, chou rouge mariné, carottes à l'orange, avocat, pois chiches"
+    },
+    {
+        name: "La Jardinière du Compère",
+        price: 13.00,
+        desc: "Boulgour aux herbes, chèvre frais, betterave rôtie, noix, pomme verte, roquette, miel-balsamique, parmesan"
+    },
+    {
+        name: "La Fraîcheur Méditerranéenne",
+        price: 14.50,
+        desc: "Mesclun, poulet grillé, tomates confites, concombre, radis, quinoa, feta, graines de courge, vinaigrette citron"
+    },
+    {
+        name: "La César Revisitée du Compère",
+        price: 16.00,
+        desc: "Romaine, poulet rôti, lardons fumés, parmesan, croûtons à l'ail, œuf mollet, sauce César maison"
+    },
+    {
+        name: "La Caprese du Compère",
+        price: 18.00,
+        desc: "Orecchiette, mozzarella di bufala, tomates anciennes, roquette, pesto maison, olives taggiasche, tomates séchées, pignons"
+    },
+    {
+        name: "La Compère Campagnarde",
+        price: 21.00,
+        desc: "Mesclun, magret fumé, lardons fermiers, jambon cru d'Ardenne, œuf poché, grenailles tièdes, oignons confits, croûtons"
+    },
+    {
+        name: "La Power Bowl",
+        price: 22.50,
+        desc: "Filet de bœuf émincé ou saumon grillé, œuf dur, edamame, pois chiches paprika, quinoa, épinards, avocat, chia"
+    },
+    {
+        name: "La Nordique",
+        price: 25.00,
+        desc: "Saumon fumé, crevettes grises, œuf dur, avocat, grenailles tièdes, concombre, jeunes pousses, câpres, oignons rouges"
+    }
+];
+
+const saladesBowlsData: Record<string, number> = {
+    "La Buddha Bowl Maison": 10.50,
+    "La Jardinière du Compère": 13.00,
+    "La Fraîcheur Méditerranéenne": 14.50,
+    "La César Revisitée du Compère": 16.00,
+    "La Caprese du Compère": 18.00,
+    "La Compère Campagnarde": 21.00,
+    "La Power Bowl": 22.50,
+    "La Nordique": 25.00
+};
+
 const collectiviteData: Record<string, number> = {
     "Lasagne aux légumes du soleil": 8,
     "Cannellonis ricotta épinards": 8,
@@ -296,6 +457,15 @@ const collectiviteData: Record<string, number> = {
 const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison", "Quiche aux légumes"];
 const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison", "Terrine de légumes"];
 const ITEMS_ASSOCIATIONS = ["Boulets Liégeois (Sauce Lapin)", "Boulets Liégeois (Sauce Tomate)", "Vol-au-vent artisanal", "Pâtes Bolognaise", "Pâtes Carbonara", "Burgers Spécial Compère", "Option Végé : Grande Salade & Quiche"];
+
+// SAUCES CHAUDES
+const SAUCES_CHAUDES_LIST = [
+    "Sauce au poivre",
+    "Sauce béarnaise",
+    "Sauce dijonnaise",
+    "Sauce aux champignons",
+    "Sauce au fond de volaille"
+];
 
 // OPTIONS
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
@@ -416,11 +586,18 @@ function ContactForm() {
         Accompagnement_Chaud: "",
         Accompagnement_Chaud_Supplement: "",
         Accompagnement_Chaud_Supplement_Check: "Non",
+        Legumes_Chauds_Check: "Non",
+        Sauces_Chaudes_Check: "Non",
+        Sauces_Chaudes_Choix: [] as string[],
         Feculent: "",
         Feculent_Extra: "",
+        Crudites_Choix_Chef: "Non",
         Suppl_Crudite_Extra: "",
         Dessert_Check: "Non",
+        Dessert_Type: "traditionnel" as "traditionnel" | "mignardises",
         Dessert_Choix: "",
+        Mignardises_Quantite: "3",
+        Mignardises_Varietes: [] as string[],
         Service_Check: "Non",
         Location_Vaisselle_Check: "Non",
         Location_Verrerie_Check: "Non",
@@ -472,7 +649,9 @@ function ContactForm() {
         Verrine_Cat_8: "", Verrine_Item_8: "",
         Verrine_Cat_9: "", Verrine_Item_9: "",
         Verrine_Cat_10: "", Verrine_Item_10: "",
+        Collectivite_Volet: "plats_chauds" as "plats_chauds" | "salad_bar",
         Plat_Collectivite: "",
+        Salad_Bar_Choix: "",
         Buffet_Chaud_Services: "3",
         Buffet_Chaud_Commentaires: "",
         Buffet_Chaud_Zakouskis: "",
@@ -540,7 +719,7 @@ function ContactForm() {
     const isPainsMode = menuParam === 'pains_garnis';
     const isZakouskisMode = menuParam === 'zakouskis';
     const isVerrinesMode = menuParam === 'verrines';
-    const isCollectiviteMode = menuParam === 'collectivite' || searchParams.get('formule') === 'collectivite';
+    const isCollectiviteMode = menuParam === 'collectivite' || menuParam === 'collectivite_chaud' || menuParam === 'salad_bar' || menuParam === 'collectivite_saladbar' || menuParam === 'collectivite_salad_bar' || searchParams.get('formule') === 'collectivite' || searchParams.get('formule') === 'salad_bar';
     const isBuffetChaudMode = searchParams.get('formule') === 'buffet-chaud';
     const isMenusFetes = typeParam === 'menus_fetes' || typeParam === 'menu_fetes' || (isLoaded && cartItems.some(i => i.itemType === 'menu_fete' || i.semaineId?.startsWith('menu') || i.semaineId?.startsWith('fetes') || i.semaineId === 'menus-fetes'));
     const isPlatPrepare = typeParam === 'plat_prepare' || isMenusFetes;
@@ -654,6 +833,7 @@ function ContactForm() {
         const menuParam = searchParams.get('menu');
         const convivesParam = searchParams.get('convives');
         const serviceParam = searchParams.get('service');
+        const voletParam = searchParams.get('volet');
 
         setFormData(prev => {
             const newData = { ...prev };
@@ -691,8 +871,12 @@ function ContactForm() {
                     newData.Type_Evenement = 'Zakouskis';
                 } else if (menuParam === 'verrines') {
                     newData.Type_Evenement = 'Verrines';
-                } else if (menuParam === 'collectivite') {
+                } else if (menuParam === 'collectivite' || menuParam === 'collectivite_chaud') {
                     newData.Type_Evenement = 'Repas de collectivité';
+                    newData.Collectivite_Volet = 'plats_chauds';
+                } else if (menuParam === 'salad_bar' || menuParam === 'collectivite_saladbar' || menuParam === 'collectivite_salad_bar') {
+                    newData.Type_Evenement = 'Repas de collectivité';
+                    newData.Collectivite_Volet = 'salad_bar';
                 }
             } else if (typeParam === 'plat_prepare' || isMenusFetes) {
                 newData.Type_Evenement = isMenusFetes ? 'Menus de Fêtes' : 'Plat Préparé';
@@ -706,8 +890,13 @@ function ContactForm() {
                 if (servicesParam) {
                     newData.Buffet_Chaud_Services = servicesParam;
                 }
-            } else if (formuleParam === 'collectivite') {
+            } else if (formuleParam === 'collectivite' || formuleParam === 'salad_bar' || formuleParam === 'collectivite_chaud' || formuleParam === 'collectivite_saladbar') {
                 newData.Type_Evenement = 'Repas de collectivité';
+                if (formuleParam === 'salad_bar' || formuleParam === 'collectivite_saladbar' || voletParam === 'salad_bar' || voletParam === 'salades') {
+                    newData.Collectivite_Volet = 'salad_bar';
+                } else if (formuleParam === 'collectivite_chaud' || voletParam === 'plats_chauds' || voletParam === 'chaud') {
+                    newData.Collectivite_Volet = 'plats_chauds';
+                }
                 const groupeParam = searchParams.get('groupe');
                 if (groupeParam === 'petit') newData.Nombre_Convives = "Moins de 30";
                 else if (groupeParam === 'standard') newData.Nombre_Convives = "30 à 100";
@@ -872,13 +1061,21 @@ function ContactForm() {
                 }
             }
             base = basePriceTotal;
-        } else if (isCollectivite && formData.Plat_Collectivite) {
-            let itemPrice = collectiviteData[formData.Plat_Collectivite];
-            // Majoration de 10% si moins de 30 personnes
-            if (formData.Nombre_Convives === 'Moins de 30') {
-                itemPrice = itemPrice * 1.10;
+        } else if (isCollectivite) {
+            if (formData.Collectivite_Volet === 'salad_bar' && formData.Salad_Bar_Choix) {
+                let itemPrice = saladesBowlsData[formData.Salad_Bar_Choix] || 0;
+                if (formData.Nombre_Convives === 'Moins de 30') {
+                    itemPrice = itemPrice * 1.10;
+                }
+                base = itemPrice;
+            } else if (formData.Plat_Collectivite) {
+                let itemPrice = collectiviteData[formData.Plat_Collectivite] || 0;
+                // Majoration de 10% si moins de 30 personnes
+                if (formData.Nombre_Convives === 'Moins de 30') {
+                    itemPrice = itemPrice * 1.10;
+                }
+                base = itemPrice;
             }
-            base = itemPrice;
         }
 
         if (base === -1) return { perPerson: -1, materiel: 0 };
@@ -896,32 +1093,49 @@ function ContactForm() {
 
         // Loop over selected meats
         const meatFields = [
-            formData.Viande_1, formData.Viande_2, formData.Viande_3,
-            formData.dinatoire_service_1, formData.dinatoire_service_2
+            formData.Viande_1,
+            formData.Viande_2,
+            formData.Viande_3
         ];
         meatFields.forEach(field => {
             if (field) {
-                if (field.includes("(+1€)")) supplements += 1;
-                if (field.includes("(+2€)")) supplements += 2;
-                if (field.includes("(+3€)")) supplements += 3;
+                supplements += getMeatSupplementPrice(field);
             }
         });
 
         if (isAnyBBQ) {
-            if (formData.Viande_Extra_1) supplements += 3;
-            if (formData.Viande_Extra_2) supplements += 3;
+            if (formData.Viande_Extra_1) {
+                supplements += 3 + getMeatSupplementPrice(formData.Viande_Extra_1);
+            }
+            if (formData.Viande_Extra_2) {
+                supplements += 3 + getMeatSupplementPrice(formData.Viande_Extra_2);
+            }
             if (formData.Suppl_Crudite_Extra) supplements += 1.5;
             if (formData.Feculent_Extra) supplements += 2;
         }
 
-        // 3. Extra Hot Side
+        // 3. Options Chaudes (Légumes & Sauces)
+        if (formData.Legumes_Chauds_Check === "Oui") {
+            supplements += 1.0;
+        }
+        if (formData.Sauces_Chaudes_Check === "Oui") {
+            supplements += 0.5;
+        }
         if (formData.Accompagnement_Chaud_Supplement_Check === "Oui" && formData.Accompagnement_Chaud_Supplement) {
             supplements += 1;
         }
 
-        // 4. Dessert
-        if (formData.Dessert_Check === "Oui" && formData.Dessert_Choix) {
-            supplements += 6;
+        // 4. Dessert & Mignardises
+        if (formData.Dessert_Check === "Oui") {
+            if (formData.Dessert_Type === "mignardises") {
+                const qty = (formData.Mignardises_Varietes || []).length;
+                if (qty > 0) {
+                    supplements += getMignardisesPricePerPerson(qty);
+                }
+            } else {
+                // Option traditionnel (+6,00€ / personne)
+                supplements += 6;
+            }
         }
 
         // Location Vaisselle & Verrerie (isolated flat equipment costs)
@@ -951,39 +1165,105 @@ function ContactForm() {
         if (isBBQVegetarien) return optionsVegetariennes;
         if (isBBQNobles) return NOBLES;
         if (isBBQDinatoire) return dinatoireViandes;
+        if (isBBQCompose) return viandesCompose;
         return viandesClassiques;
     };
-    const renderPriceDisplay = (label: string = "Prix par personne") => {
-        if (totalPrice.perPerson === 0 && totalPrice.materiel === 0) return null;
+
+    const getBBQCascadeList = (): CascadeMeatItem[] => {
+        if (isBBQClassique) return viandesClassiquesCascade;
+        if (isBBQMer) return fruitsDeMer;
+        if (isBBQVegetarien) return optionsVegetariennes;
+        if (isBBQNobles) return NOBLES;
+        if (isBBQDinatoire) return dinatoireViandesCascade;
+        if (isBBQCompose) return viandesComposeCascade;
+        return viandesClassiquesCascade;
+    };
+    const renderServiceToggle = (
+        priceLabel: string = "+2,50 € / pers.",
+        description: string = "Personnel de service et prise en charge sur place."
+    ) => {
+        const isWithService = formData.Service_Check === "Oui";
         return (
-            <div className="transition-all duration-300 border-t border-[#D4AF37]/30 pt-6 mt-6">
-                <div className="bg-black text-[#D4AF37] p-4 rounded-xl shadow-lg flex items-center justify-between border border-[#D4AF37]/50 max-w-sm mx-auto">
-                    <span className="text-xs font-bold uppercase tracking-wide">{label}</span>
-                    {totalPrice.perPerson === -1 ? (
-                        <span className="bg-[#D4AF37] text-black px-3 py-1 rounded font-bold text-xs tracking-widest uppercase">SUR DEVIS</span>
-                    ) : (
-                        <span className="text-xl font-serif font-bold">
-                            {totalPrice.perPerson > 0 ? (
-                                <>
-                                    {totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers
-                                    {totalPrice.materiel > 0 && (
-                                        <> + {totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ (Matériel)</>
-                                    )}
-                                    <span className="text-xs font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span>
-                                </>
-                            ) : (
-                                "---"
-                            )}
-                        </span>
-                    )}
+            <div className="bg-white p-5 rounded-2xl border border-neutral-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <label className="block text-sm font-bold text-neutral-800 uppercase tracking-wide flex items-center gap-1.5">
+                        <span>🧑‍🍳</span> Prestation de Service
+                    </label>
+                    <p className="text-xs text-neutral-500 mt-1 italic">
+                        {description}
+                    </p>
+                </div>
+                <div className="flex bg-neutral-100/80 p-1 rounded-xl w-fit border border-neutral-200 shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Non" }))}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                            !isWithService
+                                ? "bg-white border border-neutral-200 shadow-xs text-neutral-900 font-bold"
+                                : "text-neutral-500 hover:text-black"
+                        }`}
+                    >
+                        Sans service
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Oui" }))}
+                        className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                            isWithService
+                                ? "bg-black text-[#D4AF37] shadow-sm font-bold"
+                                : "text-neutral-500 hover:text-black"
+                        }`}
+                    >
+                        Avec service ({priceLabel})
+                    </button>
                 </div>
             </div>
         );
     };
 
+    const renderPriceDisplay = () => {
+        if (totalPrice.perPerson === 0 && totalPrice.materiel === 0) return null;
+        return (
+            <div className="transition-all duration-300 border-t border-[#D4AF37]/30 pt-8 mt-8">
+                <div className="bg-neutral-900 text-[#D4AF37] p-4 sm:p-6 rounded-2xl shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-[#D4AF37]/40 w-full max-w-lg mx-auto transform hover:scale-[1.01] transition-transform">
+                    <div>
+                        <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-[#D4AF37] block">
+                            PRIX ESTIMATIF
+                        </span>
+                        <span className="text-xs text-[#D4AF37]/70 mt-1 font-light block">
+                            {formData.Service_Check === "Oui" ? "Prestation de service incluse" : "Hors frais de déplacement et service"}
+                        </span>
+                    </div>
 
-
-
+                    <div className="text-left sm:text-right">
+                        {totalPrice.perPerson === -1 ? (
+                            <span className="bg-[#D4AF37] text-neutral-900 px-4 py-1.5 rounded-lg font-bold text-xs tracking-widest uppercase inline-block">
+                                SUR DEVIS
+                            </span>
+                        ) : (
+                            <div>
+                                <span className="text-2xl font-serif font-bold text-[#D4AF37]">
+                                    {totalPrice.perPerson > 0 ? (
+                                        <>
+                                            {totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € <span className="text-sm font-sans font-normal text-neutral-300">/ pers</span>
+                                            {totalPrice.materiel > 0 && (
+                                                <span className="block text-xs text-[#D4AF37]/80 font-sans font-normal">
+                                                    + {totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} € (Matériel)
+                                                </span>
+                                            )}
+                                            <span className="text-xs font-sans font-normal text-[#D4AF37]/70 ml-1.5 uppercase">HTVA</span>
+                                        </>
+                                    ) : (
+                                        "---"
+                                    )}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
@@ -994,8 +1274,9 @@ function ContactForm() {
                 ...prev,
                 [name]: checked ? "Oui" : "Non",
                 ...(name === "Societe" && !checked ? { Nom_Societe: "" } : {}),
+                ...(name === "Sauces_Chaudes_Check" && !checked ? { Sauces_Chaudes_Choix: [] } : {}),
                 ...(name === "Accompagnement_Chaud_Supplement_Check" && !checked ? { Accompagnement_Chaud_Supplement: "" } : {}),
-                ...(name === "Dessert_Check" && !checked ? { Dessert_Choix: "" } : {}),
+                ...(name === "Dessert_Check" && !checked ? { Dessert_Choix: "", Dessert_Type: "traditionnel", Mignardises_Quantite: "3", Mignardises_Varietes: [] } : {}),
                 ...(name === "Location_Verrerie_Check" && !checked ? { Location_Verrerie_Vin: "0", Location_Verrerie_Soft: "0", Location_Verrerie_Flute: "0" } : {}),
                 ...(name === "Option_Brasserie_Check" && !checked ? { Option_Brasserie_Details: "" } : {})
             }));
@@ -1032,6 +1313,37 @@ function ContactForm() {
         }
 
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleToggleSauceChaude = (sauce: string) => {
+        setFormData(prev => {
+            const current = prev.Sauces_Chaudes_Choix || [];
+            if (current.includes(sauce)) {
+                return { ...prev, Sauces_Chaudes_Choix: current.filter(s => s !== sauce) };
+            } else {
+                return { ...prev, Sauces_Chaudes_Choix: [...current, sauce] };
+            }
+        });
+    };
+
+    const handleToggleMignardiseVariete = (item: string) => {
+        setFormData(prev => {
+            const currentVarietes = prev.Mignardises_Varietes || [];
+            let updatedVarietes: string[];
+            if (currentVarietes.includes(item)) {
+                updatedVarietes = currentVarietes.filter(v => v !== item);
+            } else {
+                if (currentVarietes.length >= 6) {
+                    return prev; // Maximum 6 variétés
+                }
+                updatedVarietes = [...currentVarietes, item];
+            }
+            return {
+                ...prev,
+                Mignardises_Varietes: updatedVarietes,
+                Mignardises_Quantite: updatedVarietes.length.toString()
+            };
+        });
     };
 
     const handleDateBlur = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -1080,20 +1392,24 @@ function ContactForm() {
             if (!formData.Plat_Associatif) newErrors.Plat_Associatif = "Requis";
         } else if (isBuffetFroid) {
             if (!formData.Feculent_Froid) newErrors.Feculent_Froid = "Requis";
-            if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
-            if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
-            if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
-            if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
-            if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
-            if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
+            if (formData.Crudites_Choix_Chef !== "Oui") {
+                if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
+                if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
+                if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
+                if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
+                if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
+                if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
+            }
         } else if (isAnyBBQ) {
             if (!formData.Feculent) newErrors.Feculent = "Requis";
-            if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
-            if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
-            if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
-            if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
-            if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
-            if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
+            if (formData.Crudites_Choix_Chef !== "Oui") {
+                if (!formData.Crudite_1) newErrors.Crudite_1 = "Requis";
+                if (!formData.Crudite_2) newErrors.Crudite_2 = "Requis";
+                if (!formData.Crudite_3) newErrors.Crudite_3 = "Requis";
+                if (!formData.Crudite_4) newErrors.Crudite_4 = "Requis";
+                if (!formData.Crudite_5) newErrors.Crudite_5 = "Requis";
+                if (!formData.Crudite_6) newErrors.Crudite_6 = "Requis";
+            }
 
             if (isCochonOrPorchetta) {
                 // No specific dynamic fields required for these
@@ -1133,7 +1449,26 @@ function ContactForm() {
             if (!formAny.Verrine_Item_2) newErrors.Verrine_Item_2 = "Requis";
             if (!formAny.Verrine_Item_3) newErrors.Verrine_Item_3 = "Requis";
         } else if (isCollectivite) {
-            if (!formData.Plat_Collectivite) newErrors.Plat_Collectivite = "Requis";
+            if (formData.Collectivite_Volet === 'salad_bar') {
+                if (!formData.Salad_Bar_Choix) {
+                    newErrors.Salad_Bar_Choix = "Veuillez choisir une salade ou un bowl";
+                }
+            } else {
+                if (!formData.Plat_Collectivite) newErrors.Plat_Collectivite = "Requis";
+            }
+        }
+
+        // Validation Option Desserts & Mignardises
+        if (formData.Dessert_Check === "Oui") {
+            if (formData.Dessert_Type === "traditionnel") {
+                if (!formData.Dessert_Choix) {
+                    newErrors.Dessert_Choix = "Veuillez choisir un dessert";
+                }
+            } else if (formData.Dessert_Type === "mignardises") {
+                if (!formData.Mignardises_Varietes || formData.Mignardises_Varietes.length === 0) {
+                    newErrors.Mignardises_Varietes = "Veuillez sélectionner au moins 1 variété de mignardise";
+                }
+            }
         }
 
         return newErrors;
@@ -1267,13 +1602,48 @@ function ContactForm() {
             ...(formData.Feculent_Froid && { "🥔 Féculent Froid": formData.Feculent_Froid }),
 
             // CRUDITÉS (BBQ & Buffets)
-            ...(formData.Crudite_1 && { "🥗 Crudité 1": formData.Crudite_1 }),
-            ...(formData.Crudite_2 && { "🥗 Crudité 2": formData.Crudite_2 }),
-            ...(formData.Crudite_3 && { "🥗 Crudité 3": formData.Crudite_3 }),
-            ...(formData.Crudite_4 && { "🥗 Crudité 4": formData.Crudite_4 }),
-            ...(formData.Crudite_5 && { "🥗 Crudité 5": formData.Crudite_5 }),
-            ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
-            ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra }),
+            ...(() => {
+                const checkedCrudites = [
+                    formData.Crudite_1,
+                    formData.Crudite_2,
+                    formData.Crudite_3,
+                    formData.Crudite_4,
+                    formData.Crudite_5,
+                    formData.Crudite_6
+                ].filter(Boolean);
+
+                if (isAnyBBQ || isBuffetFroid) {
+                    if (formData.Crudites_Choix_Chef === "Oui") {
+                        if (checkedCrudites.length === 0) {
+                            return {
+                                "🥗 Crudités": "Assortiment au choix du chef",
+                                ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra })
+                            };
+                        } else if (checkedCrudites.length < 6) {
+                            return {
+                                "🥗 Crudités": `${checkedCrudites.join(', ')} + Complément au choix du chef`,
+                                ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra })
+                            };
+                        } else {
+                            return {
+                                "🥗 Crudités": checkedCrudites.join(', '),
+                                ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra })
+                            };
+                        }
+                    } else if (checkedCrudites.length > 0) {
+                        return {
+                            ...(formData.Crudite_1 && { "🥗 Crudité 1": formData.Crudite_1 }),
+                            ...(formData.Crudite_2 && { "🥗 Crudité 2": formData.Crudite_2 }),
+                            ...(formData.Crudite_3 && { "🥗 Crudité 3": formData.Crudite_3 }),
+                            ...(formData.Crudite_4 && { "🥗 Crudité 4": formData.Crudite_4 }),
+                            ...(formData.Crudite_5 && { "🥗 Crudité 5": formData.Crudite_5 }),
+                            ...(formData.Crudite_6 && { "🥗 Crudité 6": formData.Crudite_6 }),
+                            ...(formData.Suppl_Crudite_Extra && { "⭐ Crudité Extra (+1,50€)": formData.Suppl_Crudite_Extra })
+                        };
+                    }
+                }
+                return {};
+            })(),
 
             // --- SECTION PETITS PAINS ---
             ...(formData.Type_Evenement === 'Petits pains' && {
@@ -1313,10 +1683,19 @@ function ContactForm() {
                 ...(formData as any).Verrine_Item_10 && { "Choix Verrine 10": (formData as any).Verrine_Item_10 }
             }),
 
-            // --- SECTION COLLECTIVITÉS ---
+            // --- SECTION COLLECTIVITÉS & SALAD BAR ---
             ...(formData.Type_Evenement === 'Repas de collectivité' && {
-                "🥘 MENU SÉLECTIONNÉ": "REPAS DE COLLECTIVITÉ",
-                "🍽️ Plat Unique Choisi": formData.Plat_Collectivite || "Non spécifié"
+                "🥘 MENU SÉLECTIONNÉ": "REPAS DE COLLECTIVITÉ & PLATS UNIQUES",
+                "📋 Volet Sélectionné": formData.Collectivite_Volet === 'salad_bar' ? "Salad Bar & Bowls Fraîcheur" : "Plats Uniques Chauds",
+                ...(formData.Collectivite_Volet === 'salad_bar' ? {
+                    "🥗 Salade / Bowl Choisi": formData.Salad_Bar_Choix
+                        ? `${formData.Salad_Bar_Choix} (${(saladesBowlsData[formData.Salad_Bar_Choix] || 0).toFixed(2).replace('.', ',')} € HTVA / pers.)`
+                        : "Non spécifié"
+                } : {
+                    "🍽️ Plat Unique Chaud Choisi": formData.Plat_Collectivite
+                        ? `${formData.Plat_Collectivite} (${(collectiviteData[formData.Plat_Collectivite] || 0).toFixed(2).replace('.', ',')} € HTVA / pers.)`
+                        : "Non spécifié"
+                })
             }),
 
             // --- SECTION BUFFET CHAUD ---
@@ -1340,12 +1719,21 @@ function ContactForm() {
             ...(formData.Supplement_Viande_2 && { "⭐ Supplément Viande 2": formData.Supplement_Viande_2 }),
             ...(formData.Supplement_Viande_3 && { "⭐ Supplément Viande 3": formData.Supplement_Viande_3 }),
             ...(formData.Accompagnement_Froid_1 && { "🥗 Accompagnement Froid 1": formData.Accompagnement_Froid_1 }),
-            ...(formData.Accompagnement_Froid_2 && { "🥗 Accompagnement Froid 2": formData.Accompagnement_Froid_2 }),
-            ...(formData.Accompagnement_Froid_3 && { "🥗 Accompagnement Froid 3": formData.Accompagnement_Froid_3 }),
+            // ACCOMPAGNEMENTS CHAUDS & SAUCES
+            ...(formData.Legumes_Chauds_Check === "Oui" && {
+                "🥦 Option Légumes Chauds": "Légumes chauds cuisinés (+1,00 € / pers.)"
+            }),
+            ...(formData.Sauces_Chaudes_Check === "Oui" && {
+                "🍲 Option Sauces Chaudes": `Assortiment de sauces chaudes maison (+0,50 € / pers.)${formData.Sauces_Chaudes_Choix && formData.Sauces_Chaudes_Choix.length > 0 ? ` (${formData.Sauces_Chaudes_Choix.join(', ')})` : ''}`
+            }),
             ...(formData.Accompagnement_Chaud_Supplement && { "🔥 Accompagnement Chaud Extra": formData.Accompagnement_Chaud_Supplement }),
 
             // DESSERTS
-            ...(formData.Dessert_Check === "Oui" && formData.Dessert_Choix && { "🍰 Dessert choisi (+6€)": formData.Dessert_Choix }),
+            ...(formData.Dessert_Check === "Oui" && {
+                "🍰 Option Dessert": formData.Dessert_Type === "mignardises"
+                    ? `Option : Mignardises (${formData.Mignardises_Varietes.length} pièces/p - ${getMignardisesPricePerPerson(formData.Mignardises_Varietes.length).toFixed(2).replace('.', ',')} €/p) — Variétés : ${formData.Mignardises_Varietes.length > 0 ? formData.Mignardises_Varietes.join(', ') : 'Non spécifiées'}`
+                    : `Option : Desserts traditionnels (+6,00 €/p)${formData.Dessert_Choix ? ` (${formData.Dessert_Choix})` : ''}`
+            }),
 
             // DIVERS
             "🍽️ Location de vaisselle": formData.Location_Vaisselle_Check === "Oui" ? "Oui (+1,50€/pers)" : "Non",
@@ -1476,140 +1864,434 @@ function ContactForm() {
 
     // --- RENDERERS ---
 
-    const renderDropdown = (label: string, name: string, options: string[], excludeValues: string[] = [], req = false) => {
-        // Filter options: remove if in excludeValues AND not the current value
-        const currentVal = (formData as any)[name];
-        const filteredOptions = options.filter(opt => !excludeValues.includes(opt) || opt === currentVal);
+    const handleSelectMeat = (name: string, value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        if (errors[name]) {
+            setErrors(prev => {
+                const next = { ...prev };
+                delete next[name];
+                return next;
+            });
+        }
+    };
+
+    interface CustomDropdownProps {
+        label?: string;
+        name: string;
+        value: string;
+        options: (string | { label: string; variants: string[] })[];
+        excludeValues?: string[];
+        placeholder?: string;
+        req?: boolean;
+        disabled?: boolean;
+        hasError?: boolean;
+        onSelect?: (name: string, val: string) => void;
+    }
+
+    const CustomDropdown = ({
+        label,
+        name,
+        value,
+        options,
+        excludeValues = [],
+        placeholder = "Faites votre choix...",
+        req = false,
+        disabled = false,
+        hasError = false,
+        onSelect
+    }: CustomDropdownProps) => {
+        const [isOpen, setIsOpen] = useState(false);
+        const [hoveredLabel, setHoveredLabel] = useState<string | null>(null);
+        const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
+        const [submenuPos, setSubmenuPos] = useState<{ top: number; left: number } | null>(null);
+        const containerRef = useRef<HTMLDivElement>(null);
+        const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+        const selectHandler = onSelect || handleSelectMeat;
+        const isErr = hasError || !!errors[name];
+
+        useEffect(() => {
+            const handleClickOutside = (e: MouseEvent) => {
+                if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                    setIsOpen(false);
+                    setHoveredLabel(null);
+                    setExpandedMobile(null);
+                }
+            };
+            if (isOpen) {
+                document.addEventListener("mousedown", handleClickOutside);
+            }
+            return () => {
+                document.removeEventListener("mousedown", handleClickOutside);
+            };
+        }, [isOpen]);
+
+        const handleItemMouseEnter = (e: React.MouseEvent<HTMLDivElement>, itemLabel: string) => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            const rect = e.currentTarget.getBoundingClientRect();
+            const opensLeft = typeof window !== 'undefined' && rect.right + 310 > window.innerWidth;
+            setSubmenuPos({
+                top: rect.top,
+                left: opensLeft ? Math.max(10, rect.left - 295) : rect.right + 6
+            });
+            setHoveredLabel(itemLabel);
+        };
+
+        const handleItemMouseLeave = () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(() => {
+                setHoveredLabel(null);
+            }, 180);
+        };
+
+        const handleSubmenuEnter = () => {
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+        };
+
+        const handleSelectValue = (val: string) => {
+            selectHandler(name, val);
+            setIsOpen(false);
+            setHoveredLabel(null);
+            setExpandedMobile(null);
+        };
+
+        const handleToggleParentMobile = (e: React.MouseEvent, itemLabel: string) => {
+            e.stopPropagation();
+            setExpandedMobile(prev => (prev === itemLabel ? null : itemLabel));
+        };
+
+        const hoveredOption = options.find(
+            opt => typeof opt !== "string" && opt.label === hoveredLabel
+        ) as { label: string; variants: string[] } | undefined;
+
+        // Filter options with excludeValues
+        const filteredOptions = options.filter(opt => {
+            const itemLabel = typeof opt === "string" ? opt : opt.label;
+            return !excludeValues.includes(itemLabel) || itemLabel === value || (typeof opt !== "string" && opt.variants.some(v => `${itemLabel} (${v})` === value));
+        });
 
         return (
-            <div className="group">
-                <label className={labelStyle}>{label} {req && <span className="text-red-500">*</span>}</label>
-                <div className="relative">
-                    <select
-                        name={name}
-                        value={currentVal}
-                        onChange={handleChange}
-                        className={`${getInputStyle(name)} appearance-none cursor-pointer`}
-                    >
-                        <option value="">Faites votre choix...</option>
-                        {filteredOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                    </select>
-                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            <div className={`group relative ${isOpen ? 'z-50' : 'z-10'}`} ref={containerRef}>
+                {label && (
+                    <label className={labelStyle}>
+                        {label} {req && <span className="text-red-500">*</span>}
+                    </label>
+                )}
+
+                {/* TRIGGER BUTTON */}
+                <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => !disabled && setIsOpen(!isOpen)}
+                    className={`w-full bg-white border rounded-xl px-5 py-4 text-left flex items-center justify-between text-base transition-all duration-300 shadow-inner ${
+                        disabled
+                            ? "bg-neutral-100 opacity-60 cursor-not-allowed border-neutral-200"
+                            : isErr
+                            ? "border-red-500 ring-1 ring-red-500 bg-red-50 text-red-900 cursor-pointer"
+                            : isOpen
+                            ? "border-[#D4AF37] ring-2 ring-[#D4AF37]/40 text-neutral-900 cursor-pointer"
+                            : "border-neutral-200 hover:border-[#D4AF37]/60 text-neutral-900 cursor-pointer"
+                    }`}
+                >
+                    <span className={`text-left pr-2 leading-snug break-words ${!value ? "text-neutral-400 font-normal" : "text-neutral-900 font-medium"}`}>
+                        {value || placeholder}
+                    </span>
+                    <ChevronDown
+                        size={18}
+                        className={`text-neutral-400 transition-transform duration-200 flex-shrink-0 ml-2 ${
+                            isOpen ? "rotate-180 text-[#D4AF37]" : ""
+                        }`}
+                    />
+                </button>
+
+                {/* DROPDOWN OVERLAY */}
+                {isOpen && !disabled && (
+                    <div className="absolute z-50 left-0 top-full mt-1.5 w-full min-w-full md:min-w-[320px] md:w-max max-w-[92vw] md:max-w-lg bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 max-h-80 overflow-y-auto overscroll-contain animate-fade-in">
+                        {value && !req && (
+                            <button
+                                type="button"
+                                onClick={() => handleSelectValue("")}
+                                className="w-full text-left px-4 py-2 text-xs font-semibold uppercase tracking-wider text-red-500 hover:bg-red-50 transition-colors flex items-center justify-between border-b border-neutral-100 mb-1 cursor-pointer"
+                            >
+                                <span>Effacer le choix</span>
+                                <span>✕</span>
+                            </button>
+                        )}
+
+                        {filteredOptions.map((option, idx) => {
+                            const isObject = typeof option !== "string";
+                            const itemLabel = isObject ? option.label : option;
+                            const hasVariants = isObject && option.variants && option.variants.length > 0;
+
+                            if (!hasVariants) {
+                                const isSelected = value === itemLabel;
+                                const isExcluded = excludeValues.includes(itemLabel) && !isSelected;
+
+                                return (
+                                    <button
+                                        key={`opt_${idx}_${itemLabel}`}
+                                        type="button"
+                                        disabled={isExcluded}
+                                        onClick={() => handleSelectValue(itemLabel)}
+                                        className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-3 cursor-pointer ${
+                                            isExcluded
+                                                ? "opacity-35 cursor-not-allowed bg-neutral-50 text-neutral-400"
+                                                : isSelected
+                                                ? "bg-[#D4AF37]/15 text-neutral-900 font-bold border-l-4 border-[#D4AF37]"
+                                                : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                                        }`}
+                                    >
+                                        <span className="pr-2 text-left whitespace-normal break-words leading-snug">{itemLabel}</span>
+                                        {isSelected && <Check size={16} className="text-[#D4AF37] flex-shrink-0" />}
+                                    </button>
+                                );
+                            }
+
+                            const isHovered = hoveredLabel === itemLabel;
+                            const isExpanded = expandedMobile === itemLabel;
+                            const isParentSelected = value.startsWith(`${itemLabel} (`) || value === itemLabel;
+
+                            return (
+                                <div
+                                    key={`parent_${idx}_${itemLabel}`}
+                                    className="relative"
+                                    onMouseEnter={(e) => handleItemMouseEnter(e, itemLabel)}
+                                    onMouseLeave={handleItemMouseLeave}
+                                >
+                                    <div
+                                        onClick={(e) => handleToggleParentMobile(e, itemLabel)}
+                                        className={`w-full px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-3 cursor-pointer select-none ${
+                                            isParentSelected
+                                                ? "bg-[#D4AF37]/10 text-neutral-900 font-bold border-l-4 border-[#D4AF37]"
+                                                : isHovered || isExpanded
+                                                ? "bg-neutral-100 text-neutral-900 font-semibold"
+                                                : "text-neutral-700 hover:bg-neutral-50"
+                                        }`}
+                                    >
+                                        <span className="pr-2 text-left whitespace-normal break-words leading-snug">{itemLabel}</span>
+                                        <div className="flex items-center gap-1.5 flex-shrink-0 text-neutral-400">
+                                            <span className="text-[11px] font-normal uppercase tracking-wider text-neutral-400">
+                                                {option.variants.length} choix
+                                            </span>
+                                            <ChevronRight
+                                                size={16}
+                                                className={`transition-transform duration-200 ${
+                                                    isExpanded ? "rotate-90 text-[#D4AF37]" : ""
+                                                }`}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* MOBILE ACCORDION */}
+                                    {isExpanded && (
+                                        <div className="md:hidden bg-neutral-50/80 border-y border-neutral-200 py-1.5 pl-4 pr-2 space-y-1 animate-fade-in">
+                                            {option.variants.map((v) => {
+                                                const fullVal = `${itemLabel} (${v})`;
+                                                const isVariantSelected = value === fullVal;
+                                                const isVariantExcluded = excludeValues.includes(fullVal) && !isVariantSelected;
+
+                                                return (
+                                                    <button
+                                                        key={`mob_var_${v}`}
+                                                        type="button"
+                                                        disabled={isVariantExcluded}
+                                                        onClick={() => handleSelectValue(fullVal)}
+                                                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center justify-between gap-2 cursor-pointer ${
+                                                            isVariantExcluded
+                                                                ? "opacity-35 cursor-not-allowed text-neutral-400"
+                                                                : isVariantSelected
+                                                                ? "bg-[#D4AF37]/20 text-neutral-900 font-bold border-l-3 border-[#D4AF37]"
+                                                                : "text-neutral-700 hover:bg-white"
+                                                        }`}
+                                                    >
+                                                        <span className="text-left whitespace-normal break-words leading-snug">{v}</span>
+                                                        {isVariantSelected && <Check size={14} className="text-[#D4AF37] flex-shrink-0" />}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
-                </div>
+                )}
+
+                {/* DESKTOP CASCADING FLOATING SUBMENU */}
+                {isOpen && !disabled && hoveredLabel && hoveredOption && submenuPos && (
+                    <div
+                        onMouseEnter={handleSubmenuEnter}
+                        onMouseLeave={handleItemMouseLeave}
+                        style={{
+                            position: "fixed",
+                            top: `${submenuPos.top}px`,
+                            left: `${submenuPos.left}px`,
+                            zIndex: 9999
+                        }}
+                        className="hidden md:block w-64 md:w-72 bg-white rounded-xl shadow-2xl border border-neutral-200 py-2 animate-fade-in"
+                    >
+                        <div className="px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-wider text-neutral-400 border-b border-neutral-100 mb-1">
+                            Déclinaisons : {hoveredLabel}
+                        </div>
+                        {hoveredOption.variants.map((v) => {
+                            const fullVal = `${hoveredLabel} (${v})`;
+                            const isVariantSelected = value === fullVal;
+                            const isVariantExcluded = excludeValues.includes(fullVal) && !isVariantSelected;
+
+                            return (
+                                <button
+                                    key={`submenu_var_${v}`}
+                                    type="button"
+                                    disabled={isVariantExcluded}
+                                    onClick={() => handleSelectValue(fullVal)}
+                                    className={`w-full text-left px-3.5 py-2 text-sm transition-colors flex items-center justify-between gap-2 cursor-pointer ${
+                                        isVariantExcluded
+                                            ? "opacity-35 cursor-not-allowed bg-neutral-50 text-neutral-400"
+                                            : isVariantSelected
+                                            ? "bg-[#D4AF37]/15 text-neutral-900 font-bold border-l-3 border-[#D4AF37]"
+                                            : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
+                                    }`}
+                                >
+                                    <span className="text-left whitespace-normal break-words leading-snug">{v}</span>
+                                    {isVariantSelected && <Check size={14} className="text-[#D4AF37] flex-shrink-0" />}
+                                </button>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
+        );
+    };
+
+    const CascadeMeatDropdown = CustomDropdown;
+
+    const renderDropdown = (label: string, name: string, options: (string | { label: string; variants: string[] })[], excludeValues: string[] = [], req = false) => {
+        return (
+            <CustomDropdown
+                label={label}
+                name={name}
+                value={(formData as any)[name] || ""}
+                options={options}
+                excludeValues={excludeValues}
+                req={req}
+                hasError={!!errors[name]}
+                onSelect={handleSelectMeat}
+            />
         );
     };
 
     const renderLogisticsOptions = () => {
         if (isPlatPrepare) return null;
+        const isVaisselleChecked = formData.Location_Vaisselle_Check === "Oui";
+        const isVerrerieChecked = formData.Location_Verrerie_Check === "Oui";
+
         return (
             <div className="space-y-4 mt-6 pt-6 border-t border-neutral-200">
-                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 max-w-lg mx-auto md:max-w-none">
-                    <div className="flex items-center gap-3 mb-2">
+                {/* Option Vaisselle */}
+                <div className={`p-5 rounded-2xl border transition-all duration-300 ${
+                    isVaisselleChecked
+                        ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                        : "bg-white border-neutral-200 hover:border-neutral-300"
+                }`}>
+                    <div className="flex items-start gap-3">
                         <input
                             type="checkbox"
                             name="Location_Vaisselle_Check"
                             id="Location_Vaisselle_Check"
-                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                            checked={formData.Location_Vaisselle_Check === "Oui"}
+                            className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                            checked={isVaisselleChecked}
                             onChange={handleChange}
                         />
-                        <label htmlFor="Location_Vaisselle_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
-                            Location de vaisselle (+1,50€ / pers)
+                        <label htmlFor="Location_Vaisselle_Check" className="cursor-pointer select-none flex-1">
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                    🍽️ Location de vaisselle
+                                </span>
+                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
+                                    +1,50 € / pers.
+                                </span>
+                            </div>
+                            <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                Assiettes, couverts inox et serviettes (lavage inclus par nos soins).
+                            </span>
                         </label>
                     </div>
-                    <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
                 </div>
 
-                <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 max-w-lg mx-auto md:max-w-none">
-                    <div className="flex items-center gap-3 mb-2">
+                {/* Option Verrerie */}
+                <div className={`p-5 rounded-2xl border transition-all duration-300 ${
+                    isVerrerieChecked
+                        ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                        : "bg-white border-neutral-200 hover:border-neutral-300"
+                }`}>
+                    <div className="flex items-start gap-3">
                         <input
                             type="checkbox"
                             name="Location_Verrerie_Check"
                             id="Location_Verrerie_Check"
-                            className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                            checked={formData.Location_Verrerie_Check === "Oui"}
+                            className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                            checked={isVerrerieChecked}
                             onChange={handleChange}
                         />
-                        <label htmlFor="Location_Verrerie_Check" className="text-neutral-700 font-bold cursor-pointer select-none text-left leading-tight">
-                            Location de verrerie (1,50€ / lot de 5 verres)
+                        <label htmlFor="Location_Verrerie_Check" className="cursor-pointer select-none flex-1">
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                    🍷 Location de verrerie
+                                </span>
+                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
+                                    1,50 € / lot de 5 verres
+                                </span>
+                            </div>
+                            <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                Verres à vin, softs et flûtes à champagne (lavage inclus).
+                            </span>
                         </label>
                     </div>
-                    <p className="text-sm text-neutral-500 ml-8 italic">Cela comprend le lavage.</p>
 
                     <AnimatePresence>
-                        {formData.Location_Verrerie_Check === "Oui" && (
+                        {isVerrerieChecked && (
                             <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="overflow-hidden mt-4 pl-8"
+                                initial={{ opacity: 0, y: -6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                transition={{ duration: 0.25 }}
+                                className="mt-4 pt-4 border-t border-neutral-200 bg-white p-4 rounded-xl border border-neutral-100"
                             >
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                                            🍷 Verre à vin
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                name="Location_Verrerie_Vin"
-                                                value={formData.Location_Verrerie_Vin}
-                                                onChange={handleChange}
-                                                className={getInputStyle("Location_Verrerie_Vin")}
-                                            >
-                                                {glassSteps.map(step => (
-                                                    <option key={step} value={step}>{step} verres</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                            </div>
-                                        </div>
+                                        <CustomDropdown
+                                            label="🍷 Verre à vin"
+                                            name="Location_Verrerie_Vin"
+                                            value={formData.Location_Verrerie_Vin ? `${formData.Location_Verrerie_Vin} verres` : ""}
+                                            options={glassSteps.map(step => `${step} verres`)}
+                                            placeholder="Choisir..."
+                                            onSelect={(name, val) => handleSelectMeat(name, val.replace(" verres", ""))}
+                                        />
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                                            🥤 Verre à soft (25cl)
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                name="Location_Verrerie_Soft"
-                                                value={formData.Location_Verrerie_Soft}
-                                                onChange={handleChange}
-                                                className={getInputStyle("Location_Verrerie_Soft")}
-                                            >
-                                                {glassSteps.map(step => (
-                                                    <option key={step} value={step}>{step} verres</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                            </div>
-                                        </div>
+                                        <CustomDropdown
+                                            label="🥤 Verre à soft (25cl)"
+                                            name="Location_Verrerie_Soft"
+                                            value={formData.Location_Verrerie_Soft ? `${formData.Location_Verrerie_Soft} verres` : ""}
+                                            options={glassSteps.map(step => `${step} verres`)}
+                                            placeholder="Choisir..."
+                                            onSelect={(name, val) => handleSelectMeat(name, val.replace(" verres", ""))}
+                                        />
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                                            🥂 Flûte à champagne
-                                        </label>
-                                        <div className="relative">
-                                            <select
-                                                name="Location_Verrerie_Flute"
-                                                value={formData.Location_Verrerie_Flute}
-                                                onChange={handleChange}
-                                                className={getInputStyle("Location_Verrerie_Flute")}
-                                            >
-                                                {glassSteps.map(step => (
-                                                    <option key={step} value={step}>{step} verres</option>
-                                                ))}
-                                            </select>
-                                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                            </div>
-                                        </div>
+                                        <CustomDropdown
+                                            label="🥂 Flûte à champagne"
+                                            name="Location_Verrerie_Flute"
+                                            value={formData.Location_Verrerie_Flute ? `${formData.Location_Verrerie_Flute} verres` : ""}
+                                            options={glassSteps.map(step => `${step} verres`)}
+                                            placeholder="Choisir..."
+                                            onSelect={(name, val) => handleSelectMeat(name, val.replace(" verres", ""))}
+                                        />
                                     </div>
                                 </div>
                             </motion.div>
@@ -1665,6 +2347,360 @@ function ContactForm() {
         );
     };
 
+    const renderHotOptionsSection = () => {
+        const isLegumesChecked = formData.Legumes_Chauds_Check === "Oui";
+        const isSaucesChecked = formData.Sauces_Chaudes_Check === "Oui";
+        const selectedSauces = formData.Sauces_Chaudes_Choix || [];
+
+        return (
+            <div className="space-y-4 my-6">
+                <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest block">
+                    Accompagnements & Sauces Chaudes (En Option)
+                </label>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Option 1 : Légumes Chauds */}
+                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${
+                        isLegumesChecked
+                            ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
+                    }`}>
+                        <div className="flex items-start gap-3">
+                            <input
+                                type="checkbox"
+                                name="Legumes_Chauds_Check"
+                                id="form_legumes_chauds"
+                                className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                checked={isLegumesChecked}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="form_legumes_chauds" className="cursor-pointer select-none flex-1">
+                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                    <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                        🥦 Légumes chauds cuisinés
+                                    </span>
+                                    <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
+                                        +1,00 € / pers.
+                                    </span>
+                                </div>
+                                <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                    Assortiment de légumes chauds de saison cuisinés maison.
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Option 2 : Sauces Chaudes */}
+                    <div className={`p-5 rounded-2xl border transition-all duration-300 ${
+                        isSaucesChecked
+                            ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
+                    }`}>
+                        <div className="flex items-start gap-3">
+                            <input
+                                type="checkbox"
+                                name="Sauces_Chaudes_Check"
+                                id="form_sauces_chaudes"
+                                className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                checked={isSaucesChecked}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="form_sauces_chaudes" className="cursor-pointer select-none flex-1">
+                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                    <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                        🍲 Assortiment de sauces chaudes maison
+                                    </span>
+                                    <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
+                                        +0,50 € / pers.
+                                    </span>
+                                </div>
+                                <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                    Sauces chaudes artisanales au choix pour sublimer vos viandes.
+                                </span>
+                            </label>
+                        </div>
+
+                        {/* Sous-section sélection des sauces */}
+                        <AnimatePresence>
+                            {isSaucesChecked && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -4 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -4 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="mt-4 pt-4 border-t border-neutral-200 bg-white p-3 rounded-xl border border-neutral-100 space-y-2.5"
+                                >
+                                    <span className="block text-xs font-bold text-neutral-600 uppercase tracking-wider">
+                                        Sélectionnez vos sauces chaudes :
+                                    </span>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                        {SAUCES_CHAUDES_LIST.map((sauce) => {
+                                            const isSauceChecked = selectedSauces.includes(sauce);
+                                            return (
+                                                <label
+                                                    key={sauce}
+                                                    className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs transition-all cursor-pointer select-none ${
+                                                        isSauceChecked
+                                                            ? "bg-white border-[#D4AF37] ring-1 ring-[#D4AF37]/20 text-neutral-900 font-semibold shadow-xs"
+                                                            : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50/50"
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSauceChecked}
+                                                        onChange={() => handleToggleSauceChaude(sauce)}
+                                                        className="w-4 h-4 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
+                                                    />
+                                                    <span className="leading-snug">{sauce}</span>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderDessertSection = () => {
+        const isChecked = formData.Dessert_Check === "Oui";
+        const dessertType = formData.Dessert_Type || "traditionnel";
+        const selectedVarietes = formData.Mignardises_Varietes || [];
+        const mignardiseCount = selectedVarietes.length;
+        const mignardisePrice = getMignardisesPricePerPerson(mignardiseCount);
+
+        const getMignardisesPriceBadge = () => {
+            if (mignardiseCount === 0) return "Dès 2,50 € TTC / pièce";
+            const unitPrice = mignardiseCount <= 2 ? "2,75 €" : "2,50 €";
+            return `${unitPrice} TTC / pièce (+${mignardisePrice.toFixed(2).replace('.', ',')} € / pers.)`;
+        };
+
+        return (
+            <div className={`p-5 rounded-2xl border transition-all duration-300 mt-6 ${
+                isChecked
+                    ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                    : "bg-white border-neutral-200 hover:border-neutral-300"
+            }`}>
+                {/* Titre principal avec Case à cocher Niveau 1 */}
+                <div className="flex items-start gap-3">
+                    <input
+                        type="checkbox"
+                        id="form_dessert_check"
+                        name="Dessert_Check"
+                        className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                        checked={isChecked}
+                        onChange={(e) => {
+                            const val = e.target.checked ? "Oui" : "Non";
+                            setFormData(prev => ({
+                                ...prev,
+                                Dessert_Check: val,
+                                Dessert_Choix: val === "Oui" ? prev.Dessert_Choix : ""
+                            }));
+                        }}
+                    />
+                    <label htmlFor="form_dessert_check" className="cursor-pointer select-none flex-1">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                🍰 Ajouter une option dessert
+                            </span>
+                            <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
+                                Dès 2,50 € / pers.
+                            </span>
+                        </div>
+                        <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                            Sublimez votre événement avec nos douceurs artisanales au choix.
+                        </span>
+                    </label>
+                </div>
+
+                {/* Niveau 2 : Si la case est cochée */}
+                <AnimatePresence>
+                    {isChecked && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.25 }}
+                            className="mt-6 pt-6 border-t border-neutral-200 bg-white p-5 rounded-xl border border-neutral-100 space-y-6"
+                        >
+                            {/* Sélecteur de type de dessert (Radio/Toggles élégants) */}
+                            <div>
+                                <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">
+                                    Type de prestation sucrée
+                                </label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Option 1 : Desserts traditionnels */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, Dessert_Type: "traditionnel" }))}
+                                        className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-start justify-between cursor-pointer ${
+                                            dessertType === "traditionnel"
+                                                ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/30"
+                                                : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
+                                        }`}
+                                    >
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-base font-bold text-neutral-800">Desserts traditionnels</span>
+                                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-[11px] font-bold px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
+                                                    +6,00 € / pers
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-neutral-500 mt-1">
+                                                Gâteaux & tartes artisanales à partager (1 choix pour l&apos;ensemble)
+                                            </p>
+                                        </div>
+                                    </button>
+
+                                    {/* Option 2 : Mignardises artisanales */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData(prev => ({ ...prev, Dessert_Type: "mignardises" }))}
+                                        className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-start justify-between cursor-pointer ${
+                                            dessertType === "mignardises"
+                                                ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/30"
+                                                : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
+                                        }`}
+                                    >
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-base font-bold text-neutral-800">Mignardises artisanales</span>
+                                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-[11px] font-bold px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
+                                                    Dès 2,50 € TTC / pièce
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-neutral-500 mt-1">
+                                                Sélection directe des variétés (1 à 6 pièces par personne)
+                                            </p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Sous-section : Desserts traditionnels */}
+                            {dessertType === "traditionnel" && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-white p-5 rounded-xl border border-neutral-200 space-y-3 shadow-xs mt-4"
+                                >
+                                    <CustomDropdown
+                                        label="Sélectionnez votre dessert traditionnel"
+                                        name="Dessert_Choix"
+                                        value={formData.Dessert_Choix}
+                                        options={dessertsList}
+                                        placeholder="Faites votre choix de dessert..."
+                                        req={true}
+                                        hasError={!!errors.Dessert_Choix}
+                                        onSelect={handleSelectMeat}
+                                    />
+                                    {errors.Dessert_Choix && (
+                                        <p className="text-xs text-red-500 font-medium">{errors.Dessert_Choix}</p>
+                                    )}
+                                </motion.div>
+                            )}
+
+                            {/* Sous-section : Mignardises (Simplifiée - Sélection directe via cases à cocher) */}
+                            {dessertType === "mignardises" && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-white p-5 rounded-xl border border-neutral-200 space-y-5 shadow-xs"
+                                >
+                                    {/* En-tête avec compteur & Prix dynamique à droite */}
+                                    <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-neutral-100">
+                                        <div>
+                                            <label className={`${labelStyle} mb-0.5`}>
+                                                Sélectionnez vos variétés de mignardises <span className="text-red-500">*</span>
+                                            </label>
+                                            <p className="text-xs text-neutral-500 italic">
+                                                Cochez les variétés souhaitées (1 case = 1 pièce / pers, max 6).
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="inline-block text-xs font-bold text-[#D4AF37] bg-[#D4AF37]/10 px-3 py-1 rounded-full border border-[#D4AF37]/30">
+                                                {getMignardisesPriceBadge()}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Grille des variétés (Cases à cocher directes) */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <span className="text-xs text-neutral-500">
+                                                {mignardiseCount === 0
+                                                    ? "Aucune variété sélectionnée"
+                                                    : `${mignardiseCount} pièce${mignardiseCount > 1 ? "s" : ""} / personne sélectionnée${mignardiseCount > 1 ? "s" : ""}`}
+                                            </span>
+                                            <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                                                mignardiseCount >= 3
+                                                    ? "bg-green-100 text-green-800 font-bold"
+                                                    : mignardiseCount > 0
+                                                        ? "bg-neutral-100 text-neutral-800 font-medium border border-neutral-200"
+                                                        : "bg-neutral-100 text-neutral-600"
+                                            }`}>
+                                                {mignardiseCount} / 6 variété{mignardiseCount > 1 ? "s" : ""}
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                            {MIGNARDISES_LIST.map((item) => {
+                                                const isItemChecked = selectedVarietes.includes(item);
+                                                const isMaxReached = selectedVarietes.length >= 6 && !isItemChecked;
+
+                                                return (
+                                                    <label
+                                                        key={item}
+                                                        className={`flex items-center gap-3 p-3.5 rounded-xl border text-sm transition-all cursor-pointer select-none ${
+                                                            isItemChecked
+                                                                ? "bg-white border-[#D4AF37] ring-1 ring-[#D4AF37]/20 text-neutral-900 font-semibold shadow-xs"
+                                                                : isMaxReached
+                                                                    ? "bg-neutral-50 border-neutral-200 text-neutral-400 opacity-50 cursor-not-allowed"
+                                                                    : "bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50/50"
+                                                        }`}
+                                                    >
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isItemChecked}
+                                                            disabled={isMaxReached}
+                                                            onChange={() => handleToggleMignardiseVariete(item)}
+                                                            className="w-4 h-4 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer disabled:cursor-not-allowed"
+                                                        />
+                                                        <span className="flex-1 text-xs leading-relaxed">{item}</span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
+                                        {errors.Mignardises_Varietes && (
+                                            <p className="text-xs text-red-500 font-medium mt-2">{errors.Mignardises_Varietes}</p>
+                                        )}
+                                    </div>
+
+                                    {/* Indications informatives conservées */}
+                                    <div className="space-y-2 pt-2">
+                                        <p className="text-xs text-neutral-500 italic flex items-center gap-1.5">
+                                            <span>💡</span> Nous recommandons un minimum de 3 pièces par personne.
+                                        </p>
+
+                                        <div className="bg-white p-3 rounded-lg border border-neutral-200 text-xs text-neutral-600 flex items-center justify-between flex-wrap gap-2">
+                                            <span>🏷️ <strong>Tarif dégressif :</strong></span>
+                                            <span>1 ou 2 pièces : <strong>2,75 € / pc</strong></span>
+                                            <span className="text-neutral-300">|</span>
+                                            <span>3 à 6 pièces : <strong className="text-[#D4AF37]">2,50 € / pc</strong></span>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+        );
+    };
+
     const renderBBQComposition = () => {
         // Prepare exclusion lists with NEW keys
         const bbqChoices = [formData.Viande_1, formData.Viande_2, formData.Viande_3].filter(Boolean);
@@ -1675,7 +2711,7 @@ function ContactForm() {
         const bbqName = menuParam ? menuParam.replace('bbq_', '').charAt(0).toUpperCase() + menuParam.replace('bbq_', '').slice(1) : "Sur Mesure";
 
         return (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-neutral-50/50 border border-[#D4AF37]/30 rounded-2xl p-6 md:p-8 space-y-8 shadow-sm relative">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white border border-neutral-200 rounded-2xl p-4 sm:p-6 md:p-8 space-y-8 shadow-sm relative">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1 bg-[#D4AF37] rounded-b-full"></div>
 
                 {/* HEADER Configuration */}
@@ -1688,6 +2724,9 @@ function ContactForm() {
                         <FormAllergenLink section="bbq" />
                     </div>
                 </div>
+
+                {/* PRESTATION SERVICE OPTION */}
+                {renderServiceToggle("+2,50 € / pers.", "Maîtres du feu, découpe & service à table sur place.")}
 
                 {/* MAIN CHOICES */}
                 <div className="space-y-6">
@@ -1703,102 +2742,92 @@ function ContactForm() {
                     )}
 
                     {isBBQCompose && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {renderDropdown("Entrée 1", "compose_entree_1", entreesCompose, composeEntreeChoices)}
-                            {renderDropdown("Entrée 2", "compose_entree_2", entreesCompose, composeEntreeChoices)}
-                            {renderDropdown("Plat 1", "Viande_1", viandesCompose, bbqChoices)}
-                            {renderDropdown("Plat 2", "Viande_2", viandesCompose, bbqChoices)}
+                        <div className="space-y-4">
+                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest block">
+                                1er Service : Entrées au choix (2 Incluses)
+                            </label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {renderDropdown("1ère Entrée", "compose_entree_1", entreesCompose, composeEntreeChoices, true)}
+                                {renderDropdown("2ème Entrée", "compose_entree_2", entreesCompose, composeEntreeChoices, true)}
+                            </div>
                         </div>
                     )}
 
                     {isBBQDinatoire && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {renderDropdown("1er Service (Plat 1)", "dinatoire_service_1", dinatoireServices, dinatoireServiceChoices)}
-                            {renderDropdown("1er Service (Plat 2)", "dinatoire_service_2", dinatoireServices, dinatoireServiceChoices)}
-                            {renderDropdown("2ème Service (BBQ Choix 1)", "Viande_1", getBBQList(), bbqChoices)}
-                            {renderDropdown("2ème Service (BBQ Choix 2)", "Viande_2", getBBQList(), bbqChoices)}
-                        </div>
-                    )}
-
-                    {!isCochonOrPorchetta && !isBBQCompose && !isBBQDinatoire && (
-                        <div className={`grid grid-cols-1 ${isBBQNobles ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-6`}>
-                            {renderDropdown("Choix 1", "Viande_1", getBBQList(), bbqChoices)}
-                            {renderDropdown("Choix 2", "Viande_2", getBBQList(), bbqChoices)}
-                            {!isBBQNobles && renderDropdown("Choix 3", "Viande_3", getBBQList(), bbqChoices)}
-                        </div>
-                    )}
-
-                    {/* Suppléments Viandes (Rattachés à la catégorie Viande) */}
-                    {!isCochonOrPorchetta && (
-                        <div className="mt-4 p-4 bg-neutral-50/70 rounded-xl border border-dashed border-neutral-300">
-                            <label className={`${labelStyle} flex items-center gap-2`}>
-                                <span>🥩</span> Viande supplémentaire (+3,00€ / pers)
+                        <div className="space-y-4">
+                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest block">
+                                1er Service : Plats chauds (2 Inclus)
                             </label>
-                            <div className="relative">
-                                <select name="Viande_Extra_1" value={formData.Viande_Extra_1 || ""} onChange={handleChange} className={getInputStyle("Viande_Extra_1") + " appearance-none"}>
-                                    <option value="">Aucun supplément...</option>
-                                    {getBBQList().map(v => <option key={v} value={v}>{v}</option>)}
-                                </select>
-                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {renderDropdown("Plat 1", "dinatoire_service_1", dinatoireServices, dinatoireServiceChoices, true)}
+                                {renderDropdown("Plat 2", "dinatoire_service_2", dinatoireServices, dinatoireServiceChoices, true)}
                             </div>
-
-                            {formData.Viande_Extra_1 && (
-                                <div className="mt-4 animate-fade-in">
-                                    <label className={`${labelStyle} flex items-center gap-2`}>
-                                        <span>🥩</span> 2ème viande supplémentaire (+3,00€ / pers)
-                                    </label>
-                                    <div className="relative">
-                                        <select name="Viande_Extra_2" value={formData.Viande_Extra_2 || ""} onChange={handleChange} className={getInputStyle("Viande_Extra_2") + " appearance-none"}>
-                                            <option value="">Aucun supplément...</option>
-                                            {getBBQList().map(v => <option key={v} value={v}>{v}</option>)}
-                                        </select>
-                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
                     )}
-                </div>
 
-
-                {/* ACCOMPAGNEMENTS & SUPPLÉMENTS */}
-                <div className="space-y-6">
-                    {/* SECTION FÉCULENTS (Groupés) */}
-                    <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 mb-8 mt-8">
-                        <h4 className="text-md font-bold text-neutral-800 mb-4 flex items-center gap-2 uppercase tracking-wide">
-                            <span>🍚</span> Vos Féculents
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {/* Féculent Inclus */}
-                            <div>
-                                <label className={labelStyle}>Féculent (Inclus)</label>
-                                <div className="relative">
-                                    <select name="Feculent" value={formData.Feculent || ""} onChange={handleChange} className={getInputStyle("Feculent") + " appearance-none"}>
-                                        <option value="">Faites votre choix...</option>
-                                        {feculentsBBQ.map(f => <option key={f} value={f}>{f}</option>)}
-                                    </select>
-                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                    </div>
-                                </div>
+                    {/* VIANDES */}
+                    {!isCochonOrPorchetta && (
+                        <div className="space-y-4">
+                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest block">
+                                {isBBQCompose || isBBQDinatoire
+                                    ? "2ème Service : Viandes au choix (2 Incluses)"
+                                    : isBBQNobles
+                                        ? "Viandes au choix (2 Incluses)"
+                                        : "Viandes au choix (3 Incluses)"}
+                            </label>
+                            <div className={`grid grid-cols-1 ${isBBQCompose || isBBQDinatoire || isBBQNobles ? 'md:grid-cols-2' : 'md:grid-cols-3'} gap-4`}>
+                                {renderDropdown("Viande 1", "Viande_1", getBBQCascadeList(), bbqChoices, true)}
+                                {renderDropdown("Viande 2", "Viande_2", getBBQCascadeList(), bbqChoices, true)}
+                                {!isBBQCompose && !isBBQDinatoire && !isBBQNobles && (
+                                    renderDropdown("Viande 3", "Viande_3", getBBQCascadeList(), bbqChoices, true)
+                                )}
                             </div>
+                        </div>
+                    )}
 
-                            {/* Féculent Supplémentaire */}
+                    {/* SUPPLÉMENTS VIANDES (Optionnels) */}
+                    {!isCochonOrPorchetta && (
+                        <div className="mt-6 border-t border-dashed border-neutral-200 pt-6">
+                            <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest block mb-4">
+                                Viandes Supplémentaires (Optionnel)
+                            </label>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <CascadeMeatDropdown
+                                    label="🥩 1ère Viande Extra (+3,00€ / pers)"
+                                    name="Viande_Extra_1"
+                                    value={formData.Viande_Extra_1 || ""}
+                                    options={getBBQCascadeList()}
+                                    placeholder="Aucun supplément..."
+                                    onSelect={handleSelectMeat}
+                                />
+                                <CascadeMeatDropdown
+                                    label="🥩 2ème Viande Extra (+3,00€ / pers)"
+                                    name="Viande_Extra_2"
+                                    value={formData.Viande_Extra_2 || ""}
+                                    options={getBBQCascadeList()}
+                                    placeholder="Aucun supplément..."
+                                    onSelect={handleSelectMeat}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* FÉCULENTS */}
+                    <div className="mt-6 border-t border-dashed border-neutral-200 pt-6">
+                        <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest block mb-4">Féculents</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className={labelStyle}>Féculent Extra (+2,00€ / pers)</label>
-                                <div className="relative">
-                                    <select name="Feculent_Extra" value={formData.Feculent_Extra || ""} onChange={handleChange} className={getInputStyle("Feculent_Extra") + " appearance-none"}>
-                                        <option value="">Aucun supplément...</option>
-                                        {feculentsBBQ.map(f => <option key={f} value={f}>{f}</option>)}
-                                    </select>
-                                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                    </div>
-                                </div>
+                                {renderDropdown("1 Féculent Inclus", "Feculent", feculentsBBQ, [], true)}
+                            </div>
+                            <div>
+                                <CustomDropdown
+                                    label="🥔 Féculent supplémentaire (+2,00€ / pers)"
+                                    name="Feculent_Extra"
+                                    value={formData.Feculent_Extra || ""}
+                                    options={feculentsBBQ}
+                                    placeholder="Aucun supplément..."
+                                    onSelect={handleSelectMeat}
+                                />
                             </div>
                         </div>
                     </div>
@@ -1806,6 +2835,33 @@ function ContactForm() {
                     {/* CRUDITÉS */}
                     <div className="mt-6 border-t border-dashed border-neutral-200 pt-6"></div>
                     <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest mb-4 block">Crudités (6 Incluses)</label>
+
+                    {/* OPTION LAISSER LE CHEF COMPOSER */}
+                    <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 ${
+                        formData.Crudites_Choix_Chef === "Oui"
+                            ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
+                    }`}>
+                        <div className="flex items-start gap-3">
+                            <input
+                                type="checkbox"
+                                name="Crudites_Choix_Chef"
+                                id="BBQ_Crudites_Choix_Chef"
+                                className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                checked={formData.Crudites_Choix_Chef === "Oui"}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="BBQ_Crudites_Choix_Chef" className="cursor-pointer select-none">
+                                <span className="block font-bold text-neutral-800 text-sm md:text-base">
+                                    👨‍🍳 Laisser le chef composer l&apos;assortiment selon la saison
+                                </span>
+                                <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                    Cochez cette option pour un assortiment équilibré, ou sélectionnez vos indispensables et le chef complètera le reste.
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3, 4, 5, 6].map(num => (
                             <div key={`bbq_crudite_${num}`}>
@@ -1815,101 +2871,28 @@ function ContactForm() {
                     </div>
 
                     {/* Supplément Crudité (Rattaché à la catégorie Crudités) */}
-                    <div className="mt-4 p-4 bg-neutral-50/70 rounded-xl border border-dashed border-neutral-300">
-                        <label className={`${labelStyle} flex items-center gap-2`}>
-                            <span>🥗</span> Crudité supplémentaire (+1,50€ / pers)
-                        </label>
-                        <div className="relative">
-                            <select name="Suppl_Crudite_Extra" value={formData.Suppl_Crudite_Extra || ""} onChange={handleChange} className={getInputStyle("Suppl_Crudite_Extra") + " appearance-none"}>
-                                <option value="">Aucun supplément...</option>
-                                {SIDES_COLD.map(c => <option key={c} value={c}>{c}</option>)}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                    <div className="mt-4 p-4 bg-white rounded-xl border border-dashed border-neutral-300">
+                        <CustomDropdown
+                            label="🥗 Crudité supplémentaire (+1,50€ / pers)"
+                            name="Suppl_Crudite_Extra"
+                            value={formData.Suppl_Crudite_Extra || ""}
+                            options={SIDES_COLD}
+                            placeholder="Aucun supplément..."
+                            onSelect={handleSelectMeat}
+                        />
                     </div>
                 </div>
 
+                {/* ACCOMPAGNEMENTS & SAUCES CHAUDES */}
+                {renderHotOptionsSection()}
+
                 {/* DESSERTS SECTION */}
-                <div className="mt-8 border-t border-dashed border-neutral-200 pt-8">
-                    <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 hover:border-[#D4AF37]/30 transition-colors">
-                        <div className="flex items-center gap-3 mb-2">
-                            <input
-                                type="checkbox"
-                                name="Dessert_Check"
-                                id="Dessert_Check"
-                                className="w-5 h-5 text-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer"
-                                checked={formData.Dessert_Check === "Oui"}
-                                onChange={handleChange}
-                            />
-                            <label htmlFor="Dessert_Check" className="text-neutral-700 font-bold cursor-pointer select-none">
-                                Ajouter un Dessert (+6€ / pers)
-                            </label>
-                        </div>
-                        <AnimatePresence>
-                            {formData.Dessert_Check === "Oui" && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                                    animate={{ opacity: 1, height: "auto", marginTop: 16 }}
-                                    exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                                    transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
-                                    className="overflow-hidden"
-                                >
-                                    <div className="relative">
-                                        <select
-                                            name="Dessert_Choix"
-                                            value={formData.Dessert_Choix}
-                                            onChange={handleChange}
-                                            className={getInputStyle("Dessert_Choix")}
-                                        >
-                                            <option value="">Faites votre choix...</option>
-                                            {dessertsList.map((c) => (
-                                                <option key={c} value={c}>{c}</option>
-                                            ))}
-                                        </select>
-                                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
+                {renderDessertSection()}
 
                 {renderLogisticsOptions()}
 
-                {/* PRICE DISPLAY MOVED TO BOTTOM */}
-                <div className={`transition-all duration-300 border-t border-[#D4AF37]/30 pt-8 mt-8 ${totalPrice.perPerson !== 0 || totalPrice.materiel !== 0 ? "opacity-100" : "opacity-50"}`}>
-                    <div className="bg-black text-[#D4AF37] p-6 rounded-xl shadow-xl flex items-center justify-between border border-[#D4AF37]/50 max-w-lg mx-auto transform hover:scale-[1.02] transition-transform">
-                        <span className="text-sm font-bold uppercase tracking-widest">Prix Estimatif</span>
-                        <div className="text-right">
-                            {totalPrice.perPerson === -1 ? (
-                                <span className="bg-[#D4AF37] text-black px-4 py-1 rounded font-bold text-sm tracking-widest">SUR DEVIS</span>
-                            ) : (
-                                <span className="text-2xl font-serif font-bold">
-                                    {totalPrice.perPerson > 0 ? (
-                                        <>
-                                            {totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers
-                                            {totalPrice.materiel > 0 && (
-                                                <> + {totalPrice.materiel.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ (Matériel)</>
-                                            )}
-                                            <span className="text-sm font-sans font-normal text-[#D4AF37]/80 ml-1">HTVA</span>
-                                        </>
-                                    ) : (
-                                        "---"
-                                    )}
-                                </span>
-                            )}
-                            {totalPrice.perPerson > 0 && (
-                                <p className="text-xs text-[#D4AF37]/70 mt-1 font-light">
-                                    {formData.Service_Check === "Oui" ? "Frais de déplacement et service inclus" : "Hors frais de déplacement et service"}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </div>
+                {/* PRICE DISPLAY */}
+                {renderPriceDisplay()}
             </motion.div>
         );
     };     // Legacy renderers for Associations / Buffet can be simplified or kept similar...
@@ -1919,81 +2902,80 @@ function ContactForm() {
     // Simplified renderers for Associations / Buffet can be kept minimal
 
     const renderPlatUniqueFields = () => (
-        <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37]">
+        <div className="space-y-6 animate-fade-in bg-white p-4 sm:p-6 md:p-8 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-[#D4AF37]">
             <h3 className="text-lg font-serif text-neutral-800 font-bold border-b border-neutral-200 pb-2 mb-4">Votre Choix de Plat Unique</h3>
 
-            <div className="group">
-                <label className={labelStyle}>Choisissez votre Plat Principal <span className="text-red-500">*</span></label>
-                <div className="relative">
-                    <select name="Plat_Associatif" value={formData.Plat_Associatif} onChange={handleChange} className={getInputStyle("Plat_Associatif")}>
-                        <option value="">Faites votre choix...</option>
-                        <option value="Bar à Pâtes">Bar à Pâtes</option>
-                        <option value="Burgers">Burgers Spécial Compère</option>
-                        <option value="Boulets Liégeois">Boulets Liégeois & Frites</option>
-                        <option value="Vol-au-vent">Vol-au-vent artisanal & Frites</option>
-                        <option value="Option Végétarienne">Option Végé (Salade & Quiche)</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                    </div>
-                </div>
+            {renderServiceToggle("Sur devis", "Prise en charge et service de vos plats chauds.")}
+
+            <div>
+                <CustomDropdown
+                    label="Choisissez votre Plat Principal"
+                    name="Plat_Associatif"
+                    value={formData.Plat_Associatif}
+                    options={[
+                        "Bar à Pâtes",
+                        "Burgers",
+                        "Boulets Liégeois",
+                        "Vol-au-vent",
+                        "Option Végétarienne"
+                    ]}
+                    req={true}
+                    placeholder="Faites votre choix..."
+                    onSelect={handleSelectMeat}
+                />
             </div>
 
             {/* CASCADE : Apparaît selon le choix principal */}
             <AnimatePresence>
                 {formData.Plat_Associatif === "Bar à Pâtes" && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
-                        <label className={labelStyle}>Choix de la sauce <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                            <select name="Plat_Associatif_Detail" value={formData.Plat_Associatif_Detail} onChange={handleChange} className={getInputStyle("Plat_Associatif_Detail")}>
-                                <option value="">Sélectionnez la sauce...</option>
-                                <option value="Bolognaise">Bolognaise</option>
-                                <option value="Carbonara">Carbonara</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="pt-2">
+                        <CustomDropdown
+                            label="Choix de la sauce"
+                            name="Plat_Associatif_Detail"
+                            value={formData.Plat_Associatif_Detail}
+                            options={["Bolognaise", "Carbonara"]}
+                            req={true}
+                            placeholder="Sélectionnez la sauce..."
+                            onSelect={handleSelectMeat}
+                        />
                     </motion.div>
                 )}
 
                 {formData.Plat_Associatif === "Burgers" && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
-                        <label className={labelStyle}>Type de Burger <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                            <select name="Plat_Associatif_Detail" value={formData.Plat_Associatif_Detail} onChange={handleChange} className={getInputStyle("Plat_Associatif_Detail")}>
-                                <option value="">Sélectionnez le type...</option>
-                                <option value="Normal">Burger Normal</option>
-                                <option value="Spécial Compère">Spécial Compère</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="pt-2">
+                        <CustomDropdown
+                            label="Type de Burger"
+                            name="Plat_Associatif_Detail"
+                            value={formData.Plat_Associatif_Detail}
+                            options={["Normal", "Spécial Compère"]}
+                            req={true}
+                            placeholder="Sélectionnez le type..."
+                            onSelect={handleSelectMeat}
+                        />
                     </motion.div>
                 )}
 
                 {formData.Plat_Associatif === "Boulets Liégeois" && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="pt-2 overflow-hidden">
-                        <label className={labelStyle}>Choix de la sauce <span className="text-red-500">*</span></label>
-                        <div className="relative">
-                            <select name="Plat_Associatif_Detail" value={formData.Plat_Associatif_Detail} onChange={handleChange} className={getInputStyle("Plat_Associatif_Detail")}>
-                                <option value="">Sélectionnez la sauce...</option>
-                                <option value="Sauce Lapin">Sauce Lapin</option>
-                                <option value="Sauce Tomate">Sauce Tomate</option>
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                    <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="pt-2">
+                        <CustomDropdown
+                            label="Choix de la sauce"
+                            name="Plat_Associatif_Detail"
+                            value={formData.Plat_Associatif_Detail}
+                            options={["Sauce Lapin", "Sauce Tomate"]}
+                            req={true}
+                            placeholder="Sélectionnez la sauce..."
+                            onSelect={handleSelectMeat}
+                        />
                     </motion.div>
                 )}
             </AnimatePresence>
 
+            {renderDessertSection()}
+
             {renderLogisticsOptions()}
 
             {/* PRICE INDICATION */}
-            {renderPriceDisplay("Prix par personne")}
+            {renderPriceDisplay()}
         </div>
     );
 
@@ -2009,6 +2991,8 @@ function ContactForm() {
                     Composition de votre Buffet
                 </h3>
                 {FormAllergenLink({ section: 'buffets' })}
+
+                {renderServiceToggle("Sur devis", "Mise en place, réassort et service de votre buffet sur place.")}
 
                 {/* NOUVEAU : Encart des plats inclus */}
                 {viandesIncluses.length > 0 && (
@@ -2029,18 +3013,14 @@ function ContactForm() {
 
                 {/* Féculent */}
                 <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200">
-                    <label className={`${labelStyle} flex items-center gap-2`}>
-                        <span>🍚</span> Votre Féculent (Inclus)
-                    </label>
-                    <div className="relative">
-                        <select name="Feculent_Froid" value={formData.Feculent_Froid || ""} onChange={handleChange} className={getInputStyle("Feculent_Froid") + " appearance-none"}>
-                            <option value="">Choisissez 1 féculent...</option>
-                            {feculentsFroids.map(f => <option key={f} value={f}>{f}</option>)}
-                        </select>
-                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                        </div>
-                    </div>
+                    <CustomDropdown
+                        label="🍚 Votre Féculent (Inclus)"
+                        name="Feculent_Froid"
+                        value={formData.Feculent_Froid || ""}
+                        options={feculentsFroids}
+                        placeholder="Choisissez 1 féculent..."
+                        onSelect={handleSelectMeat}
+                    />
                 </div>
 
                 {/* Crudités Incluses (Grille de 6) */}
@@ -2048,30 +3028,58 @@ function ContactForm() {
                     <label className={`${labelStyle} flex items-center gap-2 mb-4`}>
                         <span>🥗</span> Vos 6 Crudités Incluses
                     </label>
+
+                    {/* OPTION LAISSER LE CHEF COMPOSER */}
+                    <div className={`p-4 rounded-xl border transition-all duration-300 mb-5 ${
+                        formData.Crudites_Choix_Chef === "Oui"
+                            ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                            : "bg-white border-neutral-200 hover:border-neutral-300"
+                    }`}>
+                        <div className="flex items-start gap-3">
+                            <input
+                                type="checkbox"
+                                name="Crudites_Choix_Chef"
+                                id="Buffet_Crudites_Choix_Chef"
+                                className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                checked={formData.Crudites_Choix_Chef === "Oui"}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="Buffet_Crudites_Choix_Chef" className="cursor-pointer select-none">
+                                <span className="block font-bold text-neutral-800 text-sm md:text-base">
+                                    👨‍🍳 Laisser le chef composer l&apos;assortiment selon la saison
+                                </span>
+                                <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                    Cochez cette option pour un assortiment équilibré, ou sélectionnez vos indispensables et le chef complètera le reste.
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[1, 2, 3, 4, 5, 6].map(num => (
-                            <div className="relative group" key={`Crudite_${num}`}>
-                                <select
+                            <div key={`Crudite_${num}`}>
+                                <CustomDropdown
                                     name={`Crudite_${num}`}
                                     value={(formData as any)[`Crudite_${num}`] || ""}
-                                    onChange={handleChange}
-                                    className={getInputStyle(`Crudite_${num}`) + " appearance-none"}
-                                >
-                                    <option value="">Choix {num}...</option>
-                                    {cruditesFroids.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                </div>
+                                    options={cruditesFroids}
+                                    placeholder={`Choix ${num} (ou choix du chef)...`}
+                                    onSelect={handleSelectMeat}
+                                />
                             </div>
                         ))}
                     </div>
                 </div>
 
+                {/* ACCOMPAGNEMENTS & SAUCES CHAUDES */}
+                {renderHotOptionsSection()}
+
+                {/* OPTION DESSERTS & MIGNARDISES */}
+                {renderDessertSection()}
+
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {renderPriceDisplay("Prix par personne")}
+                {renderPriceDisplay()}
             </div>
         );
     };
@@ -2098,25 +3106,29 @@ function ContactForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
-                        <label className={`${labelStyle} flex items-center gap-2`}>
-                            <span>🥖</span> Gamme de pains
-                        </label>
-                        <div className="relative">
-                            <select name="Categorie_Pains" value={formData.Categorie_Pains || ""} onChange={handleChange} className={getInputStyle("Categorie_Pains") + " appearance-none"}>
-                                <option value="">Sélectionnez une gamme...</option>
-                                {Object.keys(painsData).map(cat => {
-                                    const adjustedPrice = getAdjustedUnitPrice(painsData[cat].price);
-                                    return (
-                                        <option key={cat} value={cat}>
-                                            {cat} ({adjustedPrice.toFixed(2).replace('.', ',')}€ / pièce)
-                                        </option>
-                                    );
-                                })}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            label="🥖 Gamme de pains"
+                            name="Categorie_Pains"
+                            value={formData.Categorie_Pains ? (
+                                (() => {
+                                    const cat = formData.Categorie_Pains;
+                                    if (painsData[cat]) {
+                                        const adjustedPrice = getAdjustedUnitPrice(painsData[cat].price);
+                                        return `${cat} (${adjustedPrice.toFixed(2).replace('.', ',')}€ / pièce)`;
+                                    }
+                                    return cat;
+                                })()
+                            ) : ""}
+                            options={Object.keys(painsData).map(cat => {
+                                const adjustedPrice = getAdjustedUnitPrice(painsData[cat].price);
+                                return `${cat} (${adjustedPrice.toFixed(2).replace('.', ',')}€ / pièce)`;
+                            })}
+                            placeholder="Sélectionnez une gamme..."
+                            onSelect={(name, val) => {
+                                const rawCat = Object.keys(painsData).find(cat => val.startsWith(cat)) || val;
+                                handleSelectMeat(name, rawCat);
+                            }}
+                        />
 
                         {categoryInfo && (
                             <div className="mt-4 pt-4 border-t border-neutral-200 animate-fade-in">
@@ -2133,20 +3145,17 @@ function ContactForm() {
                     </div>
 
                     <div className="bg-neutral-50 p-6 rounded-2xl border border-neutral-200">
-                        <label className={`${labelStyle} flex items-center gap-2`}>
-                            <span>🔢</span> Quantité par personne
-                        </label>
-                        <div className="relative">
-                            <select name="Quantite_Pains" value={formData.Quantite_Pains || ""} onChange={handleChange} className={getInputStyle("Quantite_Pains") + " appearance-none"}>
-                                <option value="">Nombre de pièces/pers...</option>
-                                {[3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                                    <option key={num} value={num}>{num} pièces / pers</option>
-                                ))}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            label="🔢 Quantité par personne"
+                            name="Quantite_Pains"
+                            value={formData.Quantite_Pains ? `${formData.Quantite_Pains} pièces / pers` : ""}
+                            options={[3, 4, 5, 6, 7, 8, 9, 10].map(num => `${num} pièces / pers`)}
+                            placeholder="Nombre de pièces/pers..."
+                            onSelect={(name, val) => {
+                                const numVal = val.split(' ')[0];
+                                handleSelectMeat(name, numVal);
+                            }}
+                        />
                         {/* Message intolérances */}
                         <p className="text-xs text-neutral-500 mt-2 italic px-1">
                             En cas d'intolérances, merci de le préciser dans le champ message en bas du formulaire.
@@ -2154,10 +3163,12 @@ function ContactForm() {
                     </div>
                 </div>
 
+                {renderDessertSection()}
+
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {renderPriceDisplay("Prix par personne")}
+                {renderPriceDisplay()}
             </div>
         );
     };
@@ -2178,37 +3189,40 @@ function ContactForm() {
             const formAny = formData as any;
             const selectedCat = formAny[catKey];
 
+            const rawItems = selectedCat && zakouskisData[selectedCat]
+                ? Object.entries(zakouskisData[selectedCat]).flatMap(([gammeName, gammeData]) => {
+                    const adjustedPrice = getAdjustedPrice(gammeData.price);
+                    return gammeData.items.map(item => `${item} (${adjustedPrice.toFixed(2).replace('.', ',')}€)`);
+                })
+                : [];
+
             return (
                 <div key={`zakouski_slot_${num}`} className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm">
                     <label className="block text-xs font-bold text-neutral-800 uppercase tracking-widest mb-3 border-b pb-2">
                         Choix {num} {isRequired && <span className="text-red-500">*</span>}
                     </label>
                     <div className="space-y-3">
-                        <div className="relative">
-                            <select name={catKey} value={selectedCat || ""} onChange={handleChange} className={getInputStyle(catKey as any) + " appearance-none py-2 text-sm"}>
-                                <option value="">Famille de produit...</option>
-                                {Object.keys(zakouskisData).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
-                        <div className="relative">
-                            <select name={itemKey} value={formAny[itemKey] || ""} onChange={handleChange} disabled={!selectedCat} className={getInputStyle(itemKey as any) + ` appearance-none py-2 text-sm ${!selectedCat ? 'bg-neutral-100 opacity-60' : ''}`}>
-                                <option value="">Sélectionnez la pièce...</option>
-                                {selectedCat && Object.entries(zakouskisData[selectedCat]).map(([gammeName, gammeData]) => {
-                                    const adjustedPrice = getAdjustedPrice(gammeData.price);
-                                    return (
-                                        <optgroup key={gammeName} label={`--- ${gammeName} (${adjustedPrice.toFixed(2).replace('.', ',')}€) ---`}>
-                                            {gammeData.items.map(item => <option key={item} value={item}>{item}</option>)}
-                                        </optgroup>
-                                    );
-                                })}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            name={catKey}
+                            value={selectedCat || ""}
+                            options={Object.keys(zakouskisData)}
+                            placeholder="Famille de produit..."
+                            onSelect={(k, val) => {
+                                handleSelectMeat(k, val);
+                                if (formAny[itemKey]) handleSelectMeat(itemKey, "");
+                            }}
+                        />
+                        <CustomDropdown
+                            name={itemKey}
+                            value={formAny[itemKey] ? (rawItems.find(i => i.startsWith(formAny[itemKey])) || formAny[itemKey]) : ""}
+                            options={rawItems}
+                            placeholder="Sélectionnez la pièce..."
+                            disabled={!selectedCat}
+                            onSelect={(k, val) => {
+                                const rawItem = val.replace(/\s\(\d+.*€\)$/, '');
+                                handleSelectMeat(k, rawItem);
+                            }}
+                        />
                     </div>
                 </div>
             );
@@ -2256,10 +3270,12 @@ function ContactForm() {
                     )}
                 </AnimatePresence>
 
+                {renderDessertSection()}
+
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {renderPriceDisplay("Prix par personne")}
+                {renderPriceDisplay()}
             </div>
         );
     };
@@ -2287,6 +3303,9 @@ function ContactForm() {
             const selectedCat = formAny[catKey];
 
             const isSlotsDisabled = !selectedFormat;
+            const rawVerrineItems = selectedCat && verrinesData[selectedCat]
+                ? verrinesData[selectedCat].items.map(item => `${item} (${getAdjustedPriceDisplay(selectedCat).toFixed(2).replace('.', ',')}€ / pièce)`)
+                : [];
 
             return (
                 <div key={`verrine_slot_${num}`} className={`bg-white p-4 rounded-xl border border-neutral-200 shadow-sm transition-opacity duration-300 ${isSlotsDisabled ? 'opacity-50' : ''}`}>
@@ -2294,28 +3313,28 @@ function ContactForm() {
                         Choix {num} {isRequired && <span className="text-red-500">*</span>}
                     </label>
                     <div className="space-y-3">
-                        <div className="relative">
-                            <select name={catKey} value={selectedCat || ""} onChange={handleChange} disabled={isSlotsDisabled} className={getInputStyle(catKey as any) + " appearance-none py-2 text-sm"}>
-                                <option value="">Famille de verrine...</option>
-                                {Object.keys(verrinesData).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
-                        <div className="relative">
-                            <select name={itemKey} value={formAny[itemKey] || ""} onChange={handleChange} disabled={isSlotsDisabled || !selectedCat} className={getInputStyle(itemKey as any) + ` appearance-none py-2 text-sm ${(isSlotsDisabled || !selectedCat) ? 'bg-neutral-100 opacity-60' : ''}`}>
-                                <option value="">Sélectionnez la pièce...</option>
-                                {selectedCat && (
-                                    <optgroup label={`--- ${selectedCat} (${getAdjustedPriceDisplay(selectedCat).toFixed(2).replace('.', ',')}€ / pièce) ---`}>
-                                        {verrinesData[selectedCat].items.map(item => <option key={item} value={item}>{item}</option>)}
-                                    </optgroup>
-                                )}
-                            </select>
-                            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                            </div>
-                        </div>
+                        <CustomDropdown
+                            name={catKey}
+                            value={selectedCat || ""}
+                            options={Object.keys(verrinesData)}
+                            placeholder="Famille de verrine..."
+                            disabled={isSlotsDisabled}
+                            onSelect={(k, val) => {
+                                handleSelectMeat(k, val);
+                                if (formAny[itemKey]) handleSelectMeat(itemKey, "");
+                            }}
+                        />
+                        <CustomDropdown
+                            name={itemKey}
+                            value={formAny[itemKey] ? (rawVerrineItems.find(i => i.startsWith(formAny[itemKey])) || formAny[itemKey]) : ""}
+                            options={rawVerrineItems}
+                            placeholder="Sélectionnez la pièce..."
+                            disabled={isSlotsDisabled || !selectedCat}
+                            onSelect={(k, val) => {
+                                const rawItem = val.replace(/\s\(\d+.*€ \/ pièce\)$/, '');
+                                handleSelectMeat(k, rawItem);
+                            }}
+                        />
                     </div>
                 </div>
             );
@@ -2379,10 +3398,12 @@ function ContactForm() {
                     )}
                 </AnimatePresence>
 
+                {renderDessertSection()}
+
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {renderPriceDisplay("Prix par personne")}
+                {renderPriceDisplay()}
             </div>
         );
     };
@@ -2390,8 +3411,11 @@ function ContactForm() {
     const renderCollectiviteFields = () => {
         if (!isCollectivite) return null;
 
-        // Tri alphabétique des plats pour un affichage propre
+        const currentVolet = formData.Collectivite_Volet || "plats_chauds";
+
+        // Tri alphabétique des plats chauds pour un affichage propre
         const sortedDishes = Object.keys(collectiviteData).sort((a, b) => a.localeCompare(b));
+        const sortedSalads = Object.keys(saladesBowlsData);
 
         const getAdjustedPriceDisplay = (basePrice: number) => {
             if (formData.Nombre_Convives === 'Moins de 30') return basePrice * 1.10;
@@ -2400,37 +3424,230 @@ function ContactForm() {
 
         return (
             <div className="space-y-6 animate-fade-in bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm border-l-4 border-l-black mt-8">
-                <h3 className="text-xl font-bold text-neutral-800 uppercase tracking-wide border-b border-neutral-200 pb-2 mb-4">
-                    Détails de votre Repas de Collectivité
-                </h3>
-                {FormAllergenLink({ section: 'collectivite' })}
-
-                <div className="group">
-                    <label className={labelStyle}>Sélectionnez le plat pour votre groupe <span className="text-red-500">*</span></label>
-                    <div className="relative">
-                        <select name="Plat_Collectivite" value={formData.Plat_Collectivite} onChange={handleChange} className={getInputStyle("Plat_Collectivite" as any) + " appearance-none"}>
-                            <option value="">Faites votre choix parmi nos 21 plats...</option>
-                            {sortedDishes.map(dish => {
-                                const showPrice = formData.Nombre_Convives !== 'Plus de 100';
-                                const price = getAdjustedPriceDisplay(collectiviteData[dish]);
-                                return (
-                                    <option key={dish} value={dish}>
-                                        {dish}{showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                        </div>
-                    </div>
-                    <p className="text-xs text-neutral-500 mt-2 italic px-1">Un seul et même plat pour l'ensemble des convives.</p>
+                <div className="border-b border-neutral-200 pb-3 mb-4">
+                    <h3 className="text-xl font-bold text-neutral-800 uppercase tracking-wide">
+                        Repas de Collectivité & Plats Uniques
+                    </h3>
+                    <p className="text-xs text-neutral-500 mt-1">
+                        Choisissez votre formule : plats chauds mijotés ou salad bar & bowls fraîcheur (1 plat unique pour votre groupe).
+                    </p>
                 </div>
 
+                {renderServiceToggle("Sur devis", "Mise en place, maintien en température et service pour votre groupe.")}
+
+                {/* Sélecteur de Volet (Toggle buttons) */}
+                <div>
+                    <label className="block text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">
+                        Type de formule pour votre groupe
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFormData(prev => ({ ...prev, Collectivite_Volet: "plats_chauds" }));
+                                if (errors.Salad_Bar_Choix) {
+                                    setErrors(prev => {
+                                        const next = { ...prev };
+                                        delete next.Salad_Bar_Choix;
+                                        return next;
+                                    });
+                                }
+                            }}
+                            className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-center justify-between cursor-pointer ${
+                                currentVolet === "plats_chauds"
+                                    ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                                    : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
+                            }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl">🍲</span>
+                                <div>
+                                    <span className="block font-bold text-neutral-800 text-sm md:text-base">
+                                        Plats Uniques Chauds
+                                    </span>
+                                    <span className="block text-xs text-neutral-500 mt-0.5">
+                                        21 plats mijotés au choix (dès 8,00€ / pers)
+                                    </span>
+                                </div>
+                            </div>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFormData(prev => ({ ...prev, Collectivite_Volet: "salad_bar" }));
+                                if (errors.Plat_Collectivite) {
+                                    setErrors(prev => {
+                                        const next = { ...prev };
+                                        delete next.Plat_Collectivite;
+                                        return next;
+                                    });
+                                }
+                            }}
+                            className={`p-4 rounded-xl border text-left transition-all duration-300 flex items-center justify-between cursor-pointer ${
+                                currentVolet === "salad_bar"
+                                    ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                                    : "border-neutral-200 bg-white hover:border-neutral-300 text-neutral-600"
+                            }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl">🥗</span>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                            Salad Bar & Bowls
+                                        </span>
+                                        <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#D4AF37]/30">
+                                            NOUVEAU
+                                        </span>
+                                    </div>
+                                    <span className="block text-xs text-neutral-500 mt-0.5">
+                                        8 recettes fraîches au choix (dès 10,50€ / pers)
+                                    </span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                {/* VOLET 1 : PLATS CHAUDS */}
+                {currentVolet === "plats_chauds" && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-4 pt-2"
+                    >
+                        {FormAllergenLink({ section: 'collectivite' })}
+
+                        <div className="group">
+                            <CustomDropdown
+                                label="Sélectionnez le plat chaud pour votre groupe"
+                                name="Plat_Collectivite"
+                                value={formData.Plat_Collectivite ? (
+                                    (() => {
+                                        const showPrice = formData.Nombre_Convives !== 'Plus de 100';
+                                        const price = getAdjustedPriceDisplay(collectiviteData[formData.Plat_Collectivite] || 0);
+                                        return `${formData.Plat_Collectivite}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
+                                    })()
+                                ) : ""}
+                                options={sortedDishes.map(dish => {
+                                    const showPrice = formData.Nombre_Convives !== 'Plus de 100';
+                                    const price = getAdjustedPriceDisplay(collectiviteData[dish] || 0);
+                                    return `${dish}${showPrice ? ` (${price.toFixed(2).replace('.', ',')}€ / pers)` : ''}`;
+                                })}
+                                placeholder="Faites votre choix parmi nos 21 plats mijotés..."
+                                req={true}
+                                hasError={!!errors.Plat_Collectivite}
+                                onSelect={(name, val) => {
+                                    const dish = sortedDishes.find(d => val.startsWith(d)) || val;
+                                    handleSelectMeat(name, dish);
+                                }}
+                            />
+                            {errors.Plat_Collectivite && (
+                                <p className="text-xs text-red-500 font-medium mt-1">{errors.Plat_Collectivite}</p>
+                            )}
+                            <p className="text-xs text-neutral-500 mt-2 italic px-1">Un seul et même plat pour l&apos;ensemble des convives.</p>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* VOLET 2 : SALAD BAR & BOWLS */}
+                {currentVolet === "salad_bar" && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-4 pt-2"
+                    >
+                        {FormAllergenLink({ section: 'collectivite' })}
+
+                        <div>
+                            <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+                                <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider">
+                                    CHOISISSEZ VOTRE SALADE / BOWL (1 CHOIX POUR LE GROUPE) <span className="text-red-500">*</span>
+                                </label>
+                                <p className="text-xs text-neutral-500 italic">
+                                    Un seul et même choix pour l&apos;ensemble des convives.
+                                </p>
+                            </div>
+
+                            {/* Grille responsive des 8 Cartes Radio descriptives */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                                {SALADS_BOWLS_DATA.map((bowl) => {
+                                    const isSelected = formData.Salad_Bar_Choix === bowl.name;
+                                    const showPrice = formData.Nombre_Convives !== 'Plus de 100';
+                                    const price = getAdjustedPriceDisplay(bowl.price);
+
+                                    return (
+                                        <div
+                                            key={bowl.name}
+                                            onClick={() => {
+                                                handleFormStart();
+                                                setFormData(prev => ({
+                                                    ...prev,
+                                                    Salad_Bar_Choix: bowl.name
+                                                }));
+                                                if (errors.Salad_Bar_Choix) {
+                                                    setErrors(prev => {
+                                                        const next = { ...prev };
+                                                        delete next.Salad_Bar_Choix;
+                                                        return next;
+                                                    });
+                                                }
+                                            }}
+                                            className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer select-none group flex flex-col justify-between ${
+                                                isSelected
+                                                    ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                                                    : "bg-white border-gray-200 hover:border-gray-300 hover:bg-neutral-50/40"
+                                            }`}
+                                        >
+                                            {/* Haut de la carte : Radio + Nom + Badge Prix */}
+                                            <div className="flex items-start justify-between gap-3">
+                                                <div className="flex items-start gap-3 flex-1">
+                                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all shrink-0 mt-0.5 ${
+                                                        isSelected
+                                                            ? "border-[#D4AF37] bg-[#D4AF37]"
+                                                            : "border-gray-300 bg-white group-hover:border-gray-400"
+                                                    }`}>
+                                                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                    </div>
+                                                    <span className={`font-bold text-sm md:text-base leading-snug transition-colors ${
+                                                        isSelected ? "text-neutral-900" : "text-neutral-800 group-hover:text-black"
+                                                    }`}>
+                                                        {bowl.name}
+                                                    </span>
+                                                </div>
+
+                                                <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30 shrink-0 whitespace-nowrap">
+                                                    {showPrice ? `${price.toFixed(2).replace('.', ',')} € / pers.` : 'Sur devis'}
+                                                </span>
+                                            </div>
+
+                                            {/* Bas de la carte : Description complète des ingrédients */}
+                                            <p className="text-gray-500 text-xs md:text-sm leading-relaxed mt-2.5 pl-7">
+                                                {bowl.desc}
+                                            </p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {errors.Salad_Bar_Choix && (
+                                <p className="text-xs text-red-500 font-medium mt-2">{errors.Salad_Bar_Choix}</p>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* OPTIONS DESSERTS */}
+                {renderDessertSection()}
+
+                {/* OPTIONS LOGISTIQUE */}
                 {renderLogisticsOptions()}
 
                 {/* PRICE INDICATION */}
-                {formData.Plat_Collectivite && renderPriceDisplay("Prix par personne")}
+                {((currentVolet === "plats_chauds" && formData.Plat_Collectivite) || (currentVolet === "salad_bar" && formData.Salad_Bar_Choix)) && (
+                    renderPriceDisplay()
+                )}
             </div>
         );
     };
@@ -2447,19 +3664,33 @@ function ContactForm() {
                 </h3>
                 {FormAllergenLink({ section: 'buffets' })}
 
+                {renderServiceToggle("Sur devis", "Prise en charge et service de votre buffet chaud sur place.")}
+
                 {/* Choix du nombre de services */}
                 <div className="group mb-8">
-                    <label className={labelStyle}>Nombre de services <span className="text-red-500">*</span></label>
-                    <div className="relative md:w-1/2">
-                        <select name="Buffet_Chaud_Services" value={formData.Buffet_Chaud_Services} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Services") + " appearance-none"}>
-                            <option value="2">2 Services (Plat + Dessert)</option>
-                            <option value="3">3 Services (Entrée + Plat + Dessert)</option>
-                            <option value="4">4 Services (Zakouskis + Entrée + Plat + Dessert)</option>
-                            <option value="5">5 Services (Zakouskis + 2 Entrées + Plat + Dessert)</option>
-                        </select>
-                        <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                        </div>
+                    <div className="md:w-1/2">
+                        <CustomDropdown
+                            label="Nombre de services"
+                            name="Buffet_Chaud_Services"
+                            value={
+                                formData.Buffet_Chaud_Services === "2" ? "2 Services (Plat + Dessert)" :
+                                formData.Buffet_Chaud_Services === "3" ? "3 Services (Entrée + Plat + Dessert)" :
+                                formData.Buffet_Chaud_Services === "4" ? "4 Services (Zakouskis + Entrée + Plat + Dessert)" :
+                                formData.Buffet_Chaud_Services === "5" ? "5 Services (Zakouskis + 2 Entrées + Plat + Dessert)" :
+                                "3 Services (Entrée + Plat + Dessert)"
+                            }
+                            options={[
+                                "2 Services (Plat + Dessert)",
+                                "3 Services (Entrée + Plat + Dessert)",
+                                "4 Services (Zakouskis + Entrée + Plat + Dessert)",
+                                "5 Services (Zakouskis + 2 Entrées + Plat + Dessert)"
+                            ]}
+                            req={true}
+                            onSelect={(name, val) => {
+                                const s = val.charAt(0);
+                                handleSelectMeat(name, s);
+                            }}
+                        />
                     </div>
                 </div>
 
@@ -2498,12 +3729,13 @@ function ContactForm() {
                         <label className={labelStyle}>🥘 Plat Principal (Buffet Chaud)</label>
                         <input type="text" name="Buffet_Chaud_Plat" value={formData.Buffet_Chaud_Plat} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Plat")} placeholder="Viandes, poissons, accompagnements souhaités..." />
                     </div>
-
-                    <div className="group">
-                        <label className={labelStyle}>🍰 Dessert / Fromage</label>
-                        <input type="text" name="Buffet_Chaud_Dessert" value={formData.Buffet_Chaud_Dessert} onChange={handleChange} className={getInputStyle("Buffet_Chaud_Dessert")} placeholder="Vos envies sucrées ou fromagères..." />
-                    </div>
                 </div>
+
+                {/* ACCOMPAGNEMENTS & SAUCES CHAUDES */}
+                {renderHotOptionsSection()}
+
+                {/* OPTION DESSERTS & MIGNARDISES */}
+                {renderDessertSection()}
 
                 <div className="group mt-8 border-t border-neutral-100 pt-6">
                     <label className={labelStyle}>Thème de l'événement ou autres commentaires</label>
@@ -2516,31 +3748,28 @@ function ContactForm() {
                     />
                 </div>
                 {renderLogisticsOptions()}
+
+                {/* PRICE INDICATION */}
+                {renderPriceDisplay()}
             </div>
         );
     };
 
     const renderContactFields = () => (
-        <>
-
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="group">
-                    <label className={labelStyle}>Prénom <span className="text-red-500">*</span></label>
-                    <input type="text" name="Prenom" required value={formData.Prenom} onChange={handleChange} onFocus={handleFormStart} className={getInputStyle("Prenom")} placeholder="Votre prénom" />
-                    {errors.Prenom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Prenom}</p>}
-                </div>
-                <div className="group">
-                    <label className={labelStyle}>Nom <span className="text-red-500">*</span></label>
-                    <input type="text" name="Nom" required value={formData.Nom} onChange={handleChange} className={getInputStyle("Nom")} placeholder="Votre nom" />
-                    {errors.Nom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Nom}</p>}
-                </div>
-            </div>
-
+        <div className="space-y-6">
             <div className="bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
                 <div className="flex items-center gap-3 mb-2">
-                    <input type="checkbox" name="Societe" id="Societe" className="w-5 h-5 text-[#D4AF37] rounded" checked={formData.Societe === "Oui"} onChange={handleChange} />
-                    <label htmlFor="Societe" className="text-neutral-700 font-medium cursor-pointer">Je représente une société</label>
+                    <input
+                        type="checkbox"
+                        name="Societe"
+                        id="Societe"
+                        className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] rounded focus:ring-[#D4AF37] cursor-pointer"
+                        checked={formData.Societe === "Oui"}
+                        onChange={handleChange}
+                    />
+                    <label htmlFor="Societe" className="text-neutral-700 font-medium cursor-pointer select-none">
+                        Je représente une société
+                    </label>
                 </div>
                 <AnimatePresence>
                     {formData.Societe === "Oui" && (
@@ -2551,13 +3780,50 @@ function ContactForm() {
                             transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
                             className="overflow-hidden"
                         >
-                            <input type="text" name="Nom_Societe" className={getInputStyle("Nom_Societe")} placeholder="Ex : Colruyt Group" value={formData.Nom_Societe} onChange={handleChange} />
+                            <input
+                                type="text"
+                                name="Nom_Societe"
+                                className={getInputStyle("Nom_Societe")}
+                                placeholder="Ex : Colruyt Group, ASBL..."
+                                value={formData.Nom_Societe}
+                                onChange={handleChange}
+                            />
                         </motion.div>
                     )}
                 </AnimatePresence>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="group">
+                    <label className={labelStyle}>Prénom <span className="text-red-500">*</span></label>
+                    <input
+                        type="text"
+                        name="Prenom"
+                        required
+                        value={formData.Prenom}
+                        onChange={handleChange}
+                        onFocus={handleFormStart}
+                        className={getInputStyle("Prenom")}
+                        placeholder="Votre prénom"
+                    />
+                    {errors.Prenom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Prenom}</p>}
+                </div>
+                <div className="group">
+                    <label className={labelStyle}>Nom <span className="text-red-500">*</span></label>
+                    <input
+                        type="text"
+                        name="Nom"
+                        required
+                        value={formData.Nom}
+                        onChange={handleChange}
+                        className={getInputStyle("Nom")}
+                        placeholder="Votre nom"
+                    />
+                    {errors.Nom && <p className="text-red-500 text-xs mt-1 font-medium ml-1">{errors.Nom}</p>}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="group">
                     <label className={labelStyle}>Email <span className="text-red-500">*</span></label>
                     <input
@@ -2587,61 +3853,34 @@ function ContactForm() {
             </div>
 
             {!isPlatPrepare && (
-                <>
-                    {isAnyBBQ && (
-                        <div className="bg-neutral-50/50 p-6 rounded-2xl border border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                            <div>
-                                <label className="block text-sm font-bold text-neutral-700 uppercase tracking-wide">Prestation Service</label>
-                                <p className="text-xs text-neutral-500 mt-1 italic">Maîtres du feu, découpe & service à table sur place.</p>
-                            </div>
-                            <div className="flex bg-neutral-200/60 p-1 rounded-xl w-fit border border-neutral-200/40">
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Non" }))}
-                                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${formData.Service_Check !== "Oui" ? 'bg-white text-black shadow' : 'text-neutral-500 hover:text-black'}`}
-                                >
-                                    Sans service
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, Service_Check: "Oui" }))}
-                                    className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ${formData.Service_Check === "Oui" ? 'bg-black text-[#D4AF37] shadow' : 'text-neutral-500 hover:text-black'}`}
-                                >
-                                    Avec service (+2,5€/pers)
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="group">
-                            <label className={labelStyle}>Date <span className="text-red-500">*</span></label>
-                            <input
-                                type="date"
-                                name="Date"
-                                required
-                                min={getMinDate()}
-                                value={formData.Date}
-                                onChange={handleChange}
-                                onBlur={handleDateBlur}
-                                className={getInputStyle("Date")}
-                            />
-                        </div>
-                        <div className="group">
-                            <label className={labelStyle}>Convives <span className="text-red-500">*</span></label>
-                            <div className="relative">
-                                <select name="Nombre_Convives" value={formData.Nombre_Convives} onChange={handleChange} className={`${getInputStyle("Nombre_Convives")} appearance-none`}>
-                                    {getInitialConvivesOptions(formData.Type_Evenement).map(o => <option key={o} value={o}>{o}</option>)}
-                                </select>
-                                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                                </div>
-                            </div>
-                        </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                        <label className={labelStyle}>Date de l&apos;événement <span className="text-red-500">*</span></label>
+                        <input
+                            type="date"
+                            name="Date"
+                            required
+                            min={getMinDate()}
+                            value={formData.Date}
+                            onChange={handleChange}
+                            onBlur={handleDateBlur}
+                            className={getInputStyle("Date")}
+                        />
                     </div>
-                </>
+                    <div className="group">
+                        <CustomDropdown
+                            label="Nombre de convives"
+                            name="Nombre_Convives"
+                            value={formData.Nombre_Convives}
+                            options={getInitialConvivesOptions(formData.Type_Evenement)}
+                            req={true}
+                            hasError={!!errors.Nombre_Convives}
+                            onSelect={handleSelectMeat}
+                        />
+                    </div>
+                </div>
             )}
-
-        </>
+        </div>
     );
 
 
@@ -2652,9 +3891,9 @@ function ContactForm() {
             <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#D4AF37]/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none" />
             <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-[#D4AF37]/5 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3 z-0 pointer-events-none" />
 
-            <div className="max-w-4xl mx-auto px-6 relative z-10">
-                <div className="bg-white shadow-2xl p-8 md:p-14 rounded-[2rem] border-t-4 border-[#D4AF37]">
-                    <header className="text-center mb-10">
+            <div className="w-full max-w-5xl mx-auto px-2 sm:px-4 md:px-6 relative z-10">
+                <div className="bg-white shadow-2xl p-4 sm:p-8 md:p-14 rounded-2xl md:rounded-[2rem] border-t-4 border-[#D4AF37]">
+                    <header className="text-center mb-8 md:mb-10">
                         <h1 className="text-4xl md:text-5xl font-serif text-black mb-4">
                             {isMenusFetes ? "Menus de Fêtes 2026" : (isPlatPrepare ? "Finaliser votre Commande" : "Contactez-nous")}
                         </h1>
@@ -2714,7 +3953,7 @@ function ContactForm() {
                             </div>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="space-y-8">
+                        <form onSubmit={handleSubmit} className="space-y-10">
                             {/* 1. Sélection de Date, Créneau & Règle J-4 */}
                             {isMenusFetes && (
                                 <div className="bg-white p-6 md:p-8 rounded-3xl border-2 border-[#D4AF37]/40 shadow-sm mb-10 space-y-8">
@@ -3053,44 +4292,90 @@ function ContactForm() {
                             )}
 
                             {/* 2. Autres Formules personnalisées (BBQ, Buffets, etc.) */}
-                            {showMenuFirst && !isPlatPrepare && (
+                            {showMenuFirst && !isPlatPrepare ? (
                                 <>
-                                    {isAnyBBQ && renderBBQComposition()}
-                                    {isPlatUnique && renderPlatUniqueFields()}
-                                    {isBuffetFroid && renderBuffetFroidFields()}
-                                    {isPains && renderPainsFields()}
-                                    {isZakouskis && renderZakouskisFields()}
-                                    {isVerrines && renderVerrinesFields()}
-                                    {isCollectivite && renderCollectiviteFields()}
-                                    {isBuffetChaud && renderBuffetChaudFields()}
-                                    {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && !isCollectivite && !isBuffetChaud && (
-                                        <>
-                                            <div className="bg-neutral-50 p-6 rounded-xl text-center">
-                                                <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
+                                    {/* SECTION 1 : CONFIGURATION DE VOTRE FORMULE & OPTIONS */}
+                                    <div className="space-y-8">
+                                        {isAnyBBQ && renderBBQComposition()}
+                                        {isPlatUnique && renderPlatUniqueFields()}
+                                        {isBuffetFroid && renderBuffetFroidFields()}
+                                        {isPains && renderPainsFields()}
+                                        {isZakouskis && renderZakouskisFields()}
+                                        {isVerrines && renderVerrinesFields()}
+                                        {isCollectivite && renderCollectiviteFields()}
+                                        {isBuffetChaud && renderBuffetChaudFields()}
+                                        {(isBuffet || isAssociations) && !isBuffetFroid && !isPains && !isCollectivite && !isBuffetChaud && (
+                                            <div className="bg-neutral-50/50 border border-neutral-200 rounded-2xl p-4 sm:p-6 md:p-8 space-y-6">
+                                                <div className="bg-neutral-50 p-6 rounded-xl text-center">
+                                                    <p className="italic text-gray-500">Pour les buffets et associations, veuillez préciser vos choix dans le champ &quot;Dites-nous en plus&quot; ci-dessous ou nous vous recontacterons pour affiner le menu.</p>
+                                                </div>
+                                                {renderHotOptionsSection()}
+                                                {renderDessertSection()}
+                                                {renderLogisticsOptions()}
+                                                {renderPriceDisplay()}
                                             </div>
-                                            {renderLogisticsOptions()}
-                                        </>
-                                    )}
+                                        )}
+                                    </div>
+
+                                    {/* SECTION 2 : VOS INFORMATIONS & COORDONNÉES */}
+                                    <div className="bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 shadow-sm">
+                                        <div className="border-b border-neutral-200 pb-4">
+                                            <h3 className="text-2xl font-serif text-neutral-900 font-bold">
+                                                {isPlatPrepare ? "Vos coordonnées" : "Vos Coordonnées & Date de l'Événement"}
+                                            </h3>
+                                            <p className="text-sm text-neutral-500 mt-1">
+                                                {isPlatPrepare ? "Renseignez vos coordonnées pour finaliser votre commande." : "Renseignez vos coordonnées pour recevoir votre devis détaillé sous 24h."}
+                                            </p>
+                                        </div>
+                                        {renderContactFields()}
+                                    </div>
                                 </>
-                            )}
-
-                            <h3 className="text-xl font-serif text-neutral-800 mt-2 mb-6 border-b border-neutral-200 pb-2">
-                                {isPlatPrepare ? "Vos coordonnées" : "Vos informations"}
-                            </h3>
-                            {renderContactFields()}
-
-                            {!isPlatPrepare && (
-                                <div className="group">
-                                    <label className={labelStyle}>Dites-nous en plus !</label>
-                                    <textarea name="details_projet" value={formData.details_projet} onChange={handleChange} className={`${getInputStyle("details_projet")} h-32 resize-y`} placeholder="Allergies, précisions, déroulement..." />
+                            ) : (
+                                <div className="bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 shadow-sm">
+                                    <div className="border-b border-neutral-200 pb-4">
+                                        <h3 className="text-2xl font-serif text-neutral-900 font-bold">
+                                            {isPlatPrepare ? "Vos coordonnées" : "Vos Coordonnées & Date de l'Événement"}
+                                        </h3>
+                                        <p className="text-sm text-neutral-500 mt-1">
+                                            {isPlatPrepare ? "Renseignez vos coordonnées pour finaliser votre commande." : "Renseignez vos coordonnées pour nous transmettre votre demande."}
+                                        </p>
+                                    </div>
+                                    {renderContactFields()}
                                 </div>
                             )}
 
+                            {!isPlatPrepare && (
+                                <div className="group bg-white border border-neutral-200/80 rounded-2xl p-4 sm:p-6 md:p-8 shadow-sm space-y-3">
+                                    <label className="block text-lg font-serif font-bold text-neutral-900">
+                                        Dites-nous en plus ! (Optionnel)
+                                    </label>
+                                    <p className="text-xs text-neutral-500">
+                                        Précisez vos éventuelles allergies alimentaires, souhaits particuliers, lieu exact de l&apos;événement ou toute autre indication utile.
+                                    </p>
+                                    <textarea
+                                        name="details_projet"
+                                        value={formData.details_projet}
+                                        onChange={handleChange}
+                                        className={`${getInputStyle("details_projet")} h-32 resize-y`}
+                                        placeholder="Ex : 2 personnes intolérantes au lactose, besoin d'une découpe à 19h..."
+                                    />
+                                </div>
+                            )}
 
-
-                            <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 flex items-center gap-3">
-                                <input type="checkbox" name="Souhaite_etre_recontacte" id="recontact" className="w-5 h-5 text-[#D4AF37] rounded" checked={formData.Souhaite_etre_recontacte === "Oui"} onChange={handleChange} />
-                                <label htmlFor="recontact" className="text-neutral-700 cursor-pointer">{isPlatPrepare ? "Je souhaite ajouter un commentaire à ma commande" : "Je souhaite être recontacté pour discuter de mon devis."}</label>
+                            <div className="bg-gray-50/70 p-5 rounded-2xl border border-gray-200 flex items-center gap-3">
+                                <input
+                                    type="checkbox"
+                                    name="Souhaite_etre_recontacte"
+                                    id="recontact"
+                                    className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] rounded focus:ring-[#D4AF37] cursor-pointer"
+                                    checked={formData.Souhaite_etre_recontacte === "Oui"}
+                                    onChange={handleChange}
+                                />
+                                <label htmlFor="recontact" className="text-neutral-800 text-sm font-medium cursor-pointer select-none">
+                                    {isPlatPrepare
+                                        ? "Je souhaite ajouter un commentaire à ma commande"
+                                        : "Je souhaite être recontacté par téléphone pour discuter de mon devis."}
+                                </label>
                             </div>
 
                             {isPlatPrepare && formData.Souhaite_etre_recontacte === "Oui" && (
@@ -3100,7 +4385,7 @@ function ContactForm() {
                             )}
 
                             {isPlatPrepare && (
-                                <div className="bg-white p-6 rounded-2xl border border-neutral-200 mt-6 shadow-sm">
+                                <div className="bg-white p-4 sm:p-6 rounded-2xl border border-neutral-200 mt-6 shadow-sm">
                                     <h3 className="text-xl font-serif text-black mb-4 flex items-center gap-2">
                                         <ShoppingCart className="text-[#D4AF37]" size={20} /> Récapitulatif de votre panier
                                     </h3>
@@ -3339,7 +4624,7 @@ function ContactForm() {
                             <button
                                 type="submit"
                                 disabled={status === "submitting"}
-                                className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all"
+                                className="w-full bg-black text-white py-5 uppercase tracking-widest text-sm font-bold rounded-full shadow-lg hover:bg-[#D4AF37] transition-all cursor-pointer"
                             >
                                 {status === "submitting" ? "Envoi en cours..." : "Envoyer la demande"}
                             </button>
