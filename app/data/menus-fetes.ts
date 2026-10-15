@@ -258,6 +258,7 @@ export const CARTE_FETES_ITEMS: CarteItem[] = [
 export interface BookletDish {
     id: string;
     title: string;
+    shortTitle?: string;
     description: string;
     price: number;
     priceFormatted: string;
@@ -301,6 +302,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "zak-volaille",
                         title: "Cuillère de mousse de volaille Périgord",
+                        shortTitle: "Mousse de volaille Périgord",
                         description: "Mousse légère et parfumée, noisettes torréfiées et pointe de réduction",
                         price: 4.00,
                         priceFormatted: "4,00 €",
@@ -310,6 +312,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "zak-maquereau",
                         title: "Blini de maquereau fumé",
+                        shortTitle: "Blini de maquereau",
                         description: "Maquereau fumé artisanalement, raifort doux et fraîcheur acidulée de pomme verte",
                         price: 4.00,
                         priceFormatted: "4,00 €",
@@ -319,6 +322,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "zak-jambon",
                         title: "Roulé de jambon d'Ardenne",
+                        shortTitle: "Roulé de jambon d'Ardenne",
                         description: "Jambon d'Ardenne affiné, fromage de Herve doux et pointe de sirop de Liège",
                         price: 4.00,
                         priceFormatted: "4,00 €",
@@ -334,6 +338,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "pot-cresson",
                         title: "Velouté de cresson",
+                        shortTitle: "Velouté de cresson",
                         description: "Cresson de fontaine fraîchement lié à la crème double et pointe de muscade",
                         price: 4.00,
                         priceFormatted: "4,00 €",
@@ -343,6 +348,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "pot-potiron",
                         title: "Velouté de potiron et châtaignes",
+                        shortTitle: "Velouté potiron",
                         description: "Douceur de potiron rôti au beurre et brisures de châtaignes moelleuses",
                         price: 4.00,
                         priceFormatted: "4,00 €",
@@ -370,6 +376,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "ef-foie-gras",
                         title: "Foie gras de canard mi-cuit",
+                        shortTitle: "Foie gras de canard",
                         description: "Terrine maison au poivre de Sichuan, chutney de figues au Porto et brioche toastée",
                         price: 22.00,
                         priceFormatted: "22,00 €",
@@ -379,6 +386,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "ef-st-jacques",
                         title: "Carpaccio de noix de Saint-Jacques",
+                        shortTitle: "Carpaccio de Saint-Jacques",
                         description: "Noix tranchées minute, suprêmes d'agrumes, confit de pamplemousse et huile vierge extra",
                         price: 24.00,
                         priceFormatted: "24,00 €",
@@ -394,6 +402,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "ec-ris-de-veau",
                         title: "Cassolette de ris de veau dorés au beurre",
+                        shortTitle: "Cassolette de ris de veau",
                         description: "Ris de veau de cœur croustillants, girolles, chanterelles et crème fine réduite",
                         price: 24.00,
                         priceFormatted: "24,00 €",
@@ -403,6 +412,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "ec-raviolis",
                         title: "Raviolis farcis aux girolles",
+                        shortTitle: "Raviolis aux girolles",
                         description: "Pâtes fraîches farcies aux sous-bois, crème de parmesan affiné et girolles poêlées",
                         price: 22.00,
                         priceFormatted: "22,00 €",
@@ -430,6 +440,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "plat-chevreuil",
                         title: "Filet de chevreuil rôti",
+                        shortTitle: "Filet de chevreuil rôti",
                         description: "Gibier noble saisi au sautoir (±250g), sauce aux agrumes et chocolat noir amer",
                         price: 36.00,
                         priceFormatted: "36,00 €",
@@ -439,6 +450,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "plat-pintadeau",
                         title: "Suprême de pintadeau laqué au miel",
+                        shortTitle: "Suprême de pintadeau",
                         description: "Volaille fermière dorée au miel d'acacia (±250g), mandarines rôties et jus corsé",
                         price: 30.00,
                         priceFormatted: "30,00 €",
@@ -448,6 +460,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "plat-saumon",
                         title: "Pavé de saumon à l'oseille en cuisson lente",
+                        shortTitle: "Pavé de saumon",
                         description: "Cœur de filet de saumon fondant (±250g), émulsion légère au champagne et julienne de légumes",
                         price: 30.00,
                         priceFormatted: "30,00 €",
@@ -475,6 +488,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "buch-framboise",
                         title: "Crème fraîche & framboise",
+                        shortTitle: "Bûchette framboise",
                         description: "Biscuit roulé aérien, crème fraîche légère et compotée de framboises acidulées",
                         price: 8.00,
                         priceFormatted: "8,00 €",
@@ -484,6 +498,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "buch-chocolat",
                         title: "Mousse au chocolat cœur framboise",
+                        shortTitle: "Bûchette chocolat",
                         description: "Mousse intense au chocolat noir belge, insert fruité framboise et croustillant praliné",
                         price: 8.00,
                         priceFormatted: "8,00 €",
@@ -493,6 +508,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
                     {
                         id: "buch-moka",
                         title: "Beurre moka",
+                        shortTitle: "Bûchette moka",
                         description: "La recette festive traditionnelle : crème au beurre au café pur arabica et génoise moelleuse",
                         price: 8.00,
                         priceFormatted: "8,00 €",

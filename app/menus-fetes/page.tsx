@@ -215,33 +215,9 @@ export default function MenusFetesPage() {
     const bookletDiscountAmount = isEarlyBirdActive ? Math.round(rawBookletSubtotal * 0.05 * 100) / 100 : 0;
     const finalBookletTotal = Math.max(0, rawBookletSubtotal - bookletDiscountAmount);
 
-    // Décompte textuel des mets sélectionnés (ex : « 4 zakouskis, 2 plats, 2 bûchettes »)
-    const categoryCounts: Record<string, number> = {};
-    selectedBookletDishes.forEach(item => {
-        const cat = item.dish.categoryLabel.toLowerCase();
-        categoryCounts[cat] = (categoryCounts[cat] || 0) + item.qty;
-    });
-
-    const breakdownParts: string[] = [];
-    if (categoryCounts["zakouskis"]) {
-        breakdownParts.push(`${categoryCounts["zakouskis"]} zakouski${categoryCounts["zakouskis"] > 1 ? "s" : ""}`);
-    }
-    if (categoryCounts["potages"]) {
-        breakdownParts.push(`${categoryCounts["potages"]} potage${categoryCounts["potages"] > 1 ? "s" : ""}`);
-    }
-    const totalEntrees = (categoryCounts["entrées froides"] || 0) + (categoryCounts["entrées chaudes"] || 0);
-    if (totalEntrees > 0) {
-        breakdownParts.push(`${totalEntrees} entrée${totalEntrees > 1 ? "s" : ""}`);
-    }
-    if (categoryCounts["plats"]) {
-        breakdownParts.push(`${categoryCounts["plats"]} plat${categoryCounts["plats"] > 1 ? "s" : ""}`);
-    }
-    if (categoryCounts["bûchettes"]) {
-        breakdownParts.push(`${categoryCounts["bûchettes"]} bûchette${categoryCounts["bûchettes"] > 1 ? "s" : ""}`);
-    }
-
-    const summaryBreakdownText = breakdownParts.length > 0
-        ? `Votre sélection : ${breakdownParts.join(", ")}`
+    // Décompte textuel exhaustif des mets sélectionnés (ex : « 2x Blini de maquereau • 1x Velouté potiron • 2x Pavé de saumon »)
+    const summaryBreakdownText = selectedBookletDishes.length > 0
+        ? selectedBookletDishes.map(item => `${item.qty}x ${item.dish.shortTitle || item.dish.title}`).join(" • ")
         : "Feuilletez le livret et composez vos mets pour les fêtes";
 
     // Nombre d'articles sélectionnés par page de livret (pour le badge de l'onglet)
@@ -617,11 +593,11 @@ export default function MenusFetesPage() {
                             <ChevronRight size={20} />
                         </button>
 
-                        {/* Livret Cartonné Central */}
-                        <div className="bg-[#FAF9F6] rounded-3xl border border-[#D4AF37]/35 shadow-[0_22px_60px_-15px_rgba(20,20,20,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+                        {/* Livret Cartonné Central - Style Porte-menu gastronomique */}
+                        <div className="bg-[#F4EFE6] rounded-3xl border border-[#D4AF37]/40 shadow-[0_22px_60px_-15px_rgba(20,20,20,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
 
                             {/* En-tête du livret : Les 4 intercalaires / onglets */}
-                            <div className="bg-[#F3EFE6] border-b border-[#D4AF37]/25 px-2 sm:px-6 pt-3 flex items-center justify-start sm:justify-center gap-1.5 sm:gap-3 overflow-x-auto scrollbar-none">
+                            <div className="bg-[#ECE6DA] border-b border-[#D4AF37]/25 px-2 sm:px-6 pt-3 flex items-center justify-start sm:justify-center gap-1.5 sm:gap-3 overflow-x-auto scrollbar-none">
                                 {BOOKLET_PAGES.map((page) => {
                                     const isActive = page.pageNumber === activeBookletPage;
                                     const pageCount = getPageSelectedCount(page);
@@ -633,7 +609,7 @@ export default function MenusFetesPage() {
                                             onClick={() => goToBookletPage(page.pageNumber)}
                                             className={`group relative px-3 sm:px-5 py-2.5 rounded-t-xl text-xs sm:text-sm font-serif font-bold transition-all flex items-center gap-2 whitespace-nowrap -mb-px ${
                                                 isActive
-                                                    ? "bg-[#FAF9F6] text-black border-t-2 border-l border-r border-[#D4AF37]/50 shadow-sm"
+                                                    ? "bg-[#FAF8F5] text-black border-t-2 border-l border-r border-[#D4AF37]/50 shadow-sm"
                                                     : "text-neutral-500 hover:text-neutral-900 hover:bg-white/40"
                                             }`}
                                         >
@@ -653,177 +629,190 @@ export default function MenusFetesPage() {
                                 })}
                             </div>
 
-                            {/* Corps du livret avec cadre doré et transition fluide Framer Motion */}
-                            <div className="p-4 sm:p-8 md:p-10">
-                                <div className="border border-[#D4AF37]/30 rounded-2xl p-4 sm:p-8 relative bg-gradient-to-b from-[#FAF9F6] via-[#FCFBF8] to-[#FAF9F6]">
+                            {/* Corps du livret : Feuille de menu intérieure ivoire chaud (#FAF8F5) avec encadrement double bordure et coins d'ornement */}
+                            <div className="p-3 sm:p-6 md:p-8 bg-[#F4EFE6]/80">
+                                <div className="bg-[#FAF8F5] rounded-2xl border border-[#D4AF37]/45 p-2 sm:p-2.5 shadow-[0_4px_25px_rgba(20,20,10,0.05)] relative">
+                                    {/* Deuxième filet doré intérieur en retrait de 6 à 8px (border-[#D4AF37]/40) */}
+                                    <div className="border border-[#D4AF37]/40 rounded-xl p-4 sm:p-7 md:p-9 relative">
 
-                                    {/* Coins dorés discrets */}
-                                    <div className="absolute top-2 left-2 text-[#D4AF37]/50 text-xs select-none pointer-events-none">⌜</div>
-                                    <div className="absolute top-2 right-2 text-[#D4AF37]/50 text-xs select-none pointer-events-none">⌝</div>
-                                    <div className="absolute bottom-2 left-2 text-[#D4AF37]/50 text-xs select-none pointer-events-none">⌞</div>
-                                    <div className="absolute bottom-2 right-2 text-[#D4AF37]/50 text-xs select-none pointer-events-none">⌟</div>
+                                        {/* Mini ornements et angles biseautés dorés aux 4 coins (esprit flyer physique) */}
+                                        <div className="absolute top-2.5 left-2.5 w-4 h-4 border-t-2 border-l-2 border-[#D4AF37] pointer-events-none" />
+                                        <div className="absolute top-2.5 right-2.5 w-4 h-4 border-t-2 border-r-2 border-[#D4AF37] pointer-events-none" />
+                                        <div className="absolute bottom-2.5 left-2.5 w-4 h-4 border-b-2 border-l-2 border-[#D4AF37] pointer-events-none" />
+                                        <div className="absolute bottom-2.5 right-2.5 w-4 h-4 border-b-2 border-r-2 border-[#D4AF37] pointer-events-none" />
 
-                                    {/* Animation de page avec support swipe horizontal */}
-                                    <AnimatePresence mode="wait" custom={bookletSlideDirection}>
-                                        <motion.div
-                                            key={activeBookletPage}
-                                            custom={bookletSlideDirection}
-                                            variants={{
-                                                enter: (dir: number) => ({
-                                                    x: dir > 0 ? 40 : -40,
-                                                    opacity: 0,
-                                                }),
-                                                center: {
-                                                    x: 0,
-                                                    opacity: 1,
-                                                    transition: { duration: 0.32, ease: [0.25, 1, 0.5, 1] }
-                                                },
-                                                exit: (dir: number) => ({
-                                                    x: dir > 0 ? -40 : 40,
-                                                    opacity: 0,
-                                                    transition: { duration: 0.22, ease: [0.25, 1, 0.5, 1] }
-                                                })
-                                            }}
-                                            initial="enter"
-                                            animate="center"
-                                            exit="exit"
-                                            drag="x"
-                                            dragConstraints={{ left: 0, right: 0 }}
-                                            dragElastic={0.15}
-                                            onDragEnd={(_, info) => {
-                                                if (info.offset.x < -60 && activeBookletPage < BOOKLET_PAGES.length) {
-                                                    goToBookletPage(activeBookletPage + 1);
-                                                } else if (info.offset.x > 60 && activeBookletPage > 1) {
-                                                    goToBookletPage(activeBookletPage - 1);
-                                                }
-                                            }}
-                                            className="touch-pan-y"
-                                        >
-                                            {/* En-tête de la page */}
-                                            <div className="text-center mb-8 pb-5 border-b border-[#D4AF37]/20">
-                                                <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#927116]">
-                                                    Maison Compère • Réveillons & Fêtes 2026
-                                                </span>
-                                                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-neutral-900 mt-1 tracking-tight">
-                                                    {currentBookletPage.pageTitle}
-                                                </h3>
-                                                <p className="font-serif italic text-xs sm:text-sm text-neutral-600 mt-1.5 max-w-lg mx-auto">
-                                                    {currentBookletPage.pageTagline}
-                                                </p>
-                                            </div>
+                                        {/* Petits angles biseautés / losanges d'angle */}
+                                        <span className="absolute top-1.5 left-1.5 text-[8px] text-[#927116] select-none pointer-events-none">❖</span>
+                                        <span className="absolute top-1.5 right-1.5 text-[8px] text-[#927116] select-none pointer-events-none">❖</span>
+                                        <span className="absolute bottom-1.5 left-1.5 text-[8px] text-[#927116] select-none pointer-events-none">❖</span>
+                                        <span className="absolute bottom-1.5 right-1.5 text-[8px] text-[#927116] select-none pointer-events-none">❖</span>
 
-                                            {/* Sous-sections et mets sous forme de lignes élégantes horizontales */}
-                                            <div className="space-y-8">
-                                                {currentBookletPage.subsections.map((sub, sIdx) => (
-                                                    <div key={sIdx} className="space-y-3">
-                                                        {/* Titre de sous-catégorie */}
-                                                        <div className="flex items-baseline justify-between gap-4 pb-1.5 border-b border-neutral-200/80">
-                                                            <h4 className="font-serif font-bold text-sm sm:text-base text-neutral-900 uppercase tracking-wider">
-                                                                {sub.subtitle}
-                                                            </h4>
-                                                            {sub.note && (
-                                                                <span className="text-xs text-[#927116] font-serif italic font-medium shrink-0">
-                                                                    {sub.note}
-                                                                </span>
-                                                            )}
-                                                        </div>
+                                        {/* Animation de page avec support swipe horizontal */}
+                                        <AnimatePresence mode="wait" custom={bookletSlideDirection}>
+                                            <motion.div
+                                                key={activeBookletPage}
+                                                custom={bookletSlideDirection}
+                                                variants={{
+                                                    enter: (dir: number) => ({
+                                                        x: dir > 0 ? 40 : -40,
+                                                        opacity: 0,
+                                                    }),
+                                                    center: {
+                                                        x: 0,
+                                                        opacity: 1,
+                                                        transition: { duration: 0.32, ease: [0.25, 1, 0.5, 1] }
+                                                    },
+                                                    exit: (dir: number) => ({
+                                                        x: dir > 0 ? -40 : 40,
+                                                        opacity: 0,
+                                                        transition: { duration: 0.22, ease: [0.25, 1, 0.5, 1] }
+                                                    })
+                                                }}
+                                                initial="enter"
+                                                animate="center"
+                                                exit="exit"
+                                                drag="x"
+                                                dragConstraints={{ left: 0, right: 0 }}
+                                                dragElastic={0.15}
+                                                onDragEnd={(_, info) => {
+                                                    if (info.offset.x < -60 && activeBookletPage < BOOKLET_PAGES.length) {
+                                                        goToBookletPage(activeBookletPage + 1);
+                                                    } else if (info.offset.x > 60 && activeBookletPage > 1) {
+                                                        goToBookletPage(activeBookletPage - 1);
+                                                    }
+                                                }}
+                                                className="touch-pan-y"
+                                            >
+                                                {/* En-tête de la page */}
+                                                <div className="text-center mb-8 pb-5 border-b border-[#D4AF37]/20">
+                                                    <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-[#927116]">
+                                                        Maison Compère • Réveillons & Fêtes 2026
+                                                    </span>
+                                                    <h3 className="font-serif text-2xl sm:text-3xl font-bold text-neutral-900 mt-1 tracking-tight">
+                                                        {currentBookletPage.pageTitle}
+                                                    </h3>
+                                                    <p className="font-serif italic text-xs sm:text-sm text-neutral-600 mt-1.5 max-w-lg mx-auto">
+                                                        {currentBookletPage.pageTagline}
+                                                    </p>
+                                                </div>
 
-                                                        {/* Lignes de mets façon restaurant étoilé */}
-                                                        <div className="divide-y divide-neutral-200/60">
-                                                            {sub.dishes.map((dish) => {
-                                                                const qty = getBookletDishQty(dish.id);
-                                                                const isSelected = qty > 0;
+                                                {/* Sous-sections et mets sous forme de lignes élégantes horizontales */}
+                                                <div className="space-y-8">
+                                                    {currentBookletPage.subsections.map((sub, sIdx) => (
+                                                        <div key={sIdx} className="space-y-3">
+                                                            {/* Intertitre de service façon restaurant gastronomique : lettres capitales espacées avec tirets et filets dorés fins */}
+                                                            <div className="text-center my-6">
+                                                                <div className="flex items-center justify-center gap-3">
+                                                                    <div className="h-px bg-gradient-to-r from-transparent via-[#D4AF37]/50 to-[#D4AF37] flex-1 max-w-[50px] sm:max-w-[90px]" />
+                                                                    <h4 className="font-serif font-bold text-xs sm:text-sm text-neutral-900 tracking-[0.22em] uppercase">
+                                                                        — {sub.subtitle} —
+                                                                    </h4>
+                                                                    <div className="h-px bg-gradient-to-l from-transparent via-[#D4AF37]/50 to-[#D4AF37] flex-1 max-w-[50px] sm:max-w-[90px]" />
+                                                                </div>
+                                                                {sub.note && (
+                                                                    <p className="text-[11px] text-[#927116] font-serif italic mt-1 tracking-wide">
+                                                                        {sub.note}
+                                                                    </p>
+                                                                )}
+                                                            </div>
 
-                                                                return (
-                                                                    <div
-                                                                        key={dish.id}
-                                                                        className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 px-3 sm:px-4 rounded-xl transition-all duration-200 ${
-                                                                            isSelected
-                                                                                ? "bg-[#D4AF37]/10 border border-[#D4AF37]/35 shadow-2xs"
-                                                                                : "hover:bg-white/80 border border-transparent"
-                                                                        }`}
-                                                                    >
-                                                                        {/* Intitulé et description en italique fin */}
-                                                                        <div className="flex-1 pr-3">
-                                                                            <h5 className="font-serif font-semibold text-base sm:text-lg text-neutral-900 group-hover:text-[#927116] transition-colors leading-snug">
-                                                                                {dish.title}
-                                                                            </h5>
-                                                                            {dish.description && (
-                                                                                <p className="font-serif italic text-xs sm:text-sm text-neutral-600 mt-0.5 leading-relaxed">
-                                                                                    {dish.description}
-                                                                                </p>
-                                                                            )}
-                                                                        </div>
+                                                            {/* Lignes de mets façon restaurant étoilé */}
+                                                            <div className="divide-y divide-neutral-200/60">
+                                                                {sub.dishes.map((dish) => {
+                                                                    const qty = getBookletDishQty(dish.id);
+                                                                    const isSelected = qty > 0;
 
-                                                                        {/* Prix sobre & Mini-compteur compact */}
-                                                                        <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/40">
-                                                                            <div className="text-right">
-                                                                                <span className="font-serif font-bold text-base sm:text-lg text-neutral-900">
-                                                                                    {dish.priceFormatted}
-                                                                                </span>
-                                                                                <span className="text-[11px] text-neutral-500 ml-1">
-                                                                                    / {dish.unitLabel}
-                                                                                </span>
+                                                                    return (
+                                                                        <div
+                                                                            key={dish.id}
+                                                                            className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3.5 px-3 sm:px-4 rounded-xl transition-all duration-200 ${
+                                                                                isSelected
+                                                                                    ? "bg-[#D4AF37]/10 border border-[#D4AF37]/35 shadow-2xs"
+                                                                                    : "hover:bg-white/80 border border-transparent"
+                                                                            }`}
+                                                                        >
+                                                                            {/* Intitulé et description en italique fin */}
+                                                                            <div className="flex-1 pr-3">
+                                                                                <h5 className="font-serif font-semibold text-base sm:text-lg text-neutral-900 group-hover:text-[#927116] transition-colors leading-snug">
+                                                                                    {dish.title}
+                                                                                </h5>
+                                                                                {dish.description && (
+                                                                                    <p className="font-serif italic text-xs sm:text-sm text-neutral-600 mt-0.5 leading-relaxed">
+                                                                                        {dish.description}
+                                                                                    </p>
+                                                                                )}
                                                                             </div>
 
-                                                                            {/* Mini-compteur [ – ] Q [ + ] ou bouton sobre [ + Choisir ] */}
-                                                                            {qty === 0 ? (
-                                                                                <button
-                                                                                    type="button"
-                                                                                    onClick={() => setBookletDishQty(dish.id, 1)}
-                                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif font-bold text-neutral-800 bg-white hover:bg-black hover:text-white border border-[#D4AF37]/50 shadow-2xs transition-all duration-200"
-                                                                                    aria-label={`Choisir ${dish.title}`}
-                                                                                >
-                                                                                    <Plus size={13} className="text-[#927116] group-hover:text-white" />
-                                                                                    <span>Choisir</span>
-                                                                                </button>
-                                                                            ) : (
-                                                                                <div className="inline-flex items-center gap-1.5 bg-white border border-[#D4AF37] p-1 rounded-full shadow-2xs">
-                                                                                    <button
-                                                                                        type="button"
-                                                                                        onClick={() => setBookletDishQty(dish.id, -1)}
-                                                                                        className="w-6 h-6 rounded-full bg-[#FAF9F6] hover:bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xs transition-colors"
-                                                                                        aria-label="Diminuer la quantité"
-                                                                                    >
-                                                                                        <Minus size={11} />
-                                                                                    </button>
-                                                                                    <span className="font-bold text-xs text-black w-6 text-center font-serif">
-                                                                                        {qty}
+                                                                            {/* Prix sobre & Mini-compteur compact */}
+                                                                            <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-200/40">
+                                                                                <div className="text-right">
+                                                                                    <span className="font-serif font-bold text-base sm:text-lg text-neutral-900">
+                                                                                        {dish.priceFormatted}
                                                                                     </span>
+                                                                                    <span className="text-[11px] text-neutral-500 ml-1">
+                                                                                        / {dish.unitLabel}
+                                                                                    </span>
+                                                                                </div>
+
+                                                                                {/* Mini-compteur [ – ] Q [ + ] ou bouton sobre [ + Choisir ] */}
+                                                                                {qty === 0 ? (
                                                                                     <button
                                                                                         type="button"
                                                                                         onClick={() => setBookletDishQty(dish.id, 1)}
-                                                                                        className="w-6 h-6 rounded-full bg-black hover:bg-[#927116] text-white flex items-center justify-center font-bold text-xs transition-colors"
-                                                                                        aria-label="Augmenter la quantité"
+                                                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-serif font-bold text-neutral-800 bg-white hover:bg-black hover:text-white border border-[#D4AF37]/50 shadow-2xs transition-all duration-200"
+                                                                                        aria-label={`Choisir ${dish.title}`}
                                                                                     >
-                                                                                        <Plus size={11} />
+                                                                                        <Plus size={13} className="text-[#927116] group-hover:text-white" />
+                                                                                        <span>Choisir</span>
                                                                                     </button>
-                                                                                </div>
-                                                                            )}
+                                                                                ) : (
+                                                                                    <div className="inline-flex items-center gap-1.5 bg-white border border-[#D4AF37] p-1 rounded-full shadow-2xs">
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() => setBookletDishQty(dish.id, -1)}
+                                                                                            className="w-6 h-6 rounded-full bg-[#FAF9F6] hover:bg-neutral-100 text-neutral-700 flex items-center justify-center font-bold text-xs transition-colors"
+                                                                                            aria-label="Diminuer la quantité"
+                                                                                        >
+                                                                                            <Minus size={11} />
+                                                                                        </button>
+                                                                                        <span className="font-bold text-xs text-black w-6 text-center font-serif">
+                                                                                            {qty}
+                                                                                        </span>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() => setBookletDishQty(dish.id, 1)}
+                                                                                            className="w-6 h-6 rounded-full bg-black hover:bg-[#927116] text-white flex items-center justify-center font-bold text-xs transition-colors"
+                                                                                            aria-label="Augmenter la quantité"
+                                                                                        >
+                                                                                            <Plus size={11} />
+                                                                                        </button>
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                );
-                                                            })}
+                                                                    );
+                                                                })}
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-
-                                            {/* Mention sobre en bas de page (ex. Page 4) */}
-                                            {currentBookletPage.footnote && (
-                                                <div className="mt-8 pt-4 border-t border-[#D4AF37]/30 text-center">
-                                                    <p className="font-serif italic text-xs sm:text-sm text-neutral-700 font-medium">
-                                                        « {currentBookletPage.footnote} »
-                                                    </p>
+                                                    ))}
                                                 </div>
-                                            )}
-                                        </motion.div>
-                                    </AnimatePresence>
+
+                                                {/* Mention sobre en bas de page (ex. Page 4) */}
+                                                {currentBookletPage.footnote && (
+                                                    <div className="mt-8 pt-4 border-t border-[#D4AF37]/30 text-center">
+                                                        <p className="font-serif italic text-xs sm:text-sm text-neutral-700 font-medium">
+                                                            « {currentBookletPage.footnote} »
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </motion.div>
+                                        </AnimatePresence>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Bas du Livret : Numérotation & Boutons de navigation */}
-                            <div className="bg-[#F3EFE6] border-t border-[#D4AF37]/25 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
+                            <div className="bg-[#ECE6DA] border-t border-[#D4AF37]/25 px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
                                 {/* Bouton Précédent */}
                                 <div className="w-1/3 text-left">
                                     {activeBookletPage > 1 ? (
@@ -889,22 +878,42 @@ export default function MenusFetesPage() {
                         {/* ENCART RÉCAPITULATIF & AJOUT GLOBAL (SOUS LE LIVRET) */}
                         <div className="mt-6 bg-gradient-to-r from-neutral-950 via-neutral-900 to-black text-white p-6 sm:p-7 rounded-3xl border border-[#D4AF37]/40 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
                             {/* Récapitulatif en temps réel */}
-                            <div className="space-y-1.5 flex-1">
+                            <div className="space-y-2.5 flex-1 min-w-0">
                                 <div className="flex items-center gap-2 text-[#D4AF37] text-xs font-bold uppercase tracking-wider">
                                     <Sparkles size={14} />
                                     <span>Votre sélection du livret</span>
                                 </div>
-                                <p className="font-serif text-base sm:text-lg text-white font-medium">
-                                    {summaryBreakdownText}
-                                </p>
-                                {isEarlyBirdActive && totalBookletItemsCount > 0 && (
-                                    <div className="inline-flex items-center gap-1.5 text-xs text-[#D4AF37] font-medium bg-[#D4AF37]/15 border border-[#D4AF37]/30 px-2.5 py-0.5 rounded-full mt-1">
-                                        <span>✨ Remise Early Bird -5 % incluse (-{bookletDiscountAmount.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €)</span>
+
+                                {totalBookletItemsCount === 0 ? (
+                                    <p className="font-serif italic text-neutral-400 text-sm">
+                                        Feuilletez le livret et composez vos mets pour les fêtes.
+                                    </p>
+                                ) : (
+                                    <div className="space-y-2.5">
+                                        {/* Liste exhaustive et détaillée des choix du client avec quantités exactes sous forme de badges élégants */}
+                                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 max-h-28 overflow-y-auto pr-1 scrollbar-thin">
+                                            {selectedBookletDishes.map(({ dish, qty }) => (
+                                                <span
+                                                    key={dish.id}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-neutral-900/90 border border-[#D4AF37]/40 text-neutral-100 shadow-2xs hover:border-[#D4AF37] transition-colors"
+                                                >
+                                                    <span className="font-bold text-[#D4AF37] font-serif">{qty}x</span>
+                                                    <span className="font-serif text-white">{dish.shortTitle || dish.title}</span>
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        {/* Remise Early Bird */}
+                                        {isEarlyBirdActive && (
+                                            <div className="inline-flex items-center gap-1.5 text-xs text-[#D4AF37] font-medium bg-[#D4AF37]/15 border border-[#D4AF37]/30 px-2.5 py-0.5 rounded-full">
+                                                <span>✨ Remise Early Bird -5 % incluse (-{bookletDiscountAmount.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €)</span>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
 
-                            {/* Prix total & Bouton d'action principal */}
+                            {/* Prix total & Bouton d'action principal dynamique */}
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-5 shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-neutral-800">
                                 <div className="text-left sm:text-right">
                                     <div className="text-xs text-neutral-400 font-medium">Total sélection</div>
@@ -925,7 +934,7 @@ export default function MenusFetesPage() {
                                     type="button"
                                     onClick={handleAddAllBookletItems}
                                     disabled={totalBookletItemsCount === 0}
-                                    className={`px-7 py-3.5 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
+                                    className={`px-6 sm:px-7 py-3.5 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2.5 shadow-md ${
                                         totalBookletItemsCount > 0
                                             ? "bg-[#D4AF37] hover:bg-[#F3E5AB] text-black cursor-pointer hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                                             : "bg-neutral-800 text-neutral-500 border border-neutral-700 cursor-not-allowed"
@@ -934,8 +943,8 @@ export default function MenusFetesPage() {
                                     <ShoppingCart size={15} />
                                     <span>
                                         {totalBookletItemsCount > 0
-                                            ? `Ajouter ma sélection au panier`
-                                            : `Sélectionnez vos mets`}
+                                            ? `Ajouter la sélection au panier (${totalBookletItemsCount} ${totalBookletItemsCount > 1 ? "mets" : "met"}) — ${finalBookletTotal.toLocaleString("fr-BE", { minimumFractionDigits: 2 })} €`
+                                            : `Sélectionnez vos mets dans le livret`}
                                     </span>
                                 </button>
                             </div>
