@@ -596,8 +596,8 @@ export default function MenusFetesPage() {
                         {/* Livret Cartonné Central - Style Porte-menu gastronomique */}
                         <div className="bg-[#F4EFE6] rounded-3xl border border-[#D4AF37]/40 shadow-[0_22px_60px_-15px_rgba(20,20,20,0.08),0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
 
-                            {/* En-tête du livret : Les 4 intercalaires / onglets */}
-                            <div className="bg-[#ECE6DA] border-b border-[#D4AF37]/25 px-2 sm:px-6 pt-3 flex items-center justify-start sm:justify-center gap-1.5 sm:gap-3 overflow-x-auto scrollbar-none">
+                            {/* En-tête du livret : Les 4 intercalaires fixes répartis équitablement sur toute la largeur */}
+                            <div className="bg-[#ECE6DA] border-b border-[#D4AF37]/25 px-1 sm:px-3 pt-2 sm:pt-3 grid grid-cols-4 w-full gap-1 sm:gap-2">
                                 {BOOKLET_PAGES.map((page) => {
                                     const isActive = page.pageNumber === activeBookletPage;
                                     const pageCount = getPageSelectedCount(page);
@@ -607,7 +607,7 @@ export default function MenusFetesPage() {
                                             key={page.pageNumber}
                                             type="button"
                                             onClick={() => goToBookletPage(page.pageNumber)}
-                                            className={`group relative px-3 sm:px-5 py-2.5 rounded-t-xl text-xs sm:text-sm font-serif font-bold transition-all flex items-center gap-2 whitespace-nowrap -mb-px ${
+                                            className={`group relative px-1 sm:px-2.5 py-2 sm:py-2.5 rounded-t-xl text-[10px] sm:text-xs md:text-sm font-serif font-bold transition-all flex items-center justify-center gap-1 sm:gap-1.5 text-center -mb-px w-full ${
                                                 isActive
                                                     ? "bg-[#FAF8F5] text-black border-t-2 border-l border-r border-[#D4AF37]/50 shadow-sm"
                                                     : "text-neutral-500 hover:text-neutral-900 hover:bg-white/40"
@@ -616,11 +616,11 @@ export default function MenusFetesPage() {
                                             <span className={isActive ? "text-[#927116]" : "text-neutral-400 group-hover:text-neutral-600"}>
                                                 {page.tabNumber}.
                                             </span>
-                                            <span>{page.tabShort}</span>
+                                            <span className="truncate">{page.tabShort}</span>
 
                                             {/* Badge compte de sélection sur cette page */}
                                             {pageCount > 0 && (
-                                                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-sans font-bold bg-[#D4AF37] text-black shadow-2xs">
+                                                <span className="inline-flex items-center justify-center min-w-[15px] sm:min-w-[18px] h-3.5 sm:h-[18px] px-1 rounded-full text-[9px] sm:text-[10px] font-sans font-bold bg-[#D4AF37] text-black shadow-2xs shrink-0">
                                                     {pageCount}
                                                 </span>
                                             )}

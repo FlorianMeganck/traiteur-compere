@@ -320,7 +320,7 @@ export default function Navbar() {
                             </div>
 
                             {/* 2. CORPS DÉFILABLE */}
-                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 space-y-4 bg-[#FBFBFA]">
+                            <div className="flex-1 overflow-y-auto overscroll-y-contain p-4 sm:p-5 space-y-2.5 bg-[#FBFBFA]">
                                 {cartItems.length === 0 ? (
                                     <div className="text-center text-neutral-400 py-16 px-4 space-y-3">
                                         <div className="w-16 h-16 rounded-full bg-neutral-100 text-neutral-300 flex items-center justify-center mx-auto mb-2">
@@ -334,108 +334,100 @@ export default function Navbar() {
                                 ) : (
                                     cartItems.map((item) => {
                                         const isFestive = item.itemType === 'menu_fete' || item.semaineId.startsWith('menu') || item.semaineId.startsWith('fetes');
-                                        const weekData = MENU_DATA.find(m => m.id === item.semaineId);
+                                        const isFormule = isFestive && (item.badge?.toLowerCase().includes('formule') || item.id.startsWith('formule') || Boolean(item.coursesSummary && item.coursesSummary.length > 0));
+                                        const isCarte = isFestive && !isFormule;
 
                                         return (
                                             <div
                                                 key={item.id}
-                                                className="bg-white border border-neutral-200/80 rounded-3xl p-5 shadow-xs relative transition-shadow hover:shadow-sm"
+                                                className="bg-white border border-neutral-200/90 rounded-2xl p-3 sm:p-3.5 shadow-2xs hover:shadow-xs transition-shadow"
                                             >
-                                                {/* Bouton supprimer discret */}
-                                                <button
-                                                    onClick={() => removeFromCart(item.id)}
-                                                    className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                                    title="Supprimer l'article"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-
-                                                <div className="pr-7">
-                                                    {/* En-tête de carte : Tag & Nom */}
-                                                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                                        {isFestive ? (
-                                                            <span className="text-[10px] bg-amber-50 text-amber-800 border border-amber-200 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                                Fêtes
+                                                {/* En-tête : Badge origine + Nom du plat + Bouton supprimer aligné à droite */}
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-1.5 mb-1">
+                                                            <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shrink-0 ${
+                                                                isFormule
+                                                                    ? "bg-[#D4AF37]/15 text-[#927116] border border-[#D4AF37]/35"
+                                                                    : isCarte
+                                                                    ? "bg-amber-50 text-amber-800 border border-amber-200"
+                                                                    : "bg-neutral-100 text-neutral-600"
+                                                            }`}>
+                                                                {isFormule ? "Formule" : isCarte ? "À la carte" : "Semaine"}
                                                             </span>
-                                                        ) : (
-                                                            <span className="text-[10px] bg-neutral-100 text-neutral-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                                                Semaine
-                                                            </span>
-                                                        )}
-                                                        <h4 className="font-serif font-bold text-neutral-900 text-base leading-snug">
+                                                            {!isFestive && (
+                                                                <span className="text-[10px] text-neutral-400 capitalize truncate">
+                                                                    {item.jour}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <h4 className="font-serif font-bold text-neutral-900 text-sm leading-snug">
                                                             {item.nomPlat}
                                                         </h4>
                                                     </div>
 
-                                                    <p className="text-xs text-[#D4AF37] font-semibold capitalize mb-3">
-                                                        {item.badge || (weekData ? `${item.jour} (${weekData.week.split(' :')[0]})` : item.jour)}
-                                                    </p>
+                                                    {/* Bouton corbeille discret aligné à droite */}
+                                                    <button
+                                                        onClick={() => removeFromCart(item.id)}
+                                                        className="w-6 h-6 flex items-center justify-center rounded-lg text-neutral-400 hover:text-red-600 hover:bg-red-50 transition-colors shrink-0"
+                                                        title="Supprimer l'article"
+                                                        aria-label="Supprimer"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
 
-                                                    {/* Zone de composition avec étiquettes claires ou résumé compact */}
-                                                    {isFestive && (item.coursesDescription || (item.coursesSummary && item.coursesSummary.length > 0)) && (
-                                                        <div className="bg-[#FAF9F6] border border-neutral-200/80 rounded-2xl p-3 mb-3 text-xs">
-                                                            {item.coursesDescription ? (
-                                                                <p className="text-neutral-700 font-serif italic text-xs leading-relaxed">
-                                                                    {item.coursesDescription}
+                                                {/* Pour les Formules : Liste des 4 choix condensés en dessous */}
+                                                {isFormule && item.coursesSummary && item.coursesSummary.length > 0 && (
+                                                    <div className="mt-1.5 text-[11px] text-neutral-500 font-serif italic leading-snug space-y-0.5 pl-2 border-l border-[#D4AF37]/40">
+                                                        {item.coursesSummary.map((course, idx) => {
+                                                            const parts = course.split(':');
+                                                            const val = parts.slice(1).join(':').trim() || course;
+                                                            return (
+                                                                <p key={idx} className="line-clamp-1">
+                                                                    • {val}
                                                                 </p>
-                                                            ) : (
-                                                                <div className="space-y-1.5">
-                                                                    {item.coursesSummary?.map((course, cIdx) => {
-                                                                        const [label, ...valParts] = course.split(':');
-                                                                        const value = valParts.join(':').trim();
-                                                                        return (
-                                                                            <div key={cIdx} className="grid grid-cols-[65px_1fr] items-start gap-2 leading-snug">
-                                                                                <span className="font-bold text-[9px] uppercase tracking-wider text-[#927116] bg-[#D4AF37]/15 px-1.5 py-0.5 rounded text-center shrink-0">
-                                                                                    {label.trim()}
-                                                                                </span>
-                                                                                <span className="text-neutral-800 font-medium leading-relaxed">
-                                                                                    {value}
-                                                                                </span>
-                                                                            </div>
-                                                                        );
-                                                                    })}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )}
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
 
-                                                    {/* Soupes associées (Plats préparés) */}
-                                                    {item.soupes && Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
-                                                        <div key={soupe} className="flex justify-between items-center text-xs text-neutral-600 mb-2 pl-2.5 border-l-2 border-[#D4AF37]/50 py-0.5">
-                                                            <span>+ {qty}x {soupe}</span>
-                                                            <span className="font-semibold text-neutral-900">{qty * (item.prixUnitaireSoupe || 0)} €</span>
-                                                        </div>
-                                                    ))}
+                                                {/* Soupes associées pour les plats préparés */}
+                                                {item.soupes && Object.entries(item.soupes).map(([soupe, qty]) => qty > 0 && (
+                                                    <div key={soupe} className="flex justify-between items-center text-[11px] text-neutral-600 mt-1 pl-2 border-l-2 border-[#D4AF37]/50 py-0.5">
+                                                        <span>+ {qty}x {soupe}</span>
+                                                        <span className="font-semibold text-neutral-900">{qty * (item.prixUnitaireSoupe || 0)} €</span>
+                                                    </div>
+                                                ))}
 
-                                                    {/* Ligne d'action inférieure : Sélecteur quantité compact & Prix total */}
-                                                    <div className="flex justify-between items-center pt-2 mt-2 border-t border-neutral-100">
-                                                        {/* Sélecteur de quantité compact */}
-                                                        <div className="inline-flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/80 p-1 rounded-full shadow-2xs">
-                                                            <button
-                                                                onClick={() => updateQuantity(item.id, -1)}
-                                                                className="w-6 h-6 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:text-red-600 hover:bg-neutral-100 shadow-2xs transition-colors"
-                                                                title={item.quantitePlat === 1 ? "Supprimer" : "Diminuer"}
-                                                                aria-label="Diminuer"
-                                                            >
-                                                                <Minus size={11} />
-                                                            </button>
-                                                            <span className="w-6 text-center font-bold text-xs text-neutral-900">{item.quantitePlat}</span>
-                                                            <button
-                                                                onClick={() => updateQuantity(item.id, 1)}
-                                                                className="w-6 h-6 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:text-black hover:bg-neutral-100 shadow-2xs transition-colors"
-                                                                title="Augmenter"
-                                                                aria-label="Augmenter"
-                                                            >
-                                                                <Plus size={11} />
-                                                            </button>
-                                                        </div>
+                                                {/* Pied de l'item : Sélecteur quantité compact & Prix total calculé */}
+                                                <div className="flex justify-between items-center pt-2 mt-2 border-t border-neutral-100">
+                                                    {/* Sélecteur de quantité compact */}
+                                                    <div className="inline-flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/80 p-0.5 rounded-full shadow-2xs">
+                                                        <button
+                                                            onClick={() => updateQuantity(item.id, -1)}
+                                                            className="w-5 h-5 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:text-red-600 hover:bg-neutral-100 shadow-2xs transition-colors"
+                                                            title={item.quantitePlat === 1 ? "Supprimer" : "Diminuer"}
+                                                            aria-label="Diminuer"
+                                                        >
+                                                            <Minus size={10} />
+                                                        </button>
+                                                        <span className="w-5 text-center font-bold text-xs text-neutral-900 font-serif">{item.quantitePlat}</span>
+                                                        <button
+                                                            onClick={() => updateQuantity(item.id, 1)}
+                                                            className="w-5 h-5 flex items-center justify-center rounded-full bg-white text-neutral-700 hover:text-black hover:bg-neutral-100 shadow-2xs transition-colors"
+                                                            title="Augmenter"
+                                                            aria-label="Augmenter"
+                                                        >
+                                                            <Plus size={10} />
+                                                        </button>
+                                                    </div>
 
-                                                        {/* Prix total de la ligne */}
-                                                        <div className="text-right">
-                                                            <span className="text-base font-bold text-neutral-900 font-serif">
-                                                                {item.prixTotalLigne.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                                            </span>
-                                                        </div>
+                                                    {/* Prix total de la ligne */}
+                                                    <div className="text-right">
+                                                        <span className="text-sm font-bold text-neutral-900 font-serif">
+                                                            {item.prixTotalLigne.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>

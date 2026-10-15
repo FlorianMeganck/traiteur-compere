@@ -30,7 +30,7 @@ export interface FestiveMenu {
 }
 
 // ==========================================
-// 1. LA CARTE LIBRE (Données exactes du flyer)
+// 1. LA CARTE LIBRE
 // ==========================================
 
 export type CarteCategoryKey = 'zakouskis' | 'potages' | 'entrees_froides' | 'entrees_chaudes' | 'plats' | 'buchettes';
