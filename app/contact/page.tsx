@@ -1794,7 +1794,13 @@ function ContactForm() {
                     body: JSON.stringify(apiPayload)
                 });
 
-                const result = await response.json();
+                let result: any = {};
+                try {
+                    result = await response.json();
+                } catch {
+                    result = {};
+                }
+
                 if (response.ok && result.success) {
                     setStatus("success");
                     const joursUniques = Array.from(new Set(cartItems.map(item => item.badge || item.jour))).join(',');
@@ -1806,7 +1812,8 @@ function ContactForm() {
                     }, 3000);
                 } else {
                     console.error("Erreur API Commande:", result);
-                    alert("Une erreur est survenue lors de l'envoi. Veuillez réessayer.");
+                    const errorMsg = result?.error || result?.message || "Une erreur est survenue lors de l'enregistrement de votre commande. Veuillez réessayer.";
+                    alert(errorMsg);
                     setStatus("error");
                 }
             } else {
