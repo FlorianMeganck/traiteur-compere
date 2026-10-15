@@ -10,14 +10,15 @@ import {
     FestiveValidationMode
 } from '../../data/menus-fetes';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789');
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = (resendApiKey && resendApiKey.startsWith('re_')) ? new Resend(resendApiKey) : null;
 
 export async function POST(req: Request) {
     try {
         const data = await req.json();
 
         const {
-            Nom, Prenom, Mail, Tel, Societe, Nom_Societe, Date,
+            Nom, Prenom, Mail, Tel, Societe, Nom_Societe, Date: dateSoumission,
             dateEvenement, creneauRetrait, details_projet, captchaToken, cartItems, typeCommande,
             validationMode
         } = data;
@@ -348,7 +349,7 @@ export async function POST(req: Request) {
         `;
 
         // 3. Préparation et envoi des emails via Resend (Sécurisé et non-bloquant)
-        if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.startsWith('re_')) {
+        if (resend) {
             try {
                 const fromAddress = 'Traiteur Compère <contact@traiteur-compere.be>';
                 const traiteurEmail = process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com';
@@ -358,7 +359,7 @@ export async function POST(req: Request) {
                     from: fromAddress,
                     to: traiteurEmail,
                     replyTo: Mail,
-                    subject: `[${formattedOrderNumber}] ${isFestiveOrder ? '🎉 FETES' : '🍽️ PLATS'} - ${cleanNom} ${cleanPrenom} - ${Date || dateEvenement || 'Fêtes'}`,
+                    subject: `[${formattedOrderNumber}] ${isFestiveOrder ? '🎉 FETES' : '🍽️ PLATS'} - ${cleanNom} ${cleanPrenom} - ${dateSoumission || dateEvenement || 'Fêtes'}`,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
                             <h2>Nouvelle commande ${orderTitle} (${formattedOrderNumber})</h2>
@@ -369,7 +370,7 @@ export async function POST(req: Request) {
                                 <p style="margin: 5px 0;"><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
                                 ${dateEvenement ? `<p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>🎉 Date(s) du repas :</strong> ${dateEvenement}</p>` : ''}
                                 ${creneauRetrait ? `<p style="margin: 5px 0; line-height: 1.4;"><strong>⏰ Retrait à l'atelier :</strong><br/>${String(creneauRetrait).split(' | ').join('<br/>')}</p>` : ''}
-                                <p style="margin: 5px 0;"><strong>Date de saisie :</strong> ${Date || new Date().toLocaleDateString('fr-BE')}</p>
+                                <p style="margin: 5px 0;"><strong>Date de saisie :</strong> ${dateSoumission || new Date().toLocaleDateString('fr-BE')}</p>
                                 ${isFestiveOrder ? `<p style="margin: 5px 0;"><strong>Mode choisi :</strong> ${festivePricing.validationMode === 'acompte_30' ? 'Acompte 30% (' + (festivePricing.depositAmount || 0).toFixed(2) + ' €) - solde dû : ' + (festivePricing.remainingBalance || 0).toFixed(2) + ' €' : 'Totalité 100% (' + (festivePricing.totalNet || 0).toFixed(2) + ' €)'}</p>` : ''}
                             </div>
                             

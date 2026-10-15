@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789');
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = (resendApiKey && resendApiKey.startsWith('re_')) ? new Resend(resendApiKey) : null;
 
 export async function POST(req: Request) {
     try {
@@ -11,7 +12,7 @@ export async function POST(req: Request) {
             Prenom,
             Mail,
             Tel,
-            Date,
+            Date: dateContact,
             dateEvenement,
             creneauRetrait,
             Nombre_Convives,
@@ -101,7 +102,7 @@ export async function POST(req: Request) {
                 <p><strong>Client :</strong> ${Nom} ${Prenom || ''}</p>
                 <p><strong>Email :</strong> ${Mail}</p>
                 <p><strong>Téléphone :</strong> ${Tel || 'Non spécifié'}</p>
-                <p><strong>Date événement / repas :</strong> ${dateEvenement || Date || 'Non spécifiée'}</p>
+                <p><strong>Date événement / repas :</strong> ${dateEvenement || dateContact || 'Non spécifiée'}</p>
                 ${creneauRetrait ? `<p><strong>Créneau de retrait :</strong> ${creneauRetrait}</p>` : ''}
                 ${Nombre_Convives ? `<p><strong>Nombre de convives :</strong> ${Nombre_Convives}</p>` : ''}
                 <p><strong>Formule / Contexte :</strong> ${Type_Evenement || typeCommande || 'Sur-mesure'}</p>
@@ -129,13 +130,13 @@ export async function POST(req: Request) {
         `;
 
         // Send via Resend if configured
-        if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.startsWith('re_')) {
+        if (resend) {
             try {
                 await resend.emails.send({
                     from: 'Traiteur Compère <contact@traiteur-compere.be>',
                     to: process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com',
                     replyTo: Mail,
-                    subject: `${isFestive ? '🎉 FETES' : 'DEVIS'} - ${Nom} ${Prenom || ''} - ${dateEvenement || Date || ''}`,
+                    subject: `${isFestive ? '🎉 FETES' : 'DEVIS'} - ${Nom} ${Prenom || ''} - ${dateEvenement || dateContact || ''}`,
                     html: emailHtml
                 });
             } catch (errResend) {
