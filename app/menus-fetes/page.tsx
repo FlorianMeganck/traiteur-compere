@@ -219,7 +219,7 @@ export default function MenusFetesPage() {
         : CARTE_FETES_ITEMS.filter(item => item.category === activeCategoryFilter);
 
     return (
-        <main className="min-h-screen bg-[#FAF9F6] text-[#111111] font-sans selection:bg-[#D4AF37] selection:text-white pt-28 md:pt-36 pb-24 relative overflow-hidden">
+        <main className="min-h-screen bg-[#FAF9F6] text-[#111111] font-sans selection:bg-[#D4AF37] selection:text-white pt-44 sm:pt-48 md:pt-52 pb-24 relative overflow-hidden">
 
             {/* Notification de confirmation discrète */}
             <AnimatePresence>
@@ -351,10 +351,10 @@ export default function MenusFetesPage() {
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-neutral-900 mb-1 text-base">
-                                            Retrait à l&apos;atelier
+                                            Retrait à l&apos;atelier & Livraison
                                         </h3>
                                         <p className="text-neutral-600 text-sm leading-relaxed">
-                                            Retrait à notre atelier (Saint-Georges-sur-Meuse, Rue Potay 3) la veille de 14h à 18h ou le jour même de 8h à 12h. Notice détaillée de réchauffage et dressage fournie avec chaque commande.
+                                            Retrait à notre atelier (Saint-Georges-sur-Meuse, Rue Potay 3) la veille de 14h à 18h ou le jour même de 8h à 12h. Livraison possible si besoin et sur demande. Toutes les explications nécessaires pour un réchauffage et un dressage parfaits vous seront fournies.
                                         </p>
                                     </div>
                                 </li>
@@ -439,15 +439,15 @@ export default function MenusFetesPage() {
                                             {formule.subtitle}
                                         </p>
 
-                                        {/* Tarif avec badge -5% : Prix mis en avant */}
+                                        {/* Tarif harmonieux et raffiné avec badge -5% */}
                                         <div className="flex items-baseline gap-2 mb-7 pb-6 border-b border-neutral-200">
-                                            <span className="font-serif text-5xl sm:text-6xl font-extrabold text-black tracking-tight">
+                                            <span className="font-sans font-semibold text-3xl sm:text-4xl text-neutral-900 tracking-tight tabular-nums">
                                                 {formule.price} €
                                             </span>
-                                            <span className="text-xs sm:text-sm text-neutral-500 font-medium">
+                                            <span className="text-xs text-neutral-500 font-medium">
                                                 TVAC / pers.
                                             </span>
-                                            <span className="bg-black text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ml-auto shadow-xs">
+                                            <span className="bg-black text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ml-auto shadow-xs">
                                                 -5%*
                                             </span>
                                         </div>

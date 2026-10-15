@@ -575,6 +575,44 @@ function ContactForm() {
         }
     }, [isMenusFetes, formData.Date_Fete]);
 
+    // Onglet actif du calendrier interactif festif (Décembre 2026 vs Janvier 2027)
+    const [calendarMonth, setCalendarMonth] = useState<'decembre' | 'janvier'>('decembre');
+
+    useEffect(() => {
+        if (formData.Date_Fete?.startsWith("2027-01")) {
+            setCalendarMonth('janvier');
+        } else if (formData.Date_Fete?.startsWith("2026-12")) {
+            setCalendarMonth('decembre');
+        }
+    }, [formData.Date_Fete]);
+
+    const handleSelectFestiveDate = (dateVal: string) => {
+        const dayObj = FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === dateVal);
+        if (!dayObj) return;
+        if (isFestiveDateJ4Locked(dateVal)) return;
+
+        if (dateVal.startsWith("2027-01")) {
+            setCalendarMonth('janvier');
+        } else if (dateVal.startsWith("2026-12")) {
+            setCalendarMonth('decembre');
+        }
+
+        setFormData(prev => ({
+            ...prev,
+            Date_Fete: dateVal,
+            Date: dayObj.dayFormatted,
+            Creneau_Retrait: prev.Creneau_Retrait || "veille"
+        }));
+
+        if (errors.Date_Fete) {
+            setErrors(prev => {
+                const newErr = { ...prev };
+                delete newErr.Date_Fete;
+                return newErr;
+            });
+        }
+    };
+
     const isCustomMode = isPlatPrepare || isAnyBBQ || isBuffet || isAssociations || isPlatUnique || isBuffetFroidMode || isPainsMode || isZakouskisMode || isVerrinesMode || isCollectiviteMode || isBuffetChaudMode;
     const showMenuFirst = isCustomMode;
 
@@ -2700,7 +2738,7 @@ function ContactForm() {
                                         </div>
                                     )}
 
-                                    {/* 1.1 Les 4 boutons rapides */}
+                                    {/* 1.1 Les 4 boutons d'accès rapide */}
                                     <div className="space-y-2">
                                         <label className="text-xs uppercase tracking-wider font-bold text-neutral-700 block">
                                             Dates principales des réveillons (accès rapide) :
@@ -2715,22 +2753,7 @@ function ContactForm() {
                                                         key={day.dateValue}
                                                         type="button"
                                                         disabled={isLocked}
-                                                        onClick={() => {
-                                                            if (isLocked) return;
-                                                            setFormData(prev => ({
-                                                                ...prev,
-                                                                Date_Fete: day.dateValue,
-                                                                Date: day.dayFormatted,
-                                                                Creneau_Retrait: prev.Creneau_Retrait || "veille"
-                                                            }));
-                                                            if (errors.Date_Fete) {
-                                                                setErrors(prev => {
-                                                                    const newErr = { ...prev };
-                                                                    delete newErr.Date_Fete;
-                                                                    return newErr;
-                                                                });
-                                                            }
-                                                        }}
+                                                        onClick={() => handleSelectFestiveDate(day.dateValue)}
                                                         className={`p-4 rounded-2xl border text-center transition-all relative flex flex-col items-center justify-center gap-1 ${
                                                             isLocked
                                                                 ? "border-neutral-200 bg-neutral-100 text-neutral-400 opacity-50 cursor-not-allowed"
@@ -2759,46 +2782,196 @@ function ContactForm() {
                                         </div>
                                     </div>
 
-                                    {/* 1.2 Sélecteur de date (calendrier couvrant la plage du 20 décembre au 5 janvier inclus) */}
-                                    <div className="space-y-2 pt-2">
-                                        <label className="text-xs uppercase tracking-wider font-bold text-neutral-700 block">
-                                            Ou sélectionnez une autre date (plage du 20 décembre au 5 janvier inclus) :
-                                        </label>
-                                        <select
-                                            value={formData.Date_Fete || ""}
-                                            onChange={(e) => {
-                                                const val = e.target.value;
-                                                const dayObj = FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === val);
-                                                setFormData(prev => ({
-                                                    ...prev,
-                                                    Date_Fete: val,
-                                                    Date: dayObj ? dayObj.dayFormatted : val,
-                                                    Creneau_Retrait: prev.Creneau_Retrait || "veille"
-                                                }));
-                                                if (errors.Date_Fete) {
-                                                    setErrors(prev => {
-                                                        const newErr = { ...prev };
-                                                        delete newErr.Date_Fete;
-                                                        return newErr;
-                                                    });
-                                                }
-                                            }}
-                                            className="w-full bg-[#FAF9F6] border border-neutral-300 rounded-2xl p-3.5 text-sm font-medium text-neutral-800 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37]"
-                                        >
-                                            <option value="">-- Choisir une date dans le calendrier --</option>
-                                            {FESTIVE_CALENDAR_DAYS.map((day) => {
-                                                const isLocked = isFestiveDateJ4Locked(day.dateValue);
-                                                return (
-                                                    <option
-                                                        key={day.dateValue}
-                                                        value={day.dateValue}
-                                                        disabled={isLocked}
-                                                    >
-                                                        {day.dayFormatted} {isLocked ? '(Verrouillé - délai J-4 expiré)' : ''}
-                                                    </option>
-                                                );
-                                            })}
-                                        </select>
+                                    {/* 1.2 Calendrier interactif visuel (Décembre 2026 / Janvier 2027) */}
+                                    <div className="space-y-3 pt-3">
+                                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                                            <label className="text-xs uppercase tracking-wider font-bold text-neutral-700 block">
+                                                Calendrier interactif des réveillons (20 déc. au 5 janv.) :
+                                            </label>
+                                            <span className="text-[11px] text-[#927116] font-serif italic">
+                                                Cliquez sur le jour souhaité
+                                            </span>
+                                        </div>
+
+                                        {/* Onglets des mois */}
+                                        <div className="flex items-center gap-2 bg-neutral-100 p-1.5 rounded-2xl border border-neutral-200">
+                                            <button
+                                                type="button"
+                                                onClick={() => setCalendarMonth('decembre')}
+                                                className={`flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+                                                    calendarMonth === 'decembre'
+                                                        ? 'bg-black text-[#D4AF37] shadow-sm'
+                                                        : 'text-neutral-600 hover:text-black hover:bg-white/60'
+                                                }`}
+                                            >
+                                                <span>🎄 Décembre 2026</span>
+                                                <span className="text-[10px] font-normal opacity-75 hidden sm:inline">(20 au 31 déc.)</span>
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() => setCalendarMonth('janvier')}
+                                                className={`flex-1 py-2 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+                                                    calendarMonth === 'janvier'
+                                                        ? 'bg-black text-[#D4AF37] shadow-sm'
+                                                        : 'text-neutral-600 hover:text-black hover:bg-white/60'
+                                                }`}
+                                            >
+                                                <span>🍾 Janvier 2027</span>
+                                                <span className="text-[10px] font-normal opacity-75 hidden sm:inline">(1er au 5 janv.)</span>
+                                            </button>
+                                        </div>
+
+                                        {/* Grille du calendrier */}
+                                        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200 shadow-xs space-y-3">
+                                            {/* En-tête des jours de la semaine */}
+                                            <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-neutral-400 uppercase tracking-wider pb-2 border-b border-neutral-100">
+                                                <div>Lun</div>
+                                                <div>Mar</div>
+                                                <div>Mer</div>
+                                                <div>Jeu</div>
+                                                <div>Ven</div>
+                                                <div>Sam</div>
+                                                <div>Dim</div>
+                                            </div>
+
+                                            {/* Cases des jours */}
+                                            <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                                                {calendarMonth === 'decembre' ? (
+                                                    <>
+                                                        {/* Décembre 2026 débute un mardi -> 1 case vide le lundi */}
+                                                        <div className="h-10 sm:h-12"></div>
+
+                                                        {Array.from({ length: 31 }, (_, i) => i + 1).map((dayNum) => {
+                                                            const dateStr = `2026-12-${String(dayNum).padStart(2, '0')}`;
+                                                            const isFestive = dayNum >= 20 && dayNum <= 31;
+                                                            const isLocked = isFestive && isFestiveDateJ4Locked(dateStr);
+                                                            const isSelected = formData.Date_Fete === dateStr;
+                                                            const isQuick = dayNum === 24 || dayNum === 25 || dayNum === 31;
+
+                                                            if (!isFestive) {
+                                                                return (
+                                                                    <div
+                                                                        key={dayNum}
+                                                                        className="h-10 sm:h-12 flex flex-col items-center justify-center rounded-xl text-neutral-300 text-xs font-light select-none bg-neutral-50/50"
+                                                                        title="Non disponible (menus de fêtes du 20 déc. au 5 janv.)"
+                                                                    >
+                                                                        <span>{dayNum}</span>
+                                                                    </div>
+                                                                );
+                                                            }
+
+                                                            return (
+                                                                <button
+                                                                    key={dayNum}
+                                                                    type="button"
+                                                                    disabled={isLocked}
+                                                                    onClick={() => handleSelectFestiveDate(dateStr)}
+                                                                    className={`h-10 sm:h-12 flex flex-col items-center justify-center rounded-xl text-xs transition-all relative group ${
+                                                                        isLocked
+                                                                            ? 'bg-neutral-100 text-neutral-400 opacity-40 cursor-not-allowed border border-neutral-200'
+                                                                            : isSelected
+                                                                            ? 'bg-black text-[#D4AF37] border-2 border-[#D4AF37] shadow-md ring-2 ring-[#D4AF37]/30 font-bold scale-105 z-10'
+                                                                            : 'bg-[#FAF9F6] hover:bg-white text-neutral-900 font-semibold border border-neutral-200 hover:border-[#D4AF37] hover:shadow-xs'
+                                                                    }`}
+                                                                >
+                                                                    <span className="text-xs sm:text-sm">{dayNum}</span>
+                                                                    {isQuick && !isSelected && !isLocked && (
+                                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] absolute bottom-1"></span>
+                                                                    )}
+                                                                    {isSelected && (
+                                                                        <span className="text-[9px] font-bold text-[#D4AF37] leading-none">✓</span>
+                                                                    )}
+                                                                    {isLocked && (
+                                                                        <span className="text-[8px] text-red-500 font-semibold leading-none">J-4</span>
+                                                                    )}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {/* Janvier 2027 débute un vendredi -> 4 cases vides (Lun, Mar, Mer, Jeu) */}
+                                                        <div className="h-10 sm:h-12"></div>
+                                                        <div className="h-10 sm:h-12"></div>
+                                                        <div className="h-10 sm:h-12"></div>
+                                                        <div className="h-10 sm:h-12"></div>
+
+                                                        {Array.from({ length: 31 }, (_, i) => i + 1).map((dayNum) => {
+                                                            const dateStr = `2027-01-${String(dayNum).padStart(2, '0')}`;
+                                                            const isFestive = dayNum >= 1 && dayNum <= 5;
+                                                            const isLocked = isFestive && isFestiveDateJ4Locked(dateStr);
+                                                            const isSelected = formData.Date_Fete === dateStr;
+                                                            const isQuick = dayNum === 1;
+
+                                                            if (!isFestive) {
+                                                                return (
+                                                                    <div
+                                                                        key={dayNum}
+                                                                        className="h-10 sm:h-12 flex flex-col items-center justify-center rounded-xl text-neutral-300 text-xs font-light select-none bg-neutral-50/50"
+                                                                        title="Non disponible (menus de fêtes du 20 déc. au 5 janv.)"
+                                                                    >
+                                                                        <span>{dayNum}</span>
+                                                                    </div>
+                                                                );
+                                                            }
+
+                                                            return (
+                                                                <button
+                                                                    key={dayNum}
+                                                                    type="button"
+                                                                    disabled={isLocked}
+                                                                    onClick={() => handleSelectFestiveDate(dateStr)}
+                                                                    className={`h-10 sm:h-12 flex flex-col items-center justify-center rounded-xl text-xs transition-all relative group ${
+                                                                        isLocked
+                                                                            ? 'bg-neutral-100 text-neutral-400 opacity-40 cursor-not-allowed border border-neutral-200'
+                                                                            : isSelected
+                                                                            ? 'bg-black text-[#D4AF37] border-2 border-[#D4AF37] shadow-md ring-2 ring-[#D4AF37]/30 font-bold scale-105 z-10'
+                                                                            : 'bg-[#FAF9F6] hover:bg-white text-neutral-900 font-semibold border border-neutral-200 hover:border-[#D4AF37] hover:shadow-xs'
+                                                                    }`}
+                                                                >
+                                                                    <span className="text-xs sm:text-sm">{dayNum}</span>
+                                                                    {isQuick && !isSelected && !isLocked && (
+                                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] absolute bottom-1"></span>
+                                                                    )}
+                                                                    {isSelected && (
+                                                                        <span className="text-[9px] font-bold text-[#D4AF37] leading-none">✓</span>
+                                                                    )}
+                                                                    {isLocked && (
+                                                                        <span className="text-[8px] text-red-500 font-semibold leading-none">J-4</span>
+                                                                    )}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </>
+                                                )}
+                                            </div>
+
+                                            {/* Légende discrète et confirmation de date */}
+                                            <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-2 text-[11px] text-neutral-500">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="flex items-center gap-1">
+                                                        <span className="w-2.5 h-2.5 rounded bg-[#FAF9F6] border border-neutral-300 inline-block"></span>
+                                                        <span>Dates actives</span>
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <span className="w-2 h-2 rounded-full bg-[#D4AF37] inline-block"></span>
+                                                        <span>Réveillons</span>
+                                                    </span>
+                                                    <span className="flex items-center gap-1">
+                                                        <span className="w-2.5 h-2.5 rounded bg-neutral-100 text-red-500 text-[8px] font-bold flex items-center justify-center">J-4</span>
+                                                        <span>Verrouillé (&lt; 4j)</span>
+                                                    </span>
+                                                </div>
+
+                                                {formData.Date_Fete && (
+                                                    <div className="font-bold text-black flex items-center gap-1 bg-[#D4AF37]/15 text-[#927116] px-2.5 py-1 rounded-full">
+                                                        <span>✨ Date sélectionnée :</span>
+                                                        <span>{FESTIVE_CALENDAR_DAYS.find(d => d.dateValue === formData.Date_Fete)?.dayFormatted || formData.Date_Fete}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* 2. Choix du créneau de retrait à l'atelier (Rue Potay 3) */}
