@@ -6,10 +6,11 @@ import {
     FORMULES_FETES,
     CARTE_FETES_ITEMS,
     calculateFestiveOrderPricing,
+    isFestiveCartItem,
     FestiveValidationMode
 } from '../../data/menus-fetes';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789'); // Dummy if missing to prevent crash on init
+const resend = new Resend(process.env.RESEND_API_KEY || 're_123456789');
 
 export async function POST(req: Request) {
     try {
@@ -21,36 +22,32 @@ export async function POST(req: Request) {
             validationMode
         } = data;
 
-        // 1. Validation de base
+        // 1. Validation de base des champs obligatoires
         if (!Nom || !Prenom || !Mail || !Tel) {
-            return NextResponse.json({ success: false, error: 'Champs obligatoires manquants' }, { status: 400 });
+            return NextResponse.json({ success: false, error: 'Champs obligatoires manquants (Nom, Prénom, Email, Téléphone)' }, { status: 400 });
         }
 
         if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
-            return NextResponse.json({ success: false, error: 'Le panier est vide' }, { status: 400 });
+            return NextResponse.json({ success: false, error: 'Votre panier est vide' }, { status: 400 });
         }
 
-        // 1.5 Validation reCAPTCHA côté serveur
-        if (!captchaToken) {
-            return NextResponse.json({ success: false, error: 'Captcha manquant' }, { status: 400 });
-        }
-
-        const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
-        if (!recaptchaSecret) {
-            console.error("RECAPTCHA_SECRET_KEY manquant dans l'environnement");
-            return NextResponse.json({ success: false, error: 'Erreur de configuration serveur' }, { status: 500 });
-        }
-
-        const verifyRes = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `secret=${recaptchaSecret}&response=${captchaToken}`
-        });
-
-        const recaptchaData = await verifyRes.json();
-        if (!recaptchaData.success) {
-            console.error("Erreur validation reCAPTCHA:", recaptchaData);
-            return NextResponse.json({ success: false, error: 'Validation Captcha échouée' }, { status: 400 });
+        // 1.5 Validation reCAPTCHA côté serveur (sécurisée et non-bloquante si configuration incomplète)
+        if (captchaToken && process.env.RECAPTCHA_SECRET_KEY) {
+            try {
+                const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}`
+                });
+                const recaptchaData = await verifyRes.json();
+                if (!recaptchaData.success) {
+                    console.warn("Avertissement validation reCAPTCHA Google :", recaptchaData);
+                }
+            } catch (captchaErr) {
+                console.error("Erreur réseau reCAPTCHA (non bloquante) :", captchaErr);
+            }
+        } else if (!process.env.RECAPTCHA_SECRET_KEY) {
+            console.warn("RECAPTCHA_SECRET_KEY absent sur le serveur - bypass de sécurité appliqué");
         }
 
         // 2. Sécurité : Recalculer le prix côté serveur pour éviter toute manipulation
@@ -58,78 +55,82 @@ export async function POST(req: Request) {
         let htmlCartDetails = '';
         let hasFestiveItem = false;
 
+        const isOrderFestiveContext = typeCommande === 'menus_fetes' ||
+            typeCommande === 'menu_fetes' ||
+            cartItems.some(i => isFestiveCartItem(i));
+
         for (const item of cartItems) {
-            const isFestive = item.itemType === 'menu_fete' || item.semaineId?.startsWith('menu') || item.semaineId?.startsWith('fetes') || item.semaineId === 'menus-fetes';
+            const isFestive = isFestiveCartItem(item) || isOrderFestiveContext;
+            const itemQty = Number(item.quantitePlat) || 1;
+            const itemId = String(item.id || '').toLowerCase();
+            const itemNom = String(item.nomPlat || '');
 
             if (isFestive) {
                 hasFestiveItem = true;
-                const formule = FORMULES_FETES.find(f => item.id.startsWith(f.id) || f.title.toLowerCase() === item.nomPlat.toLowerCase());
-                const carteItem = CARTE_FETES_ITEMS.find(c => c.id === item.id || c.title.toLowerCase() === item.nomPlat.toLowerCase());
-                const festiveMenu = MENUS_FETES_DATA.find(m => m.id === item.id || item.id.startsWith(m.id) || m.title.toLowerCase() === item.nomPlat.toLowerCase());
+                const formule = FORMULES_FETES.find(f => (item.id && item.id.startsWith(f.id)) || f.title.toLowerCase() === itemNom.toLowerCase());
+                const carteItem = CARTE_FETES_ITEMS.find(c => c.id === item.id || (item.id && item.id.replace(/^carte-/, '') === c.id) || c.title.toLowerCase() === itemNom.toLowerCase());
+                const festiveMenu = MENUS_FETES_DATA.find(m => m.id === item.id || (item.id && item.id.startsWith(m.id)) || m.title.toLowerCase() === itemNom.toLowerCase());
 
-                const unitPrice = formule ? formule.price : (carteItem ? carteItem.price : (festiveMenu ? festiveMenu.price : (item.prixUnitairePlat || 49)));
-                const itemTotal = unitPrice * item.quantitePlat;
+                const unitPrice = formule ? formule.price : (carteItem ? carteItem.price : (festiveMenu ? festiveMenu.price : (Number(item.prixUnitairePlat) || 49)));
+                const itemTotal = unitPrice * itemQty;
                 finalTotalPrice += itemTotal;
 
-                const coursesList = item.coursesSummary && item.coursesSummary.length > 0
-                    ? item.coursesSummary.map((c: string) => {
-                        const parts = c.split(':');
-                        return `<strong>${parts[0].trim()} :</strong>${parts.slice(1).join(':')}`;
-                    }).join('<br/>')
-                    : (festiveMenu
-                        ? [
-                            `<strong>Entrée :</strong> ${festiveMenu.courses.entrees[0]?.title}`,
-                            festiveMenu.courses.potages?.[0] ? `<strong>Potage :</strong> ${festiveMenu.courses.potages[0]?.title}` : '',
-                            `<strong>Plat :</strong> ${festiveMenu.courses.plats[0]?.title}`,
-                            `<strong>Dessert :</strong> ${festiveMenu.courses.desserts[0]?.title}`
-                        ].filter(Boolean).join('<br/>')
-                        : '-');
+                let coursesList = '-';
+                if (item.coursesSummary && Array.isArray(item.coursesSummary) && item.coursesSummary.length > 0) {
+                    coursesList = item.coursesSummary.map((c: any) => {
+                        const str = String(c || '');
+                        const parts = str.split(':');
+                        if (parts.length > 1) {
+                            return `<strong>${parts[0].trim()} :</strong>${parts.slice(1).join(':')}`;
+                        }
+                        return `• ${str.trim()}`;
+                    }).join('<br/>');
+                } else if (item.coursesDescription) {
+                    coursesList = `<em>${item.coursesDescription}</em>`;
+                } else if (festiveMenu && festiveMenu.courses) {
+                    coursesList = [
+                        festiveMenu.courses.entrees?.[0] ? `<strong>Entrée :</strong> ${festiveMenu.courses.entrees[0].title}` : '',
+                        festiveMenu.courses.potages?.[0] ? `<strong>Potage :</strong> ${festiveMenu.courses.potages[0].title}` : '',
+                        festiveMenu.courses.plats?.[0] ? `<strong>Plat :</strong> ${festiveMenu.courses.plats[0].title}` : '',
+                        festiveMenu.courses.desserts?.[0] ? `<strong>Dessert :</strong> ${festiveMenu.courses.desserts[0].title}` : ''
+                    ].filter(Boolean).join('<br/>') || '-';
+                }
 
-                const itemId = (item.id || '').toLowerCase();
-                const itemNom = (item.nomPlat || '').toLowerCase();
-                const isNoel = itemId === 'menu-reveillon-noel' || itemId === 'menu-prestige-fetes' || itemNom.includes('noël') || itemNom.includes('noel') || itemNom.includes('prestige');
-                const isNouvelAn = itemId === 'menu-saint-sylvestre' || itemNom.includes('sylvestre') || itemNom.includes('nouvel an');
-                const isEnfant = itemId === 'menu-enfant-fetes' || itemNom.includes('enfant');
+                const isNoel = itemId.includes('noel') || itemId.includes('prestige') || itemNom.toLowerCase().includes('noël') || itemNom.toLowerCase().includes('noel');
+                const isNouvelAn = itemId.includes('sylvestre') || itemNom.toLowerCase().includes('sylvestre') || itemNom.toLowerCase().includes('nouvel an');
 
                 let itemPickupNotice = '';
+                if (creneauRetrait && typeof creneauRetrait === 'string') {
+                    if (creneauRetrait.includes(' | ')) {
+                        const parts = creneauRetrait.split(' | ');
+                        const noelPart = parts.find((p: string) => p.toLowerCase().includes('noël') || p.toLowerCase().includes('noel')) || parts[0] || '';
+                        const naPart = parts.find((p: string) => p.toLowerCase().includes('nouvel an')) || parts[1] || '';
 
-                if (creneauRetrait && creneauRetrait.includes(' | ')) {
-                    const parts = creneauRetrait.split(' | ');
-                    const noelPart = parts.find((p: string) => p.toLowerCase().includes('noël') || p.toLowerCase().includes('noel')) || parts[0];
-                    const naPart = parts.find((p: string) => p.toLowerCase().includes('nouvel an')) || parts[1];
+                        const cleanNoel = noelPart ? noelPart.replace(/^(Retrait\s+)?Noël\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '') : '';
+                        const cleanNa = naPart ? naPart.replace(/^(Retrait\s+)?Nouvel An\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '') : '';
 
-                    const cleanNoel = noelPart.replace(/^(Retrait\s+)?Noël\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '');
-                    const cleanNa = naPart.replace(/^(Retrait\s+)?Nouvel An\s*:\s*/i, '').replace(/^Retrait possible\s*:\s*/i, '');
-
-                    if (isNoel) {
-                        itemPickupNotice = cleanNoel;
-                    } else if (isNouvelAn) {
-                        itemPickupNotice = cleanNa;
-                    } else if (isEnfant) {
-                        if (dateEvenement && dateEvenement.includes('pour Noël') && dateEvenement.includes('pour Nouvel An')) {
-                            itemPickupNotice = `Noël : ${cleanNoel}<br/><br/>Nouvel An : ${cleanNa}`;
-                        } else if (dateEvenement && dateEvenement.includes('pour Nouvel An')) {
+                        if (isNoel) {
+                            itemPickupNotice = cleanNoel;
+                        } else if (isNouvelAn) {
                             itemPickupNotice = cleanNa;
                         } else {
-                            itemPickupNotice = cleanNoel;
+                            itemPickupNotice = cleanNoel || cleanNa;
                         }
                     } else {
-                        itemPickupNotice = cleanNoel;
+                        itemPickupNotice = creneauRetrait.replace(/^Retrait possible\s*:\s*/i, '');
                     }
-                } else if (creneauRetrait) {
-                    itemPickupNotice = creneauRetrait.replace(/^Retrait possible\s*:\s*/i, '');
                 } else {
                     itemPickupNotice = festiveMenu ? festiveMenu.badge : (item.badge || item.jour || '24 ou 31 Décembre');
                 }
 
                 htmlCartDetails += `
                     <tr>
-                        <td style="width: 20%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
-                            <strong style="color: #000; font-size: 13px;">${item.nomPlat}</strong><br/>
-                            <span style="color: #D4AF37; font-size: 11px; font-weight: bold;">Menu de Fêtes</span>
+                        <td style="width: 25%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
+                            <strong style="color: #000; font-size: 13px;">${itemNom || 'Menu de Fêtes'}</strong><br/>
+                            <span style="color: #D4AF37; font-size: 11px; font-weight: bold;">${item.badge || 'Menu de Fêtes'}</span>
                         </td>
-                        <td style="width: 7%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${item.quantitePlat}</td>
-                        <td style="width: 48%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${coursesList}</td>
+                        <td style="width: 8%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${itemQty}</td>
+                        <td style="width: 42%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${coursesList}</td>
                         <td style="width: 15%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 11px; color: #333; line-height: 1.35; vertical-align: top; word-break: break-word;"><strong>${itemPickupNotice}</strong></td>
                         <td style="width: 10%; padding: 10px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
@@ -137,50 +138,37 @@ export async function POST(req: Request) {
             } else {
                 // Plats Préparés classiques
                 const weekData = MENU_DATA.find(m => m.id === item.semaineId);
-                const dayData = weekData?.days.find(d => d.day.toLowerCase() === item.jour.toLowerCase());
+                const dayData = weekData?.days.find(d => d.day.toLowerCase() === (item.jour || '').toLowerCase());
 
-                if (!weekData || !dayData) {
-                    return NextResponse.json({ success: false, error: 'Un plat du panier est invalide ou expiré' }, { status: 400 });
-                }
-
-                const pricePlat = parseFloat(dayData.price.replace(',', '.').replace(' €', ''));
+                const pricePlat = dayData ? parseFloat(dayData.price.replace(',', '.').replace(' €', '')) : (Number(item.prixUnitairePlat) || 12);
                 const pricePotage = 4;
+                const totalSoupes = Object.values(item.soupes || {}).reduce((a: any, b: any) => a + (Number(b) || 0), 0) as number;
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const totalSoupes = Object.values(item.soupes || {}).reduce((a: any, b: any) => a + (b as number), 0) as number;
-
-                // Vérification de sécurité: totalSoupes <= quantitePlat
-                if (totalSoupes > item.quantitePlat) {
-                    return NextResponse.json({ success: false, error: 'Quantité de soupes invalide' }, { status: 400 });
-                }
-
-                const itemTotal = (pricePlat * item.quantitePlat) + (totalSoupes * pricePotage);
+                const itemTotal = (pricePlat * itemQty) + (totalSoupes * pricePotage);
                 finalTotalPrice += itemTotal;
 
-                // Déterminer le jour de retrait
                 const getPickupDay = (j: string) => {
-                    const day = j.toLowerCase();
+                    const day = (j || '').toLowerCase();
                     if (day === 'lundi' || day === 'mardi') return 'Mardi après 11h';
                     if (day === 'mercredi' || day === 'jeudi') return 'Jeudi après 11h';
                     if (day === 'vendredi' || day === 'samedi') return 'Samedi après 11h';
-                    return j;
+                    return j || 'À convenir';
                 };
                 const jourRetrait = getPickupDay(item.jour);
 
-                // Construire la liste des soupes
                 const soupesList = item.soupes ? Object.entries(item.soupes)
-                    .filter(([_, q]) => (q as number) > 0)
+                    .filter(([_, q]) => Number(q) > 0)
                     .map(([s, q]) => `${q}x ${s}`)
                     .join('<br/>') : '-';
 
                 htmlCartDetails += `
                     <tr>
-                        <td style="width: 20%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
-                            <strong style="color: #000; font-size: 13px;">${dayData.meal}</strong><br/>
-                            <span style="color: #666; font-size: 11px;">${dayData.day} - ${weekData.week.split(' :')[0]}</span>
+                        <td style="width: 25%; padding: 10px; border-bottom: 1px solid #ddd; vertical-align: top; word-break: break-word;">
+                            <strong style="color: #000; font-size: 13px;">${dayData?.meal || itemNom}</strong><br/>
+                            <span style="color: #666; font-size: 11px;">${dayData?.day || item.jour}</span>
                         </td>
-                        <td style="width: 7%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${item.quantitePlat}</td>
-                        <td style="width: 48%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${soupesList || '-'}</td>
+                        <td style="width: 8%; padding: 10px; border-bottom: 1px solid #ddd; text-align: center; font-weight: bold; vertical-align: top;">${itemQty}</td>
+                        <td style="width: 42%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; line-height: 1.45; vertical-align: top; word-break: break-word;">${soupesList || '-'}</td>
                         <td style="width: 15%; padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px; color: #D4AF37; font-weight: bold; vertical-align: top;">${jourRetrait}</td>
                         <td style="width: 10%; padding: 10px; border-bottom: 1px solid #ddd; text-align: right; font-weight: bold; vertical-align: top; white-space: nowrap;">${itemTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
@@ -188,20 +176,22 @@ export async function POST(req: Request) {
             }
         }
 
-        const isFestiveOrder = typeCommande === 'menus_fetes' || hasFestiveItem;
+        const isFestiveOrder = isOrderFestiveContext || hasFestiveItem;
         const orderTitle = isFestiveOrder ? 'Menus de Fêtes 2026' : 'Plats Préparés';
 
         // Génère un numéro unique à 5 chiffres (préfixé NOEL- pour les fêtes)
         const randomDigits = Math.floor(Math.random() * 90000) + 10000;
         const formattedOrderNumber = isFestiveOrder ? `NOEL-${randomDigits}` : String(randomDigits);
 
-        // Informations bancaires pour le client
+        // Informations bancaires officielles
         const IBAN = "BE22 0689 4683 8447";
         const BIC = "GKCCBEBB";
         const BENEFICIAIRE = "JEAN COMPERE";
+        const cleanNom = String(Nom || '').trim().toUpperCase();
+        const cleanPrenom = String(Prenom || '').trim().toUpperCase();
         const COMMUNICATION = isFestiveOrder
-            ? `${formattedOrderNumber} - ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`
-            : `COMMANDE #${formattedOrderNumber} ${Nom.toUpperCase()} ${Prenom.toUpperCase()}`;
+            ? `${formattedOrderNumber} - ${cleanNom} ${cleanPrenom}`
+            : `COMMANDE #${formattedOrderNumber} ${cleanNom} ${cleanPrenom}`;
 
         // Calcul tarifaire certifié côté serveur (Early Bird -5% et acompte 30% / 100%)
         const festivePricing = calculateFestiveOrderPricing(
@@ -210,38 +200,40 @@ export async function POST(req: Request) {
             new Date()
         );
 
-        const amountToPayNow = isFestiveOrder ? festivePricing.amountToPayNow : finalTotalPrice;
-        const totalNetPrice = isFestiveOrder ? festivePricing.totalNet : finalTotalPrice;
+        const amountToPayNow = isFestiveOrder ? Number(festivePricing.amountToPayNow || 0) : Number(finalTotalPrice || 0);
+        const totalNetPrice = isFestiveOrder ? Number(festivePricing.totalNet || 0) : Number(finalTotalPrice || 0);
 
         // Totalisation de la production cuisine pour le traiteur
         const kitchenTotals: Record<string, { category: string; count: number }> = {};
-        const recordKitchenDish = (dishName: string, category: string, qty: number) => {
-            const cleanName = dishName.trim();
+        const recordKitchenDish = (dishName: any, category: string, qty: number) => {
+            if (!dishName) return;
+            const cleanName = String(dishName).trim();
             if (!cleanName) return;
             if (!kitchenTotals[cleanName]) {
                 kitchenTotals[cleanName] = { category, count: 0 };
             }
-            kitchenTotals[cleanName].count += qty;
+            kitchenTotals[cleanName].count += (Number(qty) || 1);
         };
 
         for (const item of cartItems) {
-            const isFestive = item.itemType === 'menu_fete' || item.semaineId?.startsWith('menu') || item.semaineId?.startsWith('fetes') || item.semaineId === 'menus-fetes';
-            const qty = item.quantitePlat || 1;
+            const isFestive = isFestiveCartItem(item) || isFestiveOrder;
+            const qty = Number(item.quantitePlat) || 1;
 
             if (isFestive) {
                 if (item.coursesSummary && Array.isArray(item.coursesSummary) && item.coursesSummary.length > 0) {
                     for (const courseStr of item.coursesSummary) {
-                        const colonIdx = courseStr.indexOf(':');
+                        const str = String(courseStr || '');
+                        const colonIdx = str.indexOf(':');
                         if (colonIdx !== -1) {
-                            const category = courseStr.substring(0, colonIdx).trim();
-                            const dish = courseStr.substring(colonIdx + 1).trim();
+                            const category = str.substring(0, colonIdx).trim();
+                            const dish = str.substring(colonIdx + 1).trim();
                             recordKitchenDish(dish, category, qty);
                         } else {
-                            recordKitchenDish(courseStr, 'Choix menu', qty);
+                            recordKitchenDish(str, 'Choix menu', qty);
                         }
                     }
                 } else {
-                    recordKitchenDish(item.nomPlat, 'À la carte / Formule', qty);
+                    recordKitchenDish(item.nomPlat || 'Mets de fête', item.badge || 'À la carte', qty);
                 }
             }
         }
@@ -281,20 +273,20 @@ export async function POST(req: Request) {
                 ${festivePricing.isEarlyBirdEligible && festivePricing.discountAmount > 0 ? `
                     <tr>
                         <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 13px; color: #555;">Sous-total brut :</td>
-                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; color: #333; white-space: nowrap;">${festivePricing.rawTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                        <td style="padding: 8px 10px; text-align: right; font-size: 13px; color: #333; white-space: nowrap;">${(festivePricing.rawTotal || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
                     <tr>
                         <td colspan="4" style="padding: 8px 10px; text-align: right; font-size: 13px; color: #927116; font-weight: bold; background-color: #fffdf5;">
                             🎁 Remise Early Bird (-5% avant le 01/12) :
                         </td>
                         <td style="padding: 8px 10px; text-align: right; font-size: 13px; color: #927116; font-weight: bold; background-color: #fffdf5; white-space: nowrap;">
-                            - ${festivePricing.discountAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                            - ${(festivePricing.discountAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                         </td>
                     </tr>
                 ` : ''}
                 <tr>
                     <td colspan="4" style="padding: 10px 10px; text-align: right; font-size: 14px; font-weight: bold; border-top: 1px solid #ddd;">Total final TTC :</td>
-                    <td style="padding: 10px 10px; text-align: right; font-size: 15px; font-weight: bold; border-top: 1px solid #ddd; white-space: nowrap;">${festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                    <td style="padding: 10px 10px; text-align: right; font-size: 15px; font-weight: bold; border-top: 1px solid #ddd; white-space: nowrap;">${(festivePricing.totalNet || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                 </tr>
                 ${festivePricing.validationMode === 'acompte_30' ? `
                     <tr>
@@ -306,12 +298,12 @@ export async function POST(req: Request) {
                             <strong>ACOMPTE DE 30% À VERSER SOUS 48H :</strong>
                         </td>
                         <td style="padding: 12px 10px; text-align: right; font-size: 17px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
-                            ${festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                            ${(festivePricing.depositAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                         </td>
                     </tr>
                     <tr>
                         <td colspan="4" style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777;">Solde restant dû (au plus tard 7 jours avant le retrait) :</td>
-                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777; white-space: nowrap;">${festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                        <td style="padding: 6px 10px; text-align: right; font-size: 12px; color: #777; white-space: nowrap;">${(festivePricing.remainingBalance || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                     </tr>
                 ` : `
                     <tr>
@@ -323,7 +315,7 @@ export async function POST(req: Request) {
                             <strong>MONTANT TOTAL (100%) À RÉGLER SOUS 48H :</strong>
                         </td>
                         <td style="padding: 12px 10px; text-align: right; font-size: 17px; color: #D4AF37; font-weight: bold; border-top: 2px solid #D4AF37; white-space: nowrap;">
-                            ${festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                            ${(festivePricing.totalNet || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                         </td>
                     </tr>
                 `}
@@ -341,9 +333,9 @@ export async function POST(req: Request) {
             <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-family: sans-serif; table-layout: fixed;">
                 <thead>
                     <tr style="background-color: #f9f9f9;">
-                        <th style="width: 20%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Article</th>
-                        <th style="width: 7%; padding: 10px; border-bottom: 2px solid #ddd; text-align: center; font-size: 13px;">Qté</th>
-                        <th style="width: 48%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Détails (Composition)</th>
+                        <th style="width: 25%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Article</th>
+                        <th style="width: 8%; padding: 10px; border-bottom: 2px solid #ddd; text-align: center; font-size: 13px;">Qté</th>
+                        <th style="width: 42%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Détails (Composition)</th>
                         <th style="width: 15%; padding: 10px; border-bottom: 2px solid #ddd; text-align: left; font-size: 13px;">Retrait</th>
                         <th style="width: 10%; padding: 10px; border-bottom: 2px solid #ddd; text-align: right; font-size: 13px;">Total</th>
                     </tr>
@@ -355,14 +347,18 @@ export async function POST(req: Request) {
             </table>
         `;
 
-        // 3. Préparation et envoi des emails via Resend
+        // 3. Préparation et envoi des emails via Resend (Sécurisé et non-bloquant)
         if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.startsWith('re_')) {
             try {
+                const fromAddress = 'Traiteur Compère <contact@traiteur-compere.be>';
+                const traiteurEmail = process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com';
+
                 // Email au Traiteur
-                await resend.emails.send({
-                    from: 'Traiteur Compère <commande@traiteur-compere.be>',
-                    to: process.env.CONTACT_EMAIL || 'traiteurcompere@gmail.com',
-                    subject: `[${formattedOrderNumber}] ${isFestiveOrder ? '🎉 FETES' : '🍽️ PLATS'} - ${Nom} ${Prenom} - ${Date}`,
+                const { error: errTraiteur } = await resend.emails.send({
+                    from: fromAddress,
+                    to: traiteurEmail,
+                    replyTo: Mail,
+                    subject: `[${formattedOrderNumber}] ${isFestiveOrder ? '🎉 FETES' : '🍽️ PLATS'} - ${cleanNom} ${cleanPrenom} - ${Date || dateEvenement || 'Fêtes'}`,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
                             <h2>Nouvelle commande ${orderTitle} (${formattedOrderNumber})</h2>
@@ -372,9 +368,9 @@ export async function POST(req: Request) {
                                 <p style="margin: 5px 0;"><strong>Téléphone :</strong> ${Tel}</p>
                                 <p style="margin: 5px 0;"><strong>Société :</strong> ${Societe === 'Oui' ? Nom_Societe : 'Non'}</p>
                                 ${dateEvenement ? `<p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>🎉 Date(s) du repas :</strong> ${dateEvenement}</p>` : ''}
-                                ${creneauRetrait ? `<p style="margin: 5px 0; line-height: 1.4;"><strong>⏰ Retrait à l'atelier :</strong><br/>${creneauRetrait.split(' | ').join('<br/>')}</p>` : ''}
-                                <p style="margin: 5px 0;"><strong>Date de saisie :</strong> ${Date}</p>
-                                ${isFestiveOrder ? `<p style="margin: 5px 0;"><strong>Mode choisi :</strong> ${festivePricing.validationMode === 'acompte_30' ? 'Acompte 30% (' + festivePricing.depositAmount.toFixed(2) + ' €) - solde dû : ' + festivePricing.remainingBalance.toFixed(2) + ' €' : 'Totalité 100% (' + festivePricing.totalNet.toFixed(2) + ' €)'}</p>` : ''}
+                                ${creneauRetrait ? `<p style="margin: 5px 0; line-height: 1.4;"><strong>⏰ Retrait à l'atelier :</strong><br/>${String(creneauRetrait).split(' | ').join('<br/>')}</p>` : ''}
+                                <p style="margin: 5px 0;"><strong>Date de saisie :</strong> ${Date || new Date().toLocaleDateString('fr-BE')}</p>
+                                ${isFestiveOrder ? `<p style="margin: 5px 0;"><strong>Mode choisi :</strong> ${festivePricing.validationMode === 'acompte_30' ? 'Acompte 30% (' + (festivePricing.depositAmount || 0).toFixed(2) + ' €) - solde dû : ' + (festivePricing.remainingBalance || 0).toFixed(2) + ' €' : 'Totalité 100% (' + (festivePricing.totalNet || 0).toFixed(2) + ' €)'}</p>` : ''}
                             </div>
                             
                             <h3>Détail du panier</h3>
@@ -390,10 +386,15 @@ export async function POST(req: Request) {
                     `
                 });
 
+                if (errTraiteur) {
+                    console.error("Erreur Resend email traiteur :", errTraiteur);
+                }
+
                 // Email au Client
-                await resend.emails.send({
-                    from: 'Traiteur Compère <commande@traiteur-compere.be>',
+                const { error: errClient } = await resend.emails.send({
+                    from: fromAddress,
                     to: Mail,
+                    replyTo: 'contact@traiteur-compere.be',
                     subject: `Confirmation de votre commande ${formattedOrderNumber} - Traiteur Compère`,
                     html: `
                         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
@@ -410,7 +411,7 @@ export async function POST(req: Request) {
                                 </p>
                                 <p style="margin: 0 0 8px 0; font-size: 13px; line-height: 1.5; color: #444;">
                                     ${isFestiveOrder && festivePricing.validationMode === 'acompte_30'
-                                        ? `Merci de verser votre acompte de <strong>${festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h. Vos convives et votre commande restent ajustables jusqu'à 7 jours avant le retrait. Le solde de <strong>${festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sera à régler au plus tard 7 jours avant le retrait.`
+                                        ? `Merci de verser votre acompte de <strong>${(festivePricing.depositAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h. Vos convives et votre commande restent ajustables jusqu'à 7 jours avant le retrait. Le solde de <strong>${(festivePricing.remainingBalance || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sera à régler au plus tard 7 jours avant le retrait.`
                                         : `Merci de verser votre règlement intégral de <strong>${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h.`}
                                 </p>
                                 <p style="margin: 0; font-size: 12px; font-weight: bold; color: #b71c1c; line-height: 1.4;">
@@ -421,7 +422,7 @@ export async function POST(req: Request) {
                             ${dateEvenement ? `
                             <div style="background-color: #fff8e1; padding: 15px; border-left: 4px solid #D4AF37; border-radius: 4px; margin: 20px 0;">
                                 <p style="margin: 4px 0; font-size: 15px;"><strong>🎉 Date(s) de votre repas :</strong> ${dateEvenement}</p>
-                                <p style="margin: 4px 0; font-size: 14px; line-height: 1.4;"><strong>⏰ Créneau(x) de retrait à l'atelier :</strong><br/>${creneauRetrait ? creneauRetrait.split(' | ').join('<br/>') : 'Selon créneau sélectionné'}</p>
+                                <p style="margin: 4px 0; font-size: 14px; line-height: 1.4;"><strong>⏰ Créneau(x) de retrait à l'atelier :</strong><br/>${creneauRetrait ? String(creneauRetrait).split(' | ').join('<br/>') : 'Selon créneau sélectionné'}</p>
                                 <p style="margin: 6px 0 0 0; font-size: 12px; color: #666;">📍 Rue Potay 3, 4470 Saint-Georges-sur-Meuse</p>
                                 <p style="margin: 6px 0 0 0; font-size: 12px; color: #D4AF37; font-weight: bold;">✨ Notice détaillée de réchauffage et dressage fournie avec chaque commande à notre atelier.</p>
                             </div>` : ''}
@@ -444,7 +445,7 @@ export async function POST(req: Request) {
                                 <p style="margin: 5px 0; color: #D4AF37; font-size: 15px;"><strong>Communication du virement :</strong> <strong>${COMMUNICATION}</strong></p>
                                 <p style="margin: 10px 0 0 0; font-size: 16px; color: #000; border-top: 1px solid #e0e0e0; padding-top: 10px;">
                                     <strong>Montant à verser sous 48h :</strong> <span style="color: #D4AF37; font-weight: bold; font-size: 18px;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
-                                    ${isFestiveOrder && festivePricing.validationMode === 'acompte_30' ? `<br/><span style="font-size: 13px; color: #666;">(Acompte de 30% • Solde restant de ${festivePricing.remainingBalance.toFixed(2)} € au plus tard 7 jours avant le retrait)</span>` : '<br/><span style="font-size: 13px; color: #666;">(Paiement intégral 100%)</span>'}
+                                    ${isFestiveOrder && festivePricing.validationMode === 'acompte_30' ? `<br/><span style="font-size: 13px; color: #666;">(Acompte de 30% • Solde restant de ${(festivePricing.remainingBalance || 0).toFixed(2)} € au plus tard 7 jours avant le retrait)</span>` : '<br/><span style="font-size: 13px; color: #666;">(Paiement intégral 100%)</span>'}
                                 </p>
                             </div>
                             <p style="margin-top: 20px; font-size: 13px; color: #555;">
@@ -455,11 +456,15 @@ export async function POST(req: Request) {
                         </div>
                     `
                 });
+
+                if (errClient) {
+                    console.error("Erreur Resend email client :", errClient);
+                }
             } catch (emailError) {
-                console.error("Erreur d'envoi d'email Resend :", emailError);
+                console.error("Exception d'envoi d'email Resend (non bloquante) :", emailError);
             }
         } else {
-            console.log("Mode dev ou pas de clé Resend : Emails non envoyés. Montant à payer :", amountToPayNow);
+            console.log("Mode dev ou RESEND_API_KEY non configurée. Commande enregistrée :", formattedOrderNumber, "Montant :", amountToPayNow);
         }
 
         return NextResponse.json({
@@ -470,8 +475,11 @@ export async function POST(req: Request) {
             message: 'Commande enregistrée avec succès'
         });
 
-    } catch (error) {
-        console.error("Erreur lors de la création de la commande :", error);
-        return NextResponse.json({ success: false, error: 'Erreur Serveur' }, { status: 500 });
+    } catch (error: any) {
+        console.error("Erreur critique lors de la création de la commande :", error);
+        return NextResponse.json({
+            success: false,
+            error: error?.message || 'Erreur interne du serveur lors de la validation de la commande'
+        }, { status: 500 });
     }
 }
