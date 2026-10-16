@@ -116,6 +116,15 @@ export default function MenusFetesPage() {
         quantity: number;
     } | null>(null);
 
+    // Auto-dismiss du Toast / Pop-up Panier après 3 secondes (3000 ms)
+    useEffect(() => {
+        if (!addedConfirmation) return;
+        const timer = setTimeout(() => {
+            setAddedConfirmation(null);
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, [addedConfirmation]);
+
     // État de l'accordéon FAQ (index ouvert ou null)
     const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
@@ -573,7 +582,16 @@ export default function MenusFetesPage() {
                             return (
                                 <div
                                     key={formule.id}
-                                    className="bg-white rounded-3xl p-8 sm:p-9 border-2 border-neutral-200/90 hover:border-[#D4AF37] shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => handleOpenModal(formule)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            handleOpenModal(formule);
+                                        }
+                                    }}
+                                    className="bg-white rounded-3xl p-8 sm:p-9 border-2 border-neutral-200/90 hover:border-[#D4AF37] shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group relative overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/50"
                                 >
                                     <div>
                                         {/* Badge et titre */}
@@ -632,8 +650,11 @@ export default function MenusFetesPage() {
                                     <div className="pt-2">
                                         <button
                                             type="button"
-                                            onClick={() => handleOpenModal(formule)}
-                                            className="w-full bg-black hover:bg-[#D4AF37] text-white hover:text-black py-4.5 px-6 rounded-full font-serif font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2.5"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleOpenModal(formule);
+                                            }}
+                                            className="w-full bg-black hover:bg-[#D4AF37] text-white hover:text-black py-4.5 px-6 rounded-full font-serif font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2.5 cursor-pointer"
                                         >
                                             <ChefHat size={18} />
                                             <span>Composer ce menu</span>

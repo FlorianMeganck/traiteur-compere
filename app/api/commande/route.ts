@@ -9,6 +9,7 @@ import {
     isFestiveCartItem,
     FestiveValidationMode
 } from '../../data/menus-fetes';
+import { insertFestiveOrder } from '../../lib/db';
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = (resendApiKey && resendApiKey.startsWith('re_')) ? new Resend(resendApiKey) : null;
@@ -194,6 +195,32 @@ export async function POST(req: Request) {
 
         const amountToPayNow = isFestiveOrder ? Number(festivePricing.amountToPayNow || 0) : Number(finalTotalPrice || 0);
         const totalNetPrice = isFestiveOrder ? Number(festivePricing.totalNet || 0) : Number(finalTotalPrice || 0);
+
+        // 2.5 Persistance en Base de Données (festive_orders)
+        if (isFestiveOrder) {
+            try {
+                await insertFestiveOrder({
+                    id: formattedOrderNumber,
+                    prenom: cleanPrenom,
+                    nom: cleanNom,
+                    email: String(Mail).trim().toLowerCase(),
+                    telephone: String(Tel).trim(),
+                    repas_date: String(dateEvenement || '2026-12-24'),
+                    retrait_slot: String(creneauRetrait || ''),
+                    payment_mode: isAcompteMode ? 'acompte_30' : 'total_100',
+                    status: 'en_attente',
+                    total_initial: totalNetPrice,
+                    early_bird_discount: festivePricing.discountAmount || 0,
+                    amount_paid_initial: amountToPayNow,
+                    balance_remaining: isAcompteMode ? (festivePricing.remainingBalance || 0) : 0,
+                    items: cartItems,
+                    additional_items: [],
+                    notes: details_projet || ''
+                });
+            } catch (dbErr) {
+                console.error("Erreur enregistrement DB festive_orders (non-bloquante) :", dbErr);
+            }
+        }
 
         // Totalisation de la production cuisine pour le traiteur
         const kitchenTotals: Record<string, { category: string; count: number }> = {};
@@ -527,6 +554,23 @@ export async function POST(req: Request) {
                                                                 : `Merci de bien vouloir effectuer votre virement intégral sous 48h afin de valider définitivement votre réservation.`}
                                                         </p>
                                                     </div>
+
+                                                    <!-- ENCART ACCÈS ESPACE GESTION & SOLDE -->
+                                                    ${isFestiveOrder ? `
+                                                    <div style="background-color: #FAF6EB; border: 1px solid #D4AF37; border-radius: 10px; padding: 20px; margin: 0 0 28px 0; text-align: center;">
+                                                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A6D1F; margin-bottom: 6px;">
+                                                            ESPACE PERSONNEL DE SUIVI
+                                                        </div>
+                                                        <div style="font-size: 13px; font-weight: 600; color: #1A1A1A; margin-bottom: 14px; line-height: 1.45;">
+                                                            ${festivePricing.validationMode === 'acompte_30'
+                                                                ? 'Ajustez vos convives jusqu\'à 7 jours avant le retrait et réglez votre solde en toute sérénité.'
+                                                                : 'Consultez les détails et le suivi de votre réservation à tout moment.'}
+                                                        </div>
+                                                        <a href="https://www.traiteur-compere.be/gestion-commande?order=${encodeURIComponent(formattedOrderNumber)}&email=${encodeURIComponent(Mail)}" 
+                                                           style="display: inline-block; background-color: #D4AF37; color: #000000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 12px 24px; border-radius: 9999px; text-decoration: none; box-shadow: 0 2px 6px rgba(212,175,55,0.3);">
+                                                            Gérer ma commande &amp; Solder mon acompte →
+                                                        </a>
+                                                    </div>` : ''}
 
                                                     <!-- RENDEZ-VOUS DE RETRAIT & MODALITES -->
                                                     <div style="background-color: #FBFBF9; border: 1px solid #EFECE6; border-radius: 8px; padding: 20px; margin: 0 0 28px 0;">

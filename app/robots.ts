@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/commande-confirmee', '/api/'],
+        disallow: ['/commande-confirmee', '/gestion-commande', '/api/'],
       },
     ],
     sitemap: 'https://www.traiteur-compere.be/sitemap.xml',
