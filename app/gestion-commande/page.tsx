@@ -747,19 +747,24 @@ function GestionCommandeContent() {
             {/* ==================================================== */}
             <AnimatePresence>
                 {isFormuleModalOpen && activeFormule && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                    <motion.div
+                        key="modal-formule"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+                    >
+                        <div
                             onClick={() => setIsFormuleModalOpen(false)}
                             className="fixed inset-0 bg-black/75 backdrop-blur-md"
                         />
 
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
+                            initial={{ scale: 0.95 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.97 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
                             className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl border-2 border-[#D4AF37] p-6 sm:p-8 z-10 my-8 max-h-[90vh] flex flex-col overflow-hidden"
                         >
                             {/* En-tête */}
@@ -899,7 +904,7 @@ function GestionCommandeContent() {
                                 </button>
                             </div>
                         </motion.div>
-                    </div>
+                    </motion.div>
                 )}
             </AnimatePresence>
 
@@ -908,19 +913,24 @@ function GestionCommandeContent() {
             {/* ==================================================== */}
             <AnimatePresence>
                 {isCarteModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                    <motion.div
+                        key="modal-carte"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+                    >
+                        <div
                             onClick={() => setIsCarteModalOpen(false)}
                             className="fixed inset-0 bg-black/75 backdrop-blur-md"
                         />
 
                         <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
+                            initial={{ scale: 0.95 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.97 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
                             className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl border-2 border-[#D4AF37] p-6 sm:p-8 z-10 my-8 max-h-[90vh] flex flex-col overflow-hidden"
                         >
                             <div className="flex items-start justify-between pb-4 border-b border-neutral-100 shrink-0">
@@ -986,7 +996,7 @@ function GestionCommandeContent() {
                                 </button>
                             </div>
                         </motion.div>
-                    </div>
+                    </motion.div>
                 )}
             </AnimatePresence>
         </main>
