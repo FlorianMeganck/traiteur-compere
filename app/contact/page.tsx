@@ -1808,7 +1808,7 @@ function ContactForm() {
                     const redirectCreneau = creneauRetraitFormatted ? `&creneau=${encodeURIComponent(creneauRetraitFormatted)}` : '';
                     clearCart();
                     setTimeout(() => {
-                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&orderId=${result.orderNumber}&total=${targetTotalPrice}&toPay=${targetAmountToPay}&mode=${isMenusFetes ? validationMode : 'totalite_100'}&solde=${isMenusFetes ? festivePricing.remainingBalance : 0}&remise=${isMenusFetes ? festivePricing.discountAmount : 0}&jours=${encodeURIComponent(redirectJours)}${redirectCreneau}`;
+                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&email=${encodeURIComponent(formData.Mail)}&orderId=${result.orderNumber}&total=${targetTotalPrice}&toPay=${targetAmountToPay}&mode=${isMenusFetes ? validationMode : 'totalite_100'}&solde=${isMenusFetes ? festivePricing.remainingBalance : 0}&remise=${isMenusFetes ? festivePricing.discountAmount : 0}&jours=${encodeURIComponent(redirectJours)}${redirectCreneau}`;
                     }, 3000);
                 } else {
                     console.error("Erreur API Commande:", result);
