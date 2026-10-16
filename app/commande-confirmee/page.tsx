@@ -120,7 +120,7 @@ function CommandeConfirmeeContent() {
                             <div className="text-sm">
                                 <p className="font-bold text-neutral-900 font-serif">Option Acompte de 30% sélectionnée</p>
                                 <p className="text-neutral-700 mt-0.5">
-                                    Le versement de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> bloque votre commande et la remise de -5 %. Le solde ({SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) et le nombre de convives sont ajustables jusqu&apos;à 7 jours avant le retrait.
+                                    Le versement de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> bloque votre réservation et la remise de -5 %. Le solde ({SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) et le nombre de convives sont ajustables jusqu&apos;à 7 jours avant le retrait (les convives ou plats ajoutés après le 1er décembre sont au tarif plein).
                                 </p>
                             </div>
                         </div>

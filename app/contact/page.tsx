@@ -4501,7 +4501,7 @@ function ContactForm() {
                                                                     </span>
                                                                 </div>
                                                                 <p className="text-xs text-neutral-600 leading-relaxed">
-                                                                    Montant de l&apos;acompte calculé au centime près. Bloque la commande et la remise de -5 %. Convives et commande ajustables par email/téléphone jusqu&apos;à 7 jours avant le retrait. Solde obligatoire au plus tard 7 jours avant le retrait ({festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €).
+                                                                    Bloque la remise de -5 % sur votre sélection actuelle. Convives modifiables jusqu&apos;à J-7 (les ajouts post-1er décembre sont au tarif plein). Solde ({festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) à régler au plus tard 7 jours avant le retrait.
                                                                 </p>
                                                             </div>
                                                         </div>

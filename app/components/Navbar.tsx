@@ -508,8 +508,8 @@ export default function Navbar() {
                                                         {pricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                     </span>
                                                 </div>
-                                                <p className="text-[11px] text-neutral-500 italic pt-0.5">
-                                                    Option acompte 30% ou totalité 100% au choix à la validation.
+                                                <p className="text-[11px] text-neutral-500 italic pt-0.5 leading-snug">
+                                                    Remise de -5 % valable jusqu&apos;au 1er décembre, applicable au versement de l&apos;acompte (30 %) comme au paiement intégral.
                                                 </p>
                                             </div>
                                         ) : (

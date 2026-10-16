@@ -25,7 +25,7 @@ import { useCart, CartItem } from "../hooks/useCart";
 const FESTIVE_FAQ = [
     {
         question: "Comment commander vos menus de réveillon de Noël et Nouvel An chez Traiteur Compère ?",
-        answer: "Vous pouvez composer et réserver vos repas de fêtes directement en ligne via nos 3 formules gastronomiques 4 services ou notre carte festive à composer librement. Les commandes pour Noël et le Nouvel An sont ouvertes du 20 décembre au 5 janvier inclus, et doivent être enregistrées au plus tard 4 jours avant la date de retrait (J-4). Une remise « Réservation Anticipée » de -5 % est appliquée automatiquement sur l'ensemble de votre commande pour toute réservation validée avant le 1er décembre avec un acompte de 30 %."
+        answer: "Vous pouvez composer et réserver vos repas de fêtes directement en ligne via nos 3 formules gastronomiques 4 services ou notre carte festive à composer librement. Les commandes pour Noël et le Nouvel An sont ouvertes du 20 décembre au 5 janvier inclus, et doivent être enregistrées au plus tard 4 jours avant la date de retrait (J-4). Une remise « Réservation Anticipée » de -5 % est appliquée automatiquement sur l'ensemble de votre commande pour toute réservation validée avant le 1er décembre, applicable au versement de l'acompte (30 %) comme au paiement intégral."
     },
     {
         question: "Où et quand s'effectue le retrait des plats traiteur pour les fêtes ?",
@@ -36,8 +36,8 @@ const FESTIVE_FAQ = [
         answer: "Tous nos mets (gibiers nobles, suprêmes de pintadeau, pavés de saumon à l'oseille, potages et entrées chaudes) sont préparés maison par notre chef et conditionnés prêts à réchauffer. Toutes les explications claires et détaillées de remise en température ainsi que des conseils de dressage gastronomique vous seront fournies lors du retrait pour garantir une dégustation parfaite sans aucun stress en cuisine."
     },
     {
-        question: "Peut-on modifier le nombre de convives après avoir versé l'acompte ?",
-        answer: "Oui. En choisissant le versement d'un acompte de 30 % lors de votre réservation (option disponible jusqu'au 10 décembre), vous bloquez votre commande ainsi que l'avantage des -5 %. Le nombre de convives et la composition exacte de vos menus restent ajustables par email ou par téléphone jusqu'à 7 jours avant la date de retrait. Le solde restant est à régler au plus tard 7 jours avant le retrait."
+        question: "Peut-on modifier le nombre de convives ?",
+        answer: "Oui, uniquement si vous avez choisi le versement de l'acompte de 30 % lors de votre réservation (un paiement à 100 % fige définitivement la commande). Vous pouvez ajuster le nombre d'invités et vos choix de plats par téléphone ou par email jusqu'à 7 jours avant la date de retrait. À noter : La remise de -5 % reste bloquée sur les menus réservés avant le 1er décembre. Tout invité ou plat supplémentaire ajouté après cette date sera facturé au tarif standard."
     },
     {
         question: "Proposez-vous des options adaptées aux allergies ou intolérances alimentaires ?",
@@ -55,7 +55,7 @@ const faqJsonLd = {
             "name": "Comment commander vos menus de réveillon de Noël et Nouvel An chez Traiteur Compère ?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Vous pouvez composer et réserver vos repas de fêtes directement en ligne via nos 3 formules gastronomiques 4 services ou notre carte festive à composer librement. Commandes ouvertes du 20 décembre au 5 janvier (J-4). Remise de -5% avant le 1er décembre."
+                "text": "Vous pouvez composer et réserver vos repas de fêtes directement en ligne via nos 3 formules gastronomiques 4 services ou notre carte festive à composer librement. Commandes ouvertes du 20 décembre au 5 janvier (J-4). Remise de -5% valable jusqu'au 1er décembre (acompte 30% ou total)."
             }
         },
         {
@@ -76,10 +76,10 @@ const faqJsonLd = {
         },
         {
             "@type": "Question",
-            "name": "Peut-on modifier le nombre de convives après avoir versé l'acompte ?",
+            "name": "Peut-on modifier le nombre de convives ?",
             "acceptedAnswer": {
                 "@type": "Answer",
-                "text": "Oui, avec l'acompte de 30% (disponible jusqu'au 10 décembre), le nombre de convives est modifiable par email ou téléphone jusqu'à 7 jours avant le retrait."
+                "text": "Oui, uniquement si vous avez choisi le versement de l'acompte de 30 % lors de votre réservation (un paiement à 100 % fige définitivement la commande). Vous pouvez ajuster le nombre d'invités et vos choix de plats par téléphone ou par email jusqu'à 7 jours avant la date de retrait. À noter : La remise de -5 % reste bloquée sur les menus réservés avant le 1er décembre. Tout invité ou plat supplémentaire ajouté après cette date sera facturé au tarif standard."
             }
         },
         {
@@ -440,7 +440,7 @@ export default function MenusFetesPage() {
 
                     {/* Micro-réassurance sous les boutons */}
                     <p className="text-xs text-neutral-500 font-sans tracking-wide pt-1">
-                        « Remise de -5 % jusqu&apos;au 1er décembre • Retrait à Saint-Georges-sur-Meuse &amp; Livraison sur demande »
+                        « Remise de -5 % valable jusqu&apos;au 1er décembre, applicable au versement de l&apos;acompte (30 %) comme au paiement intégral • Retrait à Saint-Georges-sur-Meuse &amp; Livraison sur demande »
                     </p>
                 </header>
 
@@ -480,7 +480,7 @@ export default function MenusFetesPage() {
                                             Acompte de 30 % ou Paiement total
                                         </h3>
                                         <p className="text-neutral-600 text-sm leading-relaxed">
-                                            Versez 30 % d&apos;acompte pour bloquer votre commande (option disponible jusqu&apos;au 10 décembre). Le solde et le nombre de convives sont ajustables jusqu&apos;à 7 jours avant le retrait.
+                                            Versez 30 % d&apos;acompte (disponible jusqu&apos;au 10 décembre) pour bloquer votre réservation et vos -5 % tout en gardant vos convives ajustables jusqu&apos;à 7 jours avant le retrait (ajouts post-1er décembre au tarif normal). Le paiement à 100 % fige directement la commande.
                                         </p>
                                     </div>
                                 </li>
@@ -539,13 +539,13 @@ export default function MenusFetesPage() {
                             </div>
 
                             <p className="text-neutral-300 text-sm leading-relaxed font-light max-w-xs">
-                                Valable sur l&apos;ensemble des formules et des plats à la carte pour toute commande validée avant le <strong>1er décembre 2026</strong>.
+                                Remise de -5 % valable jusqu&apos;au 1er décembre, applicable au versement de l&apos;acompte (30 %) comme au paiement intégral sur l&apos;ensemble des formules et de la carte.
                             </p>
                         </div>
 
                         <div className="relative z-10 mt-6 pt-6 border-t border-white/20 w-full text-center">
                             <p className="text-neutral-400 text-xs leading-relaxed">
-                                Remise déduite automatiquement dans votre panier. Réservation validée dès versement de votre acompte de 30 % sous 48h par virement.
+                                Remise déduite automatiquement dans votre panier. Bloquée sur votre sélection validée avant le 1er décembre (ajouts ultérieurs de convives ou plats au tarif normal).
                             </p>
                         </div>
                     </div>
@@ -687,7 +687,7 @@ export default function MenusFetesPage() {
                             <span className="text-[#D4AF37] text-xl">✨</span>
                             <div className="text-xs">
                                 <p className="font-bold text-[#D4AF37]">Remise de -5 % Early Bird également sur la carte</p>
-                                <p className="text-neutral-400">Pour toute commande validée avant le 1er décembre 2026.</p>
+                                <p className="text-neutral-400">Valable jusqu&apos;au 1er décembre (applicable à l&apos;acompte de 30 % comme au paiement intégral).</p>
                             </div>
                         </div>
                     </div>
