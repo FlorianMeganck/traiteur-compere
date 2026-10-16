@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
     Check, ArrowLeft, ArrowRight, AlertCircle, Copy,
     CheckCheck, Printer, Mail, MapPin, Calendar, Clock,
@@ -745,260 +745,234 @@ function GestionCommandeContent() {
             {/* ==================================================== */}
             {/* MODALE 1 : CONFIGURATION D'UNE FORMULE AJOUTÉE       */}
             {/* ==================================================== */}
-            <AnimatePresence>
-                {isFormuleModalOpen && activeFormule && (
-                    <motion.div
-                        key="modal-formule"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
-                    >
-                        <div
-                            onClick={() => setIsFormuleModalOpen(false)}
-                            className="fixed inset-0 bg-black/75 backdrop-blur-md"
-                        />
+            {isFormuleModalOpen && activeFormule && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+                    {/* Backdrop sombre indépendant */}
+                    <div
+                        onClick={() => setIsFormuleModalOpen(false)}
+                        className="fixed inset-0 bg-black/75 backdrop-blur-md"
+                    />
 
-                        <motion.div
-                            initial={{ scale: 0.95 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0.97 }}
-                            transition={{ duration: 0.15, ease: "easeOut" }}
-                            className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl border-2 border-[#D4AF37] p-6 sm:p-8 z-10 my-8 max-h-[90vh] flex flex-col overflow-hidden"
-                        >
-                            {/* En-tête */}
-                            <div className="flex items-start justify-between pb-4 border-b border-neutral-100 shrink-0">
-                                <div>
-                                    <span className="text-[10px] uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-2.5 py-1 rounded-full mb-1 inline-block">
-                                        Ajouter un convive
+                    {/* Panneau blanc 100% opaque sans transition ni opacité différée */}
+                    <div className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl border-2 border-[#D4AF37] p-6 sm:p-8 z-10 my-8 max-h-[90vh] flex flex-col overflow-hidden">
+                        {/* En-tête */}
+                        <div className="flex items-start justify-between pb-4 border-b border-neutral-100 shrink-0">
+                            <div>
+                                <span className="text-[10px] uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-2.5 py-1 rounded-full mb-1 inline-block">
+                                    Ajouter un convive
+                                </span>
+                                <h3 className="font-serif text-2xl font-bold text-black">
+                                    {activeFormule.title}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="font-serif font-bold text-lg text-black">
+                                        {isEarlyBirdOnAdditions ? (activeFormule.price * 0.95).toFixed(2) : activeFormule.price} €
                                     </span>
-                                    <h3 className="font-serif text-2xl font-bold text-black">
-                                        {activeFormule.title}
-                                    </h3>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="font-serif font-bold text-lg text-black">
-                                            {isEarlyBirdOnAdditions ? (activeFormule.price * 0.95).toFixed(2) : activeFormule.price} €
+                                    <span className="text-xs text-neutral-500">/ convive TVAC</span>
+                                    {isEarlyBirdOnAdditions && (
+                                        <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                            -5% Early Bird
                                         </span>
-                                        <span className="text-xs text-neutral-500">/ convive TVAC</span>
-                                        {isEarlyBirdOnAdditions && (
-                                            <span className="bg-black text-[#D4AF37] text-[10px] font-bold px-2 py-0.5 rounded-full">
-                                                -5% Early Bird
-                                            </span>
-                                        )}
-                                    </div>
+                                    )}
                                 </div>
+                            </div>
 
+                            <button
+                                onClick={() => setIsFormuleModalOpen(false)}
+                                className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        {/* Quantité convives */}
+                        <div className="py-3 border-b border-neutral-100 flex items-center justify-between bg-[#FAF9F6] -mx-6 sm:-mx-8 px-6 sm:px-8 shrink-0">
+                            <span className="text-xs uppercase font-bold text-neutral-700">
+                                Nombre de convives pour ce choix
+                            </span>
+                            <div className="inline-flex items-center gap-3 bg-white border border-neutral-300 px-3 py-1.5 rounded-full shadow-2xs">
                                 <button
-                                    onClick={() => setIsFormuleModalOpen(false)}
-                                    className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center transition-colors cursor-pointer"
+                                    type="button"
+                                    onClick={() => setFormuleQuantity(prev => Math.max(1, prev - 1))}
+                                    className="w-6 h-6 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs"
                                 >
-                                    <X size={16} />
+                                    <Minus size={11} />
+                                </button>
+                                <span className="font-serif font-bold text-sm text-black w-5 text-center">
+                                    {formuleQuantity}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormuleQuantity(prev => prev + 1)}
+                                    className="w-6 h-6 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs"
+                                >
+                                    <Plus size={11} />
                                 </button>
                             </div>
+                        </div>
 
-                            {/* Quantité convives */}
-                            <div className="py-3 border-b border-neutral-100 flex items-center justify-between bg-[#FAF9F6] -mx-6 sm:-mx-8 px-6 sm:px-8 shrink-0">
-                                <span className="text-xs uppercase font-bold text-neutral-700">
-                                    Nombre de convives pour ce choix
-                                </span>
-                                <div className="inline-flex items-center gap-3 bg-white border border-neutral-300 px-3 py-1.5 rounded-full shadow-2xs">
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormuleQuantity(prev => Math.max(1, prev - 1))}
-                                        className="w-6 h-6 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs"
-                                    >
-                                        <Minus size={11} />
-                                    </button>
-                                    <span className="font-serif font-bold text-sm text-black w-5 text-center">
-                                        {formuleQuantity}
-                                    </span>
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormuleQuantity(prev => prev + 1)}
-                                        className="w-6 h-6 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs"
-                                    >
-                                        <Plus size={11} />
-                                    </button>
-                                </div>
-                            </div>
+                        {/* Choix des étapes */}
+                        <div className="overflow-y-auto py-4 space-y-5 flex-1 pr-1">
+                            {activeFormule.steps.map(step => {
+                                const currentVal = formuleSelections[step.id];
 
-                            {/* Choix des étapes */}
-                            <div className="overflow-y-auto py-4 space-y-5 flex-1 pr-1">
-                                {activeFormule.steps.map(step => {
-                                    const currentVal = formuleSelections[step.id];
+                                return (
+                                    <div key={step.id} className="space-y-2">
+                                        <h4 className="font-serif font-bold text-sm text-black flex items-center gap-2">
+                                            <span className="w-5 h-5 rounded-full bg-black text-[#D4AF37] text-[10px] font-bold flex items-center justify-center">
+                                                {step.stepNumber}
+                                            </span>
+                                            <span>{step.stepTitle}</span>
+                                        </h4>
 
-                                    return (
-                                        <div key={step.id} className="space-y-2">
-                                            <h4 className="font-serif font-bold text-sm text-black flex items-center gap-2">
-                                                <span className="w-5 h-5 rounded-full bg-black text-[#D4AF37] text-[10px] font-bold flex items-center justify-center">
-                                                    {step.stepNumber}
-                                                </span>
-                                                <span>{step.stepTitle}</span>
-                                            </h4>
+                                        {step.selectionType === 'fixed' ? (
+                                            <div className="bg-[#FAF9F6] p-3 rounded-xl border border-neutral-200 flex items-start gap-2.5">
+                                                <span className="text-xs text-[#D4AF37] font-bold">✓</span>
+                                                <span className="font-serif font-bold text-xs text-neutral-900">{step.fixedItem?.title}</span>
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                {step.options.map(option => {
+                                                    const isSelected = step.selectionType === 'multiple_2'
+                                                        ? Array.isArray(currentVal) && currentVal.includes(option.id)
+                                                        : currentVal === option.id;
 
-                                            {step.selectionType === 'fixed' ? (
-                                                <div className="bg-[#FAF9F6] p-3 rounded-xl border border-neutral-200 flex items-start gap-2.5">
-                                                    <span className="text-xs text-[#D4AF37] font-bold">✓</span>
-                                                    <span className="font-serif font-bold text-xs text-neutral-900">{step.fixedItem?.title}</span>
-                                                </div>
-                                            ) : (
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                    {step.options.map(option => {
-                                                        const isSelected = step.selectionType === 'multiple_2'
-                                                            ? Array.isArray(currentVal) && currentVal.includes(option.id)
-                                                            : currentVal === option.id;
-
-                                                        return (
-                                                            <div
-                                                                key={option.id}
-                                                                onClick={() => {
-                                                                    if (step.selectionType === 'multiple_2') {
-                                                                        const prev = Array.isArray(currentVal) ? currentVal : [];
-                                                                        if (prev.includes(option.id)) {
-                                                                            setFormuleSelections(s => ({ ...s, [step.id]: prev.filter(x => x !== option.id) }));
-                                                                        } else if (prev.length < 2) {
-                                                                            setFormuleSelections(s => ({ ...s, [step.id]: [...prev, option.id] }));
-                                                                        }
-                                                                    } else {
-                                                                        setFormuleSelections(s => ({ ...s, [step.id]: option.id }));
+                                                    return (
+                                                        <div
+                                                            key={option.id}
+                                                            onClick={() => {
+                                                                if (step.selectionType === 'multiple_2') {
+                                                                    const prev = Array.isArray(currentVal) ? currentVal : [];
+                                                                    if (prev.includes(option.id)) {
+                                                                        setFormuleSelections(s => ({ ...s, [step.id]: prev.filter(x => x !== option.id) }));
+                                                                    } else if (prev.length < 2) {
+                                                                        setFormuleSelections(s => ({ ...s, [step.id]: [...prev, option.id] }));
                                                                     }
-                                                                }}
-                                                                className={`cursor-pointer p-3 rounded-xl border transition-all text-left ${isSelected
-                                                                        ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30'
-                                                                        : 'bg-[#FAF9F6] border-neutral-200 hover:border-[#D4AF37]/50'
-                                                                    }`}
-                                                            >
-                                                                <div className="flex items-start justify-between gap-2">
-                                                                    <p className="font-serif font-bold text-xs text-neutral-900 leading-snug">
-                                                                        {option.title}
-                                                                    </p>
-                                                                    <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? 'bg-[#D4AF37] border-[#D4AF37] text-black text-[9px] font-bold' : 'border-neutral-300'}`}>
-                                                                        {isSelected && '✓'}
-                                                                    </div>
+                                                                } else {
+                                                                    setFormuleSelections(s => ({ ...s, [step.id]: option.id }));
+                                                                }
+                                                            }}
+                                                            className={`cursor-pointer p-3 rounded-xl border transition-all text-left ${isSelected
+                                                                    ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30'
+                                                                    : 'bg-[#FAF9F6] border-neutral-200 hover:border-[#D4AF37]/50'
+                                                                }`}
+                                                        >
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <p className="font-serif font-bold text-xs text-neutral-900 leading-snug">
+                                                                    {option.title}
+                                                                </p>
+                                                                <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center shrink-0 ${isSelected ? 'bg-[#D4AF37] border-[#D4AF37] text-black text-[9px] font-bold' : 'border-neutral-300'}`}>
+                                                                    {isSelected && '✓'}
                                                                 </div>
                                                             </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                })}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* Pied */}
+                        <div className="pt-4 border-t border-neutral-100 flex items-center justify-between gap-4 shrink-0">
+                            <div>
+                                <span className="text-[11px] text-neutral-500 uppercase block">Montant ajout :</span>
+                                <span className="font-serif text-xl font-bold text-black">
+                                    {((isEarlyBirdOnAdditions ? activeFormule.price * 0.95 : activeFormule.price) * formuleQuantity).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                </span>
                             </div>
 
-                            {/* Pied */}
-                            <div className="pt-4 border-t border-neutral-100 flex items-center justify-between gap-4 shrink-0">
-                                <div>
-                                    <span className="text-[11px] text-neutral-500 uppercase block">Montant ajout :</span>
-                                    <span className="font-serif text-xl font-bold text-black">
-                                        {((isEarlyBirdOnAdditions ? activeFormule.price * 0.95 : activeFormule.price) * formuleQuantity).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                    </span>
-                                </div>
-
-                                <button
-                                    onClick={handleAddFormuleToPending}
-                                    className="bg-black hover:bg-[#D4AF37] text-white hover:text-black py-3 px-6 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
-                                >
-                                    Valider cet ajout
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                            <button
+                                onClick={handleAddFormuleToPending}
+                                className="bg-black hover:bg-[#D4AF37] text-white hover:text-black py-3 px-6 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                            >
+                                Valider cet ajout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ==================================================== */}
             {/* MODALE 2 : SÉLECTEUR RAPIDE DE METS À LA CARTE        */}
             {/* ==================================================== */}
-            <AnimatePresence>
-                {isCarteModalOpen && (
-                    <motion.div
-                        key="modal-carte"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
-                    >
-                        <div
-                            onClick={() => setIsCarteModalOpen(false)}
-                            className="fixed inset-0 bg-black/75 backdrop-blur-md"
-                        />
+            {isCarteModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+                    {/* Backdrop sombre indépendant */}
+                    <div
+                        onClick={() => setIsCarteModalOpen(false)}
+                        className="fixed inset-0 bg-black/75 backdrop-blur-md"
+                    />
 
-                        <motion.div
-                            initial={{ scale: 0.95 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0.97 }}
-                            transition={{ duration: 0.15, ease: "easeOut" }}
-                            className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl border-2 border-[#D4AF37] p-6 sm:p-8 z-10 my-8 max-h-[90vh] flex flex-col overflow-hidden"
-                        >
-                            <div className="flex items-start justify-between pb-4 border-b border-neutral-100 shrink-0">
-                                <div>
-                                    <span className="text-[10px] uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-2.5 py-1 rounded-full mb-1 inline-block">
-                                        Mets à la carte
-                                    </span>
-                                    <h3 className="font-serif text-2xl font-bold text-black">
-                                        Sélectionnez vos portions supplémentaires
-                                    </h3>
-                                </div>
-                                <button
-                                    onClick={() => setIsCarteModalOpen(false)}
-                                    className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center cursor-pointer"
-                                >
-                                    <X size={16} />
-                                </button>
+                    {/* Panneau blanc 100% opaque sans transition ni opacité différée */}
+                    <div className="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl border-2 border-[#D4AF37] p-6 sm:p-8 z-10 my-8 max-h-[90vh] flex flex-col overflow-hidden">
+                        <div className="flex items-start justify-between pb-4 border-b border-neutral-100 shrink-0">
+                            <div>
+                                <span className="text-[10px] uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-2.5 py-1 rounded-full mb-1 inline-block">
+                                    Mets à la carte
+                                </span>
+                                <h3 className="font-serif text-2xl font-bold text-black">
+                                    Sélectionnez vos portions supplémentaires
+                                </h3>
                             </div>
+                            <button
+                                onClick={() => setIsCarteModalOpen(false)}
+                                className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center cursor-pointer"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
 
-                            <div className="overflow-y-auto py-4 space-y-3 flex-1 pr-1">
-                                {CARTE_FETES_ITEMS.map(item => {
-                                    const qty = carteQuantities[item.id] || 0;
-                                    const unitPrice = isEarlyBirdOnAdditions ? item.price * 0.95 : item.price;
+                        <div className="overflow-y-auto py-4 space-y-3 flex-1 pr-1">
+                            {CARTE_FETES_ITEMS.map(item => {
+                                const qty = carteQuantities[item.id] || 0;
+                                const unitPrice = isEarlyBirdOnAdditions ? item.price * 0.95 : item.price;
 
-                                    return (
-                                        <div key={item.id} className="p-3 rounded-2xl bg-[#FAF9F6] border border-neutral-200/80 flex items-center justify-between gap-3 text-xs sm:text-sm">
-                                            <div className="space-y-0.5">
-                                                <span className="text-[10px] uppercase font-bold text-[#927116]">{item.categoryLabel}</span>
-                                                <p className="font-serif font-bold text-neutral-900">{item.title}</p>
-                                                <p className="text-[11px] text-neutral-500">{unitPrice.toFixed(2)} € / {item.unitLabel}</p>
-                                            </div>
-
-                                            <div className="inline-flex items-center gap-2 bg-white border border-neutral-300 px-2.5 py-1 rounded-full shadow-2xs shrink-0">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setCarteQuantities(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
-                                                    className="w-6 h-6 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs"
-                                                >
-                                                    <Minus size={11} />
-                                                </button>
-                                                <span className="font-serif font-bold text-xs text-black w-4 text-center">
-                                                    {qty}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setCarteQuantities(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
-                                                    className="w-6 h-6 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs"
-                                                >
-                                                    <Plus size={11} />
-                                                </button>
-                                            </div>
+                                return (
+                                    <div key={item.id} className="p-3 rounded-2xl bg-[#FAF9F6] border border-neutral-200/80 flex items-center justify-between gap-3 text-xs sm:text-sm">
+                                        <div className="space-y-0.5">
+                                            <span className="text-[10px] uppercase font-bold text-[#927116]">{item.categoryLabel}</span>
+                                            <p className="font-serif font-bold text-neutral-900">{item.title}</p>
+                                            <p className="text-[11px] text-neutral-500">{unitPrice.toFixed(2)} € / {item.unitLabel}</p>
                                         </div>
-                                    );
-                                })}
-                            </div>
 
-                            <div className="pt-4 border-t border-neutral-100 flex items-center justify-end gap-3 shrink-0">
-                                <button
-                                    onClick={handleAddCarteToPending}
-                                    className="bg-black hover:bg-[#D4AF37] text-white hover:text-black py-3 px-6 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
-                                >
-                                    Valider ces articles
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                                        <div className="inline-flex items-center gap-2 bg-white border border-neutral-300 px-2.5 py-1 rounded-full shadow-2xs shrink-0">
+                                            <button
+                                                type="button"
+                                                onClick={() => setCarteQuantities(prev => ({ ...prev, [item.id]: Math.max(0, (prev[item.id] || 0) - 1) }))}
+                                                className="w-6 h-6 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs"
+                                            >
+                                                <Minus size={11} />
+                                            </button>
+                                            <span className="font-serif font-bold text-xs text-black w-4 text-center">
+                                                {qty}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setCarteQuantities(prev => ({ ...prev, [item.id]: (prev[item.id] || 0) + 1 }))}
+                                                className="w-6 h-6 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center font-bold text-xs"
+                                            >
+                                                <Plus size={11} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        <div className="pt-4 border-t border-neutral-100 flex items-center justify-end gap-3 shrink-0">
+                            <button
+                                onClick={handleAddCarteToPending}
+                                className="bg-black hover:bg-[#D4AF37] text-white hover:text-black py-3 px-6 rounded-full font-serif font-bold text-xs uppercase tracking-wider transition-all shadow-md cursor-pointer"
+                            >
+                                Valider ces articles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }
