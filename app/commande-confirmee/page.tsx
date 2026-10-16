@@ -76,9 +76,18 @@ function CommandeConfirmeeContent() {
     const BENEFICIAIRE = process.env.NEXT_PUBLIC_TRAITEUR_BENEFICIAIRE || "JEAN COMPERE";
     const isNoel = orderId.startsWith("NOEL-");
     const fullNameUpper = `${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
-    const COMMUNICATION = isNoel
-        ? `${orderId} - ${fullNameUpper}`
-        : `COMMANDE #${orderId} ${fullNameUpper}`;
+
+    // 1. COMMUNICATION BANCAIRE EXPLICITE (ACOMPTE 30% VS TOTAL 100%)
+    let COMMUNICATION = "";
+    if (isNoel) {
+        if (isAcompte) {
+            COMMUNICATION = `${orderId} - ACOMPTE 30% - ${fullNameUpper}`;
+        } else {
+            COMMUNICATION = `${orderId} - TOTAL 100% - ${fullNameUpper}`;
+        }
+    } else {
+        COMMUNICATION = `COMMANDE #${orderId} ${fullNameUpper}`;
+    }
 
     const TOTAL_NUM = parseFloat(total);
     const TOPAY_NUM = toPayParam ? parseFloat(toPayParam) : TOTAL_NUM;
@@ -127,7 +136,7 @@ function CommandeConfirmeeContent() {
             {/* Lueur d'ambiance dorée supérieure (masquée à l'impression) */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-96 bg-gradient-to-b from-[#D4AF37]/10 via-[#D4AF37]/5 to-transparent blur-3xl pointer-events-none -z-10 print:hidden" />
 
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 relative z-10 space-y-8 print:max-w-none print:px-0 print:space-y-4">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 space-y-8 print:max-w-none print:px-0 print:space-y-4">
 
                 {/* ==================================================== */}
                 {/* EN-TÊTE DÉDIÉ IMPRESSION A4 (Uniquement pour print)  */}
@@ -180,7 +189,7 @@ function CommandeConfirmeeContent() {
                     </div>
 
                     {/* Encadré Réassurance Email */}
-                    <div className="mt-6 bg-[#F4F8F4] border border-emerald-600/25 rounded-2xl p-4 sm:p-5 text-left text-neutral-800 flex items-start gap-3.5 shadow-2xs print:bg-white print:border-neutral-300 print:p-2.5 print:mt-2">
+                    <div className="mt-4 bg-[#F4F8F4] border border-emerald-600/25 rounded-2xl p-4 sm:p-5 text-left text-neutral-800 flex items-start gap-3.5 shadow-2xs print:bg-white print:border-neutral-300 print:p-2.5 print:mt-2">
                         <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5 print:hidden">
                             <Mail size={18} />
                         </div>
@@ -196,261 +205,280 @@ function CommandeConfirmeeContent() {
                 </motion.section>
 
                 {/* ==================================================== */}
-                {/* 2. BLOC CENTRAL : RÈGLEMENT PAR VIREMENT BANCAIRE    */}
+                {/* AVERTISSEMENT DÉLAI 48H & SOUMISSION                 */}
                 {/* ==================================================== */}
-                <motion.section
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.1 }}
-                    className="bg-white rounded-3xl border border-[#E8E2D5] shadow-[0_12px_40px_-10px_rgba(0,0,0,0.06)] overflow-hidden print:border-neutral-300 print:rounded-2xl print:shadow-none print-avoid-break"
-                >
-                    {/* A. MONTANT EXIGIBLE SOUS 48H */}
-                    <div className="p-6 sm:p-8 bg-gradient-to-b from-white to-[#FAF9F6] border-b border-[#E8E2D5] text-center space-y-3 print:bg-white print:p-4 print:border-neutral-300">
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#927116] border border-[#D4AF37]/30 text-[11px] sm:text-xs font-bold uppercase tracking-wider print:bg-neutral-100 print:text-black print:border-neutral-400">
-                            <Clock size={13} className="print:hidden" />
-                            <span>
-                                {isAcompte
-                                    ? "Acompte de validation (30 %) à verser sous 48h"
-                                    : "Règlement intégral sous 48h (commande ferme et figée)"}
-                            </span>
+                <div className="bg-amber-50/90 border border-amber-300/80 rounded-2xl p-4 sm:p-5 text-left shadow-2xs print:border-neutral-300 print:bg-white print:p-2.5 print-avoid-break">
+                    <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5 print:hidden">
+                            <AlertCircle size={18} className="text-amber-800" />
                         </div>
-
-                        {/* Montant affiché en très grand format */}
-                        <div className="py-1">
-                            <div className="font-serif font-bold text-4xl sm:text-5xl md:text-6xl text-black tracking-tight print:text-3xl">
-                                {TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                            </div>
-                            {isAcompte && TOTAL_NUM > 0 && (
-                                <p className="text-xs text-neutral-500 font-sans mt-1 print:text-[9pt]">
-                                    Montant total TTC de la commande : {TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                        <div className="space-y-1 text-xs sm:text-sm">
+                            <h4 className="font-bold text-amber-950 font-serif text-sm sm:text-base print:text-black">
+                                Validation sous 48h par virement bancaire
+                            </h4>
+                            <p className="text-neutral-800 leading-relaxed">
+                                {isAcompte ? (
+                                    <>Votre réservation et la remise de -5 % sont verrouillées dès réception de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h.</>
+                                ) : (
+                                    <>Votre réservation est définitivement confirmée dès réception de votre règlement de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h.</>
+                                )}
+                            </p>
+                            {isAcompte && (
+                                <p className="text-neutral-600 text-xs">
+                                    Solde restant de <strong>{SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> à régler au plus tard 7 jours avant le retrait. Convives ajustables jusqu&apos;à J-7.
                                 </p>
                             )}
                         </div>
-
-                        {/* Mentions sous le montant selon acompte ou total */}
-                        {isAcompte ? (
-                            <div className="bg-[#FAF8F5] border border-[#D4AF37]/35 rounded-xl p-3.5 max-w-xl mx-auto text-xs text-neutral-700 leading-relaxed text-center sm:text-left print:bg-white print:border-neutral-300 print:p-2 print:text-[9.5pt]">
-                                <p>
-                                    <strong className="text-neutral-900">Solde restant de {SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> à régler au plus tard 7 jours avant le retrait. Le nombre de convives et vos choix restent ajustables par téléphone ou email jusqu&apos;à 7 jours avant le retrait.
-                                </p>
-                            </div>
-                        ) : (
-                            <p className="text-xs text-neutral-600 max-w-lg mx-auto leading-relaxed print:text-[9.5pt]">
-                                Commande ferme et définitive. Votre réservation est enregistrée au centime près.
-                            </p>
-                        )}
-
-                        {/* Avertissement délai de 48h */}
-                        <div className="pt-2 flex items-center justify-center gap-2 text-xs font-medium text-amber-900 bg-amber-50/80 border border-amber-200/80 rounded-xl px-4 py-2.5 max-w-xl mx-auto print:bg-white print:border-neutral-300 print:text-black print:py-1.5 print:text-[9pt]">
-                            <AlertCircle size={15} className="shrink-0 text-amber-700 print:hidden" />
-                            <span>
-                                « Votre réservation ainsi que la remise éventuelle de -5 % sont définitivement verrouillées dès réception de votre virement bancaire sous 48h. »
-                            </span>
-                        </div>
                     </div>
+                </div>
 
-                    {/* B. DEUX MÉTHODES DE PAIEMENT (CÔTE À CÔTE DESKTOP / EMPILÉES MOBILE) */}
-                    <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch print:grid-cols-2 print:p-4 print:gap-4">
+                {/* ========================================================================= */}
+                {/* 2. MODULE BANCAIRE ÉPROUVÉ (ANCIENNE STRUCTURE RÉUTILISÉE & PERFECTIONNÉE) */}
+                {/* ========================================================================= */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch text-left print:grid-cols-2 print:gap-4 print-avoid-break">
 
-                        {/* OPTION 1 : QR CODE EPC BELGIQUE */}
-                        <div className="bg-[#FAF9F6] border border-[#E8E2D5] rounded-2xl p-5 sm:p-6 flex flex-col justify-between items-center text-center print:bg-white print:border-neutral-300 print:p-3">
-                            <div className="w-full space-y-1.5">
-                                <span className="text-[10px] uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30 print:bg-neutral-100 print:text-black print:border-neutral-400">
-                                    Option 1 • Instantané
-                                </span>
-                                <h3 className="font-serif font-bold text-lg text-black print:text-sm">
-                                    Paiement par QR Code EPC
-                                </h3>
-                                <p className="text-xs text-neutral-600 leading-relaxed max-w-xs mx-auto print:text-[8.5pt]">
-                                    Scannez directement depuis votre application bancaire (Belfius, BNP Paribas Fortis, ING, KBC...) pour pré-remplir le virement sans saisie manuelle.
-                                </p>
-                            </div>
+                    {/* COLONNE GAUCHE : COORDONNÉES BANCAIRES & RÉCAPITULATIF */}
+                    <div className="bg-white p-6 sm:p-8 rounded-2xl border border-neutral-200 shadow-sm flex flex-col justify-between print:border-neutral-300 print:p-3">
+                        <div>
+                            <h3 className="text-lg font-bold uppercase tracking-widest text-neutral-800 mb-6 flex items-center gap-2 print:text-sm print:mb-3">
+                                <span className="w-5 h-1 bg-[#D4AF37]"></span>
+                                Informations de paiement
+                            </h3>
 
-                            {/* Le QR Code cliquable avec effet de survol pour agrandissement */}
-                            <div
-                                role="button"
-                                tabIndex={0}
-                                onClick={() => setIsQrModalOpen(true)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" || e.key === " ") {
-                                        e.preventDefault();
-                                        setIsQrModalOpen(true);
-                                    }
-                                }}
-                                className="my-4 bg-white p-3.5 rounded-2xl border-2 border-neutral-200 hover:border-[#D4AF37] shadow-sm hover:shadow-md cursor-pointer transition-all duration-200 group relative print:border-neutral-300 print:shadow-none print:my-2 print:p-2"
-                                title="Cliquer pour agrandir le QR Code"
-                                aria-label="Agrandir le QR Code"
-                            >
-                                <div ref={qrRef} className="flex justify-center">
-                                    <QRCode
-                                        value={generateEPCString()}
-                                        size={150}
-                                        level="M"
-                                        className="rounded-lg transition-transform group-hover:scale-[1.02] print:w-28 print:h-28"
-                                    />
-                                </div>
-                                <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity flex items-end justify-center pb-2 pointer-events-none print:hidden">
-                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-black text-[#D4AF37] px-2.5 py-0.5 rounded-full shadow-md">
-                                        <ZoomIn size={11} />
-                                        <span>Agrandir</span>
-                                    </span>
-                                </div>
-                            </div>
-
-                            <p className="text-[11px] text-neutral-400 hover:text-neutral-700 transition-colors print:hidden flex items-center gap-1 mb-2">
-                                <ZoomIn size={12} className="text-[#927116]" />
-                                <span>Cliquer sur le QR Code pour l&apos;agrandir</span>
-                            </p>
-
-                            <button
-                                type="button"
-                                onClick={handleDownloadQR}
-                                className="w-full py-2.5 px-3 rounded-xl bg-white hover:bg-neutral-50 text-neutral-800 border border-neutral-200 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-2xs hover:border-[#D4AF37] print:hidden cursor-pointer"
-                            >
-                                <Download size={14} className="text-[#927116]" />
-                                <span>Télécharger le QR Code PNG</span>
-                            </button>
-                        </div>
-
-                        {/* OPTION 2 : COORDONNÉES BANCAIRES AVEC BOUTONS COPIER & SANS TRONCATURE */}
-                        <div className="bg-[#FAF9F6] border border-[#E8E2D5] rounded-2xl p-5 sm:p-6 flex flex-col justify-between print:bg-white print:border-neutral-300 print:p-3">
-                            <div className="space-y-1.5 mb-3">
-                                <span className="text-[10px] uppercase font-bold tracking-widest text-neutral-600 bg-neutral-200/80 px-2.5 py-0.5 rounded-full print:bg-neutral-100 print:text-black">
-                                    Option 2 • Virement manuel
-                                </span>
-                                <h3 className="font-serif font-bold text-lg text-black print:text-sm">
-                                    Coordonnées bancaires
-                                </h3>
-                                <p className="text-xs text-neutral-600 leading-relaxed print:text-[8.5pt]">
-                                    À encoder dans votre application ou espace web bancaire :
-                                </p>
-                            </div>
-
-                            {/* Liste des champs SANS truncate avec boutons Copier */}
-                            <div className="space-y-2.5 print:space-y-1.5">
+                            <div className="space-y-4 text-sm text-neutral-600 print:space-y-2">
                                 {/* Bénéficiaire */}
-                                <div className="bg-white p-3 rounded-xl border border-neutral-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs print:border-neutral-300 print:p-1.5">
-                                    <div className="min-w-0 flex-1">
-                                        <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-bold block">
-                                            Bénéficiaire
-                                        </span>
-                                        <span className="font-serif font-bold text-sm text-neutral-900 block break-words select-all print:text-xs">
+                                <div className="flex flex-col">
+                                    <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">
+                                        Bénéficiaire
+                                    </span>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="font-serif font-bold text-neutral-900 text-base select-all">
                                             {BENEFICIAIRE}
                                         </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCopy(BENEFICIAIRE, 'beneficiaire')}
+                                            className="px-2 py-1 rounded text-xs font-semibold bg-neutral-100 hover:bg-[#FAF8F5] text-neutral-700 hover:text-black border border-neutral-200 transition-all flex items-center gap-1 cursor-pointer print:hidden"
+                                            title="Copier le nom du bénéficiaire"
+                                        >
+                                            {copiedKey === 'beneficiaire' ? (
+                                                <>
+                                                    <CheckCheck size={12} className="text-emerald-600" />
+                                                    <span className="text-emerald-700">Copié !</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy size={12} className="text-[#927116]" />
+                                                    <span>Copier</span>
+                                                </>
+                                            )}
+                                        </button>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleCopy(BENEFICIAIRE, 'beneficiaire')}
-                                        className="self-start sm:self-center shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-neutral-100 hover:bg-[#FAF8F5] text-neutral-800 hover:text-black border border-neutral-200 hover:border-[#D4AF37] transition-all flex items-center gap-1 cursor-pointer print:hidden"
-                                        title="Copier le nom du bénéficiaire"
-                                    >
-                                        {copiedKey === 'beneficiaire' ? (
-                                            <>
-                                                <CheckCheck size={12} className="text-emerald-600" />
-                                                <span className="text-emerald-700">Copié !</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Copy size={12} className="text-[#927116]" />
-                                                <span>Copier</span>
-                                            </>
-                                        )}
-                                    </button>
                                 </div>
 
-                                {/* IBAN sans troncature */}
-                                <div className="bg-white p-3 rounded-xl border border-neutral-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs print:border-neutral-300 print:p-1.5">
-                                    <div className="min-w-0 flex-1">
-                                        <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-bold block">
-                                            IBAN
-                                        </span>
-                                        <span className="font-mono font-bold text-xs sm:text-sm text-neutral-900 block tracking-wider break-all sm:break-normal select-all print:text-xs">
+                                {/* IBAN sans coupure */}
+                                <div className="flex flex-col">
+                                    <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">
+                                        IBAN (Compte bancaire)
+                                    </span>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="font-mono text-black font-semibold text-sm sm:text-base tracking-wider select-all break-all sm:break-normal">
                                             {IBAN}
                                         </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCopy(IBAN_CLEAN, 'iban')}
+                                            className="px-2 py-1 rounded text-xs font-semibold bg-neutral-100 hover:bg-[#FAF8F5] text-neutral-700 hover:text-black border border-neutral-200 transition-all flex items-center gap-1 cursor-pointer print:hidden"
+                                            title="Copier l'IBAN"
+                                        >
+                                            {copiedKey === 'iban' ? (
+                                                <>
+                                                    <CheckCheck size={12} className="text-emerald-600" />
+                                                    <span className="text-emerald-700">Copié !</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy size={12} className="text-[#927116]" />
+                                                    <span>Copier</span>
+                                                </>
+                                            )}
+                                        </button>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleCopy(IBAN_CLEAN, 'iban')}
-                                        className="self-start sm:self-center shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-neutral-100 hover:bg-[#FAF8F5] text-neutral-800 hover:text-black border border-neutral-200 hover:border-[#D4AF37] transition-all flex items-center gap-1 cursor-pointer print:hidden"
-                                        title="Copier l'IBAN"
-                                    >
-                                        {copiedKey === 'iban' ? (
-                                            <>
-                                                <CheckCheck size={12} className="text-emerald-600" />
-                                                <span className="text-emerald-700">Copié !</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Copy size={12} className="text-[#927116]" />
-                                                <span>Copier</span>
-                                            </>
-                                        )}
-                                    </button>
                                 </div>
 
                                 {/* BIC */}
-                                <div className="bg-white p-3 rounded-xl border border-neutral-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-2xs print:border-neutral-300 print:p-1.5">
-                                    <div className="min-w-0 flex-1">
-                                        <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-bold block">
-                                            BIC / SWIFT
-                                        </span>
-                                        <span className="font-mono font-bold text-xs sm:text-sm text-neutral-900 block tracking-wider select-all print:text-xs">
+                                <div className="flex flex-col">
+                                    <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">
+                                        BIC / SWIFT
+                                    </span>
+                                    <div className="flex items-center justify-between gap-2">
+                                        <span className="font-mono text-black font-semibold text-sm sm:text-base tracking-wider select-all">
                                             {BIC}
                                         </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCopy(BIC, 'bic')}
+                                            className="px-2 py-1 rounded text-xs font-semibold bg-neutral-100 hover:bg-[#FAF8F5] text-neutral-700 hover:text-black border border-neutral-200 transition-all flex items-center gap-1 cursor-pointer print:hidden"
+                                            title="Copier le code BIC"
+                                        >
+                                            {copiedKey === 'bic' ? (
+                                                <>
+                                                    <CheckCheck size={12} className="text-emerald-600" />
+                                                    <span className="text-emerald-700">Copié !</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy size={12} className="text-[#927116]" />
+                                                    <span>Copier</span>
+                                                </>
+                                            )}
+                                        </button>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleCopy(BIC, 'bic')}
-                                        className="self-start sm:self-center shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-neutral-100 hover:bg-[#FAF8F5] text-neutral-800 hover:text-black border border-neutral-200 hover:border-[#D4AF37] transition-all flex items-center gap-1 cursor-pointer print:hidden"
-                                        title="Copier le code BIC"
-                                    >
-                                        {copiedKey === 'bic' ? (
-                                            <>
-                                                <CheckCheck size={12} className="text-emerald-600" />
-                                                <span className="text-emerald-700">Copié !</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Copy size={12} className="text-[#927116]" />
-                                                <span>Copier</span>
-                                            </>
-                                        )}
-                                    </button>
                                 </div>
 
-                                {/* Communication obligatoire sans troncature */}
-                                <div className="bg-white p-3 rounded-xl border-2 border-[#D4AF37]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 shadow-xs print:border-neutral-400 print:p-1.5">
-                                    <div className="min-w-0 flex-1">
-                                        <span className="text-[10px] uppercase tracking-wider text-[#927116] font-bold block print:text-black">
-                                            Communication obligatoire
-                                        </span>
-                                        <span className="font-mono font-bold text-xs sm:text-sm text-neutral-900 block break-words select-all print:text-xs">
+                                {/* Communication explicite */}
+                                <div className="flex flex-col">
+                                    <span className="text-xs uppercase tracking-widest text-[#927116] font-bold mb-1 print:text-black">
+                                        Communication obligatoire
+                                    </span>
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#D4AF37]/10 p-2.5 rounded-xl border border-[#D4AF37]/40 print:bg-neutral-100 print:border-neutral-300">
+                                        <span className="font-mono font-bold text-xs sm:text-sm text-neutral-900 select-all break-words">
                                             {COMMUNICATION}
                                         </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCopy(COMMUNICATION, 'comm')}
+                                            className="self-start sm:self-center shrink-0 px-2.5 py-1 rounded text-xs font-semibold bg-black hover:bg-[#D4AF37] text-white hover:text-black transition-all flex items-center gap-1 cursor-pointer print:hidden"
+                                            title="Copier la communication"
+                                        >
+                                            {copiedKey === 'comm' ? (
+                                                <>
+                                                    <CheckCheck size={12} className="text-emerald-400" />
+                                                    <span>Copié !</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Copy size={12} />
+                                                    <span>Copier</span>
+                                                </>
+                                            )}
+                                        </button>
                                     </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleCopy(COMMUNICATION, 'comm')}
-                                        className="self-start sm:self-center shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-black hover:bg-[#D4AF37] text-white hover:text-black transition-all flex items-center gap-1 cursor-pointer print:hidden"
-                                        title="Copier la communication"
-                                    >
-                                        {copiedKey === 'comm' ? (
-                                            <>
-                                                <CheckCheck size={12} className="text-emerald-400" />
-                                                <span>Copié !</span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Copy size={12} />
-                                                <span>Copier</span>
-                                            </>
-                                        )}
-                                    </button>
                                 </div>
                             </div>
                         </div>
+
+                        {/* Récapitulatif financier sous les coordonnées */}
+                        <div className="mt-8 pt-6 border-t border-neutral-200 space-y-2.5 print:mt-4 print:pt-3 print:space-y-1.5">
+                            {REMISE_NUM > 0 && (
+                                <div className="flex justify-between items-center text-xs sm:text-sm text-emerald-700 font-medium">
+                                    <span>Promotion Early Bird (-5%)</span>
+                                    <span className="font-bold">-{REMISE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                </div>
+                            )}
+
+                            <div className="flex justify-between items-center text-xs sm:text-sm text-neutral-600">
+                                <span>Total global TTC</span>
+                                <span className="font-bold text-black">{TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                            </div>
+
+                            {isAcompte ? (
+                                <>
+                                    <div className="flex justify-between items-baseline pt-2 border-t border-dashed border-neutral-200">
+                                        <div>
+                                            <span className="uppercase tracking-widest font-bold text-amber-800 text-xs block">
+                                                Acompte à verser (30%)
+                                            </span>
+                                            <span className="text-[11px] text-neutral-500">Sous 48h pour valider</span>
+                                        </div>
+                                        <span className="text-2xl sm:text-3xl font-serif font-bold text-[#D4AF37]">
+                                            {TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between items-center text-xs text-neutral-500 pt-0.5">
+                                        <span>Solde restant (à J-7 du retrait)</span>
+                                        <span className="font-medium text-neutral-800">
+                                            {SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                        </span>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex justify-between items-baseline pt-2 border-t border-dashed border-neutral-200">
+                                    <span className="uppercase tracking-widest font-bold text-neutral-600 text-xs">
+                                        Montant intégral (100%)
+                                    </span>
+                                    <span className="text-2xl sm:text-3xl font-serif font-bold text-black">
+                                        {TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                    </span>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </motion.section>
+
+                    {/* COLONNE DROITE : MODULE NOIR & OR SCANNEZ & PAYEZ AVEC ZOOM */}
+                    <div className="bg-black text-white p-6 sm:p-8 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden text-center print:bg-white print:text-black print:border print:border-neutral-300 print:p-3">
+                        {/* Lueur dorée d'angle (masquée print) */}
+                        <div className="absolute top-0 right-0 w-36 h-36 bg-[#D4AF37]/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none print:hidden"></div>
+
+                        <h3 className="text-lg sm:text-xl font-bold uppercase tracking-widest text-[#D4AF37] mb-1.5 z-10 print:text-black print:text-sm">
+                            Scannez &amp; Payez
+                        </h3>
+
+                        <p className="text-xs font-semibold text-neutral-300 mb-2 z-10 print:text-black">
+                            Montant : <span className="text-[#D4AF37] font-bold text-sm sm:text-base print:text-black">{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                            {isAcompte ? ' (Acompte 30%)' : ' (Paiement total)'}
+                        </p>
+
+                        <p className="text-xs text-neutral-400 mb-4 z-10 max-w-xs print:text-[8.5pt] print:text-neutral-600">
+                            Scannez ce QR Code EPC avec votre application bancaire (Belfius, BNP, ING, KBC...) pour pré-remplir le virement.
+                        </p>
+
+                        {/* Le QR Code Cliquable avec zoom / modale */}
+                        <div
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => setIsQrModalOpen(true)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    setIsQrModalOpen(true);
+                                }
+                            }}
+                            className="bg-white p-3.5 sm:p-4 rounded-xl z-10 cursor-pointer hover:ring-4 hover:ring-[#D4AF37]/60 transition-all duration-200 group relative shadow-md print:border print:border-neutral-300 print:p-2"
+                            title="Cliquer pour agrandir le QR Code"
+                            aria-label="Agrandir le QR Code"
+                        >
+                            <div ref={qrRef} className="flex justify-center">
+                                <QRCode
+                                    value={generateEPCString()}
+                                    size={160}
+                                    level="M"
+                                    className="rounded-lg print:w-28 print:h-28"
+                                />
+                            </div>
+                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity flex items-center justify-center pointer-events-none print:hidden">
+                                <span className="bg-black text-[#D4AF37] text-xs font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                                    <ZoomIn size={13} />
+                                    <span>Agrandir</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <p className="text-[11px] text-neutral-400 mt-2 z-10 print:hidden flex items-center gap-1">
+                            <ZoomIn size={12} className="text-[#D4AF37]" />
+                            <span>Cliquer sur le QR code pour l&apos;agrandir</span>
+                        </p>
+
+                        <button
+                            type="button"
+                            onClick={handleDownloadQR}
+                            className="mt-4 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors z-10 print:hidden cursor-pointer bg-neutral-900/80 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800"
+                        >
+                            <Download size={13} className="text-[#D4AF37]" />
+                            <span>Télécharger le QR Code PNG</span>
+                        </button>
+                    </div>
+                </div>
 
                 {/* ==================================================== */}
                 {/* 3. RAPPEL PRATIQUE DE LOGISTIQUE & RETRAIT           */}
@@ -638,7 +666,7 @@ function CommandeConfirmeeContent() {
                                 </div>
                                 <div className="border-t border-neutral-200/70 pt-2">
                                     <span className="text-[10px] uppercase font-bold text-neutral-400 block mb-0.5">
-                                        Communication :
+                                        Communication obligatoire :
                                     </span>
                                     <span className="font-mono font-bold text-xs text-neutral-900 block break-words select-all">
                                         {COMMUNICATION}

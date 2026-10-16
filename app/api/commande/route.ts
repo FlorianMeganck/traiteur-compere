@@ -180,8 +180,9 @@ export async function POST(req: Request) {
         const BENEFICIAIRE = "JEAN COMPERE";
         const cleanNom = String(Nom || '').trim().toUpperCase();
         const cleanPrenom = String(Prenom || '').trim().toUpperCase();
+        const isAcompteMode = isFestiveOrder && validationMode === 'acompte_30';
         const COMMUNICATION = isFestiveOrder
-            ? `${formattedOrderNumber} - ${cleanNom} ${cleanPrenom}`
+            ? `${formattedOrderNumber} - ${isAcompteMode ? 'ACOMPTE 30%' : 'TOTAL 100%'} - ${cleanNom} ${cleanPrenom}`
             : `COMMANDE #${formattedOrderNumber} ${cleanNom} ${cleanPrenom}`;
 
         // Calcul tarifaire certifié côté serveur (Early Bird -5% et acompte 30% / 100%)
