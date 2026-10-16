@@ -7,7 +7,7 @@ import {
     Sparkles, Check, Plus, Minus, ShoppingCart, X,
     ChefHat, Calendar, Clock, MapPin, Award, FileText, ArrowRight,
     UtensilsCrossed, CreditCard, Star, ShoppingBag, Info,
-    ChevronLeft, ChevronRight, BookOpen
+    ChevronLeft, ChevronRight, BookOpen, ChevronDown
 } from "lucide-react";
 
 import {
@@ -20,6 +20,78 @@ import {
     isEarlyBirdFestivePromoActive
 } from "../data/menus-fetes";
 import { useCart, CartItem } from "../hooks/useCart";
+
+// Questions / Réponses FAQ Fêtes (Optimisé GEO & IA Overviews)
+const FESTIVE_FAQ = [
+    {
+        question: "Comment commander vos menus de réveillon de Noël et Nouvel An chez Traiteur Compère ?",
+        answer: "Vous pouvez composer et réserver vos repas de fêtes directement en ligne via nos 3 formules gastronomiques 4 services ou notre carte festive à composer librement. Les commandes pour Noël et le Nouvel An sont ouvertes du 20 décembre au 5 janvier inclus, et doivent être enregistrées au plus tard 4 jours avant la date de retrait (J-4). Une remise « Réservation Anticipée » de -5 % est appliquée automatiquement sur l'ensemble de votre commande pour toute réservation validée avant le 1er décembre avec un acompte de 30 %."
+    },
+    {
+        question: "Où et quand s'effectue le retrait des plats traiteur pour les fêtes ?",
+        answer: "Le retrait de vos menus festifs s'effectue à notre atelier artisanal situé Rue Potay 3, 4470 Saint-Georges-sur-Meuse (province de Liège). Pour votre confort et éviter l'attente, deux créneaux horaires sont proposés : la veille de votre repas entre 14h00 et 18h00, ou le jour même entre 08h00 et 12h00. Un service de livraison à domicile est également disponible si besoin et sur demande dans la région liégeoise et les communes avoisinantes."
+    },
+    {
+        question: "Comment réchauffer et présenter vos plats de fêtes à domicile ?",
+        answer: "Tous nos mets (gibiers nobles, suprêmes de pintadeau, pavés de saumon à l'oseille, potages et entrées chaudes) sont préparés maison par notre chef et conditionnés prêts à réchauffer. Toutes les explications claires et détaillées de remise en température ainsi que des conseils de dressage gastronomique vous seront fournies lors du retrait pour garantir une dégustation parfaite sans aucun stress en cuisine."
+    },
+    {
+        question: "Peut-on modifier le nombre de convives après avoir versé l'acompte ?",
+        answer: "Oui. En choisissant le versement d'un acompte de 30 % lors de votre réservation (option disponible jusqu'au 10 décembre), vous bloquez votre commande ainsi que l'avantage des -5 %. Le nombre de convives et la composition exacte de vos menus restent ajustables par email ou par téléphone jusqu'à 7 jours avant la date de retrait. Le solde restant est à régler au plus tard 7 jours avant le retrait."
+    },
+    {
+        question: "Proposez-vous des options adaptées aux allergies ou intolérances alimentaires ?",
+        answer: "La Maison Compère veille à la sécurité et au plaisir gustatif de l'ensemble de vos invités. Les allergènes majeurs sont renseignés pour chaque préparation de notre carte festive. Pour toute intolérance spécifique ou demande d'adaptation d'un menu, notre équipe traiteur reste joignable au +32 468 38 50 82 pour vous orienter et vous proposer des alternatives sur-mesure."
+    }
+];
+
+// Données structurées Schema.org FAQPage pour moteurs génératifs (SearchGPT, Perplexity, Google AI)
+const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "Comment commander vos menus de réveillon de Noël et Nouvel An chez Traiteur Compère ?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Vous pouvez composer et réserver vos repas de fêtes directement en ligne via nos 3 formules gastronomiques 4 services ou notre carte festive à composer librement. Commandes ouvertes du 20 décembre au 5 janvier (J-4). Remise de -5% avant le 1er décembre."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Où et quand s'effectue le retrait des plats traiteur pour les fêtes ?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Retrait à l'atelier Rue Potay 3, 4470 Saint-Georges-sur-Meuse (province de Liège). Créneaux : la veille (14h-18h) ou le jour même (8h-12h). Livraison sur demande disponible."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Comment réchauffer et présenter vos plats de fêtes à domicile ?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Plats préparés maison conditionnés prêts à réchauffer. Toutes les explications de réchauffage et de dressage gastronomique sont fournies lors du retrait."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Peut-on modifier le nombre de convives après avoir versé l'acompte ?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Oui, avec l'acompte de 30% (disponible jusqu'au 10 décembre), le nombre de convives est modifiable par email ou téléphone jusqu'à 7 jours avant le retrait."
+            }
+        },
+        {
+            "@type": "Question",
+            "name": "Proposez-vous des options adaptées aux allergies ou intolérances alimentaires ?",
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Allergènes renseignés pour chaque plat. Adaptations possibles sur demande par téléphone au +32 468 38 50 82."
+            }
+        }
+    ]
+};
 
 export default function MenusFetesPage() {
     const { addToCart, addMultipleToCart, totalItems } = useCart();
@@ -43,6 +115,9 @@ export default function MenusFetesPage() {
         formuleTitle: string;
         quantity: number;
     } | null>(null);
+
+    // État de l'accordéon FAQ (index ouvert ou null)
+    const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
     // Initialiser les sélections par défaut quand on ouvre une formule
     const handleOpenModal = (formule: FestiveFormule) => {
@@ -309,6 +384,14 @@ export default function MenusFetesPage() {
                 )}
             </AnimatePresence>
 
+            {/* Données structurées FAQPage Schema.org pour GEO / IA Moteurs */}
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify(faqJsonLd)
+                }}
+            />
+
             {/* Halo doré décoratif */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[550px] bg-gradient-to-b from-[#D4AF37]/10 via-[#D4AF37]/5 to-transparent blur-3xl pointer-events-none -z-10" />
 
@@ -317,18 +400,47 @@ export default function MenusFetesPage() {
                 {/* ==================================================== */}
                 {/* 1. EN-TÊTE HERO                                      */}
                 {/* ==================================================== */}
-                <header className="text-center max-w-3xl mx-auto">
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#927116] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] mb-4 shadow-xs">
+                <header className="text-center max-w-3xl mx-auto space-y-6">
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#D4AF37]/15 border border-[#D4AF37]/40 text-[#927116] text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] shadow-xs">
                         <Sparkles size={13} className="text-[#D4AF37]" />
-                        <span>Maison Compère • Réveillons & Fêtes 2026</span>
+                        <span>Maison Compère • Réveillons &amp; Fêtes 2026</span>
                     </div>
 
-                    <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif text-black tracking-tight mb-4 font-bold">
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl font-serif text-black tracking-tight font-bold">
                         Menus des Fêtes 2026
                     </h1>
 
                     <p className="font-serif italic text-neutral-600 text-lg sm:text-xl max-w-2xl mx-auto leading-relaxed">
                         &ldquo;Pour vos réveillons de Noël et de Nouvel An, savourez l&apos;art de recevoir sans le stress des préparatifs.&rdquo;
+                    </p>
+
+                    {/* Double CTA d'Orientation & Ancrages */}
+                    <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-md mx-auto">
+                        <a
+                            href="#formules"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById('formules')?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-black hover:bg-[#D4AF37] text-white hover:text-black font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] text-center"
+                        >
+                            Découvrir nos 3 Formules
+                        </a>
+                        <a
+                            href="#carte-libre"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById('carte-libre')?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-white hover:bg-[#FAF8F5] text-neutral-900 border border-[#D4AF37] hover:border-[#927116] font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-xs hover:shadow-md hover:scale-[1.02] active:scale-[0.98] text-center"
+                        >
+                            Composer à la Carte ↓
+                        </a>
+                    </div>
+
+                    {/* Micro-réassurance sous les boutons */}
+                    <p className="text-xs text-neutral-500 font-sans tracking-wide pt-1">
+                        « Remise de -5 % jusqu&apos;au 1er décembre • Retrait à Saint-Georges-sur-Meuse &amp; Livraison sur demande »
                     </p>
                 </header>
 
@@ -442,7 +554,7 @@ export default function MenusFetesPage() {
                 {/* ==================================================== */}
                 {/* 3. VITRINE DES 3 FORMULES (CARTES GRAND FORMAT)      */}
                 {/* ==================================================== */}
-                <section className="space-y-10">
+                <section id="formules" className="space-y-10 scroll-mt-28">
                     <div className="text-center max-w-2xl mx-auto">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-[#D4AF37] text-xs font-bold uppercase tracking-wider mb-3">
                             <Award size={14} />
@@ -501,7 +613,7 @@ export default function MenusFetesPage() {
                                             </p>
 
                                             {formule.steps.map((st, sIdx) => (
-                                                <div key={sIdx} className="bg-[#FAF9F6] p-4 rounded-2xl border border-neutral-200/80 shadow-2xs">
+                                                 <div key={sIdx} className="bg-[#FAF9F6] p-4 rounded-2xl border border-neutral-200/80 shadow-2xs">
                                                     <p className="font-bold text-sm text-neutral-900 flex items-center gap-2 mb-1.5">
                                                         <span className="w-2 h-2 rounded-full bg-[#D4AF37] shrink-0" />
                                                         <span>{st.stepTitle}</span>
@@ -532,12 +644,29 @@ export default function MenusFetesPage() {
                             );
                         })}
                     </div>
+
+                    {/* Passerelle de transition vers la carte libre */}
+                    <div className="mt-12 text-center bg-[#FAF8F5] border border-[#D4AF37]/35 rounded-2xl p-6 sm:p-8 max-w-2xl mx-auto shadow-xs">
+                        <p className="font-serif italic text-neutral-800 text-base sm:text-lg mb-3">
+                            &ldquo;Vous préférez composer votre repas sur-mesure ou ajouter des portions supplémentaires ?&rdquo;
+                        </p>
+                        <a
+                            href="#carte-libre"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById('carte-libre')?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-serif font-bold text-[#927116] hover:text-black uppercase tracking-wider transition-colors underline decoration-[#D4AF37] underline-offset-4 hover:decoration-black"
+                        >
+                            <span>Découvrir notre carte à composer librement ↓</span>
+                        </a>
+                    </div>
                 </section>
 
                 {/* ==================================================== */}
                 {/* 4. SECTION "LIVRET DE TABLE / MENU TOURNANT"         */}
                 {/* ==================================================== */}
-                <section id="livret-de-table" className="pt-10 space-y-8 border-t border-neutral-200">
+                <section id="carte-libre" className="pt-10 space-y-8 border-t border-neutral-200 scroll-mt-28">
                     {/* En-tête de section */}
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div>
@@ -953,7 +1082,76 @@ export default function MenusFetesPage() {
                 </section>
 
                 {/* ==================================================== */}
-                {/* 5. MENTION OFFICIELLE DU FLYER & INFOS PRATIQUES     */}
+                {/* 5. SECTION FAQ FESTIVE (ACCORDÉON GEO & SEO)         */}
+                {/* ==================================================== */}
+                <section className="pt-12 space-y-8 border-t border-[#D4AF37]/30 max-w-4xl mx-auto">
+                    <div className="text-center max-w-2xl mx-auto">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#927116] text-xs font-bold uppercase tracking-wider mb-2">
+                            <Sparkles size={14} />
+                            <span>Guide &amp; Conseils Maison Compère</span>
+                        </div>
+                        <h2 className="text-3xl sm:text-4xl font-serif text-black font-bold">
+                            Questions Fréquentes • Réveillons &amp; Fêtes
+                        </h2>
+                        <p className="font-serif italic text-neutral-600 text-sm sm:text-base mt-2">
+                            Tout savoir sur la commande, la préparation et le retrait de vos repas de fêtes.
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {FESTIVE_FAQ.map((faq, index) => {
+                            const isOpen = openFaqIndex === index;
+                            return (
+                                <div
+                                    key={index}
+                                    className="bg-[#FAF9F6] border border-[#D4AF37]/30 rounded-2xl overflow-hidden shadow-2xs transition-colors"
+                                >
+                                    <button
+                                        type="button"
+                                        onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                                        aria-expanded={isOpen}
+                                        aria-controls={`faq-answer-${index}`}
+                                        id={`faq-question-${index}`}
+                                        className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-[#F3EFE6]/60 transition-colors"
+                                    >
+                                        <span className="font-serif font-bold text-base sm:text-lg text-neutral-900 leading-snug">
+                                            {faq.question}
+                                        </span>
+                                        <div
+                                            className={`w-8 h-8 rounded-full border border-[#D4AF37]/40 flex items-center justify-center shrink-0 text-[#927116] bg-white transition-transform duration-300 ${
+                                                isOpen ? "rotate-180 bg-[#D4AF37] text-black border-[#D4AF37]" : ""
+                                            }`}
+                                        >
+                                            <ChevronDown size={16} />
+                                        </div>
+                                    </button>
+
+                                    <AnimatePresence initial={false}>
+                                        {isOpen && (
+                                            <motion.div
+                                                id={`faq-answer-${index}`}
+                                                role="region"
+                                                aria-labelledby={`faq-question-${index}`}
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.25, ease: "easeInOut" }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="px-5 pb-5 sm:px-6 sm:pb-6 pt-1 text-sm sm:text-base text-neutral-700 font-sans leading-relaxed border-t border-[#D4AF37]/15">
+                                                    {faq.answer}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </section>
+
+                {/* ==================================================== */}
+                {/* 6. MENTION OFFICIELLE DU FLYER & INFOS PRATIQUES     */}
                 {/* ==================================================== */}
                 <footer className="pt-12 border-t border-[#D4AF37]/30 text-center space-y-6">
                     <div className="inline-block bg-white px-8 sm:px-12 py-4 rounded-2xl border border-[#D4AF37]/50 shadow-sm">

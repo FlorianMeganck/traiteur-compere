@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, X, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 import Logo from "./Logo";
@@ -22,12 +22,29 @@ const NAV_LINKS = [
 
 export default function Navbar() {
     const pathname = usePathname();
+    const router = useRouter();
     const [scrolled, setScrolled] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCartBouncing, setIsCartBouncing] = useState(false);
     const { cartItems, removeFromCart, updateQuantity, cartTotal, totalItems } = useCart();
     const prevTotalItems = useRef(totalItems);
+
+    const handleGoToCarteLibre = () => {
+        setIsCartOpen(false);
+        if (pathname === "/menus-fetes") {
+            setTimeout(() => {
+                const el = document.getElementById("carte-libre");
+                if (el) {
+                    el.scrollIntoView({ behavior: "smooth" });
+                } else {
+                    window.location.hash = "carte-libre";
+                }
+            }, 100);
+        } else {
+            router.push("/menus-fetes#carte-libre");
+        }
+    };
 
     useEffect(() => {
         if (totalItems > prevTotalItems.current) {
@@ -342,7 +359,8 @@ export default function Navbar() {
                                         </p>
                                     </div>
                                 ) : (
-                                    cartItems.map((item) => {
+                                    <>
+                                        {cartItems.map((item) => {
                                         const isFestive = item.itemType === 'menu_fete' || item.semaineId.startsWith('menu') || item.semaineId.startsWith('fetes');
                                         const isFormule = isFestive && (item.badge?.toLowerCase().includes('formule') || item.id.startsWith('formule') || Boolean(item.coursesSummary && item.coursesSummary.length > 0));
                                         const isCarte = isFestive && !isFormule;
@@ -442,7 +460,20 @@ export default function Navbar() {
                                                 </div>
                                             </div>
                                         );
-                                    })
+                                    })}
+
+                                    {/* Bouton d'action discret : Ajouter un plat à la carte */}
+                                    <div className="pt-2 pb-1">
+                                        <button
+                                            type="button"
+                                            onClick={handleGoToCarteLibre}
+                                            className="w-full py-2.5 px-3 rounded-xl border border-dashed border-[#D4AF37]/60 hover:border-[#D4AF37] bg-white hover:bg-[#FAF8F5] text-neutral-800 hover:text-black text-xs font-serif font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs group cursor-pointer"
+                                        >
+                                            <Plus size={13} className="text-[#927116] group-hover:scale-110 transition-transform" />
+                                            <span>Ajouter un plat à la carte</span>
+                                        </button>
+                                    </div>
+                                </>
                                 )}
                             </div>
 
