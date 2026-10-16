@@ -32,3 +32,46 @@ h5,
 h6 {
   font-family: var(--font-serif);
 }
+
+@media print {
+  /* Masquer header, navbar, footer, aside et boutons d'action */
+  header,
+  nav,
+  footer,
+  aside,
+  #cookie-banner,
+  .cookie-banner,
+  .scroll-to-top,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 10pt !important;
+    line-height: 1.35 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm;
+  }
+
+  /* Éviter les coupures brutales de blocs sur A4 */
+  .print-avoid-break {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    background: #ffffff !important;
+  }
+}
