@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,21 +13,30 @@ import { Suspense, useRef, useState, useEffect } from "react";
 import QRCode from "react-qr-code";
 import { useCart } from "../hooks/useCart";
 
+interface LastOrderSummary {
+    orderId?: string;
+    nom?: string;
+    prenom?: string;
+    email?: string;
+    total?: number | string;
+    toPay?: number | string;
+    paymentMode?: 'acompte' | 'total';
+    mode?: string;
+    solde?: number | string;
+    remise?: number | string;
+    repasDate?: string;
+    jours?: string;
+    jour?: string;
+    retraitSlot?: string;
+    creneau?: string;
+}
+
 function CommandeConfirmeeContent() {
+    const router = useRouter();
     const searchParams = useSearchParams();
-    const nom = searchParams.get('nom') || "Client";
-    const prenom = searchParams.get('prenom') || "";
-    const email = searchParams.get('email') || "";
-    const orderId = searchParams.get('orderId') || "NOEL-XXXXX";
-    const jour = searchParams.get('jour') || "";
-    const joursParam = searchParams.get('jours') || "";
-    const creneauParam = searchParams.get('creneau') || "";
-    const total = searchParams.get('total') || "0";
-    const toPayParam = searchParams.get('toPay');
-    const mode = searchParams.get('mode') || 'totalite_100';
-    const solde = searchParams.get('solde') || '0';
-    const remise = searchParams.get('remise') || '0';
-    const isAcompte = mode === 'acompte_30';
+
+    const [order, setOrder] = useState<LastOrderSummary | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     const { clearCart } = useCart();
     const qrRef = useRef<HTMLDivElement>(null);
@@ -37,16 +46,59 @@ function CommandeConfirmeeContent() {
         clearCart();
     }, [clearCart]);
 
+    // Récupérer les données depuis la session (ou fallback dev searchParams)
+    useEffect(() => {
+        let foundOrder: LastOrderSummary | null = null;
+
+        // 1. Priorité absolue : lecture sécurisée depuis sessionStorage
+        if (typeof window !== "undefined") {
+            try {
+                const data = sessionStorage.getItem("lastOrderSummary");
+                if (data) {
+                    foundOrder = JSON.parse(data);
+                }
+            } catch (err) {
+                console.error("Erreur lecture sessionStorage lastOrderSummary:", err);
+            }
+        }
+
+        // 2. Fallback temporaire pour le dev via searchParams si présents
+        if (!foundOrder && searchParams.get("orderId")) {
+            foundOrder = {
+                orderId: searchParams.get("orderId") || "NOEL-XXXXX",
+                nom: searchParams.get("nom") || "Client",
+                prenom: searchParams.get("prenom") || "",
+                email: searchParams.get("email") || "",
+                total: searchParams.get("total") || "0",
+                toPay: searchParams.get("toPay") || undefined,
+                mode: searchParams.get("mode") || "totalite_100",
+                paymentMode: searchParams.get("mode") === "acompte_30" ? "acompte" : "total",
+                solde: searchParams.get("solde") || "0",
+                remise: searchParams.get("remise") || "0",
+                jours: searchParams.get("jours") || searchParams.get("jour") || "",
+                creneau: searchParams.get("creneau") || "",
+            };
+        }
+
+        if (foundOrder) {
+            setOrder(foundOrder);
+            setIsLoading(false);
+        } else {
+            // Aucun ordre en session (accès direct sans commande) : redirection vers l'accueil
+            router.replace("/");
+        }
+    }, [router, searchParams]);
+
     // État d'ouverture de la modale / lightbox du QR Code
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
     // Fermeture avec la touche Échap
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') setIsQrModalOpen(false);
+            if (e.key === "Escape") setIsQrModalOpen(false);
         };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
     // État de copie des coordonnées avec feedback temporaire
@@ -59,6 +111,28 @@ function CommandeConfirmeeContent() {
             setTimeout(() => setCopiedKey(null), 2500);
         }
     };
+
+    if (isLoading || !order) {
+        return (
+            <div className="min-h-screen bg-[#F7F5F0] flex items-center justify-center text-sm font-serif text-neutral-500">
+                Chargement de votre reçu...
+            </div>
+        );
+    }
+
+    const nom = order.nom || "Client";
+    const prenom = order.prenom || "";
+    const email = order.email || "";
+    const orderId = order.orderId || "NOEL-XXXXX";
+    const jour = order.jour || "";
+    const joursParam = order.jours || order.repasDate || "";
+    const creneauParam = order.creneau || order.retraitSlot || "";
+    const total = String(order.total ?? "0");
+    const toPayParam = order.toPay !== undefined && order.toPay !== null ? String(order.toPay) : undefined;
+    const mode = order.mode || (order.paymentMode === "acompte" ? "acompte_30" : "totalite_100");
+    const solde = String(order.solde ?? "0");
+    const remise = String(order.remise ?? "0");
+    const isAcompte = mode === "acompte_30" || order.paymentMode === "acompte";
 
     // Formattage date de repas et créneau
     let dateRepasText = "À confirmer";

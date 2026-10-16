@@ -1805,11 +1805,38 @@ function ContactForm() {
                     setStatus("success");
                     const joursUniques = Array.from(new Set(cartItems.map(item => item.badge || item.jour))).join(',');
                     const redirectJours = isMenusFetes ? (dateEvenementFormatted || '24 Décembre') : joursUniques;
-                    const redirectCreneau = creneauRetraitFormatted ? `&creneau=${encodeURIComponent(creneauRetraitFormatted)}` : '';
                     clearCart();
+
+                    // Stocker l'objet récapitulatif complet dans sessionStorage pour une URL propre et sécurisée
+                    const paymentMode = isMenusFetes ? (validationMode === 'acompte_30' ? 'acompte' : 'total') : 'total';
+                    const orderSummary = {
+                        orderId: result.orderNumber || "NOEL-XXXXX",
+                        prenom: formData.Prenom || "",
+                        nom: formData.Nom || "",
+                        email: formData.Mail || "",
+                        total: targetTotalPrice,
+                        toPay: targetAmountToPay,
+                        paymentMode,
+                        mode: isMenusFetes ? validationMode : 'totalite_100',
+                        solde: isMenusFetes ? festivePricing.remainingBalance : 0,
+                        remise: isMenusFetes ? festivePricing.discountAmount : 0,
+                        repasDate: redirectJours,
+                        jours: redirectJours,
+                        retraitSlot: creneauRetraitFormatted || '',
+                        creneau: creneauRetraitFormatted || ''
+                    };
+
+                    if (typeof window !== 'undefined') {
+                        try {
+                            sessionStorage.setItem('lastOrderSummary', JSON.stringify(orderSummary));
+                        } catch (err) {
+                            console.error("Erreur enregistrement sessionStorage lastOrderSummary:", err);
+                        }
+                    }
+
                     setTimeout(() => {
-                        window.location.href = `/commande-confirmee?nom=${encodeURIComponent(formData.Nom)}&prenom=${encodeURIComponent(formData.Prenom)}&email=${encodeURIComponent(formData.Mail)}&orderId=${result.orderNumber}&total=${targetTotalPrice}&toPay=${targetAmountToPay}&mode=${isMenusFetes ? validationMode : 'totalite_100'}&solde=${isMenusFetes ? festivePricing.remainingBalance : 0}&remise=${isMenusFetes ? festivePricing.discountAmount : 0}&jours=${encodeURIComponent(redirectJours)}${redirectCreneau}`;
-                    }, 3000);
+                        router.push('/commande-confirmee');
+                    }, 2000);
                 } else {
                     console.error("Erreur API Commande:", result);
                     const errorMsg = result?.error || result?.message || "Une erreur est survenue lors de l'enregistrement de votre commande. Veuillez réessayer.";
@@ -3954,7 +3981,7 @@ function ContactForm() {
                                 <div className="inline-block bg-neutral-100 px-6 py-3 rounded-full border border-neutral-200">
                                     <p className="text-sm text-neutral-500 font-medium animate-pulse flex items-center gap-2">
                                         <span className="w-2 h-2 bg-green-500 rounded-full animate-bounce"></span>
-                                        {isPlatPrepare ? "Redirection vers le paiement dans 3 secondes..." : "Redirection vers l'accueil dans 3 secondes..."}
+                                        {(isPlatPrepare || isMenusFetes) ? "Redirection vers la confirmation de commande..." : "Redirection vers l'accueil dans 3 secondes..."}
                                     </p>
                                 </div>
                             </div>
