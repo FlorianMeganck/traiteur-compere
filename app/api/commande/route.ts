@@ -510,9 +510,6 @@ export async function POST(req: Request) {
                                             <!-- EN-TETE MAISON COMPERE -->
                                             <tr>
                                                 <td style="padding: 36px 32px 24px 32px; text-align: center; border-bottom: 1px solid #F0ECE4;">
-                                                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #B89327; margin-bottom: 6px;">
-                                                        MAISON DE BOUCHE
-                                                    </div>
                                                     <h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; letter-spacing: 3px; color: #1A1A1A; text-transform: uppercase;">
                                                         MAISON COMPÈRE
                                                     </h1>
