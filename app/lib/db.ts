@@ -240,6 +240,7 @@ export async function updateFestiveOrderAdditions(
                 UPDATE festive_orders SET
                     additional_items = ${JSON.stringify(combinedAdditionalItems)},
                     balance_remaining = ${newBalanceRemaining},
+                    status = 'solde_en_attente',
                     updated_at = CURRENT_TIMESTAMP
                 WHERE UPPER(id) = ${existing.id.toUpperCase()};
             `;
@@ -250,7 +251,36 @@ export async function updateFestiveOrderAdditions(
 
     existing.additional_items = combinedAdditionalItems;
     existing.balance_remaining = newBalanceRemaining;
+    existing.status = 'solde_en_attente';
     saveFallbackOrder(existing);
 
+    return existing;
+}
+
+export async function updateFestiveOrderStatus(
+    orderId: string,
+    email: string,
+    newStatus: string
+): Promise<FestiveOrderRecord | null> {
+    const existing = await getFestiveOrder(orderId, email);
+    if (!existing) return null;
+
+    const sql = getDb();
+    if (sql) {
+        try {
+            await ensureFestiveOrdersTable();
+            await sql`
+                UPDATE festive_orders SET
+                    status = ${newStatus},
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE UPPER(id) = ${existing.id.toUpperCase()};
+            `;
+        } catch (err) {
+            console.error("Erreur updateFestiveOrderStatus SQL:", err);
+        }
+    }
+
+    existing.status = newStatus;
+    saveFallbackOrder(existing);
     return existing;
 }

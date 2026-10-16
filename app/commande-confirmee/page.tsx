@@ -20,7 +20,7 @@ interface LastOrderSummary {
     email?: string;
     total?: number | string;
     toPay?: number | string;
-    paymentMode?: 'acompte' | 'total';
+    paymentMode?: 'acompte' | 'total' | 'solde_final';
     mode?: string;
     solde?: number | string;
     remise?: number | string;
@@ -29,6 +29,8 @@ interface LastOrderSummary {
     jour?: string;
     retraitSlot?: string;
     creneau?: string;
+    isSoldeFinal?: boolean;
+    items?: any[];
 }
 
 function CommandeConfirmeeContent() {
@@ -129,10 +131,11 @@ function CommandeConfirmeeContent() {
     const creneauParam = order.creneau || order.retraitSlot || "";
     const total = String(order.total ?? "0");
     const toPayParam = order.toPay !== undefined && order.toPay !== null ? String(order.toPay) : undefined;
+    const isSoldeFinal = Boolean(order.isSoldeFinal || order.paymentMode === 'solde_final' || order.mode === 'solde_final');
     const mode = order.mode || (order.paymentMode === "acompte" ? "acompte_30" : "totalite_100");
     const solde = String(order.solde ?? "0");
     const remise = String(order.remise ?? "0");
-    const isAcompte = mode === "acompte_30" || order.paymentMode === "acompte";
+    const isAcompte = !isSoldeFinal && (mode === "acompte_30" || order.paymentMode === "acompte");
 
     // Formattage date de repas et créneau
     let dateRepasText = "À confirmer";
@@ -151,10 +154,12 @@ function CommandeConfirmeeContent() {
     const isNoel = orderId.startsWith("NOEL-");
     const fullNameUpper = `${nom.toUpperCase()} ${prenom.toUpperCase()}`.trim();
 
-    // 1. COMMUNICATION BANCAIRE EXPLICITE (ACOMPTE 30% VS TOTAL 100%)
+    // 1. COMMUNICATION BANCAIRE EXPLICITE (ACOMPTE 30% VS TOTAL 100% VS SOLDE FINAL)
     let COMMUNICATION = "";
     if (isNoel) {
-        if (isAcompte) {
+        if (isSoldeFinal) {
+            COMMUNICATION = `${orderId} - SOLDE FINAL - ${fullNameUpper}`;
+        } else if (isAcompte) {
             COMMUNICATION = `${orderId} - ACOMPTE 30% - ${fullNameUpper}`;
         } else {
             COMMUNICATION = `${orderId} - TOTAL 100% - ${fullNameUpper}`;
@@ -251,7 +256,7 @@ function CommandeConfirmeeContent() {
 
                     {/* Titre principal */}
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-black font-bold tracking-tight print:text-2xl print:mb-1">
-                        Votre réservation est bien enregistrée !
+                        {isSoldeFinal ? "Règlement de votre solde final" : "Votre réservation est bien enregistrée !"}
                     </h1>
 
                     {/* Numéro de commande bien en évidence */}
@@ -269,10 +274,16 @@ function CommandeConfirmeeContent() {
                         </div>
                         <div className="text-xs sm:text-sm leading-relaxed space-y-1 print:text-[10pt]">
                             <p className="font-semibold text-emerald-950 print:text-black">
-                                Un email récapitulatif complet vient de vous être envoyé {email ? <>à <strong className="text-emerald-900 underline underline-offset-2 print:text-black">{email}</strong></> : "sur votre messagerie"}.
+                                {isSoldeFinal
+                                    ? <>Votre récapitulatif de solde final a été enregistré pour votre commande {email ? <>associée à <strong className="text-emerald-900 underline underline-offset-2 print:text-black">{email}</strong></> : ""}.</>
+                                    : <>Un email récapitulatif complet vient de vous être envoyé {email ? <>à <strong className="text-emerald-900 underline underline-offset-2 print:text-black">{email}</strong></> : "sur votre messagerie"}.</>
+                                }
                             </p>
                             <p className="text-neutral-600 print:text-neutral-700">
-                                Vous y retrouverez le détail de vos mets, les modalités de retrait ainsi que les instructions de paiement. Pensez à vérifier vos courriers indésirables (spams) si vous ne le recevez pas dans les prochaines minutes.
+                                {isSoldeFinal
+                                    ? "Effectuez votre virement bancaire ci-dessous au plus tard 7 jours avant le retrait de vos mets. Pensez à mentionner la communication obligatoire."
+                                    : "Vous y retrouverez le détail de vos mets, les modalités de retrait ainsi que les instructions de paiement. Pensez à vérifier vos courriers indésirables (spams) si vous ne le recevez pas dans les prochaines minutes."
+                                }
                             </p>
                         </div>
                     </div>
@@ -288,23 +299,89 @@ function CommandeConfirmeeContent() {
                         </div>
                         <div className="space-y-1 text-xs sm:text-sm">
                             <h4 className="font-bold text-amber-950 font-serif text-sm sm:text-base print:text-black">
-                                Validation sous 48h par virement bancaire
+                                {isSoldeFinal ? "Règlement du solde par virement bancaire" : "Validation sous 48h par virement bancaire"}
                             </h4>
                             <p className="text-neutral-800 leading-relaxed">
-                                {isAcompte ? (
+                                {isSoldeFinal ? (
+                                    <>Votre règlement de solde final de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> finalise et clôture définitivement votre réservation.</>
+                                ) : isAcompte ? (
                                     <>Votre réservation et la remise de -5 % sont verrouillées dès réception de votre acompte de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h.</>
                                 ) : (
                                     <>Votre réservation est définitivement confirmée dès réception de votre règlement de <strong>{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sous 48h.</>
                                 )}
                             </p>
-                            {isAcompte && (
+                            {isSoldeFinal ? (
+                                <p className="text-neutral-600 text-xs">
+                                    Ce solde est à régler au plus tard 7 jours avant votre date de retrait.
+                                </p>
+                            ) : isAcompte ? (
                                 <p className="text-neutral-600 text-xs">
                                     Solde restant de <strong>{SOLDE_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> à régler au plus tard 7 jours avant le retrait. Convives ajustables jusqu&apos;à J-7.
                                 </p>
-                            )}
+                            ) : null}
                         </div>
                     </div>
                 </div>
+
+                {/* ==================================================== */}
+                {/* RÉCAPITULATIF FIGÉ DES METS COMMANDÉS                */}
+                {/* ==================================================== */}
+                {order.items && Array.isArray(order.items) && order.items.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: 0.1 }}
+                        className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200/90 shadow-sm space-y-4 print:border-neutral-300 print:p-4 print-avoid-break text-left"
+                    >
+                        <div className="flex items-center justify-between border-b border-neutral-100 pb-3 print:pb-1.5">
+                            <div>
+                                <h3 className="font-serif font-bold text-lg sm:text-xl text-black print:text-sm">
+                                    {isSoldeFinal ? "Récapitulatif final de votre commande" : "Mets sélectionnés"}
+                                </h3>
+                                <p className="font-serif italic text-xs text-neutral-500 mt-0.5 print:hidden">
+                                    {isSoldeFinal ? "Sélection finale figée & prête pour la préparation artisanale" : "Détail de votre réservation gastronomique"}
+                                </p>
+                            </div>
+                            <span className="text-xs bg-[#FAF8F5] text-neutral-700 border border-neutral-200 px-3 py-1 rounded-full font-semibold print:hidden">
+                                {order.items.length} {order.items.length > 1 ? 'articles' : 'article'}
+                            </span>
+                        </div>
+
+                        <div className="space-y-2.5">
+                            {order.items.map((item: any, idx: number) => (
+                                <div
+                                    key={idx}
+                                    className="p-3.5 rounded-2xl bg-[#FAF9F6] border border-neutral-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm print:bg-white print:p-2 print:border-neutral-200"
+                                >
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-bold text-neutral-900 font-serif text-sm">
+                                                {item.quantitePlat || item.quantity || 1}x {item.nomPlat || item.title || item.name}
+                                            </span>
+                                            {item.isAddition && (
+                                                <span className="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full print:hidden">
+                                                    Ajout
+                                                </span>
+                                            )}
+                                        </div>
+                                        {item.coursesSummary && Array.isArray(item.coursesSummary) && item.coursesSummary.length > 0 && (
+                                            <ul className="text-xs text-neutral-600 space-y-0.5 pl-3 border-l-2 border-[#D4AF37]/50 print:text-[8pt]">
+                                                {item.coursesSummary.map((c: string, cIdx: number) => (
+                                                    <li key={cIdx}>{c}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                    {(item.prixTotalLigne !== undefined || item.totalPrice !== undefined) && (
+                                        <span className="font-bold font-serif text-neutral-900 self-end sm:self-center shrink-0">
+                                            {Number(item.prixTotalLigne ?? item.totalPrice).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                        </span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* ========================================================================= */}
                 {/* 2. MODULE BANCAIRE ÉPROUVÉ (ANCIENNE STRUCTURE RÉUTILISÉE & PERFECTIONNÉE) */}
@@ -456,7 +533,19 @@ function CommandeConfirmeeContent() {
                                 <span className="font-bold text-black">{TOTAL_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
                             </div>
 
-                            {isAcompte ? (
+                            {isSoldeFinal ? (
+                                <div className="flex justify-between items-baseline pt-2 border-t border-dashed border-neutral-200">
+                                    <div>
+                                        <span className="uppercase tracking-widest font-bold text-neutral-800 text-xs block">
+                                            Solde final à régler
+                                        </span>
+                                        <span className="text-[11px] text-neutral-500">Avant le retrait</span>
+                                    </div>
+                                    <span className="text-2xl sm:text-3xl font-serif font-bold text-[#D4AF37]">
+                                        {TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                    </span>
+                                </div>
+                            ) : isAcompte ? (
                                 <>
                                     <div className="flex justify-between items-baseline pt-2 border-t border-dashed border-neutral-200">
                                         <div>
@@ -500,7 +589,7 @@ function CommandeConfirmeeContent() {
 
                         <p className="text-xs font-semibold text-neutral-300 mb-2 z-10 print:text-black">
                             Montant : <span className="text-[#D4AF37] font-bold text-sm sm:text-base print:text-black">{TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
-                            {isAcompte ? ' (Acompte 30%)' : ' (Paiement total)'}
+                            {isSoldeFinal ? ' (Solde final)' : isAcompte ? ' (Acompte 30%)' : ' (Paiement total)'}
                         </p>
 
                         <p className="text-xs text-neutral-400 mb-4 z-10 max-w-xs print:text-[8.5pt] print:text-neutral-600">
@@ -735,7 +824,11 @@ function CommandeConfirmeeContent() {
                                     <span className="text-neutral-500 font-medium">Montant exact :</span>
                                     <span className="font-serif font-bold text-lg text-black">
                                         {TOPAY_NUM.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                        {isAcompte && <span className="text-[11px] text-[#927116] font-sans font-semibold ml-1">(Acompte 30%)</span>}
+                                        {isSoldeFinal ? (
+                                            <span className="text-[11px] text-[#927116] font-sans font-semibold ml-1">(Solde final)</span>
+                                        ) : isAcompte ? (
+                                            <span className="text-[11px] text-[#927116] font-sans font-semibold ml-1">(Acompte 30%)</span>
+                                        ) : null}
                                     </span>
                                 </div>
                                 <div className="border-t border-neutral-200/70 pt-2">

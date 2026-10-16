@@ -6,12 +6,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Check, ArrowLeft, Download, AlertCircle, Copy,
+    Check, ArrowLeft, ArrowRight, AlertCircle, Copy,
     CheckCheck, Printer, Mail, MapPin, Calendar, Clock,
-    Phone, ExternalLink, Sparkles, ZoomIn, X, Plus, Minus,
+    Phone, ExternalLink, Sparkles, X, Plus, Minus,
     Trash2, ChefHat, ShoppingCart, ShieldCheck, Lock, User
 } from "lucide-react";
-import QRCode from "react-qr-code";
 import {
     FORMULES_FETES,
     CARTE_FETES_ITEMS,
@@ -58,11 +57,9 @@ function GestionCommandeContent() {
 
     // Nouveaux ajouts en cours (non encore validés)
     const [pendingAdditions, setPendingAdditions] = useState<any[]>([]);
-    const [isSubmittingAvenant, setIsSubmittingAvenant] = useState(false);
-    const [avenantSuccessMessage, setAvenantSuccessMessage] = useState<string | null>(null);
+    const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
-    // Modales & Lightbox
-    const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+    // Modales
     const [isFormuleModalOpen, setIsFormuleModalOpen] = useState(false);
     const [activeFormule, setActiveFormule] = useState<FestiveFormule | null>(null);
     const [formuleQuantity, setFormuleQuantity] = useState(1);
@@ -71,22 +68,10 @@ function GestionCommandeContent() {
     const [isCarteModalOpen, setIsCarteModalOpen] = useState(false);
     const [carteQuantities, setCarteQuantities] = useState<Record<string, number>>({});
 
-    const [copiedKey, setCopiedKey] = useState<string | null>(null);
-    const qrRef = useRef<HTMLDivElement>(null);
-
-    const handleCopy = (text: string, key: string) => {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(text);
-            setCopiedKey(key);
-            setTimeout(() => setCopiedKey(null), 2500);
-        }
-    };
-
     // Fermeture avec Échap
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
-                setIsQrModalOpen(false);
                 setIsFormuleModalOpen(false);
                 setIsCarteModalOpen(false);
             }
@@ -228,85 +213,89 @@ function GestionCommandeContent() {
     const currentOrderBalance = order ? Number(order.balance_remaining || 0) : 0;
     const finalNewBalanceTotal = currentOrderBalance + additionsTotalAmount;
 
-    // Soumission de l'avenant (sauvegarde en base et email)
-    const handleConfirmAvenant = async () => {
-        if (!order || pendingAdditions.length === 0) return;
+    // Redirection vers l'écran dédié de paiement du solde final
+    const handleProceedToPayment = async () => {
+        if (!order) return;
 
-        setIsSubmittingAvenant(true);
-        setAvenantSuccessMessage(null);
+        setIsProcessingPayment(true);
         try {
-            const res = await fetch("/api/gestion-commande", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    orderId: order.id,
-                    email: order.email,
-                    additionalItems: pendingAdditions,
-                    additionalAmount: additionsTotalAmount,
-                    newBalanceTotal: finalNewBalanceTotal
-                })
-            });
+            let currentOrderData = order;
 
-            const data = await res.json();
-            if (res.ok && data.success && data.order) {
-                setOrder(data.order);
-                setPendingAdditions([]);
-                setAvenantSuccessMessage("Vos modifications ont été validées avec succès ! Un email d'avenant vient de vous être envoyé avec votre reçu actualisé.");
-            } else {
-                alert(data?.error || "Une erreur est survenue lors de l'enregistrement de vos modifications.");
+            // 1. Si des ajouts sont en attente : enregistrement en DB (statut solde_en_attente) & envoi email avenant
+            if (pendingAdditions.length > 0) {
+                const res = await fetch("/api/gestion-commande", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        orderId: order.id,
+                        email: order.email,
+                        additionalItems: pendingAdditions,
+                        additionalAmount: additionsTotalAmount,
+                        newBalanceTotal: finalNewBalanceTotal
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    alert(data?.error || "Une erreur est survenue lors de l'enregistrement de vos modifications.");
+                    setIsProcessingPayment(false);
+                    return;
+                }
+                if (data.order) {
+                    currentOrderData = data.order;
+                }
             }
-        } catch {
+
+            // 2. Combiner l'ensemble des articles pour le récapitulatif figé
+            const allItems = [
+                ...(currentOrderData.items || []),
+                ...(currentOrderData.additional_items || []),
+                ...(currentOrderData === order && pendingAdditions.length > 0 ? pendingAdditions : [])
+            ];
+
+            const totalAdditions = (currentOrderData.additional_items || []).reduce(
+                (sum: number, it: any) => sum + Number(it.prixTotalLigne || 0),
+                0
+            ) + (currentOrderData === order ? additionsTotalAmount : 0);
+
+            const grandTotal = Number(currentOrderData.total_initial || 0) + totalAdditions;
+
+            // 3. Stocker dans sessionStorage pour /commande-confirmee
+            const orderSummaryPayload = {
+                orderId: currentOrderData.id,
+                prenom: currentOrderData.prenom,
+                nom: currentOrderData.nom,
+                email: currentOrderData.email,
+                telephone: currentOrderData.telephone,
+                total: grandTotal,
+                toPay: finalNewBalanceTotal,
+                paymentMode: 'solde_final',
+                mode: 'solde_final',
+                isSoldeFinal: true,
+                solde: 0,
+                remise: currentOrderData.early_bird_discount || 0,
+                repasDate: currentOrderData.repas_date,
+                jours: currentOrderData.repas_date,
+                retraitSlot: currentOrderData.retrait_slot,
+                creneau: currentOrderData.retrait_slot,
+                items: allItems
+            };
+
+            if (typeof window !== 'undefined') {
+                try {
+                    sessionStorage.setItem('lastOrderSummary', JSON.stringify(orderSummaryPayload));
+                } catch (err) {
+                    console.error("Erreur enregistrement sessionStorage lastOrderSummary:", err);
+                }
+            }
+
+            // 4. Redirection vers l'écran dédié de paiement
+            router.push('/commande-confirmee');
+        } catch (err) {
+            console.error("Erreur lors de la redirection vers le paiement:", err);
             alert("Erreur de connexion. Veuillez réessayer.");
-        } finally {
-            setIsSubmittingAvenant(false);
+            setIsProcessingPayment(false);
         }
-    };
-
-    // Coordonnées bancaires
-    const IBAN_RAW = process.env.NEXT_PUBLIC_TRAITEUR_IBAN || "BE22 0689 4683 8447";
-    const IBAN = IBAN_RAW.replace(/(\w{4})/g, "$1 ").trim();
-    const IBAN_CLEAN = IBAN_RAW.replace(/\s+/g, "");
-    const BIC = process.env.NEXT_PUBLIC_TRAITEUR_BIC || "GKCCBEBB";
-    const BENEFICIAIRE = process.env.NEXT_PUBLIC_TRAITEUR_BENEFICIAIRE || "JEAN COMPERE";
-
-    const fullNameUpper = order ? `${order.nom.toUpperCase()} ${order.prenom.toUpperCase()}`.trim() : "";
-    const isNoel = order ? order.id.startsWith("NOEL-") : true;
-
-    // Communication obligatoire pour le solde final
-    const COMMUNICATION = order
-        ? `${order.id} - SOLDE FINAL - ${fullNameUpper}`
-        : "SOLDE FINAL TRAITEUR COMPERE";
-
-    // Chaîne SEPA EPC QR Code standardisée pour le solde
-    const balanceToPayNow = finalNewBalanceTotal > 0 ? finalNewBalanceTotal : currentOrderBalance;
-    const generateEPCString = () => {
-        const montantStr = balanceToPayNow > 0 ? `EUR${balanceToPayNow.toFixed(2)}` : "";
-        return `BCD\n002\n1\nSCT\n${BIC}\n${BENEFICIAIRE}\n${IBAN_CLEAN}\n${montantStr}\n\n\n${COMMUNICATION}\n\n`;
-    };
-
-    const handleDownloadQR = () => {
-        if (!qrRef.current) return;
-        const svg = qrRef.current.querySelector("svg");
-        if (!svg) return;
-        const svgData = new XMLSerializer().serializeToString(svg);
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-        const img = new window.Image();
-        img.onload = () => {
-            canvas.width = img.width + 40;
-            canvas.height = img.height + 40;
-            if (ctx) {
-                ctx.fillStyle = "white";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 20, 20);
-                const pngFile = canvas.toDataURL("image/png");
-                const downloadLink = document.createElement("a");
-                downloadLink.download = `QR_Solde_${order?.id || 'Commande'}.png`;
-                downloadLink.href = pngFile;
-                downloadLink.click();
-            }
-        };
-        img.src = "data:image/svg+xml;base64," + btoa(svgData);
     };
 
     return (
@@ -434,18 +423,6 @@ function GestionCommandeContent() {
                                     </span>
                                 </div>
                             </div>
-
-                            {/* Alerte succès avenant */}
-                            {avenantSuccessMessage && (
-                                <motion.div
-                                    initial={{ opacity: 0, y: -10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-2xl p-4 text-xs sm:text-sm flex items-start gap-3 shadow-xs"
-                                >
-                                    <Check className="text-emerald-700 shrink-0 mt-0.5" size={18} />
-                                    <span>{avenantSuccessMessage}</span>
-                                </motion.div>
-                            )}
 
                             {/* Modalités de retrait */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs sm:text-sm pt-1">
@@ -582,103 +559,107 @@ function GestionCommandeContent() {
                                 <div className="bg-neutral-50 border border-neutral-200 p-4 rounded-2xl text-xs sm:text-sm text-neutral-700">
                                     Votre commande a été passée avec un règlement intégral (100 %). Les ajouts en ligne sont réservés aux réservations sur acompte. Pour toute demande d&apos;ajout, contactez notre atelier au <strong>+32 468 38 50 82</strong>.
                                 </div>
-                            ) : !canAdjust ? (
-                                <div className="bg-amber-50 border border-amber-300 p-4 rounded-2xl text-xs sm:text-sm text-amber-900 flex items-start gap-2.5">
-                                    <AlertCircle size={18} className="text-amber-800 shrink-0 mt-0.5" />
-                                    <span>
-                                        La date limite d&apos;ajustement (7 jours avant la date de retrait) est atteinte. La production en cuisine est verrouillée pour garantir une fraîcheur irréprochable.
-                                    </span>
-                                </div>
                             ) : (
                                 <div className="space-y-6">
-                                    <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
-                                        Vous recevez des convives supplémentaires ? Vous pouvez compléter votre table jusqu&apos;à 7 jours avant le retrait.
-                                        {isEarlyBirdOnAdditions
-                                            ? " La remise Early Bird de -5 % s'applique également sur vos ajouts !"
-                                            : " L'avantage de -5 % acquis sur votre commande initiale reste garanti. Les nouveaux ajouts sont comptabilisés au tarif plein standard."}
-                                    </p>
-
-                                    {/* Boutons d'ajouts */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => openFormuleModal(FORMULES_FETES[0])}
-                                            className="p-4 rounded-2xl bg-[#FAF8F5] hover:bg-[#F2EDE2] border border-[#D4AF37]/60 hover:border-[#D4AF37] transition-all text-left flex items-center gap-3.5 group cursor-pointer shadow-xs"
-                                        >
-                                            <div className="w-11 h-11 rounded-xl bg-black text-[#D4AF37] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                                                <ChefHat size={22} />
-                                            </div>
-                                            <div>
-                                                <span className="font-serif font-bold text-sm sm:text-base text-black block">
-                                                    + Ajouter un convive (Formule)
-                                                </span>
-                                                <span className="text-[11px] text-neutral-500">
-                                                    Formule 4 services gastronomiques au choix
-                                                </span>
-                                            </div>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsCarteModalOpen(true)}
-                                            className="p-4 rounded-2xl bg-[#FAF8F5] hover:bg-[#F2EDE2] border border-[#D4AF37]/60 hover:border-[#D4AF37] transition-all text-left flex items-center gap-3.5 group cursor-pointer shadow-xs"
-                                        >
-                                            <div className="w-11 h-11 rounded-xl bg-black text-[#D4AF37] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                                                <ShoppingCart size={20} />
-                                            </div>
-                                            <div>
-                                                <span className="font-serif font-bold text-sm sm:text-base text-black block">
-                                                    + Ajouter des mets à la carte
-                                                </span>
-                                                <span className="text-[11px] text-neutral-500">
-                                                    Zakouskis, entrées, plats ou bûches à l&apos;unité
-                                                </span>
-                                            </div>
-                                        </button>
-                                    </div>
-
-                                    {/* Liste des ajouts en attente de validation */}
-                                    {pendingAdditions.length > 0 && (
-                                        <div className="bg-[#FAF9F6] p-5 rounded-2xl border border-neutral-200/90 space-y-4">
-                                            <h3 className="font-serif font-bold text-sm text-black flex items-center justify-between">
-                                                <span>Ajouts en cours de validation ({pendingAdditions.length}) :</span>
-                                                <span className="text-xs text-[#927116] font-mono">
-                                                    + {additionsTotalAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                                </span>
-                                            </h3>
-
-                                            <div className="space-y-2">
-                                                {pendingAdditions.map((item, idx) => (
-                                                    <div key={idx} className="bg-white p-3 rounded-xl border border-neutral-200 flex items-center justify-between gap-3 text-xs">
-                                                        <div>
-                                                            <span className="font-bold text-neutral-900">{item.quantitePlat}x {item.nomPlat}</span>
-                                                            {item.coursesSummary && (
-                                                                <span className="text-[11px] text-neutral-500 block">{item.coursesSummary.join(' • ')}</span>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-3 shrink-0">
-                                                            <span className="font-bold text-black">
-                                                                {Number(item.prixTotalLigne).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                                            </span>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleRemovePendingAddition(idx)}
-                                                                className="text-red-500 hover:text-red-700 p-1 cursor-pointer"
-                                                                title="Supprimer cet ajout"
-                                                            >
-                                                                <Trash2 size={14} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                    {!canAdjust ? (
+                                        <div className="bg-amber-50 border border-amber-300 p-4 rounded-2xl text-xs sm:text-sm text-amber-900 flex items-start gap-2.5">
+                                            <AlertCircle size={18} className="text-amber-800 shrink-0 mt-0.5" />
+                                            <span>
+                                                La date limite d&apos;ajustement (7 jours avant la date de retrait) est atteinte. La production en cuisine est verrouillée pour garantir une fraîcheur irréprochable. Vous pouvez toutefois régler votre solde ci-dessous.
+                                            </span>
                                         </div>
+                                    ) : (
+                                        <>
+                                            <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
+                                                Vous recevez des convives supplémentaires ? Vous pouvez compléter votre table jusqu&apos;à 7 jours avant le retrait.
+                                                {isEarlyBirdOnAdditions
+                                                    ? " La remise Early Bird de -5 % s'applique également sur vos ajouts !"
+                                                    : " L'avantage de -5 % acquis sur votre commande initiale reste garanti. Les nouveaux ajouts sont comptabilisés au tarif plein standard."}
+                                            </p>
+
+                                            {/* Boutons d'ajouts */}
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openFormuleModal(FORMULES_FETES[0])}
+                                                    className="p-4 rounded-2xl bg-[#FAF8F5] hover:bg-[#F2EDE2] border border-[#D4AF37]/60 hover:border-[#D4AF37] transition-all text-left flex items-center gap-3.5 group cursor-pointer shadow-xs"
+                                                >
+                                                    <div className="w-11 h-11 rounded-xl bg-black text-[#D4AF37] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                                        <ChefHat size={22} />
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-serif font-bold text-sm sm:text-base text-black block">
+                                                            + Ajouter un convive (Formule)
+                                                        </span>
+                                                        <span className="text-[11px] text-neutral-500">
+                                                            Formule 4 services gastronomiques au choix
+                                                        </span>
+                                                    </div>
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIsCarteModalOpen(true)}
+                                                    className="p-4 rounded-2xl bg-[#FAF8F5] hover:bg-[#F2EDE2] border border-[#D4AF37]/60 hover:border-[#D4AF37] transition-all text-left flex items-center gap-3.5 group cursor-pointer shadow-xs"
+                                                >
+                                                    <div className="w-11 h-11 rounded-xl bg-black text-[#D4AF37] flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                                        <ShoppingCart size={20} />
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-serif font-bold text-sm sm:text-base text-black block">
+                                                            + Ajouter des mets à la carte
+                                                        </span>
+                                                        <span className="text-[11px] text-neutral-500">
+                                                            Zakouskis, entrées, plats ou bûches à l&apos;unité
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            </div>
+
+                                            {/* Liste des ajouts en attente de validation */}
+                                            {pendingAdditions.length > 0 && (
+                                                <div className="bg-[#FAF9F6] p-5 rounded-2xl border border-neutral-200/90 space-y-4">
+                                                    <h3 className="font-serif font-bold text-sm text-black flex items-center justify-between">
+                                                        <span>Ajouts en cours de validation ({pendingAdditions.length}) :</span>
+                                                        <span className="text-xs text-[#927116] font-mono">
+                                                            + {additionsTotalAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                        </span>
+                                                    </h3>
+
+                                                    <div className="space-y-2">
+                                                        {pendingAdditions.map((item, idx) => (
+                                                            <div key={idx} className="bg-white p-3 rounded-xl border border-neutral-200 flex items-center justify-between gap-3 text-xs">
+                                                                <div>
+                                                                    <span className="font-bold text-neutral-900">{item.quantitePlat}x {item.nomPlat}</span>
+                                                                    {item.coursesSummary && (
+                                                                        <span className="text-[11px] text-neutral-500 block">{item.coursesSummary.join(' • ')}</span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex items-center gap-3 shrink-0">
+                                                                    <span className="font-bold text-black">
+                                                                        {Number(item.prixTotalLigne).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                                    </span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleRemovePendingAddition(idx)}
+                                                                        className="text-red-500 hover:text-red-700 p-1 cursor-pointer"
+                                                                        title="Supprimer cet ajout"
+                                                                    >
+                                                                        <Trash2 size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
 
                                     {/* ==================================================== */}
                                     {/* DÉCOMPTE FINANCIER DYNAMIQUE DU SOLDE                */}
                                     {/* ==================================================== */}
-                                    <div className="bg-[#FAF6EB] p-5 sm:p-6 rounded-2xl border border-[#E8D8A6] space-y-3">
+                                    <div className="bg-[#FAF6EB] p-5 sm:p-6 rounded-2xl border border-[#E8D8A6] space-y-4">
                                         <h3 className="font-serif font-bold text-sm text-[#8A6D1F] uppercase tracking-wider">
                                             Décompte financier actualisé du solde
                                         </h3>
@@ -710,20 +691,24 @@ function GestionCommandeContent() {
                                             </div>
                                         </div>
 
-                                        {/* Bouton de confirmation de l'avenant si ajouts en cours */}
-                                        {pendingAdditions.length > 0 && (
+                                        {order.status === 'solde_regle' ? (
+                                            <div className="bg-emerald-50 border border-emerald-300 p-4 rounded-2xl text-xs sm:text-sm text-emerald-900 font-semibold text-center">
+                                                ✓ Le solde de cette commande a déjà été intégralement réglé. Merci pour votre confiance !
+                                            </div>
+                                        ) : (
+                                            /* Bouton d'action principal bien mis en avant */
                                             <button
                                                 type="button"
-                                                onClick={handleConfirmAvenant}
-                                                disabled={isSubmittingAvenant}
-                                                className="w-full mt-3 py-4 px-6 rounded-full bg-black hover:bg-[#D4AF37] text-white hover:text-black font-serif font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-300 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                                                onClick={handleProceedToPayment}
+                                                disabled={isProcessingPayment}
+                                                className="w-full mt-2 py-4 px-6 rounded-full bg-black hover:bg-[#D4AF37] text-white hover:text-black font-serif font-bold text-sm sm:text-base uppercase tracking-wider transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group"
                                             >
-                                                {isSubmittingAvenant ? (
-                                                    <span>Validation de l&apos;avenant en cours...</span>
+                                                {isProcessingPayment ? (
+                                                    <span>Enregistrement &amp; redirection...</span>
                                                 ) : (
                                                     <>
-                                                        <Check size={16} />
-                                                        <span>Confirmer mes modifications et actualiser le solde ({finalNewBalanceTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €)</span>
+                                                        <span>Régler mon solde final — {finalNewBalanceTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
+                                                        <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                                                     </>
                                                 )}
                                             </button>
@@ -731,172 +716,6 @@ function GestionCommandeContent() {
                                     </div>
                                 </div>
                             )}
-                        </div>
-
-                        {/* ========================================================================= */}
-                        {/* 3. MODULE BANCAIRE SOLDE FINAL (COMMUNICATION EXPLICITE & QR CODE EPC)     */}
-                        {/* ========================================================================= */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch text-left">
-
-                            {/* COLONNE GAUCHE : COORDONNÉES BANCAIRES POUR LE SOLDE */}
-                            <div className="bg-white p-6 sm:p-8 rounded-2xl border border-neutral-200 shadow-sm flex flex-col justify-between">
-                                <div>
-                                    <h3 className="text-lg font-bold uppercase tracking-widest text-neutral-800 mb-6 flex items-center gap-2">
-                                        <span className="w-5 h-1 bg-[#D4AF37]"></span>
-                                        Règlement du solde final
-                                    </h3>
-
-                                    <div className="space-y-4 text-sm text-neutral-600">
-                                        {/* Bénéficiaire */}
-                                        <div className="flex flex-col">
-                                            <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">
-                                                Bénéficiaire
-                                            </span>
-                                            <div className="flex items-center justify-between gap-2">
-                                                <span className="font-serif font-bold text-neutral-900 text-base select-all">
-                                                    {BENEFICIAIRE}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleCopy(BENEFICIAIRE, 'beneficiaire')}
-                                                    className="px-2 py-1 rounded text-xs font-semibold bg-neutral-100 hover:bg-[#FAF8F5] text-neutral-700 hover:text-black border border-neutral-200 transition-all flex items-center gap-1 cursor-pointer"
-                                                >
-                                                    {copiedKey === 'beneficiaire' ? <CheckCheck size={12} className="text-emerald-600" /> : <Copy size={12} className="text-[#927116]" />}
-                                                    <span>{copiedKey === 'beneficiaire' ? 'Copié !' : 'Copier'}</span>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* IBAN */}
-                                        <div className="flex flex-col">
-                                            <span className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">
-                                                IBAN (Compte bancaire)
-                                            </span>
-                                            <div className="flex items-center justify-between gap-2">
-                                                <span className="font-mono text-black font-semibold text-sm sm:text-base tracking-wider select-all break-all sm:break-normal">
-                                                    {IBAN}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleCopy(IBAN_CLEAN, 'iban')}
-                                                    className="px-2 py-1 rounded text-xs font-semibold bg-neutral-100 hover:bg-[#FAF8F5] text-neutral-700 hover:text-black border border-neutral-200 transition-all flex items-center gap-1 cursor-pointer"
-                                                >
-                                                    {copiedKey === 'iban' ? <CheckCheck size={12} className="text-emerald-600" /> : <Copy size={12} className="text-[#927116]" />}
-                                                    <span>{copiedKey === 'iban' ? 'Copié !' : 'Copier'}</span>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* BIC */}
-                                        <div className="flex flex-col">
-                                            <span className="text-xs uppercase font-bold text-neutral-400 mb-1">
-                                                BIC / SWIFT
-                                            </span>
-                                            <div className="flex items-center justify-between gap-2">
-                                                <span className="font-mono text-black font-semibold text-sm select-all">
-                                                    {BIC}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleCopy(BIC, 'bic')}
-                                                    className="px-2 py-1 rounded text-xs font-semibold bg-neutral-100 hover:bg-[#FAF8F5] text-neutral-700 hover:text-black border border-neutral-200 transition-all flex items-center gap-1 cursor-pointer"
-                                                >
-                                                    {copiedKey === 'bic' ? <CheckCheck size={12} className="text-emerald-600" /> : <Copy size={12} className="text-[#927116]" />}
-                                                    <span>{copiedKey === 'bic' ? 'Copié !' : 'Copier'}</span>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Communication SOLDE FINAL */}
-                                        <div className="flex flex-col">
-                                            <span className="text-xs uppercase font-bold text-[#927116] mb-1">
-                                                Communication obligatoire (Solde Final)
-                                            </span>
-                                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#D4AF37]/10 p-2.5 rounded-xl border border-[#D4AF37]/40">
-                                                <span className="font-mono font-bold text-xs sm:text-sm text-neutral-900 select-all break-words">
-                                                    {COMMUNICATION}
-                                                </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleCopy(COMMUNICATION, 'comm')}
-                                                    className="self-start sm:self-center shrink-0 px-2.5 py-1 rounded text-xs font-semibold bg-black hover:bg-[#D4AF37] text-white hover:text-black transition-all flex items-center gap-1 cursor-pointer"
-                                                >
-                                                    {copiedKey === 'comm' ? <CheckCheck size={12} className="text-emerald-400" /> : <Copy size={12} />}
-                                                    <span>{copiedKey === 'comm' ? 'Copié !' : 'Copier'}</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="mt-8 pt-5 border-t border-neutral-200 space-y-1">
-                                    <span className="text-xs uppercase font-bold text-neutral-500 block">
-                                        Montant net du solde à virer :
-                                    </span>
-                                    <span className="text-3xl font-serif font-bold text-[#D4AF37] block">
-                                        {balanceToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                    </span>
-                                    <span className="text-[11px] text-neutral-500">
-                                        À virer au plus tard 7 jours avant votre date de retrait.
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* COLONNE DROITE : MODULE NOIR & OR SCANNEZ & PAYEZ SOLDE */}
-                            <div className="bg-black text-white p-6 sm:p-8 rounded-2xl flex flex-col items-center justify-center relative overflow-hidden text-center">
-                                <div className="absolute top-0 right-0 w-36 h-36 bg-[#D4AF37]/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-
-                                <h3 className="text-lg sm:text-xl font-bold uppercase tracking-widest text-[#D4AF37] mb-1.5 z-10">
-                                    Scannez &amp; Payez le Solde
-                                </h3>
-
-                                <p className="text-xs font-semibold text-neutral-300 mb-2 z-10">
-                                    Montant : <span className="text-[#D4AF37] font-bold text-base">{balanceToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>
-                                </p>
-
-                                <p className="text-xs text-neutral-400 mb-4 z-10 max-w-xs">
-                                    Scannez ce QR Code EPC avec votre application bancaire (Belfius, BNP, ING, KBC...) pour pré-remplir le virement du solde.
-                                </p>
-
-                                {/* QR Code cliquable avec zoom */}
-                                <div
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() => setIsQrModalOpen(true)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter" || e.key === " ") {
-                                            e.preventDefault();
-                                            setIsQrModalOpen(true);
-                                        }
-                                    }}
-                                    className="bg-white p-3.5 sm:p-4 rounded-xl z-10 cursor-pointer hover:ring-4 hover:ring-[#D4AF37]/60 transition-all duration-200 group relative shadow-md"
-                                    title="Cliquer pour agrandir le QR Code"
-                                >
-                                    <div ref={qrRef} className="flex justify-center">
-                                        <QRCode
-                                            value={generateEPCString()}
-                                            size={160}
-                                            level="M"
-                                            className="rounded-lg"
-                                        />
-                                    </div>
-                                    <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity flex items-center justify-center pointer-events-none">
-                                        <span className="bg-black text-[#D4AF37] text-xs font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
-                                            <ZoomIn size={13} />
-                                            <span>Agrandir</span>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={handleDownloadQR}
-                                    className="mt-4 text-xs text-neutral-300 hover:text-white flex items-center gap-1.5 transition-colors z-10 cursor-pointer bg-neutral-900/80 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800"
-                                >
-                                    <Download size={13} className="text-[#D4AF37]" />
-                                    <span>Télécharger le QR Code PNG</span>
-                                </button>
-                            </div>
                         </div>
 
                         {/* Actions de pied de page */}
@@ -1166,83 +985,6 @@ function GestionCommandeContent() {
                                     Valider ces articles
                                 </button>
                             </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
-
-            {/* ==================================================== */}
-            {/* MODALE 3 : ZOOM QR CODE                              */}
-            {/* ==================================================== */}
-            <AnimatePresence>
-                {isQrModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            onClick={() => setIsQrModalOpen(false)}
-                            className="fixed inset-0 bg-black/80 backdrop-blur-sm cursor-pointer"
-                        />
-
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.92 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.92 }}
-                            className="relative bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full shadow-2xl border-2 border-[#D4AF37] z-10 text-center space-y-4"
-                        >
-                            <button
-                                type="button"
-                                onClick={() => setIsQrModalOpen(false)}
-                                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-600 flex items-center justify-center cursor-pointer"
-                            >
-                                <X size={16} />
-                            </button>
-
-                            <div>
-                                <span className="text-[10px] uppercase font-bold tracking-widest text-[#927116] bg-[#D4AF37]/15 px-3 py-1 rounded-full border border-[#D4AF37]/30 inline-block mb-1">
-                                    QR Code EPC • Solde
-                                </span>
-                                <h3 className="font-serif font-bold text-xl text-black">
-                                    Scannez pour payer le solde
-                                </h3>
-                                <p className="text-xs text-neutral-500 mt-0.5">
-                                    Ouvrez votre application bancaire belge (KBC, Belfius, BNP, ING...)
-                                </p>
-                            </div>
-
-                            <div className="bg-white p-4 rounded-2xl border-2 border-neutral-200 shadow-md inline-block mx-auto">
-                                <QRCode
-                                    value={generateEPCString()}
-                                    size={220}
-                                    level="M"
-                                    className="rounded-lg"
-                                />
-                            </div>
-
-                            <div className="bg-[#FAF8F5] p-3.5 rounded-2xl border border-neutral-200 text-left space-y-1.5 text-xs">
-                                <div className="flex justify-between items-baseline">
-                                    <span className="text-neutral-500">Montant du solde :</span>
-                                    <span className="font-serif font-bold text-base text-black">
-                                        {balanceToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                    </span>
-                                </div>
-                                <div className="border-t border-neutral-200/70 pt-1.5">
-                                    <span className="text-[10px] uppercase font-bold text-neutral-400 block">Communication :</span>
-                                    <span className="font-mono font-bold text-xs text-neutral-900 block break-words select-all">
-                                        {COMMUNICATION}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={handleDownloadQR}
-                                className="w-full py-2.5 px-3 rounded-xl bg-black hover:bg-[#D4AF37] text-white hover:text-black text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm cursor-pointer"
-                            >
-                                <Download size={14} />
-                                <span>Télécharger l&apos;image du QR Code</span>
-                            </button>
                         </motion.div>
                     </div>
                 )}
