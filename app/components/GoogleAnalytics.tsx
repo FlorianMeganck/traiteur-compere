@@ -16,7 +16,7 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID }: { GA_MEASUREMENT_
                 try {
                     const preferences = JSON.parse(preferencesStr);
                     setConsent(preferences.analytical === true);
-                } catch (e) {
+                } catch {
                     setConsent(false);
                 }
             } else {
@@ -40,8 +40,9 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID }: { GA_MEASUREMENT_
     useEffect(() => {
         if (consent && GA_MEASUREMENT_ID) {
             // Envoie la page vue à Google quand l'URL change
-            if ((window as any).gtag) {
-                (window as any).gtag('config', GA_MEASUREMENT_ID, {
+            const win = window as Window & { gtag?: (command: string, targetId: string, config?: Record<string, unknown>) => void };
+            if (win.gtag) {
+                win.gtag('config', GA_MEASUREMENT_ID, {
                     page_path: pathname,
                 });
             }

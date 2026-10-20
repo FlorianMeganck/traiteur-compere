@@ -1,22 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import {
-    Check, ArrowLeft, ArrowRight, AlertCircle, Copy,
-    CheckCheck, Printer, Mail, MapPin, Calendar, Clock,
-    Phone, ExternalLink, Sparkles, X, Plus, Minus,
-    Trash2, ChefHat, ShoppingCart, ShieldCheck, Lock, User
+    ArrowLeft, ArrowRight, AlertCircle,
+    Printer, Calendar, Clock,
+    Sparkles, X, Plus, Minus,
+    Trash2, ChefHat, ShoppingCart, ShieldCheck, Lock
 } from "lucide-react";
 import {
     FORMULES_FETES,
     CARTE_FETES_ITEMS,
-    FestiveFormule,
-    CarteItem
+    FestiveFormule
 } from "../data/menus-fetes";
+import type { FestiveOrderItem } from "../lib/db";
 
 interface OrderData {
     id: string;
@@ -32,8 +31,8 @@ interface OrderData {
     early_bird_discount: number;
     amount_paid_initial: number;
     balance_remaining: number;
-    items: any[];
-    additional_items?: any[];
+    items: FestiveOrderItem[];
+    additional_items?: FestiveOrderItem[];
     notes?: string;
 }
 
@@ -56,7 +55,7 @@ function GestionCommandeContent() {
     const [isEarlyBirdOnAdditions, setIsEarlyBirdOnAdditions] = useState(false);
 
     // Nouveaux ajouts en cours (non encore validés)
-    const [pendingAdditions, setPendingAdditions] = useState<any[]>([]);
+    const [pendingAdditions, setPendingAdditions] = useState<FestiveOrderItem[]>([]);
     const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
     // Modales
@@ -178,7 +177,7 @@ function GestionCommandeContent() {
     // Gestion des ajouts à la carte
     const handleAddCarteToPending = () => {
         const discountRate = isEarlyBirdOnAdditions ? 0.05 : 0;
-        const newItems: any[] = [];
+        const newItems: FestiveOrderItem[] = [];
 
         Object.entries(carteQuantities).forEach(([itemId, qty]) => {
             if (qty <= 0) return;
@@ -254,7 +253,7 @@ function GestionCommandeContent() {
             ];
 
             const totalAdditions = (currentOrderData.additional_items || []).reduce(
-                (sum: number, it: any) => sum + Number(it.prixTotalLigne || 0),
+                (sum: number, it: FestiveOrderItem) => sum + Number(it.prixTotalLigne || 0),
                 0
             ) + (currentOrderData === order ? additionsTotalAmount : 0);
 
@@ -284,15 +283,16 @@ function GestionCommandeContent() {
             if (typeof window !== 'undefined') {
                 try {
                     sessionStorage.setItem('lastOrderSummary', JSON.stringify(orderSummaryPayload));
-                } catch (err) {
-                    console.error("Erreur enregistrement sessionStorage lastOrderSummary:", err);
+                } catch {
+                    // Silencieux
                 }
             }
 
             // 4. Redirection vers l'écran dédié de paiement
-            router.push('/commande-confirmee');
-        } catch (err) {
-            console.error("Erreur lors de la redirection vers le paiement:", err);
+            if (typeof window !== 'undefined') {
+                window.location.href = '/commande-confirmee';
+            }
+        } catch {
             alert("Erreur de connexion. Veuillez réessayer.");
             setIsProcessingPayment(false);
         }

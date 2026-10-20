@@ -36,20 +36,14 @@ export async function POST(req: Request) {
         // 1.5 Validation reCAPTCHA côté serveur (sécurisée et non-bloquante si configuration incomplète)
         if (captchaToken && process.env.RECAPTCHA_SECRET_KEY) {
             try {
-                const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+                await fetch('https://www.google.com/recaptcha/api/siteverify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}`
                 });
-                const recaptchaData = await verifyRes.json();
-                if (!recaptchaData.success) {
-                    console.warn("Avertissement validation reCAPTCHA Google :", recaptchaData);
-                }
-            } catch (captchaErr) {
-                console.error("Erreur réseau reCAPTCHA (non bloquante) :", captchaErr);
+            } catch {
+                // Non bloquant
             }
-        } else if (!process.env.RECAPTCHA_SECRET_KEY) {
-            console.warn("RECAPTCHA_SECRET_KEY absent sur le serveur - bypass de sécurité appliqué");
         }
 
         // 2. Sécurité : Recalculer le prix côté serveur pour éviter toute manipulation
@@ -61,7 +55,7 @@ export async function POST(req: Request) {
             typeCommande === 'menu_fetes' ||
             cartItems.some(i => isFestiveCartItem(i));
 
-        const cleanDishTitle = (raw: any): string => {
+        const cleanDishTitle = (raw: unknown): string => {
             let str = String(raw || '').trim();
             const colonIdx = str.indexOf(':');
             if (colonIdx !== -1) {
@@ -134,12 +128,12 @@ export async function POST(req: Request) {
 
                 const pricePlat = dayData ? parseFloat(dayData.price.replace(',', '.').replace(' €', '')) : (Number(item.prixUnitairePlat) || 12);
                 const pricePotage = 4;
-                const totalSoupes = Object.values(item.soupes || {}).reduce((a: any, b: any) => a + (Number(b) || 0), 0) as number;
+                const totalSoupes = Object.values(item.soupes || {}).reduce((a: number, b) => a + (Number(b) || 0), 0);
 
                 const itemTotal = (pricePlat * itemQty) + (totalSoupes * pricePotage);
                 finalTotalPrice += itemTotal;
 
-                const soupesEntries = item.soupes ? Object.entries(item.soupes).filter(([_, q]) => Number(q) > 0) : [];
+                const soupesEntries = item.soupes ? Object.entries(item.soupes).filter(([, q]) => Number(q) > 0) : [];
                 const soupesHtml = soupesEntries.length > 0 ? `
                     <ul style="margin: 6px 0 0 0; padding: 0 0 0 14px; list-style-type: none; font-size: 12px; color: #555555; line-height: 1.55;">
                         ${soupesEntries.map(([s, q]) => `<li style="margin-bottom: 2px;"><span style="color: #D4AF37; margin-right: 6px;">•</span>${q}x ${s}</li>`).join('')}
@@ -224,7 +218,7 @@ export async function POST(req: Request) {
 
         // Totalisation de la production cuisine pour le traiteur
         const kitchenTotals: Record<string, { category: string; count: number }> = {};
-        const recordKitchenDish = (dishName: any, category: string, qty: number) => {
+        const recordKitchenDish = (dishName: unknown, category: string, qty: number) => {
             if (!dishName) return;
             const cleanName = String(dishName).trim();
             if (!cleanName) return;
@@ -678,8 +672,6 @@ export async function POST(req: Request) {
             } catch (emailError) {
                 console.error("Exception d'envoi d'email Resend (non bloquante) :", emailError);
             }
-        } else {
-            console.log("Mode dev ou RESEND_API_KEY non configurée. Commande enregistrée :", formattedOrderNumber, "Montant :", amountToPayNow);
         }
 
         return NextResponse.json({
@@ -690,11 +682,12 @@ export async function POST(req: Request) {
             message: 'Commande enregistrée avec succès'
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Erreur critique lors de la création de la commande :", error);
+        const errorMessage = error instanceof Error ? error.message : 'Erreur interne du serveur lors de la validation de la commande';
         return NextResponse.json({
             success: false,
-            error: error?.message || 'Erreur interne du serveur lors de la validation de la commande'
+            error: errorMessage
         }, { status: 500 });
     }
 }

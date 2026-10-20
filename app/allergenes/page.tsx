@@ -9,7 +9,15 @@ import { Sprout, Shell, Flower2, FlaskConical, ShieldAlert } from "lucide-react"
 
 // --- BASE DE DONNÉES DES 14 ALLERGÈNES MAJEURS (Règlement UE n° 1169/2011) ---
 
-const ALLERGENES = {
+interface AllergeneInfo {
+    id: string;
+    name: string;
+    color: string;
+    image?: string;
+    icon?: React.ComponentType<{ size?: number; strokeWidth?: number }>;
+}
+
+const ALLERGENES: Record<string, AllergeneInfo> = {
     GLU: { id: "GLU", name: "Gluten", image: "/allergene/ble.png", color: "bg-amber-100 text-amber-800 border-amber-200" },
     CRU: { id: "CRU", name: "Crustacés", image: "/allergene/crustace.png", color: "bg-orange-100 text-orange-800 border-orange-200" },
     OEU: { id: "OEU", name: "Œufs", image: "/allergene/oeuf.png", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
@@ -206,14 +214,14 @@ function AllergenesContent() {
             };
 
             const target = aliasMap[sectionParam] || sectionParam;
-            setOpenSection(target);
-
-            setTimeout(() => {
+            const timer = setTimeout(() => {
+                setOpenSection(target);
                 const element = document.getElementById(`section-${target}`);
                 if (element) {
                     element.scrollIntoView({ behavior: "smooth", block: "start" });
                 }
             }, 300);
+            return () => clearTimeout(timer);
         }
     }, [searchParams]);
 
@@ -238,12 +246,12 @@ function AllergenesContent() {
                 {/* Légende Globale des Allergènes */}
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-neutral-200 mb-10 flex flex-wrap gap-4 justify-center">
                     {Object.values(ALLERGENES).map((a) => {
-                        const IconComponent = (a as any).icon;
+                        const IconComponent = a.icon;
                         return (
                             <div key={a.id} className="flex flex-col items-center gap-2">
                                 <div className={`w-12 h-12 rounded-full border ${a.color} flex items-center justify-center overflow-hidden`}>
-                                    {(a as any).image ? (
-                                        <Image src={(a as any).image} alt={a.name} width={32} height={32} className="object-contain" />
+                                    {a.image ? (
+                                        <Image src={a.image} alt={a.name} width={32} height={32} className="object-contain" />
                                     ) : IconComponent ? (
                                         <IconComponent size={24} strokeWidth={1.5} />
                                     ) : (
@@ -286,13 +294,13 @@ function AllergenesContent() {
                                                     <div className="flex flex-wrap gap-1.5">
                                                         {item.allergens.length > 0 ? (
                                                             item.allergens.map((alCode) => {
-                                                                const alInfo = ALLERGENES[alCode as keyof typeof ALLERGENES];
+                                                                const alInfo = ALLERGENES[alCode];
                                                                 if (!alInfo) return null;
-                                                                const IconComponent = (alInfo as any).icon;
+                                                                const IconComponent = alInfo.icon;
                                                                 return (
                                                                     <div key={alCode} className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded border ${alInfo.color}`}>
-                                                                        {(alInfo as any).image && (
-                                                                            <Image src={(alInfo as any).image} alt={alInfo.name} width={16} height={16} className="object-contain" />
+                                                                        {alInfo.image && (
+                                                                            <Image src={alInfo.image} alt={alInfo.name} width={16} height={16} className="object-contain" />
                                                                         )}
                                                                         {IconComponent && (
                                                                             <IconComponent size={14} strokeWidth={1.5} />

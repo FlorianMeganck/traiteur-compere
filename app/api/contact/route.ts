@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import type { FestiveOrderItem } from '../../lib/db';
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = (resendApiKey && resendApiKey.startsWith('re_')) ? new Resend(resendApiKey) : null;
@@ -36,17 +37,13 @@ export async function POST(req: Request) {
         // Verify captcha if provided and configured
         if (captchaToken && process.env.RECAPTCHA_SECRET_KEY) {
             try {
-                const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+                await fetch('https://www.google.com/recaptcha/api/siteverify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}`
                 });
-                const recaptchaData = await verifyRes.json();
-                if (!recaptchaData.success) {
-                    console.warn("Avertissement validation reCAPTCHA (non bloquant):", recaptchaData);
-                }
-            } catch (captchaErr) {
-                console.error("Erreur réseau reCAPTCHA /api/contact:", captchaErr);
+            } catch {
+                // Non bloquant
             }
         }
 
@@ -58,7 +55,7 @@ export async function POST(req: Request) {
         // Cart items formatting if present
         let itemsHtml = '';
         if (Array.isArray(cartItems) && cartItems.length > 0) {
-            const rows = cartItems.map((item: any) => {
+            const rows = cartItems.map((item: FestiveOrderItem) => {
                 const name = item.nomPlat || 'Article';
                 const qty = item.quantitePlat || 1;
                 const total = item.prixTotalLigne ? `${item.prixTotalLigne} €` : '';
@@ -149,8 +146,9 @@ export async function POST(req: Request) {
             message: 'Demande enregistrée avec succès',
             orderNumber: `NOEL-${Math.floor(Math.random() * 90000) + 10000}`
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Erreur API /api/contact:', error);
-        return NextResponse.json({ success: false, error: error?.message || 'Erreur interne du serveur' }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'Erreur interne du serveur';
+        return NextResponse.json({ success: false, error: errorMessage }, { status: 500 });
     }
 }

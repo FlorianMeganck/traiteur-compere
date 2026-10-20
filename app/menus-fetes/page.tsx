@@ -1,19 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-    Sparkles, Check, Plus, Minus, ShoppingCart, X,
-    ChefHat, Calendar, Clock, MapPin, Award, FileText, ArrowRight,
-    UtensilsCrossed, CreditCard, Star, ShoppingBag, Info,
+    Sparkles, Plus, Minus, ShoppingCart, X,
+    ChefHat, Clock, MapPin, Award, ArrowRight,
+    UtensilsCrossed, CreditCard, Star,
     ChevronLeft, ChevronRight, BookOpen, ChevronDown
 } from "lucide-react";
 
 import {
     FORMULES_FETES,
     FestiveFormule,
-    MenuOption,
     BOOKLET_PAGES,
     BookletPage,
     BookletDish,
@@ -94,7 +92,7 @@ const faqJsonLd = {
 };
 
 export default function MenusFetesPage() {
-    const { addToCart, addMultipleToCart, totalItems } = useCart();
+    const { addToCart, addMultipleToCart } = useCart();
 
     // Modale de composition active (formule en cours de configuration)
     const [activeFormuleModal, setActiveFormuleModal] = useState<FestiveFormule | null>(null);
@@ -149,14 +147,17 @@ export default function MenusFetesPage() {
 
     // Synchronisation avec l'URL (?formule=...)
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const f = params.get("formule");
-        if (f) {
-            const found = FORMULES_FETES.find(item => item.id === f);
-            if (found) {
-                handleOpenModal(found);
+        const timer = setTimeout(() => {
+            const params = new URLSearchParams(window.location.search);
+            const f = params.get("formule");
+            if (f) {
+                const found = FORMULES_FETES.find(item => item.id === f);
+                if (found) {
+                    handleOpenModal(found);
+                }
             }
-        }
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
     const handleCloseModal = () => {
@@ -276,7 +277,8 @@ export default function MenusFetesPage() {
             const current = prev[dishId] || 0;
             const updated = Math.max(0, current + delta);
             if (updated === 0) {
-                const { [dishId]: _, ...rest } = prev;
+                const rest = { ...prev };
+                delete rest[dishId];
                 return rest;
             }
             return { ...prev, [dishId]: updated };
@@ -298,11 +300,6 @@ export default function MenusFetesPage() {
     const isEarlyBirdActive = isEarlyBirdFestivePromoActive();
     const bookletDiscountAmount = isEarlyBirdActive ? Math.round(rawBookletSubtotal * 0.05 * 100) / 100 : 0;
     const finalBookletTotal = Math.max(0, rawBookletSubtotal - bookletDiscountAmount);
-
-    // Décompte textuel exhaustif des mets sélectionnés (ex : « 2x Blini de maquereau • 1x Velouté potiron • 2x Pavé de saumon »)
-    const summaryBreakdownText = selectedBookletDishes.length > 0
-        ? selectedBookletDishes.map(item => `${item.qty}x ${item.dish.shortTitle || item.dish.title}`).join(" • ")
-        : "Feuilletez le livret et composez vos mets pour les fêtes";
 
     // Nombre d'articles sélectionnés par page de livret (pour le badge de l'onglet)
     const getPageSelectedCount = (page: BookletPage) => {

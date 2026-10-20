@@ -1,4 +1,4 @@
-import type { FestiveOrderRecord } from './db';
+import type { FestiveOrderRecord, FestiveOrderItem } from './db';
 
 export const IBAN = "BE22 0689 4683 8447";
 export const BIC = "GKCCBEBB";
@@ -119,7 +119,7 @@ export function cleanCapitalize(str: string): string {
 /**
  * Génère le tableau HTML récapitulatif des mets commandés
  */
-export function renderOrderItemsTable(items: any[], additionalItems?: any[]): string {
+export function renderOrderItemsTable(items: FestiveOrderItem[], additionalItems?: FestiveOrderItem[]): string {
     const combined = [...(items || []), ...(additionalItems || [])];
     if (combined.length === 0) {
         return '<p style="color: #777777; font-size: 13px; font-style: italic;">Détail des mets consultable dans votre espace de gestion.</p>';

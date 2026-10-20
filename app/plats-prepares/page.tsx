@@ -1,19 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Trash2, Check } from "lucide-react";
+import { CalendarDays, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Check } from "lucide-react";
 
 import { MENU_DATA, isPlatVisible } from "../data/plats-prepares";
 import { useCart, CartItem } from "../hooks/useCart";
 
 export default function PlatsPrepares() {
-    const { cartItems, addToCart, removeFromCart, cartTotal, totalItems } = useCart();
+    const { addToCart } = useCart();
     
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'warning' } | null>(null);
-    const [isCartOpen, setIsCartOpen] = useState(false);
 
     useEffect(() => {
         const handleCartCleaned = () => {
@@ -36,7 +34,7 @@ export default function PlatsPrepares() {
             return MENU_DATA.slice(1, 5);
         }
         return MENU_DATA.slice(0, 4);
-    }, []);
+    }, [isVisible]);
 
     const firstAvailableWeek = displayedWeeks.find(menu =>
         menu.days.some(dayItem => isVisible(dayItem.day, menu.id))

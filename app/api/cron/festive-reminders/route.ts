@@ -9,10 +9,7 @@ import {
 import {
     isOrderDueForReminder,
     generateReminderEmailAcompte,
-    generateReminderEmailSoldé,
-    parseRepasDate,
-    getEffectivePickupDate,
-    getDiffCalendarDays
+    generateReminderEmailSoldé
 } from '../../../lib/festive-reminders';
 
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -186,8 +183,6 @@ async function handleCronExecution(req: Request) {
                             });
                             continue;
                         }
-                    } else {
-                        console.log(`[Rappel Fêtes J-10] Clé Resend non active - Envoi simulé pour ${order.id} (${order.email})`);
                     }
 
                     // Mise à jour immédiate en base (UPDATE festive_orders SET reminder_sent_at = NOW())
@@ -206,9 +201,10 @@ async function handleCronExecution(req: Request) {
                         status: 'sent',
                         subject: emailData.subject
                     });
-                } catch (sendEx: any) {
+                } catch (sendEx: unknown) {
                     console.error(`Exception envoi rappel pour ${order.id}:`, sendEx);
                     errorCount++;
+                    const sendErrorMsg = sendEx instanceof Error ? sendEx.message : 'Erreur inconnue';
                     results.push({
                         orderId: order.id,
                         email: order.email,
@@ -220,7 +216,7 @@ async function handleCronExecution(req: Request) {
                         diffMealDays: check.diffMeal,
                         status: 'error',
                         subject: emailData.subject,
-                        error: sendEx?.message || 'Erreur inconnue'
+                        error: sendErrorMsg
                     });
                 }
             }
@@ -241,11 +237,12 @@ async function handleCronExecution(req: Request) {
             results
         });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Erreur générale Cron /api/cron/festive-reminders:", err);
+        const generalErrorMsg = err instanceof Error ? err.message : 'Erreur interne lors de l\'exécution du rappel';
         return NextResponse.json({
             success: false,
-            error: err?.message || 'Erreur interne lors de l\'exécution du rappel'
+            error: generalErrorMsg
         }, { status: 500 });
     }
 }

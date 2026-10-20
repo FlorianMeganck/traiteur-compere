@@ -53,8 +53,7 @@ export function useCart() {
                         window.dispatchEvent(new CustomEvent('cart-cleaned'));
                     }
                     setCartItems(validItems);
-                } catch (e) {
-                    console.error("Erreur parsing cart", e);
+                } catch {
                     setCartItems([]);
                 }
             }
@@ -63,7 +62,10 @@ export function useCart() {
     }, []);
 
     useEffect(() => {
-        loadCart();
+        const timer = setTimeout(() => {
+            loadCart();
+        }, 0);
+
         // Listener pour synchroniser le panier entre les onglets
         const handleStorageChange = (e: StorageEvent) => {
             if (e.key === 'traiteurCart') {
@@ -78,6 +80,7 @@ export function useCart() {
         window.addEventListener('cart-updated', handleLocalSync);
 
         return () => {
+            clearTimeout(timer);
             window.removeEventListener('storage', handleStorageChange);
             window.removeEventListener('cart-updated', handleLocalSync);
         };
@@ -91,7 +94,7 @@ export function useCart() {
 
     const addMultipleToCart = (newItems: CartItem[]) => {
         if (!newItems || newItems.length === 0) return;
-        let currentCart = [...cartItems];
+        const currentCart = [...cartItems];
 
         for (const item of newItems) {
             const existingIndex = currentCart.findIndex(i => i.id === item.id);

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import { Sprout, Shell, Flower2, FlaskConical, LucideIcon, Check, Package, Flame } from "lucide-react";
+import { motion } from "framer-motion";
+import { Sprout, Shell, Flower2, FlaskConical, LucideIcon, Check, Flame } from "lucide-react";
 import Link from "next/link";
 
 // --- DATA ---

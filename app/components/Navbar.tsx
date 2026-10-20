@@ -6,9 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, X, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
-import Logo from "./Logo";
 import { useCart } from "../hooks/useCart";
-import { MENU_DATA } from "../data/plats-prepares";
 import { calculateFestiveOrderPricing } from "../data/menus-fetes";
 
 const NAV_LINKS = [
@@ -48,9 +46,12 @@ export default function Navbar() {
 
     useEffect(() => {
         if (totalItems > prevTotalItems.current) {
-            setIsCartBouncing(true);
+            const bounceTimer = setTimeout(() => setIsCartBouncing(true), 0);
             const timer = setTimeout(() => setIsCartBouncing(false), 800);
-            return () => clearTimeout(timer);
+            return () => {
+                clearTimeout(bounceTimer);
+                clearTimeout(timer);
+            };
         }
         prevTotalItems.current = totalItems;
     }, [totalItems]);
@@ -99,8 +100,10 @@ export default function Navbar() {
 
     // Fermer systématiquement les tiroirs/menus et rétablir le body à chaque changement d'URL
     useEffect(() => {
-        setIsMenuOpen(false);
-        setIsCartOpen(false);
+        const timer = setTimeout(() => {
+            setIsMenuOpen(false);
+            setIsCartOpen(false);
+        }, 0);
         if (typeof document !== "undefined") {
             document.body.style.overflow = "auto";
             document.body.style.pointerEvents = "auto";
@@ -108,9 +111,8 @@ export default function Navbar() {
             document.body.removeAttribute("data-scroll-locked");
             document.documentElement.removeAttribute("data-scroll-locked");
         }
+        return () => clearTimeout(timer);
     }, [pathname]);
-
-    const [cartBump, setCartBump] = useState(false);
 
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
@@ -125,8 +127,8 @@ export default function Navbar() {
             }
         };
         const handleCartBump = () => {
-            setCartBump(true);
-            setTimeout(() => setCartBump(false), 800);
+            setIsCartBouncing(true);
+            setTimeout(() => setIsCartBouncing(false), 800);
         };
         window.addEventListener('open-cart-drawer', handleOpenCart);
         window.addEventListener('close-cart-drawer', handleCloseCart);

@@ -1,17 +1,17 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Check, ArrowLeft, Download, AlertCircle, Copy,
     CheckCheck, Printer, Mail, MapPin, Calendar, Clock,
-    Phone, ExternalLink, Sparkles, ZoomIn, X
+    ExternalLink, Sparkles, ZoomIn, X
 } from "lucide-react";
 import { Suspense, useRef, useState, useEffect } from "react";
 import QRCode from "react-qr-code";
 import { useCart } from "../hooks/useCart";
+import type { FestiveOrderItem } from "../lib/db";
 
 interface LastOrderSummary {
     orderId?: string;
@@ -30,7 +30,7 @@ interface LastOrderSummary {
     retraitSlot?: string;
     creneau?: string;
     isSoldeFinal?: boolean;
-    items?: any[];
+    items?: FestiveOrderItem[];
 }
 
 function CommandeConfirmeeContent() {
@@ -98,8 +98,8 @@ function CommandeConfirmeeContent() {
                 if (data) {
                     foundOrder = JSON.parse(data);
                 }
-            } catch (err) {
-                console.error("Erreur lecture sessionStorage lastOrderSummary:", err);
+            } catch {
+                // Silencieux
             }
         }
 
@@ -121,13 +121,17 @@ function CommandeConfirmeeContent() {
             };
         }
 
-        if (foundOrder) {
-            setOrder(foundOrder);
-            setIsLoading(false);
-        } else {
-            // Aucun ordre en session (accès direct sans commande) : redirection vers l'accueil
-            router.replace("/");
-        }
+        const timer = setTimeout(() => {
+            if (foundOrder) {
+                setOrder(foundOrder);
+                setIsLoading(false);
+            } else {
+                // Aucun ordre en session (accès direct sans commande) : redirection vers l'accueil
+                router.replace("/");
+            }
+        }, 0);
+
+        return () => clearTimeout(timer);
     }, [router, searchParams]);
 
     // État d'ouverture de la modale / lightbox du QR Code
@@ -403,7 +407,7 @@ function CommandeConfirmeeContent() {
                         </div>
 
                         <div className="space-y-2.5">
-                            {order.items.map((item: any, idx: number) => (
+                            {order.items.map((item: FestiveOrderItem, idx: number) => (
                                 <div
                                     key={idx}
                                     className="p-3.5 rounded-2xl bg-[#FAF9F6] border border-neutral-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm print:bg-white print:p-2 print:border-neutral-200"
@@ -413,7 +417,7 @@ function CommandeConfirmeeContent() {
                                             <span className="font-bold text-neutral-900 font-serif text-sm">
                                                 {item.quantitePlat || item.quantity || 1}x {item.nomPlat || item.title || item.name}
                                             </span>
-                                            {item.isAddition && (
+                                            {Boolean(item.isAddition) && (
                                                 <span className="bg-amber-100 text-amber-900 text-[10px] font-bold px-2 py-0.5 rounded-full print:hidden">
                                                     Ajout
                                                 </span>

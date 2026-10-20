@@ -59,7 +59,7 @@ export default function CookieBanner() {
                 {/* Text Content */}
                 <p className="text-white font-sans text-sm md:text-base text-center md:text-left flex-1">
                     Nous utilisons des cookies pour optimiser votre expérience et analyser notre trafic. <br className="hidden md:block" />
-                    Vous pouvez modifier vos choix à tout moment via le lien "Gestion des cookies" en bas de page.
+                    Vous pouvez modifier vos choix à tout moment via le lien &quot;Gestion des cookies&quot; en bas de page.
                 </p>
 
                 {/* Buttons Container */}

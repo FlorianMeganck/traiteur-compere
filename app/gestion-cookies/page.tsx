@@ -23,14 +23,17 @@ function GestionCookiesContent() {
     const returnTo = searchParams.get('returnTo') || '/';
 
     useEffect(() => {
-        const storedPreferences = localStorage.getItem("cookie_preferences");
-        if (storedPreferences) {
-            try {
-                setPreferences(JSON.parse(storedPreferences));
-            } catch (e) {
-                console.error("Failed to parse cookie preferences", e);
+        const timer = setTimeout(() => {
+            const storedPreferences = localStorage.getItem("cookie_preferences");
+            if (storedPreferences) {
+                try {
+                    setPreferences(JSON.parse(storedPreferences));
+                } catch {
+                    // Ignore parse error
+                }
             }
-        }
+        }, 0);
+        return () => clearTimeout(timer);
     }, []);
 
     const handleToggle = (key: keyof CookiePreferences) => {

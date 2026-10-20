@@ -2,6 +2,31 @@ import { neon, NeonQueryFunction } from '@neondatabase/serverless';
 import fs from 'fs';
 import path from 'path';
 
+export interface FestiveOrderItem {
+    id?: string;
+    nomPlat?: string;
+    title?: string;
+    nom?: string;
+    name?: string;
+    prixUnitairePlat?: number;
+    quantitePlat?: number;
+    quantite?: number;
+    qty?: number;
+    quantity?: number;
+    soupes?: Record<string, number>;
+    prixUnitaireSoupe?: number;
+    prixTotalLigne?: number;
+    semaineId?: string;
+    jour?: string;
+    itemType?: 'plat_prepare' | 'menu_fete' | string;
+    badge?: string;
+    coursesSummary?: string[];
+    coursesDescription?: string;
+    isAddition?: boolean;
+    totalPrice?: number;
+    [key: string]: unknown;
+}
+
 export interface FestiveOrderRecord {
     id: string; // ex: 'NOEL-64053'
     created_at?: string;
@@ -19,8 +44,8 @@ export interface FestiveOrderRecord {
     early_bird_discount: number;
     amount_paid_initial: number;
     balance_remaining: number;
-    items: any[];
-    additional_items?: any[];
+    items: FestiveOrderItem[];
+    additional_items?: FestiveOrderItem[];
     notes?: string;
 }
 
@@ -197,31 +222,32 @@ export async function getFestiveOrder(orderId: string, email?: string): Promise<
             `;
 
             if (rows && rows.length > 0) {
-                const row = rows[0] as any;
-                if (cleanEmail && row.email.toLowerCase().trim() !== cleanEmail) {
+                const row = rows[0] as Record<string, unknown>;
+                const rowEmail = String(row.email || '').toLowerCase().trim();
+                if (cleanEmail && rowEmail !== cleanEmail) {
                     return null;
                 }
 
                 return {
-                    id: row.id,
-                    created_at: row.created_at,
-                    updated_at: row.updated_at,
-                    reminder_sent_at: row.reminder_sent_at ? new Date(row.reminder_sent_at).toISOString() : null,
-                    prenom: row.prenom,
-                    nom: row.nom,
-                    email: row.email,
-                    telephone: row.telephone,
-                    repas_date: row.repas_date,
-                    retrait_slot: row.retrait_slot,
-                    payment_mode: row.payment_mode,
-                    status: row.status,
-                    total_initial: Number(row.total_initial),
+                    id: String(row.id),
+                    created_at: row.created_at ? String(row.created_at) : undefined,
+                    updated_at: row.updated_at ? String(row.updated_at) : undefined,
+                    reminder_sent_at: row.reminder_sent_at ? new Date(String(row.reminder_sent_at)).toISOString() : null,
+                    prenom: String(row.prenom || ''),
+                    nom: String(row.nom || ''),
+                    email: String(row.email || ''),
+                    telephone: String(row.telephone || ''),
+                    repas_date: String(row.repas_date || ''),
+                    retrait_slot: String(row.retrait_slot || ''),
+                    payment_mode: row.payment_mode === 'acompte_30' ? 'acompte_30' : 'total_100',
+                    status: String(row.status || 'en_attente'),
+                    total_initial: Number(row.total_initial || 0),
                     early_bird_discount: Number(row.early_bird_discount || 0),
-                    amount_paid_initial: Number(row.amount_paid_initial),
-                    balance_remaining: Number(row.balance_remaining),
-                    items: typeof row.items === 'string' ? JSON.parse(row.items) : row.items,
-                    additional_items: typeof row.additional_items === 'string' ? JSON.parse(row.additional_items) : (row.additional_items || []),
-                    notes: row.notes || ''
+                    amount_paid_initial: Number(row.amount_paid_initial || 0),
+                    balance_remaining: Number(row.balance_remaining || 0),
+                    items: typeof row.items === 'string' ? JSON.parse(row.items) : ((row.items as FestiveOrderItem[]) || []),
+                    additional_items: typeof row.additional_items === 'string' ? JSON.parse(row.additional_items) : ((row.additional_items as FestiveOrderItem[]) || []),
+                    notes: row.notes ? String(row.notes) : ''
                 };
             }
         } catch (err) {
@@ -242,27 +268,30 @@ export async function getFestiveOrdersPendingReminder(): Promise<FestiveOrderRec
                 WHERE reminder_sent_at IS NULL;
             `;
 
-            return (rows || []).map((row: any) => ({
-                id: row.id,
-                created_at: row.created_at,
-                updated_at: row.updated_at,
-                reminder_sent_at: row.reminder_sent_at ? new Date(row.reminder_sent_at).toISOString() : null,
-                prenom: row.prenom,
-                nom: row.nom,
-                email: row.email,
-                telephone: row.telephone,
-                repas_date: row.repas_date,
-                retrait_slot: row.retrait_slot,
-                payment_mode: row.payment_mode,
-                status: row.status,
-                total_initial: Number(row.total_initial),
-                early_bird_discount: Number(row.early_bird_discount || 0),
-                amount_paid_initial: Number(row.amount_paid_initial),
-                balance_remaining: Number(row.balance_remaining),
-                items: typeof row.items === 'string' ? JSON.parse(row.items) : row.items,
-                additional_items: typeof row.additional_items === 'string' ? JSON.parse(row.additional_items) : (row.additional_items || []),
-                notes: row.notes || ''
-            }));
+            return (rows || []).map((r) => {
+                const row = r as Record<string, unknown>;
+                return {
+                    id: String(row.id),
+                    created_at: row.created_at ? String(row.created_at) : undefined,
+                    updated_at: row.updated_at ? String(row.updated_at) : undefined,
+                    reminder_sent_at: row.reminder_sent_at ? new Date(String(row.reminder_sent_at)).toISOString() : null,
+                    prenom: String(row.prenom || ''),
+                    nom: String(row.nom || ''),
+                    email: String(row.email || ''),
+                    telephone: String(row.telephone || ''),
+                    repas_date: String(row.repas_date || ''),
+                    retrait_slot: String(row.retrait_slot || ''),
+                    payment_mode: row.payment_mode === 'acompte_30' ? 'acompte_30' : 'total_100',
+                    status: String(row.status || 'en_attente'),
+                    total_initial: Number(row.total_initial || 0),
+                    early_bird_discount: Number(row.early_bird_discount || 0),
+                    amount_paid_initial: Number(row.amount_paid_initial || 0),
+                    balance_remaining: Number(row.balance_remaining || 0),
+                    items: typeof row.items === 'string' ? JSON.parse(row.items) : ((row.items as FestiveOrderItem[]) || []),
+                    additional_items: typeof row.additional_items === 'string' ? JSON.parse(row.additional_items) : ((row.additional_items as FestiveOrderItem[]) || []),
+                    notes: row.notes ? String(row.notes) : ''
+                };
+            });
         } catch (err) {
             console.error("Erreur getFestiveOrdersPendingReminder SQL:", err);
         }
@@ -308,7 +337,7 @@ export async function markFestiveOrderReminderSent(orderId: string): Promise<boo
 export async function updateFestiveOrderAdditions(
     orderId: string,
     email: string,
-    newAdditionalItems: any[],
+    newAdditionalItems: FestiveOrderItem[],
     newBalanceRemaining: number
 ): Promise<FestiveOrderRecord | null> {
     const existing = await getFestiveOrder(orderId, email);

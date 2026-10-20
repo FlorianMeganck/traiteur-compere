@@ -70,11 +70,12 @@ export async function GET(req: Request) {
             isEarlyBirdOnAdditions: isEarlyBirdFestivePromoActive(new Date())
         });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Erreur GET /api/gestion-commande:", err);
+        const errMsg = err instanceof Error ? err.message : 'Erreur serveur lors de la récupération de la commande';
         return NextResponse.json({
             success: false,
-            error: err?.message || 'Erreur serveur lors de la récupération de la commande'
+            error: errMsg
         }, { status: 500 });
     }
 }
@@ -283,11 +284,12 @@ export async function POST(req: Request) {
             message: 'Avenant enregistré et email de confirmation envoyé avec succès.'
         });
 
-    } catch (err: any) {
+    } catch (err: unknown) {
         console.error("Erreur POST /api/gestion-commande:", err);
+        const errMsg = err instanceof Error ? err.message : 'Erreur lors de la validation des ajustements';
         return NextResponse.json({
             success: false,
-            error: err?.message || 'Erreur lors de la validation des ajustements'
+            error: errMsg
         }, { status: 500 });
     }
 }

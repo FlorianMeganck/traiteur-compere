@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, useLayoutEffect, Suspense, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useLayoutEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Leaf, Check, ShoppingCart, Clock, Calendar, AlertCircle, AlertTriangle, Phone, ChevronDown, ChevronRight } from "lucide-react";
+import { Check, ShoppingCart, Clock, Calendar, Phone, ChevronDown, ChevronRight } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
 import {
     FESTIVE_CALENDAR_DAYS,
@@ -73,47 +73,6 @@ const dinatoireViandesCascade: CascadeMeatItem[] = [
     "Brochette de scampi (+2,00 € / pers.)",
     "Contrefilet de bœuf étranger (+2,00 € / pers.)",
     ...viandesClassiquesCascade
-];
-
-const viandesClassiques = [
-    "Saucisse (nature, campagne, barbecue, italienne)",
-    "Chipolata (nature, fines herbes, poivre, piment d'Espelette)",
-    "Merguez",
-    "Mini boudin blanc",
-    "Saucisse de volaille (nature, fromage)",
-    "Brochette de mini boulettes marinées",
-    "Brochette de mini boudins",
-    "Filet de poulet mariné",
-    "Pilon de poulet mariné",
-    "Brochette de volaille marinée",
-    "Brochette de volaille nature garnie aux oignons",
-    "Brochette de dinde nature garnie aux oignons",
-    "Brochette de dinde marinée",
-    "Brochette nature garnie d'oignons",
-    "Brochette de porc garnie aux oignons",
-    "Brochette de porc marinée",
-    "Braisade de porc marinée",
-    "Lard mariné (ail & fines herbes ou paprika)",
-    "Jambon barbecue en tranche",
-    "Brochette de bœuf marinée (+1,00 € / pers.)",
-    "Braisade de bœuf marinée (+1,00 € / pers.)",
-    "Spare ribs marinés au miel (+1,00 € / pers.)",
-    "Côte d'agneau marinée ail & fines herbes (+1,00 € / pers.)",
-    "Braisade de canard aux trois poivres (+2,00 € / pers.)",
-    "Tranche de gigot d'agneau marinée ail & fines herbes (+2,00 € / pers.)",
-    "Spare ribs de bœuf (+2,50 € / pers.)"
-];
-
-const viandesCompose = [
-    "Brochette de scampi (+2,00 € / pers.)",
-    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
-    ...viandesClassiques
-];
-
-const dinatoireViandes = [
-    "Brochette de scampi (+2,00 € / pers.)",
-    "Contrefilet de bœuf étranger (+2,00 € / pers.)",
-    ...viandesClassiques
 ];
 
 const getMeatSupplementPrice = (meatName: string): number => {
@@ -454,11 +413,6 @@ const collectiviteData: Record<string, number> = {
     "Blanquette de veau à l'ancienne, purée": 14
 };
 
-// Legacy/Other Menus
-const ITEMS_ARDENNAIS = ["Croûte de pâté de chevreuil", "Boudin blanc de Liège", "Boudin noir", "Jambon d'Ardenne", "Pêche au thon", "Rosbif braisé", "Rôti de porc braisé", "Hure de veau", "Feuilleté de légumes de saison", "Quiche aux légumes"];
-const ITEMS_GALA = ["Mousse de foie de canard", "Saumon en belle-vue", "Farandole de langoustines", "Tomates aux crevettes grises", "Terrine de Sandre", "Jambon sur griffe", "Viande braisée", "Feuilleté de légumes de saison", "Terrine de légumes"];
-const ITEMS_ASSOCIATIONS = ["Boulets Liégeois (Sauce Lapin)", "Boulets Liégeois (Sauce Tomate)", "Vol-au-vent artisanal", "Pâtes Bolognaise", "Pâtes Carbonara", "Burgers Spécial Compère", "Option Végé : Grande Salade & Quiche"];
-
 // SAUCES CHAUDES
 const SAUCES_CHAUDES_LIST = [
     "Sauce au poivre",
@@ -535,14 +489,6 @@ const isValidPhone = (phone: string) => {
 
 function ContactForm() {
     const router = useRouter();
-    const getPickupDayPreview = (j: string | null) => {
-        if (!j) return "";
-        const d = j.toLowerCase();
-        if (d === 'lundi' || d === 'mardi') return 'Mardi';
-        if (d === 'mercredi' || d === 'jeudi') return 'Jeudi';
-        if (d === 'vendredi' || d === 'samedi') return 'Samedi';
-        return j;
-    };
     const searchParams = useSearchParams();
     const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -673,8 +619,9 @@ function ContactForm() {
     const handleFormStart = () => {
         if (!isStarted) {
             setIsStarted(true);
-            if (typeof window !== 'undefined' && (window as any).gtag) {
-                (window as any).gtag('event', 'form_start', {
+            const win = typeof window !== 'undefined' ? (window as Window & { gtag?: (cmd: string, action: string, params: Record<string, unknown>) => void }) : null;
+            if (win?.gtag) {
+                win.gtag('event', 'form_start', {
                     'event_category': 'engagement',
                     'event_label': 'debut_saisie_formulaire'
                 });
@@ -808,7 +755,7 @@ function ContactForm() {
     const isCollectivite = formData.Type_Evenement === 'Repas de collectivité';
     const isBuffetChaud = formData.Type_Evenement === 'Buffet Chaud';
 
-    const getInitialConvivesOptions = (currentType?: string) => {
+    const getInitialConvivesOptions = useCallback((currentType?: string) => {
         if (isCochonOrPorchetta) return OPTIONS_COCHON;
         if (isAnyBBQ) return OPTIONS_BBQ;
         if (isBuffetFroidMode) return OPTIONS_BUFFET_FROID;
@@ -818,7 +765,7 @@ function ContactForm() {
         if (isPainsMode || isZakouskisMode || isVerrinesMode) return OPTIONS_PAINS;
         if (isCollectiviteMode) return OPTIONS_COLLECTIVITE;
         return OPTIONS_STANDARD;
-    };
+    }, [isCochonOrPorchetta, isAnyBBQ, isBuffetFroidMode, isBuffet, isBuffetChaudMode, isAssociations, isPlatUnique, isPainsMode, isZakouskisMode, isVerrinesMode, isCollectiviteMode]);
 
     // --- HOOKS DEPENDING ON DECLARED MODE VARIABLES ---
     useLayoutEffect(() => {
@@ -967,7 +914,7 @@ function ContactForm() {
 
             return newData;
         });
-    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations, isPlatUnique, isBuffetFroidMode, isPainsMode]);
+    }, [searchParams, isCochonOrPorchetta, isAnyBBQ, isBuffet, isAssociations, isPlatUnique, isBuffetFroidMode, isPainsMode, getInitialConvivesOptions, isMenusFetes, typeParam]);
 
     // --- PRICING ENGINE ---
 
@@ -1038,8 +985,7 @@ function ContactForm() {
             let basePriceTotal = 0;
             // On boucle sur les 10 choix potentiels
             for (let i = 1; i <= 10; i++) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const item = (formData as any)[`Zakouski_Item_${i}`];
+                const item = (formData as Record<string, unknown>)[`Zakouski_Item_${i}`] as string | undefined;
                 if (item) {
                     let itemPrice = getZakouskiBasePrice(item);
                     if (formData.Nombre_Convives === 'Moins de 25') itemPrice += 0.30;
@@ -1053,8 +999,7 @@ function ContactForm() {
             const format = formData.Format_Verrines; // "6cl" ou "12cl"
 
             for (let i = 1; i <= 10; i++) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const item = (formData as any)[`Verrine_Item_${i}`];
+                const item = (formData as Record<string, unknown>)[`Verrine_Item_${i}`] as string | undefined;
                 if (item) {
                     const basePrices = getVerrineBasePrices(item);
                     if (basePrices) {
@@ -1162,17 +1107,6 @@ function ContactForm() {
     };
 
     const totalPrice = calculateTotal();
-
-    // Helper to get needed list based on menu
-    const getBBQList = () => {
-        if (isBBQClassique) return viandesClassiques;
-        if (isBBQMer) return fruitsDeMer;
-        if (isBBQVegetarien) return optionsVegetariennes;
-        if (isBBQNobles) return NOBLES;
-        if (isBBQDinatoire) return dinatoireViandes;
-        if (isBBQCompose) return viandesCompose;
-        return viandesClassiques;
-    };
 
     const getBBQCascadeList = (): CascadeMeatItem[] => {
         if (isBBQClassique) return viandesClassiquesCascade;
@@ -1441,18 +1375,16 @@ function ContactForm() {
             if (!formData.Categorie_Pains) newErrors.Categorie_Pains = "Requis";
             if (!formData.Quantite_Pains) newErrors.Quantite_Pains = "Requis";
         } else if (isZakouskis) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const formAny = formData as any;
-            if (!formAny.Zakouski_Item_1) newErrors.Zakouski_Item_1 = "Requis";
-            if (!formAny.Zakouski_Item_2) newErrors.Zakouski_Item_2 = "Requis";
-            if (!formAny.Zakouski_Item_3) newErrors.Zakouski_Item_3 = "Requis";
+            const formRecord = formData as unknown as Record<string, string | undefined>;
+            if (!formRecord.Zakouski_Item_1) newErrors.Zakouski_Item_1 = "Requis";
+            if (!formRecord.Zakouski_Item_2) newErrors.Zakouski_Item_2 = "Requis";
+            if (!formRecord.Zakouski_Item_3) newErrors.Zakouski_Item_3 = "Requis";
         } else if (isVerrines) {
             if (!formData.Format_Verrines) newErrors.Format_Verrines = "Requis";
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const formAny = formData as any;
-            if (!formAny.Verrine_Item_1) newErrors.Verrine_Item_1 = "Requis";
-            if (!formAny.Verrine_Item_2) newErrors.Verrine_Item_2 = "Requis";
-            if (!formAny.Verrine_Item_3) newErrors.Verrine_Item_3 = "Requis";
+            const formRecord = formData as unknown as Record<string, string | undefined>;
+            if (!formRecord.Verrine_Item_1) newErrors.Verrine_Item_1 = "Requis";
+            if (!formRecord.Verrine_Item_2) newErrors.Verrine_Item_2 = "Requis";
+            if (!formRecord.Verrine_Item_3) newErrors.Verrine_Item_3 = "Requis";
         } else if (isCollectivite) {
             if (formData.Collectivite_Volet === 'salad_bar') {
                 if (!formData.Salad_Bar_Choix) {
@@ -1565,6 +1497,7 @@ function ContactForm() {
         };
 
         // 3. Construction du Payload Web3Forms (Propre pour le Web, Visuel pour le Mail)
+        const formRecord = formData as unknown as Record<string, string | undefined>;
         const payload = {
             access_key: "32511cd2-dc66-49b5-8c6f-12a73315f644",
             subject: `Nouvelle demande : ${formData.Nom} ${formData.Prenom}`,
@@ -1660,32 +1593,32 @@ function ContactForm() {
             // --- SECTION ZAKOUSKIS ---
             ...(formData.Type_Evenement === 'Zakouskis' && {
                 "🥟 MENU SÉLECTIONNÉ": "ZAKOUSKIS",
-                ...(formData as any).Zakouski_Item_1 && { "Choix 1": (formData as any).Zakouski_Item_1 },
-                ...(formData as any).Zakouski_Item_2 && { "Choix 2": (formData as any).Zakouski_Item_2 },
-                ...(formData as any).Zakouski_Item_3 && { "Choix 3": (formData as any).Zakouski_Item_3 },
-                ...(formData as any).Zakouski_Item_4 && { "Choix 4": (formData as any).Zakouski_Item_4 },
-                ...(formData as any).Zakouski_Item_5 && { "Choix 5": (formData as any).Zakouski_Item_5 },
-                ...(formData as any).Zakouski_Item_6 && { "Choix 6": (formData as any).Zakouski_Item_6 },
-                ...(formData as any).Zakouski_Item_7 && { "Choix 7": (formData as any).Zakouski_Item_7 },
-                ...(formData as any).Zakouski_Item_8 && { "Choix 8": (formData as any).Zakouski_Item_8 },
-                ...(formData as any).Zakouski_Item_9 && { "Choix 9": (formData as any).Zakouski_Item_9 },
-                ...(formData as any).Zakouski_Item_10 && { "Choix 10": (formData as any).Zakouski_Item_10 }
+                ...(formRecord.Zakouski_Item_1 && { "Choix 1": formRecord.Zakouski_Item_1 }),
+                ...(formRecord.Zakouski_Item_2 && { "Choix 2": formRecord.Zakouski_Item_2 }),
+                ...(formRecord.Zakouski_Item_3 && { "Choix 3": formRecord.Zakouski_Item_3 }),
+                ...(formRecord.Zakouski_Item_4 && { "Choix 4": formRecord.Zakouski_Item_4 }),
+                ...(formRecord.Zakouski_Item_5 && { "Choix 5": formRecord.Zakouski_Item_5 }),
+                ...(formRecord.Zakouski_Item_6 && { "Choix 6": formRecord.Zakouski_Item_6 }),
+                ...(formRecord.Zakouski_Item_7 && { "Choix 7": formRecord.Zakouski_Item_7 }),
+                ...(formRecord.Zakouski_Item_8 && { "Choix 8": formRecord.Zakouski_Item_8 }),
+                ...(formRecord.Zakouski_Item_9 && { "Choix 9": formRecord.Zakouski_Item_9 }),
+                ...(formRecord.Zakouski_Item_10 && { "Choix 10": formRecord.Zakouski_Item_10 })
             }),
 
             // --- SECTION VERRINES ---
             ...(formData.Type_Evenement === 'Verrines' && {
                 "🍵 MENU SÉLECTIONNÉ": "VERRINES",
                 "📐 Format choisi": formData.Format_Verrines || "Non spécifié",
-                ...(formData as any).Verrine_Item_1 && { "Choix Verrine 1": (formData as any).Verrine_Item_1 },
-                ...(formData as any).Verrine_Item_2 && { "Choix Verrine 2": (formData as any).Verrine_Item_2 },
-                ...(formData as any).Verrine_Item_3 && { "Choix Verrine 3": (formData as any).Verrine_Item_3 },
-                ...(formData as any).Verrine_Item_4 && { "Choix Verrine 4": (formData as any).Verrine_Item_4 },
-                ...(formData as any).Verrine_Item_5 && { "Choix Verrine 5": (formData as any).Verrine_Item_5 },
-                ...(formData as any).Verrine_Item_6 && { "Choix Verrine 6": (formData as any).Verrine_Item_6 },
-                ...(formData as any).Verrine_Item_7 && { "Choix Verrine 7": (formData as any).Verrine_Item_7 },
-                ...(formData as any).Verrine_Item_8 && { "Choix Verrine 8": (formData as any).Verrine_Item_8 },
-                ...(formData as any).Verrine_Item_9 && { "Choix Verrine 9": (formData as any).Verrine_Item_9 },
-                ...(formData as any).Verrine_Item_10 && { "Choix Verrine 10": (formData as any).Verrine_Item_10 }
+                ...(formRecord.Verrine_Item_1 && { "Choix Verrine 1": formRecord.Verrine_Item_1 }),
+                ...(formRecord.Verrine_Item_2 && { "Choix Verrine 2": formRecord.Verrine_Item_2 }),
+                ...(formRecord.Verrine_Item_3 && { "Choix Verrine 3": formRecord.Verrine_Item_3 }),
+                ...(formRecord.Verrine_Item_4 && { "Choix Verrine 4": formRecord.Verrine_Item_4 }),
+                ...(formRecord.Verrine_Item_5 && { "Choix Verrine 5": formRecord.Verrine_Item_5 }),
+                ...(formRecord.Verrine_Item_6 && { "Choix Verrine 6": formRecord.Verrine_Item_6 }),
+                ...(formRecord.Verrine_Item_7 && { "Choix Verrine 7": formRecord.Verrine_Item_7 }),
+                ...(formRecord.Verrine_Item_8 && { "Choix Verrine 8": formRecord.Verrine_Item_8 }),
+                ...(formRecord.Verrine_Item_9 && { "Choix Verrine 9": formRecord.Verrine_Item_9 }),
+                ...(formRecord.Verrine_Item_10 && { "Choix Verrine 10": formRecord.Verrine_Item_10 })
             }),
 
             // --- SECTION COLLECTIVITÉS & SALAD BAR ---
@@ -1799,7 +1732,7 @@ function ContactForm() {
                     body: JSON.stringify(apiPayload)
                 });
 
-                let result: any = {};
+                let result: { success?: boolean; error?: string; orderNumber?: string; [key: string]: unknown } = {};
                 try {
                     result = await response.json();
                 } catch {
@@ -1886,10 +1819,9 @@ function ContactForm() {
                 const result = await response.json();
 
                 if (result.success) {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    if (typeof window !== 'undefined' && (window as any).gtag) {
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        (window as any).gtag('event', 'generate_lead', {
+                    if (typeof window !== 'undefined') {
+                        const win = window as Window & { gtag?: (type: string, name: string, options?: Record<string, unknown>) => void };
+                        win.gtag?.('event', 'generate_lead', {
                             'event_category': 'formulaire',
                             'event_label': 'contact_traiteur'
                         });
@@ -2237,7 +2169,7 @@ function ContactForm() {
             <CustomDropdown
                 label={label}
                 name={name}
-                value={(formData as any)[name] || ""}
+                value={String((formData as Record<string, unknown>)[name] || "")}
                 options={options}
                 excludeValues={excludeValues}
                 req={req}
@@ -2770,7 +2702,6 @@ function ContactForm() {
         const bbqChoices = [formData.Viande_1, formData.Viande_2, formData.Viande_3].filter(Boolean);
         const composeEntreeChoices = [formData.compose_entree_1, formData.compose_entree_2].filter(Boolean);
         const dinatoireServiceChoices = [formData.dinatoire_service_1, formData.dinatoire_service_2].filter(Boolean);
-        const froidChoices = [formData.Accompagnement_Froid_1, formData.Accompagnement_Froid_2, formData.Accompagnement_Froid_3].filter(Boolean);
 
         const bbqName = menuParam ? menuParam.replace('bbq_', '').charAt(0).toUpperCase() + menuParam.replace('bbq_', '').slice(1) : "Sur Mesure";
 
@@ -3124,7 +3055,7 @@ function ContactForm() {
                             <div key={`Crudite_${num}`}>
                                 <CustomDropdown
                                     name={`Crudite_${num}`}
-                                    value={(formData as any)[`Crudite_${num}`] || ""}
+                                    value={String((formData as Record<string, unknown>)[`Crudite_${num}`] || "")}
                                     options={cruditesFroids}
                                     placeholder={`Choix ${num} (ou choix du chef)...`}
                                     onSelect={handleSelectMeat}
@@ -3249,12 +3180,11 @@ function ContactForm() {
         const renderZakouskiSlot = (num: number, isRequired: boolean) => {
             const catKey = `Zakouski_Cat_${num}`;
             const itemKey = `Zakouski_Item_${num}`;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const formAny = formData as any;
-            const selectedCat = formAny[catKey];
+            const formRecord = formData as Record<string, unknown>;
+            const selectedCat = formRecord[catKey] as string | undefined;
 
             const rawItems = selectedCat && zakouskisData[selectedCat]
-                ? Object.entries(zakouskisData[selectedCat]).flatMap(([gammeName, gammeData]) => {
+                ? Object.entries(zakouskisData[selectedCat]).flatMap(([, gammeData]) => {
                     const adjustedPrice = getAdjustedPrice(gammeData.price);
                     return gammeData.items.map(item => `${item} (${adjustedPrice.toFixed(2).replace('.', ',')}€)`);
                 })
@@ -3273,12 +3203,12 @@ function ContactForm() {
                             placeholder="Famille de produit..."
                             onSelect={(k, val) => {
                                 handleSelectMeat(k, val);
-                                if (formAny[itemKey]) handleSelectMeat(itemKey, "");
+                                if (formRecord[itemKey]) handleSelectMeat(itemKey, "");
                             }}
                         />
                         <CustomDropdown
                             name={itemKey}
-                            value={formAny[itemKey] ? (rawItems.find(i => i.startsWith(formAny[itemKey])) || formAny[itemKey]) : ""}
+                            value={formRecord[itemKey] ? (rawItems.find(i => i.startsWith(String(formRecord[itemKey]))) || String(formRecord[itemKey])) : ""}
                             options={rawItems}
                             placeholder="Sélectionnez la pièce..."
                             disabled={!selectedCat}
@@ -3292,13 +3222,12 @@ function ContactForm() {
             );
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const formAny = formData as any;
-        const showBlock2 = !!formAny.Zakouski_Item_3;
-        const showSlot7 = !!formAny.Zakouski_Item_6;
-        const showSlot8 = !!formAny.Zakouski_Item_7;
-        const showSlot9 = !!formAny.Zakouski_Item_8;
-        const showSlot10 = !!formAny.Zakouski_Item_9;
+        const formRecord = formData as Record<string, unknown>;
+        const showBlock2 = !!formRecord.Zakouski_Item_3;
+        const showSlot7 = !!formRecord.Zakouski_Item_6;
+        const showSlot8 = !!formRecord.Zakouski_Item_7;
+        const showSlot9 = !!formRecord.Zakouski_Item_8;
+        const showSlot10 = !!formRecord.Zakouski_Item_9;
 
         return (
             <div className="space-y-8 animate-fade-in mt-8">
@@ -3362,9 +3291,8 @@ function ContactForm() {
         const renderVerrineSlot = (num: number, isRequired: boolean) => {
             const catKey = `Verrine_Cat_${num}`;
             const itemKey = `Verrine_Item_${num}`;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const formAny = formData as any;
-            const selectedCat = formAny[catKey];
+            const formRecord = formData as Record<string, unknown>;
+            const selectedCat = formRecord[catKey] as string | undefined;
 
             const isSlotsDisabled = !selectedFormat;
             const rawVerrineItems = selectedCat && verrinesData[selectedCat]
@@ -3385,12 +3313,12 @@ function ContactForm() {
                             disabled={isSlotsDisabled}
                             onSelect={(k, val) => {
                                 handleSelectMeat(k, val);
-                                if (formAny[itemKey]) handleSelectMeat(itemKey, "");
+                                if (formRecord[itemKey]) handleSelectMeat(itemKey, "");
                             }}
                         />
                         <CustomDropdown
                             name={itemKey}
-                            value={formAny[itemKey] ? (rawVerrineItems.find(i => i.startsWith(formAny[itemKey])) || formAny[itemKey]) : ""}
+                            value={formRecord[itemKey] ? (rawVerrineItems.find(i => i.startsWith(String(formRecord[itemKey]))) || String(formRecord[itemKey])) : ""}
                             options={rawVerrineItems}
                             placeholder="Sélectionnez la pièce..."
                             disabled={isSlotsDisabled || !selectedCat}
@@ -3404,13 +3332,12 @@ function ContactForm() {
             );
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const formAny = formData as any;
-        const showBlock2 = !!formAny.Verrine_Item_3;
-        const showSlot7 = !!formAny.Verrine_Item_6;
-        const showSlot8 = !!formAny.Verrine_Item_7;
-        const showSlot9 = !!formAny.Verrine_Item_8;
-        const showSlot10 = !!formAny.Verrine_Item_9;
+        const formRecord = formData as Record<string, unknown>;
+        const showBlock2 = !!formRecord.Verrine_Item_3;
+        const showSlot7 = !!formRecord.Verrine_Item_6;
+        const showSlot8 = !!formRecord.Verrine_Item_7;
+        const showSlot9 = !!formRecord.Verrine_Item_8;
+        const showSlot10 = !!formRecord.Verrine_Item_9;
 
         return (
             <div className="space-y-8 animate-fade-in mt-8">
@@ -3479,7 +3406,6 @@ function ContactForm() {
 
         // Tri alphabétique des plats chauds pour un affichage propre
         const sortedDishes = Object.keys(collectiviteData).sort((a, b) => a.localeCompare(b));
-        const sortedSalads = Object.keys(saladesBowlsData);
 
         const getAdjustedPriceDisplay = (basePrice: number) => {
             if (formData.Nombre_Convives === 'Moins de 30') return basePrice * 1.10;
