@@ -44,10 +44,11 @@ function CommandeConfirmeeContent() {
     const qrRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        // Supprime tout verrouillage laissé par un composant précédent (Radix, Drawer, etc.)
+        // Nettoyage impératif des styles résiduels
         document.body.style.pointerEvents = 'auto';
         document.documentElement.style.pointerEvents = 'auto';
         document.body.style.overflow = 'auto';
+        document.documentElement.style.overflow = 'auto';
 
         // Nettoyage préventif des attributs de verrouillage résiduels
         document.body.removeAttribute('data-scroll-locked');
@@ -58,10 +59,26 @@ function CommandeConfirmeeContent() {
             window.dispatchEvent(new CustomEvent('close-cart-drawer'));
         }
 
+        // Sécurité de navigation : force le rechargement sur clic des liens si SPA bloquée
+        const handleLinkClick = (e: MouseEvent) => {
+            const target = (e.target as HTMLElement).closest('a');
+            if (target && target.href && !target.target && target.origin === window.location.origin) {
+                // Si c'est un lien interne standard
+                const path = target.pathname;
+                if (path && path !== window.location.pathname) {
+                    e.preventDefault();
+                    window.location.href = target.href;
+                }
+            }
+        };
+
+        document.addEventListener('click', handleLinkClick, { capture: true });
+
         return () => {
             document.body.style.pointerEvents = 'auto';
             document.documentElement.style.pointerEvents = 'auto';
             document.body.style.overflow = 'auto';
+            document.removeEventListener('click', handleLinkClick, { capture: true });
         };
     }, []);
 
