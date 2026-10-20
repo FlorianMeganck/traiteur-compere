@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Trash2, Check } from "lucide-react";
 
-import { MENU_DATA } from "../data/plats-prepares";
+import { MENU_DATA, isPlatVisible } from "../data/plats-prepares";
 import { useCart, CartItem } from "../hooks/useCart";
 
 export default function PlatsPrepares() {
@@ -25,28 +25,7 @@ export default function PlatsPrepares() {
     }, []);
 
     // 1. Logique de visibilité
-    const isVisible = (dayName: string, weekId: string) => {
-        const today = new Date();
-        const pickupDates: Record<string, Record<string, Date>> = {
-            "semaine-1": { "mardi": new Date(2026, 4, 5), "jeudi": new Date(2026, 4, 7), "samedi": new Date(2026, 4, 9) },
-            "semaine-2": { "mardi": new Date(2026, 4, 12), "jeudi": new Date(2026, 4, 14), "samedi": new Date(2026, 4, 16) },
-            "semaine-3": { "mardi": new Date(2026, 4, 19), "jeudi": new Date(2026, 4, 21), "samedi": new Date(2026, 4, 23) },
-            "semaine-4": { "mardi": new Date(2026, 4, 26), "jeudi": new Date(2026, 4, 28), "samedi": new Date(2026, 4, 30) },
-        };
-
-        let targetDay = "";
-        const d = dayName.toLowerCase();
-        if (d === 'lundi' || d === 'mardi') targetDay = 'mardi';
-        else if (d === 'mercredi' || d === 'jeudi') targetDay = 'jeudi';
-        else targetDay = 'samedi';
-
-        const pickupDate = pickupDates[weekId]?.[targetDay];
-        if (!pickupDate) return false;
-
-        const diffTime = pickupDate.getTime() - today.getTime();
-        const diffDays = diffTime / (1000 * 60 * 60 * 24);
-        return diffDays >= 2;
-    };
+    const isVisible = isPlatVisible;
 
     const firstAvailableWeek = MENU_DATA.find(menu =>
         menu.days.some(dayItem => isVisible(dayItem.day, menu.id))
