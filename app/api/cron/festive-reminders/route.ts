@@ -22,28 +22,26 @@ const FROM_EMAIL = 'Traiteur Compère <contact@traiteur-compere.be>';
 /**
  * Vérification de sécurité :
  * - Vercel Cron Job envoie le header "Authorization: Bearer <CRON_SECRET>"
- * - Permet également le test manuel via ?secret=<CRON_SECRET>
- * - Autorise l'exécution locale en dev si CRON_SECRET n'est pas encore défini
+ * - Permet le test manuel via ?key=test-compere ou ?key=<CRON_SECRET>
+ * - Autorise l'exécution locale en dev
  */
 function isAuthorized(req: Request): boolean {
-    const cronSecret = process.env.CRON_SECRET;
     const authHeader = req.headers.get('authorization');
     const { searchParams } = new URL(req.url);
-    const querySecret = searchParams.get('secret');
+    const testKey = searchParams.get('key') || searchParams.get('secret');
 
-    // 1. Si CRON_SECRET est configuré (production / Vercel)
-    if (cronSecret) {
-        if (authHeader === `Bearer ${cronSecret}`) return true;
-        if (querySecret === cronSecret) return true;
-        return false;
+    const isValidCron = Boolean(process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`);
+    const isValidManualTest = testKey === 'test-compere' || Boolean(process.env.CRON_SECRET && testKey === process.env.CRON_SECRET);
+
+    if (isValidCron || isValidManualTest) {
+        return true;
     }
 
-    // 2. En local / dev si CRON_SECRET n'est pas encore défini
+    // Autoriser en local / dev
     if (process.env.NODE_ENV !== 'production') {
         return true;
     }
 
-    // 3. En production sans secret configuré : refus par sécurité
     return false;
 }
 
@@ -52,7 +50,7 @@ async function handleCronExecution(req: Request) {
     if (!isAuthorized(req)) {
         return NextResponse.json({
             success: false,
-            error: 'Accès non autorisé. Header Authorization Bearer ou paramètre ?secret invalide.'
+            error: 'Unauthorized'
         }, { status: 401 });
     }
 
