@@ -1812,13 +1812,17 @@ function ContactForm() {
                     const redirectJours = isMenusFetes ? (dateEvenementFormatted || '24 Décembre') : joursUniques;
                     clearCart();
 
-                    // Nettoyage de sécurité proactif avant redirection
-                    if (typeof document !== 'undefined') {
-                        document.body.style.pointerEvents = 'auto';
-                        document.body.style.overflow = 'unset';
-                    }
+                    // Fermeture propre du CartDrawer et reset des styles avant redirection
                     if (typeof window !== 'undefined') {
                         window.dispatchEvent(new CustomEvent('close-cart-drawer'));
+                    }
+                    if (typeof document !== 'undefined') {
+                        document.body.style.pointerEvents = 'auto';
+                        document.documentElement.style.pointerEvents = 'auto';
+                        document.body.style.overflow = 'auto';
+                        document.documentElement.style.overflow = 'auto';
+                        document.body.removeAttribute('data-scroll-locked');
+                        document.documentElement.removeAttribute('data-scroll-locked');
                     }
 
                     // Stocker l'objet récapitulatif complet dans sessionStorage pour une URL propre et sécurisée
@@ -1849,12 +1853,20 @@ function ContactForm() {
                     }
 
                     setTimeout(() => {
+                        // S'assurer du démontage complet du drawer et déverrouillage avant la navigation
+                        if (typeof window !== 'undefined') {
+                            window.dispatchEvent(new CustomEvent('close-cart-drawer'));
+                        }
                         if (typeof document !== 'undefined') {
                             document.body.style.pointerEvents = 'auto';
-                            document.body.style.overflow = 'unset';
+                            document.documentElement.style.pointerEvents = 'auto';
+                            document.body.style.overflow = 'auto';
+                            document.documentElement.style.overflow = 'auto';
+                            document.body.removeAttribute('data-scroll-locked');
+                            document.documentElement.removeAttribute('data-scroll-locked');
                         }
                         router.push('/commande-confirmee');
-                    }, 2000);
+                    }, 1500);
                 } else {
                     console.error("Erreur API Commande:", result);
                     const errorMsg = result?.error || result?.message || "Une erreur est survenue lors de l'enregistrement de votre commande. Veuillez réessayer.";

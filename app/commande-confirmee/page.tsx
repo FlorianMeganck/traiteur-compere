@@ -43,13 +43,25 @@ function CommandeConfirmeeContent() {
     const { clearCart } = useCart();
     const qrRef = useRef<HTMLDivElement>(null);
 
-    // Nettoyage de sécurité des styles injectés sur document.body et restauration des interactions
     useEffect(() => {
+        // Supprime tout verrouillage laissé par un composant précédent (Radix, Drawer, etc.)
         document.body.style.pointerEvents = 'auto';
-        document.body.style.overflow = 'unset';
+        document.documentElement.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'auto';
+
+        // Nettoyage préventif des attributs de verrouillage résiduels
+        document.body.removeAttribute('data-scroll-locked');
+        document.documentElement.removeAttribute('data-scroll-locked');
+
+        // Fermeture propre de tout tiroir de panier encore actif
+        if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('close-cart-drawer'));
+        }
+
         return () => {
             document.body.style.pointerEvents = 'auto';
-            document.body.style.overflow = 'unset';
+            document.documentElement.style.pointerEvents = 'auto';
+            document.body.style.overflow = 'auto';
         };
     }, []);
 
@@ -118,12 +130,14 @@ function CommandeConfirmeeContent() {
         if (isQrModalOpen) {
             document.body.style.overflow = "hidden";
         } else {
-            document.body.style.overflow = "unset";
+            document.body.style.overflow = "auto";
             document.body.style.pointerEvents = "auto";
+            document.documentElement.style.pointerEvents = "auto";
         }
         return () => {
-            document.body.style.overflow = "unset";
+            document.body.style.overflow = "auto";
             document.body.style.pointerEvents = "auto";
+            document.documentElement.style.pointerEvents = "auto";
         };
     }, [isQrModalOpen]);
 

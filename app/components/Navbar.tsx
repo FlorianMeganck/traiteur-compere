@@ -86,12 +86,14 @@ export default function Navbar() {
         if (isMenuOpen || isCartOpen) {
             document.body.style.overflow = "hidden";
         } else {
-            document.body.style.overflow = "unset";
+            document.body.style.overflow = "auto";
             document.body.style.pointerEvents = "auto";
+            document.documentElement.style.pointerEvents = "auto";
         }
         return () => {
-            document.body.style.overflow = "unset";
+            document.body.style.overflow = "auto";
             document.body.style.pointerEvents = "auto";
+            document.documentElement.style.pointerEvents = "auto";
         };
     }, [isMenuOpen, isCartOpen]);
 
@@ -100,8 +102,11 @@ export default function Navbar() {
         setIsMenuOpen(false);
         setIsCartOpen(false);
         if (typeof document !== "undefined") {
-            document.body.style.overflow = "unset";
+            document.body.style.overflow = "auto";
             document.body.style.pointerEvents = "auto";
+            document.documentElement.style.pointerEvents = "auto";
+            document.body.removeAttribute("data-scroll-locked");
+            document.documentElement.removeAttribute("data-scroll-locked");
         }
     }, [pathname]);
 
@@ -109,7 +114,16 @@ export default function Navbar() {
 
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
-        const handleCloseCart = () => setIsCartOpen(false);
+        const handleCloseCart = () => {
+            setIsCartOpen(false);
+            if (typeof document !== "undefined") {
+                document.body.style.overflow = "auto";
+                document.body.style.pointerEvents = "auto";
+                document.documentElement.style.pointerEvents = "auto";
+                document.body.removeAttribute("data-scroll-locked");
+                document.documentElement.removeAttribute("data-scroll-locked");
+            }
+        };
         const handleCartBump = () => {
             setCartBump(true);
             setTimeout(() => setCartBump(false), 800);
@@ -175,7 +189,11 @@ export default function Navbar() {
                                         setIsCartOpen(false);
                                         if (typeof document !== 'undefined') {
                                             document.body.style.pointerEvents = 'auto';
-                                            document.body.style.overflow = 'unset';
+                                            document.documentElement.style.pointerEvents = 'auto';
+                                            document.body.style.overflow = 'auto';
+                                            document.documentElement.style.overflow = 'auto';
+                                            document.body.removeAttribute('data-scroll-locked');
+                                            document.documentElement.removeAttribute('data-scroll-locked');
                                         }
                                     }}
                                     className="relative block w-32 h-16 md:w-44 md:h-22 lg:w-48 lg:h-24 transition-transform hover:scale-105 z-50 cursor-pointer"
@@ -234,7 +252,11 @@ export default function Navbar() {
                                     setIsCartOpen(false);
                                     if (typeof document !== 'undefined') {
                                         document.body.style.pointerEvents = 'auto';
-                                        document.body.style.overflow = 'unset';
+                                        document.documentElement.style.pointerEvents = 'auto';
+                                        document.body.style.overflow = 'auto';
+                                        document.documentElement.style.overflow = 'auto';
+                                        document.body.removeAttribute('data-scroll-locked');
+                                        document.documentElement.removeAttribute('data-scroll-locked');
                                     }
                                 }}
                                 className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50 cursor-pointer"
