@@ -156,32 +156,33 @@ export default function Navbar() {
                 >
                     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12 relative">
 
-                        {/* --- DESKTOP LAYOUT (Grid 3 Cols: Left links / Logo / Right links + Extremities) --- */}
-                        <div className="hidden md:grid grid-cols-[1fr_auto_1fr] items-center w-full relative">
+                        {/* --- DESKTOP LAYOUT (3 Zones distinctes sans chevauchement : Gauche / Logo centré / Droite) --- */}
+                        <div className="hidden md:flex items-center justify-between w-full relative z-20">
 
-                            {/* SOCIALS (Pushed to the absolute far left) */}
-                            <div className="hidden lg:flex absolute left-0 items-center gap-3.5">
-                                <SocialLink
-                                    href="https://www.facebook.com/profile.php?id=61582940090708"
-                                    icon={<FacebookIcon />}
-                                    className={desktopTextColor}
-                                />
-                                <SocialLink
-                                    href="https://www.instagram.com/traiteurcompere/"
-                                    icon={<InstagramIcon />}
-                                    className={desktopTextColor}
-                                />
+                            {/* ZONE GAUCHE : Réseaux sociaux + Liens gauche (À Propos, Services, Plats Préparés) */}
+                            <div className="flex-1 flex items-center min-w-0 relative z-20">
+                                <div className="hidden lg:flex items-center gap-3.5 shrink-0 mr-4 xl:mr-6">
+                                    <SocialLink
+                                        href="https://www.facebook.com/profile.php?id=61582940090708"
+                                        icon={<FacebookIcon />}
+                                        className={desktopTextColor}
+                                    />
+                                    <SocialLink
+                                        href="https://www.instagram.com/traiteurcompere/"
+                                        icon={<InstagramIcon />}
+                                        className={desktopTextColor}
+                                    />
+                                </div>
+
+                                <div className="flex items-center gap-4 lg:gap-6 xl:gap-8 ml-auto pr-4 lg:pr-8">
+                                    <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
+                                    <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
+                                    <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
+                                </div>
                             </div>
 
-                            {/* LEFT ZONE: À Propos, Services & Plats Préparés (Spaced out to the left of the logo) */}
-                            <div className="flex justify-end items-center gap-4 lg:gap-6 xl:gap-8 pr-6 lg:pr-10 xl:pr-14">
-                                <NavLink href={NAV_LINKS[0].href} label={NAV_LINKS[0].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[0].href} />
-                                <NavLink href={NAV_LINKS[1].href} label={NAV_LINKS[1].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[1].href} />
-                                <NavLink href={NAV_LINKS[2].href} label={NAV_LINKS[2].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[2].href} />
-                            </div>
-
-                            {/* CENTER ZONE: Logo avec respiration */}
-                            <div className="flex justify-center items-center px-4 lg:px-8">
+                            {/* ZONE CENTRALE : Logo (parfaitement centré, z-index supérieur z-30) */}
+                            <div className="shrink-0 flex items-center justify-center px-3 lg:px-6 relative z-30">
                                 <Link
                                     href="/"
                                     onClick={() => {
@@ -196,7 +197,7 @@ export default function Navbar() {
                                             document.documentElement.removeAttribute('data-scroll-locked');
                                         }
                                     }}
-                                    className="relative block w-32 h-16 md:w-44 md:h-22 lg:w-48 lg:h-24 transition-transform hover:scale-105 z-50 cursor-pointer"
+                                    className="relative block w-32 h-16 md:w-44 md:h-22 lg:w-48 lg:h-24 transition-transform hover:scale-105 z-30 cursor-pointer pointer-events-auto"
                                 >
                                     <Image
                                         src="/images/Logo_traiteur.png"
@@ -208,42 +209,43 @@ export default function Navbar() {
                                 </Link>
                             </div>
 
-                            {/* RIGHT ZONE: Formules, Menus de Fêtes & Contact (Spaced out to the right of the logo) */}
-                            <div className="flex justify-start items-center gap-4 lg:gap-6 xl:gap-8 pl-6 lg:pl-10 xl:pl-14">
-                                <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
-                                <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} isFestive={true} />
-                                <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
-                            </div>
+                            {/* ZONE DROITE : Liens droite (Formules, Menus de Fêtes, Contact) + Panier */}
+                            <div className="flex-1 flex items-center min-w-0 relative z-20">
+                                <div className="flex items-center gap-4 lg:gap-6 xl:gap-8 pl-4 lg:pl-8">
+                                    <NavLink href={NAV_LINKS[3].href} label={NAV_LINKS[3].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[3].href} />
+                                    <NavLink href={NAV_LINKS[4].href} label={NAV_LINKS[4].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[4].href} isFestive={true} />
+                                    <NavLink href={NAV_LINKS[5].href} label={NAV_LINKS[5].label} textColor={desktopTextColor} isActive={pathname === NAV_LINKS[5].href} />
+                                </div>
 
-                            {/* DESKTOP CART (Pushed to the absolute far right with Bounce animation) */}
-                            <div className="hidden md:flex absolute right-0 items-center">
-                                <motion.button
-                                    onClick={() => setIsCartOpen(true)}
-                                    animate={isCartBouncing ? {
-                                        scale: [1, 1.28, 0.92, 1.15, 1],
-                                        rotate: [0, -8, 8, -4, 4, 0],
-                                    } : { scale: 1, rotate: 0 }}
-                                    transition={{ duration: 0.55, ease: "easeInOut" }}
-                                    className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37] hover:bg-black/5`}
-                                    aria-label="Panier de commande"
-                                >
-                                    <ShoppingCart size={23} className={isCartBouncing ? "text-[#D4AF37]" : ""} />
-                                    {totalItems > 0 && (
-                                        <motion.span
-                                            key={totalItems}
-                                            initial={{ scale: 0.3 }}
-                                            animate={{ scale: 1 }}
-                                            className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white"
-                                        >
-                                            {totalItems}
-                                        </motion.span>
-                                    )}
-                                </motion.button>
+                                <div className="flex items-center shrink-0 ml-auto pl-2">
+                                    <motion.button
+                                        onClick={() => setIsCartOpen(true)}
+                                        animate={isCartBouncing ? {
+                                            scale: [1, 1.28, 0.92, 1.15, 1],
+                                            rotate: [0, -8, 8, -4, 4, 0],
+                                        } : { scale: 1, rotate: 0 }}
+                                        transition={{ duration: 0.55, ease: "easeInOut" }}
+                                        className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${desktopTextColor} hover:text-[#D4AF37] hover:bg-black/5 pointer-events-auto`}
+                                        aria-label="Panier de commande"
+                                    >
+                                        <ShoppingCart size={23} className={isCartBouncing ? "text-[#D4AF37]" : ""} />
+                                        {totalItems > 0 && (
+                                            <motion.span
+                                                key={totalItems}
+                                                initial={{ scale: 0.3 }}
+                                                animate={{ scale: 1 }}
+                                                className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 bg-[#D4AF37] text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-md ring-2 ring-white"
+                                            >
+                                                {totalItems}
+                                            </motion.span>
+                                        )}
+                                    </motion.button>
+                                </div>
                             </div>
                         </div>
 
                         {/* --- MOBILE LAYOUT (Flex Between) --- */}
-                        <div className="md:hidden flex justify-between items-center w-full">
+                        <div className="md:hidden flex justify-between items-center w-full relative z-20">
                             {/* LOGO */}
                             <Link
                                 href="/"
@@ -259,7 +261,7 @@ export default function Navbar() {
                                         document.documentElement.removeAttribute('data-scroll-locked');
                                     }
                                 }}
-                                className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50 cursor-pointer"
+                                className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-30 cursor-pointer pointer-events-auto"
                             >
                                 <Image
                                     src="/images/Logo_traiteur.png"
@@ -270,7 +272,7 @@ export default function Navbar() {
                                 />
                             </Link>
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-4 relative z-30 pointer-events-auto">
                                 {/* Mobile Cart Button with Bounce */}
                                 <motion.button
                                     onClick={() => { setIsMenuOpen(false); setIsCartOpen(true); }}
@@ -279,7 +281,7 @@ export default function Navbar() {
                                         rotate: [0, -8, 8, -4, 4, 0],
                                     } : { scale: 1, rotate: 0 }}
                                     transition={{ duration: 0.55, ease: "easeInOut" }}
-                                    className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-50`}
+                                    className={`relative flex items-center justify-center p-2 rounded-full transition-colors ${finalLogoColor} hover:text-[#D4AF37] z-30 pointer-events-auto`}
                                 >
                                     <ShoppingCart size={24} className={isCartBouncing ? "text-[#D4AF37]" : ""} />
                                     {totalItems > 0 && (
@@ -295,7 +297,7 @@ export default function Navbar() {
                                 </motion.button>
 
                                 {/* BURGER */}
-                                <div className="relative z-50">
+                                <div className="relative z-30">
                                     <button
                                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                                         className="flex flex-col justify-center items-center w-10 h-10 gap-1.5 focus:outline-none"
