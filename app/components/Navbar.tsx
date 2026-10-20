@@ -81,30 +81,45 @@ export default function Navbar() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    // Lock body scroll when menu is open
+    // Verrouillage/déverrouillage propre du scroll et réactivation des interactions
     useEffect(() => {
-        if (isMenuOpen) {
+        if (isMenuOpen || isCartOpen) {
             document.body.style.overflow = "hidden";
         } else {
             document.body.style.overflow = "unset";
+            document.body.style.pointerEvents = "auto";
         }
         return () => {
             document.body.style.overflow = "unset";
+            document.body.style.pointerEvents = "auto";
         };
-    }, [isMenuOpen]);
+    }, [isMenuOpen, isCartOpen]);
+
+    // Fermer systématiquement les tiroirs/menus et rétablir le body à chaque changement d'URL
+    useEffect(() => {
+        setIsMenuOpen(false);
+        setIsCartOpen(false);
+        if (typeof document !== "undefined") {
+            document.body.style.overflow = "unset";
+            document.body.style.pointerEvents = "auto";
+        }
+    }, [pathname]);
 
     const [cartBump, setCartBump] = useState(false);
 
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
+        const handleCloseCart = () => setIsCartOpen(false);
         const handleCartBump = () => {
             setCartBump(true);
             setTimeout(() => setCartBump(false), 800);
         };
         window.addEventListener('open-cart-drawer', handleOpenCart);
+        window.addEventListener('close-cart-drawer', handleCloseCart);
         window.addEventListener('cart-bump', handleCartBump);
         return () => {
             window.removeEventListener('open-cart-drawer', handleOpenCart);
+            window.removeEventListener('close-cart-drawer', handleCloseCart);
             window.removeEventListener('cart-bump', handleCartBump);
         };
     }, []);
@@ -153,7 +168,18 @@ export default function Navbar() {
 
                             {/* CENTER ZONE: Logo avec respiration */}
                             <div className="flex justify-center items-center px-4 lg:px-8">
-                                <Link href="/" className="relative block w-32 h-16 md:w-44 md:h-22 lg:w-48 lg:h-24 transition-transform hover:scale-105 z-50">
+                                <Link
+                                    href="/"
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                        setIsCartOpen(false);
+                                        if (typeof document !== 'undefined') {
+                                            document.body.style.pointerEvents = 'auto';
+                                            document.body.style.overflow = 'unset';
+                                        }
+                                    }}
+                                    className="relative block w-32 h-16 md:w-44 md:h-22 lg:w-48 lg:h-24 transition-transform hover:scale-105 z-50 cursor-pointer"
+                                >
                                     <Image
                                         src="/images/Logo_traiteur.png"
                                         alt="Traiteur Compère"
@@ -201,7 +227,18 @@ export default function Navbar() {
                         {/* --- MOBILE LAYOUT (Flex Between) --- */}
                         <div className="md:hidden flex justify-between items-center w-full">
                             {/* LOGO */}
-                            <Link href="/" className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50">
+                            <Link
+                                href="/"
+                                onClick={() => {
+                                    setIsMenuOpen(false);
+                                    setIsCartOpen(false);
+                                    if (typeof document !== 'undefined') {
+                                        document.body.style.pointerEvents = 'auto';
+                                        document.body.style.overflow = 'unset';
+                                    }
+                                }}
+                                className="relative block w-32 h-16 md:w-48 md:h-24 transition-transform hover:scale-105 z-50 cursor-pointer"
+                            >
                                 <Image
                                     src="/images/Logo_traiteur.png"
                                     alt="Traiteur Compère"

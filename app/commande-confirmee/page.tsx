@@ -43,6 +43,16 @@ function CommandeConfirmeeContent() {
     const { clearCart } = useCart();
     const qrRef = useRef<HTMLDivElement>(null);
 
+    // Nettoyage de sécurité des styles injectés sur document.body et restauration des interactions
+    useEffect(() => {
+        document.body.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'unset';
+        return () => {
+            document.body.style.pointerEvents = 'auto';
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
+
     // Vider le panier dès l'arrivée sur cet écran
     useEffect(() => {
         clearCart();
@@ -102,6 +112,20 @@ function CommandeConfirmeeContent() {
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
+
+    // Gestion du scroll lors de l'ouverture de la modale QR code
+    useEffect(() => {
+        if (isQrModalOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "unset";
+            document.body.style.pointerEvents = "auto";
+        }
+        return () => {
+            document.body.style.overflow = "unset";
+            document.body.style.pointerEvents = "auto";
+        };
+    }, [isQrModalOpen]);
 
     // État de copie des coordonnées avec feedback temporaire
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -740,7 +764,13 @@ function CommandeConfirmeeContent() {
                         {/* Bouton 2 : Retour à l'accueil */}
                         <Link
                             href="/"
-                            className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-black hover:bg-[#D4AF37] text-white hover:text-black font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2"
+                            onClick={() => {
+                                if (typeof document !== 'undefined') {
+                                    document.body.style.pointerEvents = 'auto';
+                                    document.body.style.overflow = 'unset';
+                                }
+                            }}
+                            className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-black hover:bg-[#D4AF37] text-white hover:text-black font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <ArrowLeft size={15} />
                             <span>Retour à l&apos;accueil</span>

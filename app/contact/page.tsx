@@ -1812,6 +1812,15 @@ function ContactForm() {
                     const redirectJours = isMenusFetes ? (dateEvenementFormatted || '24 Décembre') : joursUniques;
                     clearCart();
 
+                    // Nettoyage de sécurité proactif avant redirection
+                    if (typeof document !== 'undefined') {
+                        document.body.style.pointerEvents = 'auto';
+                        document.body.style.overflow = 'unset';
+                    }
+                    if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new CustomEvent('close-cart-drawer'));
+                    }
+
                     // Stocker l'objet récapitulatif complet dans sessionStorage pour une URL propre et sécurisée
                     const paymentMode = isMenusFetes ? (validationMode === 'acompte_30' ? 'acompte' : 'total') : 'total';
                     const orderSummary = {
@@ -1840,6 +1849,10 @@ function ContactForm() {
                     }
 
                     setTimeout(() => {
+                        if (typeof document !== 'undefined') {
+                            document.body.style.pointerEvents = 'auto';
+                            document.body.style.overflow = 'unset';
+                        }
                         router.push('/commande-confirmee');
                     }, 2000);
                 } else {
