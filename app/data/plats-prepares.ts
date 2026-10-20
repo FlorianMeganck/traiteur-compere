@@ -13,10 +13,14 @@ export type MenuWeek = {
 };
 
 export const PICKUP_DATES: Record<string, Record<string, Date>> = {
-    "semaine-1": { "mardi": new Date(2026, 9, 27), "jeudi": new Date(2026, 9, 29), "samedi": new Date(2026, 9, 31) },
-    "semaine-2": { "mardi": new Date(2026, 10, 3), "jeudi": new Date(2026, 10, 5), "samedi": new Date(2026, 10, 7) },
-    "semaine-3": { "mardi": new Date(2026, 10, 10), "jeudi": new Date(2026, 10, 12), "samedi": new Date(2026, 10, 14) },
-    "semaine-4": { "mardi": new Date(2026, 10, 17), "jeudi": new Date(2026, 10, 19), "samedi": new Date(2026, 10, 21) },
+    "semaine-4-octobre": { "mardi": new Date(2026, 9, 27), "jeudi": new Date(2026, 9, 29), "samedi": new Date(2026, 9, 31) },
+    "semaine-1": { "mardi": new Date(2026, 10, 3), "jeudi": new Date(2026, 10, 5), "samedi": new Date(2026, 10, 7) },
+    "semaine-2": { "mardi": new Date(2026, 10, 10), "jeudi": new Date(2026, 10, 12), "samedi": new Date(2026, 10, 14) },
+    "semaine-3": { "mardi": new Date(2026, 10, 17), "jeudi": new Date(2026, 10, 19), "samedi": new Date(2026, 10, 21) },
+    "semaine-4": { "mardi": new Date(2026, 10, 24), "jeudi": new Date(2026, 10, 26), "samedi": new Date(2026, 10, 28) },
+    // Aliases rétrocompatibles
+    "semaine-4-nov": { "mardi": new Date(2026, 10, 24), "jeudi": new Date(2026, 10, 26), "samedi": new Date(2026, 10, 28) },
+    "semaine-1-oct": { "mardi": new Date(2026, 9, 27), "jeudi": new Date(2026, 9, 29), "samedi": new Date(2026, 9, 31) },
     "semaine-5": { "mardi": new Date(2026, 10, 24), "jeudi": new Date(2026, 10, 26), "samedi": new Date(2026, 10, 28) },
 };
 
@@ -38,8 +42,8 @@ export const isPlatVisible = (dayName: string, weekId: string, customNow?: Date)
 
 export const MENU_DATA: MenuWeek[] = [
     {
-        id: "semaine-1",
-        week: "Semaine 1 : du 26 au 31 octobre 2026",
+        id: "semaine-4-octobre",
+        week: "Semaine 4 : du 26 au 31 octobre 2026",
         soups: ["Velouté de potiron", "Poireaux-pommes de terre"],
         days: [
             { day: "Lundi", date: "lundi 26 octobre 2026", meal: "Carbonnade flamande (Purée)", price: "13,50 €" },
@@ -51,8 +55,8 @@ export const MENU_DATA: MenuWeek[] = [
         ]
     },
     {
-        id: "semaine-2",
-        week: "Semaine 2 : du 2 au 8 novembre 2026",
+        id: "semaine-1",
+        week: "Semaine 1 : du 2 au 8 novembre 2026",
         soups: ["Velouté de champignons des bois", "Carottes au cumin"],
         days: [
             { day: "Lundi", date: "lundi 2 novembre 2026", meal: "Chicons au gratin (jambon) (Purée)", price: "12,50 €" },
@@ -65,8 +69,8 @@ export const MENU_DATA: MenuWeek[] = [
         ]
     },
     {
-        id: "semaine-3",
-        week: "Semaine 3 : du 9 au 14 novembre 2026",
+        id: "semaine-2",
+        week: "Semaine 2 : du 9 au 14 novembre 2026",
         soups: ["Soupe de tomates aux boulettes", "Pois cassés au lard"],
         days: [
             { day: "Lundi", date: "lundi 9 novembre 2026", meal: "Gratin de pâtes jambon-fromage", price: "11,00 €" },
@@ -78,8 +82,8 @@ export const MENU_DATA: MenuWeek[] = [
         ]
     },
     {
-        id: "semaine-4",
-        week: "Semaine 4 : du 16 au 21 novembre 2026",
+        id: "semaine-3",
+        week: "Semaine 3 : du 16 au 21 novembre 2026",
         soups: ["Velouté de céleri-rave", "Minestrone"],
         days: [
             { day: "Lundi", date: "lundi 16 novembre 2026", meal: "Chili con carne (Riz)", price: "11,50 €" },
@@ -91,8 +95,8 @@ export const MENU_DATA: MenuWeek[] = [
         ]
     },
     {
-        id: "semaine-5",
-        week: "Semaine 5 : du 23 au 26 novembre 2026",
+        id: "semaine-4",
+        week: "Semaine 4 : du 23 au 26 novembre 2026",
         soups: ["Soupe à l'oignon", "Velouté de lentilles corail"],
         days: [
             { day: "Lundi", date: "lundi 23 novembre 2026", meal: "Choucroute garnie (Pommes vapeur)", price: "13,50 €" },

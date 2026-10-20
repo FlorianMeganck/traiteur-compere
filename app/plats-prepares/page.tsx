@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Mail, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Trash2, Check } from "lucide-react";
 
@@ -27,9 +27,20 @@ export default function PlatsPrepares() {
     // 1. Logique de visibilité
     const isVisible = isPlatVisible;
 
-    const firstAvailableWeek = MENU_DATA.find(menu =>
+    // Afficher 4 semaines à la fois :
+    // - Semaine 4 d'octobre + Semaines 1 à 3 de novembre actuellement
+    // - Semaines 1 à 4 de novembre dès que la semaine d'octobre est passée
+    const displayedWeeks = useMemo(() => {
+        const isOctobrePast = !MENU_DATA[0].days.some(dayItem => isVisible(dayItem.day, MENU_DATA[0].id));
+        if (isOctobrePast && MENU_DATA.length > 4) {
+            return MENU_DATA.slice(1, 5);
+        }
+        return MENU_DATA.slice(0, 4);
+    }, []);
+
+    const firstAvailableWeek = displayedWeeks.find(menu =>
         menu.days.some(dayItem => isVisible(dayItem.day, menu.id))
-    )?.id || MENU_DATA[0].id;
+    )?.id || displayedWeeks[0].id;
 
     const [activeTab, setActiveTab] = useState(firstAvailableWeek);
 
@@ -404,7 +415,7 @@ export default function PlatsPrepares() {
                     <div className="bg-white rounded-3xl shadow-lg border border-neutral-100 overflow-hidden">
                         {/* Tab Headers */}
                         <div className="flex flex-wrap border-b border-neutral-100">
-                            {MENU_DATA.map((menu) => (
+                            {displayedWeeks.map((menu) => (
                                 <button
                                     key={menu.id}
                                     onClick={() => setActiveTab(menu.id)}
@@ -427,7 +438,7 @@ export default function PlatsPrepares() {
                         {/* Tab Content */}
                         <div className="p-6 md:p-10">
                             <AnimatePresence mode="wait">
-                                {MENU_DATA.map((menu) => (
+                                {displayedWeeks.map((menu) => (
                                     activeTab === menu.id && (
                                         <motion.div
                                             key={menu.id}
