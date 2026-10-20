@@ -87,7 +87,7 @@ export default function Footer() {
                             icon={<FacebookIcon />}
                         />
                         <SocialLink
-                            href="https://www.instagram.com/traiteurcompere8/"
+                            href="https://www.instagram.com/traiteurcompere/"
                             icon={<InstagramIcon />}
                         />
                     </div>

@@ -138,7 +138,7 @@ export default function Navbar() {
                                     className={desktopTextColor}
                                 />
                                 <SocialLink
-                                    href="https://www.instagram.com/traiteurcompere8/"
+                                    href="https://www.instagram.com/traiteurcompere/"
                                     icon={<InstagramIcon />}
                                     className={desktopTextColor}
                                 />
@@ -293,7 +293,7 @@ export default function Navbar() {
                                             className="text-white"
                                         />
                                         <SocialLink
-                                            href="https://www.instagram.com/traiteurcompere8/"
+                                            href="https://www.instagram.com/traiteurcompere/"
                                             icon={<InstagramIcon size={32} />}
                                             className="text-white"
                                         />

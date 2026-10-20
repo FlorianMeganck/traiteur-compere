@@ -84,7 +84,7 @@ export default function StructuredData() {
         ],
         "sameAs": [
           "https://www.facebook.com/profile.php?id=61582940090708",
-          "https://www.instagram.com/traiteurcompere8/"
+          "https://www.instagram.com/traiteurcompere/"
         ],
         "hasMenu": {
           "@type": "Menu",
