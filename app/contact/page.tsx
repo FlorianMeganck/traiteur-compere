@@ -15,6 +15,7 @@ import {
     FestiveValidationMode
 } from "../data/menus-fetes";
 import { useCart } from "../hooks/useCart";
+import { getPlatsPickupDates, formatPlatsPickupDates } from "../data/plats-prepares";
 
 export default function Contact() {
     return (
@@ -734,6 +735,10 @@ function ContactForm() {
     const festivePricing = useMemo(() => {
         return calculateFestiveOrderPricing(cartItems, validationMode);
     }, [cartItems, validationMode]);
+
+    // Dates de retrait dynamiques pour les plats préparés
+    const platsPickupDates = useMemo(() => getPlatsPickupDates(cartItems), [cartItems]);
+    const formattedPickupDates = useMemo(() => formatPlatsPickupDates(platsPickupDates), [platsPickupDates]);
 
     // Forcer le mode 100% si l'acompte n'est plus autorisé (après le 10 décembre)
     useEffect(() => {
@@ -4418,34 +4423,19 @@ function ContactForm() {
                                 </div>
                             )}
 
-                            {isPlatPrepare && !isMenusFetes && (
-                                <div className="bg-[#FAF9F6] border border-[#D4AF37]/50 rounded-2xl p-5 sm:p-6 mt-6 shadow-xs">
-                                    <div className="flex items-start gap-3.5">
-                                        <div className="w-9 h-9 rounded-full bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0 mt-0.5">
-                                            <Clock size={19} />
-                                        </div>
-                                        <div className="space-y-3 flex-1">
-                                            <h4 className="font-serif font-bold text-neutral-900 text-base sm:text-lg">
-                                                Rappel pour le retrait de vos plats à l&apos;atelier :
-                                            </h4>
-                                            <p className="text-neutral-700 text-sm sm:text-[15px] leading-relaxed">
-                                                Vos plats sont fraîchement cuisinés selon le calendrier hebdomadaire. Le retrait s&apos;effectue à l&apos;atelier (Rue Potay 3, 4470 Saint-Georges-sur-Meuse) aux jours suivants :
-                                            </p>
-                                            <ul className="space-y-2 pt-1 text-sm sm:text-[15px] text-neutral-800">
-                                                <li className="flex items-center gap-2.5">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] shrink-0"></span>
-                                                    <span><strong>Plats du dimanche, lundi et mardi</strong> : retrait le <strong>mardi</strong></span>
-                                                </li>
-                                                <li className="flex items-center gap-2.5">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] shrink-0"></span>
-                                                    <span><strong>Plats du mercredi et jeudi</strong> : retrait le <strong>jeudi</strong></span>
-                                                </li>
-                                                <li className="flex items-center gap-2.5">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] shrink-0"></span>
-                                                    <span><strong>Plats du vendredi et samedi</strong> : retrait le <strong>samedi</strong></span>
-                                                </li>
-                                            </ul>
-                                        </div>
+                            {isPlatPrepare && !isMenusFetes && formattedPickupDates && (
+                                <div className="bg-[#FAF9F6] border border-[#D4AF37]/50 rounded-xl px-4 py-3 mt-6 shadow-xs flex items-center gap-3">
+                                    <Clock className="text-[#D4AF37] shrink-0" size={18} />
+                                    <div className="text-sm sm:text-[15px] text-neutral-800 leading-snug">
+                                        <span className="font-semibold text-neutral-900">
+                                            {platsPickupDates.length > 1 ? "Vos jours de retrait à l'atelier : " : "Date de retrait à l'atelier : "}
+                                        </span>
+                                        <span className="text-[#8c7322] font-bold">
+                                            {formattedPickupDates}
+                                        </span>
+                                        <span className="text-neutral-500 text-xs sm:text-sm ml-1.5 font-normal">
+                                            (Rue Potay 3, 4470 Saint-Georges-sur-Meuse)
+                                        </span>
                                     </div>
                                 </div>
                             )}

@@ -27,8 +27,8 @@ export const PICKUP_DATES: Record<string, Record<string, Date>> = {
 export const isPlatVisible = (dayName: string, weekId: string, customNow?: Date): boolean => {
     const today = customNow || new Date();
     let targetDay = "";
-    const d = dayName.toLowerCase();
-    if (d === 'lundi' || d === 'mardi') targetDay = 'mardi';
+    const d = dayName.toLowerCase().trim();
+    if (d === 'dimanche' || d === 'lundi' || d === 'mardi') targetDay = 'mardi';
     else if (d === 'mercredi' || d === 'jeudi') targetDay = 'jeudi';
     else targetDay = 'samedi';
 
@@ -38,6 +38,42 @@ export const isPlatVisible = (dayName: string, weekId: string, customNow?: Date)
     const diffTime = pickupDate.getTime() - today.getTime();
     const diffDays = diffTime / (1000 * 60 * 60 * 24);
     return diffDays >= 2;
+};
+
+export const getPlatsPickupDates = (cartItems: Array<{ semaineId?: string; jour?: string; itemType?: string }>): Date[] => {
+    const datesMap = new Map<string, Date>();
+
+    cartItems.forEach(item => {
+        if (item.itemType === 'menu_fete' || item.semaineId?.startsWith('menu') || item.semaineId?.startsWith('fetes')) {
+            return;
+        }
+
+        const d = (item.jour || "").toLowerCase().trim();
+        let targetDay = "";
+        if (d === 'dimanche' || d === 'lundi' || d === 'mardi') targetDay = 'mardi';
+        else if (d === 'mercredi' || d === 'jeudi') targetDay = 'jeudi';
+        else if (d === 'vendredi' || d === 'samedi') targetDay = 'samedi';
+
+        if (!targetDay || !item.semaineId) return;
+
+        const date = PICKUP_DATES[item.semaineId]?.[targetDay];
+        if (date) {
+            datesMap.set(date.toISOString().split('T')[0], date);
+        }
+    });
+
+    return Array.from(datesMap.values()).sort((a, b) => a.getTime() - b.getTime());
+};
+
+export const formatPlatsPickupDates = (dates: Date[]): string => {
+    if (dates.length === 0) return "";
+
+    const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+    const formatted = dates.map(d => capitalize(d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })));
+
+    if (formatted.length === 1) return formatted[0];
+    if (formatted.length === 2) return `${formatted[0]} et ${formatted[1]}`;
+    return `${formatted.slice(0, -1).join(', ')} et ${formatted[formatted.length - 1]}`;
 };
 
 export const MENU_DATA: MenuWeek[] = [
