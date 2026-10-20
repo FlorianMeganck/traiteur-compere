@@ -1865,7 +1865,7 @@ function ContactForm() {
                             document.body.removeAttribute('data-scroll-locked');
                             document.documentElement.removeAttribute('data-scroll-locked');
                         }
-                        router.push('/commande-confirmee');
+                        window.location.href = '/commande-confirmee';
                     }, 1500);
                 } else {
                     console.error("Erreur API Commande:", result);

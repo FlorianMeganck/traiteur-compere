@@ -776,19 +776,16 @@ function CommandeConfirmeeContent() {
                         </button>
 
                         {/* Bouton 2 : Retour à l'accueil */}
-                        <Link
-                            href="/"
+                        <button
+                            type="button"
                             onClick={() => {
-                                if (typeof document !== 'undefined') {
-                                    document.body.style.pointerEvents = 'auto';
-                                    document.body.style.overflow = 'unset';
-                                }
+                                window.location.href = '/';
                             }}
                             className="w-full sm:w-auto px-8 py-3.5 rounded-full bg-black hover:bg-[#D4AF37] text-white hover:text-black font-serif font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2 cursor-pointer"
                         >
                             <ArrowLeft size={15} />
                             <span>Retour à l&apos;accueil</span>
-                        </Link>
+                        </button>
                     </div>
 
                     {/* Ligne d'assistance */}
