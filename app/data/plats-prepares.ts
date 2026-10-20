@@ -12,70 +12,72 @@ export type MenuWeek = {
     days: DailyMeal[];
 };
 
-// Mapping exact des jours de retrait :
-// - Samedi : pour les plats du samedi, du dimanche et du lundi (retrait le samedi précédent pour le lundi)
-// - Mardi : pour les plats du mardi et du mercredi
-// - Jeudi : pour les plats du jeudi et du vendredi
+// Nouvelles règles des jours de retrait :
+// - Lundi : pour les plats du lundi et du mardi
+// - Mercredi : pour les plats du mercredi et du jeudi
+// - Vendredi : pour les plats du vendredi et du samedi
 export const DAY_PICKUP_DATES: Record<string, Record<string, Date>> = {
     "semaine-4-octobre": {
-        "lundi": new Date(2026, 9, 24),     // Samedi 24 octobre 2026
-        "mardi": new Date(2026, 9, 27),     // Mardi 27 octobre 2026
-        "mercredi": new Date(2026, 9, 27),  // Mardi 27 octobre 2026
-        "jeudi": new Date(2026, 9, 29),     // Jeudi 29 octobre 2026
-        "vendredi": new Date(2026, 9, 29),  // Jeudi 29 octobre 2026
-        "samedi": new Date(2026, 9, 31),    // Samedi 31 octobre 2026
+        "lundi": new Date(2026, 9, 26),     // Lundi 26 octobre 2026
+        "mardi": new Date(2026, 9, 26),     // Lundi 26 octobre 2026
+        "mercredi": new Date(2026, 9, 28),  // Mercredi 28 octobre 2026
+        "jeudi": new Date(2026, 9, 28),     // Mercredi 28 octobre 2026
+        "vendredi": new Date(2026, 9, 30),  // Vendredi 30 octobre 2026
+        "samedi": new Date(2026, 9, 30),    // Vendredi 30 octobre 2026
     },
     "semaine-1": {
-        "lundi": new Date(2026, 9, 31),     // Samedi 31 octobre 2026
-        "mardi": new Date(2026, 10, 3),     // Mardi 3 novembre 2026
-        "mercredi": new Date(2026, 10, 3),  // Mardi 3 novembre 2026
-        "jeudi": new Date(2026, 10, 5),     // Jeudi 5 novembre 2026
-        "vendredi": new Date(2026, 10, 5),  // Jeudi 5 novembre 2026
-        "samedi": new Date(2026, 10, 7),    // Samedi 7 novembre 2026
-        "dimanche": new Date(2026, 10, 7),  // Samedi 7 novembre 2026
+        "lundi": new Date(2026, 10, 2),     // Lundi 2 novembre 2026
+        "mardi": new Date(2026, 10, 2),     // Lundi 2 novembre 2026
+        "mercredi": new Date(2026, 10, 4),  // Mercredi 4 novembre 2026
+        "jeudi": new Date(2026, 10, 4),     // Mercredi 4 novembre 2026
+        "vendredi": new Date(2026, 10, 6),  // Vendredi 6 novembre 2026
+        "samedi": new Date(2026, 10, 6),    // Vendredi 6 novembre 2026
     },
     "semaine-2": {
-        "lundi": new Date(2026, 10, 7),     // Samedi 7 novembre 2026
-        "mardi": new Date(2026, 10, 10),    // Mardi 10 novembre 2026
-        "mercredi": new Date(2026, 10, 10), // Mardi 10 novembre 2026
-        "jeudi": new Date(2026, 10, 12),    // Jeudi 12 novembre 2026
-        "vendredi": new Date(2026, 10, 12), // Jeudi 12 novembre 2026
-        "samedi": new Date(2026, 10, 14),   // Samedi 14 novembre 2026
+        "lundi": new Date(2026, 10, 9),     // Lundi 9 novembre 2026
+        "mardi": new Date(2026, 10, 9),     // Lundi 9 novembre 2026
+        "mercredi": new Date(2026, 10, 11), // Mercredi 11 novembre 2026
+        "jeudi": new Date(2026, 10, 11),    // Mercredi 11 novembre 2026
+        "vendredi": new Date(2026, 10, 13), // Vendredi 13 novembre 2026
+        "samedi": new Date(2026, 10, 13),   // Vendredi 13 novembre 2026
     },
     "semaine-3": {
-        "lundi": new Date(2026, 10, 14),    // Samedi 14 novembre 2026
-        "mardi": new Date(2026, 10, 17),    // Mardi 17 novembre 2026
-        "mercredi": new Date(2026, 10, 17), // Mardi 17 novembre 2026
-        "jeudi": new Date(2026, 10, 19),    // Jeudi 19 novembre 2026
-        "vendredi": new Date(2026, 10, 19), // Jeudi 19 novembre 2026
-        "samedi": new Date(2026, 10, 21),   // Samedi 21 novembre 2026
+        "lundi": new Date(2026, 10, 16),    // Lundi 16 novembre 2026
+        "mardi": new Date(2026, 10, 16),    // Lundi 16 novembre 2026
+        "mercredi": new Date(2026, 10, 18), // Mercredi 18 novembre 2026
+        "jeudi": new Date(2026, 10, 18),    // Mercredi 18 novembre 2026
+        "vendredi": new Date(2026, 10, 20), // Vendredi 20 novembre 2026
+        "samedi": new Date(2026, 10, 20),   // Vendredi 20 novembre 2026
     },
     "semaine-4": {
-        "lundi": new Date(2026, 10, 21),    // Samedi 21 novembre 2026
-        "mardi": new Date(2026, 10, 24),    // Mardi 24 novembre 2026
-        "mercredi": new Date(2026, 10, 24), // Mardi 24 novembre 2026
-        "jeudi": new Date(2026, 10, 26),    // Jeudi 26 novembre 2026
+        "lundi": new Date(2026, 10, 23),    // Lundi 23 novembre 2026
+        "mardi": new Date(2026, 10, 23),    // Lundi 23 novembre 2026
+        "mercredi": new Date(2026, 10, 25), // Mercredi 25 novembre 2026
+        "jeudi": new Date(2026, 10, 25),    // Mercredi 25 novembre 2026
+        "vendredi": new Date(2026, 10, 27), // Vendredi 27 novembre 2026
     },
     // Aliases rétrocompatibles
     "semaine-4-nov": {
-        "lundi": new Date(2026, 10, 21),
-        "mardi": new Date(2026, 10, 24),
-        "mercredi": new Date(2026, 10, 24),
-        "jeudi": new Date(2026, 10, 26),
+        "lundi": new Date(2026, 10, 23),
+        "mardi": new Date(2026, 10, 23),
+        "mercredi": new Date(2026, 10, 25),
+        "jeudi": new Date(2026, 10, 25),
+        "vendredi": new Date(2026, 10, 27),
     },
     "semaine-1-oct": {
-        "lundi": new Date(2026, 9, 24),
-        "mardi": new Date(2026, 9, 27),
-        "mercredi": new Date(2026, 9, 27),
-        "jeudi": new Date(2026, 9, 29),
-        "vendredi": new Date(2026, 9, 29),
-        "samedi": new Date(2026, 9, 31),
+        "lundi": new Date(2026, 9, 26),
+        "mardi": new Date(2026, 9, 26),
+        "mercredi": new Date(2026, 9, 28),
+        "jeudi": new Date(2026, 9, 28),
+        "vendredi": new Date(2026, 9, 30),
+        "samedi": new Date(2026, 9, 30),
     },
     "semaine-5": {
-        "lundi": new Date(2026, 10, 21),
-        "mardi": new Date(2026, 10, 24),
-        "mercredi": new Date(2026, 10, 24),
-        "jeudi": new Date(2026, 10, 26),
+        "lundi": new Date(2026, 10, 23),
+        "mardi": new Date(2026, 10, 23),
+        "mercredi": new Date(2026, 10, 25),
+        "jeudi": new Date(2026, 10, 25),
+        "vendredi": new Date(2026, 10, 27),
     },
 };
 
@@ -139,7 +141,7 @@ export const MENU_DATA: MenuWeek[] = [
     },
     {
         id: "semaine-1",
-        week: "Semaine 1 : du 2 au 8 novembre 2026",
+        week: "Semaine 1 : du 2 au 7 novembre 2026",
         soups: ["Velouté de champignons des bois", "Carottes au cumin"],
         days: [
             { day: "Lundi", date: "lundi 2 novembre 2026", meal: "Chicons au gratin (jambon) (Purée)", price: "12,50 €" },
@@ -148,7 +150,6 @@ export const MENU_DATA: MenuWeek[] = [
             { day: "Jeudi", date: "jeudi 5 novembre 2026", meal: "Boulets à la liégeoise (Purée)", price: "12,50 €" },
             { day: "Vendredi", date: "vendredi 6 novembre 2026", meal: "Dos de cabillaud, sauce mousseline (Purée)", price: "14,50 €" },
             { day: "Samedi", date: "samedi 7 novembre 2026", meal: "Lapin aux pruneaux (Pommes vapeur)", price: "14,00 €" },
-            { day: "Dimanche", date: "dimanche 8 novembre 2026", meal: "Filet de pintadeau, sauce champignons (Gratin dauphinois)", price: "16,50 €" },
         ]
     },
     {
@@ -156,12 +157,12 @@ export const MENU_DATA: MenuWeek[] = [
         week: "Semaine 2 : du 9 au 14 novembre 2026",
         soups: ["Soupe de tomates aux boulettes", "Pois cassés au lard"],
         days: [
-            { day: "Lundi", date: "lundi 9 novembre 2026", meal: "Gratin de pâtes jambon-fromage", price: "11,00 €" },
-            { day: "Mardi", date: "mardi 10 novembre 2026", meal: "Stoemp aux poireaux & saucisse", price: "11,50 €" },
-            { day: "Mercredi", date: "mercredi 11 novembre 2026", meal: "Rôti de porc, sauce moutarde à l'ancienne (Gratin dauphinois)", price: "13,00 €" },
-            { day: "Jeudi", date: "jeudi 12 novembre 2026", meal: "Poulet basquaise (Riz)", price: "12,50 €" },
-            { day: "Vendredi", date: "vendredi 13 novembre 2026", meal: "Brandade de morue", price: "13,50 €" },
-            { day: "Samedi", date: "samedi 14 novembre 2026", meal: "Joue de bœuf braisée au vin rouge (Purée)", price: "16,50 €" },
+            { day: "Lundi", date: "lundi 9 novembre 2026", meal: "Filet de pintadeau, sauce champignons (Gratin dauphinois)", price: "16,50 €" },
+            { day: "Mardi", date: "mardi 10 novembre 2026", meal: "Gratin de pâtes jambon-fromage", price: "11,00 €" },
+            { day: "Mercredi", date: "mercredi 11 novembre 2026", meal: "Stoemp aux poireaux & saucisse", price: "11,50 €" },
+            { day: "Jeudi", date: "jeudi 12 novembre 2026", meal: "Rôti de porc, sauce moutarde à l'ancienne (Gratin dauphinois)", price: "13,00 €" },
+            { day: "Vendredi", date: "vendredi 13 novembre 2026", meal: "Poulet basquaise (Riz)", price: "12,50 €" },
+            { day: "Samedi", date: "samedi 14 novembre 2026", meal: "Brandade de morue", price: "13,50 €" },
         ]
     },
     {
@@ -169,23 +170,24 @@ export const MENU_DATA: MenuWeek[] = [
         week: "Semaine 3 : du 16 au 21 novembre 2026",
         soups: ["Velouté de céleri-rave", "Minestrone"],
         days: [
-            { day: "Lundi", date: "lundi 16 novembre 2026", meal: "Chili con carne (Riz)", price: "11,50 €" },
-            { day: "Mardi", date: "mardi 17 novembre 2026", meal: "Lasagne saumon-épinards", price: "13,50 €" },
-            { day: "Mercredi", date: "mercredi 18 novembre 2026", meal: "Navarin d'agneau aux légumes d'automne (Pommes vapeur)", price: "15,50 €" },
-            { day: "Jeudi", date: "jeudi 19 novembre 2026", meal: "Poulet curry doux & lait de coco (Riz)", price: "12,50 €" },
-            { day: "Vendredi", date: "vendredi 20 novembre 2026", meal: "Gratin de la mer (Purée)", price: "14,50 €" },
-            { day: "Samedi", date: "samedi 21 novembre 2026", meal: "Mijoté de sanglier à la bière brune, airelles (Purée)", price: "16,00 €" },
+            { day: "Lundi", date: "lundi 16 novembre 2026", meal: "Joue de bœuf braisée au vin rouge (Purée)", price: "16,50 €" },
+            { day: "Mardi", date: "mardi 17 novembre 2026", meal: "Chili con carne (Riz)", price: "11,50 €" },
+            { day: "Mercredi", date: "mercredi 18 novembre 2026", meal: "Lasagne saumon-épinards", price: "13,50 €" },
+            { day: "Jeudi", date: "jeudi 19 novembre 2026", meal: "Navarin d'agneau aux légumes d'automne (Pommes vapeur)", price: "15,50 €" },
+            { day: "Vendredi", date: "vendredi 20 novembre 2026", meal: "Poulet curry doux & lait de coco (Riz)", price: "12,50 €" },
+            { day: "Samedi", date: "samedi 21 novembre 2026", meal: "Gratin de la mer (Purée)", price: "14,50 €" },
         ]
     },
     {
         id: "semaine-4",
-        week: "Semaine 4 : du 23 au 26 novembre 2026",
+        week: "Semaine 4 : du 23 au 27 novembre 2026",
         soups: ["Soupe à l'oignon", "Velouté de lentilles corail"],
         days: [
-            { day: "Lundi", date: "lundi 23 novembre 2026", meal: "Choucroute garnie (Pommes vapeur)", price: "13,50 €" },
-            { day: "Mardi", date: "mardi 24 novembre 2026", meal: "Pain de viande, sauce tomate (Purée)", price: "11,50 €" },
-            { day: "Mercredi", date: "mercredi 25 novembre 2026", meal: "Osso buco à la milanaise (Tagliatelles)", price: "15,50 €" },
-            { day: "Jeudi", date: "jeudi 26 novembre 2026", meal: "Boulettes sauce chasseur (Purée)", price: "11,50 €" },
+            { day: "Lundi", date: "lundi 23 novembre 2026", meal: "Mijoté de sanglier à la bière brune, airelles (Purée)", price: "16,00 €" },
+            { day: "Mardi", date: "mardi 24 novembre 2026", meal: "Choucroute garnie (Pommes vapeur)", price: "13,50 €" },
+            { day: "Mercredi", date: "mercredi 25 novembre 2026", meal: "Pain de viande, sauce tomate (Purée)", price: "11,50 €" },
+            { day: "Jeudi", date: "jeudi 26 novembre 2026", meal: "Osso buco à la milanaise (Tagliatelles)", price: "15,50 €" },
+            { day: "Vendredi", date: "vendredi 27 novembre 2026", meal: "Boulettes sauce chasseur (Purée)", price: "11,50 €" },
         ]
     }
 ];
