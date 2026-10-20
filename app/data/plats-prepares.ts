@@ -12,27 +12,79 @@ export type MenuWeek = {
     days: DailyMeal[];
 };
 
-export const PICKUP_DATES: Record<string, Record<string, Date>> = {
-    "semaine-4-octobre": { "mardi": new Date(2026, 9, 27), "jeudi": new Date(2026, 9, 29), "samedi": new Date(2026, 9, 31) },
-    "semaine-1": { "mardi": new Date(2026, 10, 3), "jeudi": new Date(2026, 10, 5), "samedi": new Date(2026, 10, 7) },
-    "semaine-2": { "mardi": new Date(2026, 10, 10), "jeudi": new Date(2026, 10, 12), "samedi": new Date(2026, 10, 14) },
-    "semaine-3": { "mardi": new Date(2026, 10, 17), "jeudi": new Date(2026, 10, 19), "samedi": new Date(2026, 10, 21) },
-    "semaine-4": { "mardi": new Date(2026, 10, 24), "jeudi": new Date(2026, 10, 26), "samedi": new Date(2026, 10, 28) },
+// Mapping exact des jours de retrait :
+// - Samedi : pour les plats du samedi, du dimanche et du lundi (retrait le samedi précédent pour le lundi)
+// - Mardi : pour les plats du mardi et du mercredi
+// - Jeudi : pour les plats du jeudi et du vendredi
+export const DAY_PICKUP_DATES: Record<string, Record<string, Date>> = {
+    "semaine-4-octobre": {
+        "lundi": new Date(2026, 9, 24),     // Samedi 24 octobre 2026
+        "mardi": new Date(2026, 9, 27),     // Mardi 27 octobre 2026
+        "mercredi": new Date(2026, 9, 27),  // Mardi 27 octobre 2026
+        "jeudi": new Date(2026, 9, 29),     // Jeudi 29 octobre 2026
+        "vendredi": new Date(2026, 9, 29),  // Jeudi 29 octobre 2026
+        "samedi": new Date(2026, 9, 31),    // Samedi 31 octobre 2026
+    },
+    "semaine-1": {
+        "lundi": new Date(2026, 9, 31),     // Samedi 31 octobre 2026
+        "mardi": new Date(2026, 10, 3),     // Mardi 3 novembre 2026
+        "mercredi": new Date(2026, 10, 3),  // Mardi 3 novembre 2026
+        "jeudi": new Date(2026, 10, 5),     // Jeudi 5 novembre 2026
+        "vendredi": new Date(2026, 10, 5),  // Jeudi 5 novembre 2026
+        "samedi": new Date(2026, 10, 7),    // Samedi 7 novembre 2026
+        "dimanche": new Date(2026, 10, 7),  // Samedi 7 novembre 2026
+    },
+    "semaine-2": {
+        "lundi": new Date(2026, 10, 7),     // Samedi 7 novembre 2026
+        "mardi": new Date(2026, 10, 10),    // Mardi 10 novembre 2026
+        "mercredi": new Date(2026, 10, 10), // Mardi 10 novembre 2026
+        "jeudi": new Date(2026, 10, 12),    // Jeudi 12 novembre 2026
+        "vendredi": new Date(2026, 10, 12), // Jeudi 12 novembre 2026
+        "samedi": new Date(2026, 10, 14),   // Samedi 14 novembre 2026
+    },
+    "semaine-3": {
+        "lundi": new Date(2026, 10, 14),    // Samedi 14 novembre 2026
+        "mardi": new Date(2026, 10, 17),    // Mardi 17 novembre 2026
+        "mercredi": new Date(2026, 10, 17), // Mardi 17 novembre 2026
+        "jeudi": new Date(2026, 10, 19),    // Jeudi 19 novembre 2026
+        "vendredi": new Date(2026, 10, 19), // Jeudi 19 novembre 2026
+        "samedi": new Date(2026, 10, 21),   // Samedi 21 novembre 2026
+    },
+    "semaine-4": {
+        "lundi": new Date(2026, 10, 21),    // Samedi 21 novembre 2026
+        "mardi": new Date(2026, 10, 24),    // Mardi 24 novembre 2026
+        "mercredi": new Date(2026, 10, 24), // Mardi 24 novembre 2026
+        "jeudi": new Date(2026, 10, 26),    // Jeudi 26 novembre 2026
+    },
     // Aliases rétrocompatibles
-    "semaine-4-nov": { "mardi": new Date(2026, 10, 24), "jeudi": new Date(2026, 10, 26), "samedi": new Date(2026, 10, 28) },
-    "semaine-1-oct": { "mardi": new Date(2026, 9, 27), "jeudi": new Date(2026, 9, 29), "samedi": new Date(2026, 9, 31) },
-    "semaine-5": { "mardi": new Date(2026, 10, 24), "jeudi": new Date(2026, 10, 26), "samedi": new Date(2026, 10, 28) },
+    "semaine-4-nov": {
+        "lundi": new Date(2026, 10, 21),
+        "mardi": new Date(2026, 10, 24),
+        "mercredi": new Date(2026, 10, 24),
+        "jeudi": new Date(2026, 10, 26),
+    },
+    "semaine-1-oct": {
+        "lundi": new Date(2026, 9, 24),
+        "mardi": new Date(2026, 9, 27),
+        "mercredi": new Date(2026, 9, 27),
+        "jeudi": new Date(2026, 9, 29),
+        "vendredi": new Date(2026, 9, 29),
+        "samedi": new Date(2026, 9, 31),
+    },
+    "semaine-5": {
+        "lundi": new Date(2026, 10, 21),
+        "mardi": new Date(2026, 10, 24),
+        "mercredi": new Date(2026, 10, 24),
+        "jeudi": new Date(2026, 10, 26),
+    },
 };
+
+export const PICKUP_DATES = DAY_PICKUP_DATES;
 
 export const isPlatVisible = (dayName: string, weekId: string, customNow?: Date): boolean => {
     const today = customNow || new Date();
-    let targetDay = "";
     const d = dayName.toLowerCase().trim();
-    if (d === 'dimanche' || d === 'lundi' || d === 'mardi') targetDay = 'mardi';
-    else if (d === 'mercredi' || d === 'jeudi') targetDay = 'jeudi';
-    else targetDay = 'samedi';
-
-    const pickupDate = PICKUP_DATES[weekId]?.[targetDay];
+    const pickupDate = DAY_PICKUP_DATES[weekId]?.[d];
     if (!pickupDate) return false;
 
     const diffTime = pickupDate.getTime() - today.getTime();
@@ -49,14 +101,9 @@ export const getPlatsPickupDates = (cartItems: Array<{ semaineId?: string; jour?
         }
 
         const d = (item.jour || "").toLowerCase().trim();
-        let targetDay = "";
-        if (d === 'dimanche' || d === 'lundi' || d === 'mardi') targetDay = 'mardi';
-        else if (d === 'mercredi' || d === 'jeudi') targetDay = 'jeudi';
-        else if (d === 'vendredi' || d === 'samedi') targetDay = 'samedi';
+        if (!d || !item.semaineId) return;
 
-        if (!targetDay || !item.semaineId) return;
-
-        const date = PICKUP_DATES[item.semaineId]?.[targetDay];
+        const date = DAY_PICKUP_DATES[item.semaineId]?.[d];
         if (date) {
             datesMap.set(date.toISOString().split('T')[0], date);
         }
@@ -69,7 +116,7 @@ export const formatPlatsPickupDates = (dates: Date[]): string => {
     if (dates.length === 0) return "";
 
     const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
-    const formatted = dates.map(d => capitalize(d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })));
+    const formatted = dates.map(d => capitalize(d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })));
 
     if (formatted.length === 1) return formatted[0];
     if (formatted.length === 2) return `${formatted[0]} et ${formatted[1]}`;
