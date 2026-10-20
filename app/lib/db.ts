@@ -6,6 +6,7 @@ export interface FestiveOrderRecord {
     id: string; // ex: 'NOEL-64053'
     created_at?: string;
     updated_at?: string;
+    reminder_sent_at?: string | null;
     prenom: string;
     nom: string;
     email: string;
@@ -97,6 +98,7 @@ export async function ensureFestiveOrdersTable(): Promise<boolean> {
                 id VARCHAR(30) PRIMARY KEY,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                reminder_sent_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
                 prenom VARCHAR(100) NOT NULL,
                 nom VARCHAR(100) NOT NULL,
                 email VARCHAR(255) NOT NULL,
@@ -114,6 +116,13 @@ export async function ensureFestiveOrdersTable(): Promise<boolean> {
                 notes TEXT
             );
         `;
+
+        // Évolution de schéma : ajout idempotent de la colonne reminder_sent_at si table existante
+        await sql`
+            ALTER TABLE festive_orders 
+            ADD COLUMN IF NOT EXISTS reminder_sent_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+        `;
+
         isTableInitialized = true;
         return true;
     } catch (err) {
@@ -136,7 +145,7 @@ export async function insertFestiveOrder(order: FestiveOrderRecord): Promise<boo
             INSERT INTO festive_orders (
                 id, prenom, nom, email, telephone, repas_date, retrait_slot,
                 payment_mode, status, total_initial, early_bird_discount,
-                amount_paid_initial, balance_remaining, items, additional_items, notes
+                amount_paid_initial, balance_remaining, items, additional_items, notes, reminder_sent_at
             ) VALUES (
                 ${order.id},
                 ${order.prenom},
@@ -153,7 +162,8 @@ export async function insertFestiveOrder(order: FestiveOrderRecord): Promise<boo
                 ${order.balance_remaining},
                 ${JSON.stringify(order.items)},
                 ${JSON.stringify(order.additional_items || [])},
-                ${order.notes || ''}
+                ${order.notes || ''},
+                ${order.reminder_sent_at || null}
             )
             ON CONFLICT (id) DO UPDATE SET
                 updated_at = CURRENT_TIMESTAMP,
@@ -196,6 +206,7 @@ export async function getFestiveOrder(orderId: string, email?: string): Promise<
                     id: row.id,
                     created_at: row.created_at,
                     updated_at: row.updated_at,
+                    reminder_sent_at: row.reminder_sent_at ? new Date(row.reminder_sent_at).toISOString() : null,
                     prenom: row.prenom,
                     nom: row.nom,
                     email: row.email,
@@ -219,6 +230,79 @@ export async function getFestiveOrder(orderId: string, email?: string): Promise<
     }
 
     return getFallbackOrder(cleanId, cleanEmail);
+}
+
+export async function getFestiveOrdersPendingReminder(): Promise<FestiveOrderRecord[]> {
+    const sql = getDb();
+    if (sql) {
+        try {
+            await ensureFestiveOrdersTable();
+            const rows = await sql`
+                SELECT * FROM festive_orders 
+                WHERE reminder_sent_at IS NULL;
+            `;
+
+            return (rows || []).map((row: any) => ({
+                id: row.id,
+                created_at: row.created_at,
+                updated_at: row.updated_at,
+                reminder_sent_at: row.reminder_sent_at ? new Date(row.reminder_sent_at).toISOString() : null,
+                prenom: row.prenom,
+                nom: row.nom,
+                email: row.email,
+                telephone: row.telephone,
+                repas_date: row.repas_date,
+                retrait_slot: row.retrait_slot,
+                payment_mode: row.payment_mode,
+                status: row.status,
+                total_initial: Number(row.total_initial),
+                early_bird_discount: Number(row.early_bird_discount || 0),
+                amount_paid_initial: Number(row.amount_paid_initial),
+                balance_remaining: Number(row.balance_remaining),
+                items: typeof row.items === 'string' ? JSON.parse(row.items) : row.items,
+                additional_items: typeof row.additional_items === 'string' ? JSON.parse(row.additional_items) : (row.additional_items || []),
+                notes: row.notes || ''
+            }));
+        } catch (err) {
+            console.error("Erreur getFestiveOrdersPendingReminder SQL:", err);
+        }
+    }
+
+    // Fallback mémoire / dev
+    loadDevFallbackOrders();
+    return Array.from(memoryFallbackOrders.values()).filter(o => !o.reminder_sent_at);
+}
+
+export async function markFestiveOrderReminderSent(orderId: string): Promise<boolean> {
+    const rawId = (orderId || '').trim().toUpperCase();
+    const cleanId = rawId.startsWith('NOEL-') ? rawId : `NOEL-${rawId}`;
+    const sql = getDb();
+    const nowIso = new Date().toISOString();
+
+    if (sql) {
+        try {
+            await ensureFestiveOrdersTable();
+            await sql`
+                UPDATE festive_orders 
+                SET reminder_sent_at = CURRENT_TIMESTAMP,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE UPPER(id) = ${cleanId};
+            `;
+        } catch (err) {
+            console.error("Erreur markFestiveOrderReminderSent SQL:", err);
+            return false;
+        }
+    }
+
+    // Mise à jour fallback dev
+    loadDevFallbackOrders();
+    const found = memoryFallbackOrders.get(cleanId);
+    if (found) {
+        found.reminder_sent_at = nowIso;
+        saveFallbackOrder(found);
+    }
+
+    return true;
 }
 
 export async function updateFestiveOrderAdditions(
