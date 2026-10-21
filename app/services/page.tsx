@@ -96,56 +96,56 @@ export default function Services() {
                 {/* 5. FORMULE BRASSERIE & BOISSONS */}
                 <section id="boissons" className="scroll-mt-24 relative z-10 pt-20">
                     <div className="max-w-7xl mx-auto px-6">
-                        <div className="bg-[#0e0e0e] text-white rounded-3xl p-8 md:p-14 border border-[#D4AF37]/30 relative overflow-hidden shadow-2xl">
+                        <div className="bg-[#FAF8F5] text-neutral-800 rounded-3xl p-8 md:p-14 border border-[#E8E2D5] relative overflow-hidden shadow-sm">
                             <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none" />
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
                                 <div className="lg:col-span-7 space-y-6">
-                                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/40 text-[#D4AF37] text-xs uppercase tracking-widest font-bold">
+                                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAF6EB] border border-[#D4AF37]/30 text-[#996515] text-xs uppercase tracking-widest font-bold">
                                         <span>🍺</span> Prestation Boissons
                                     </div>
-                                    <h2 className="text-3xl md:text-5xl font-serif text-white tracking-wide">
+                                    <h2 className="text-3xl md:text-5xl font-serif text-[#1A1A1A] tracking-wide">
                                         Service Bar & Boissons (Formule Brasserie)
                                     </h2>
-                                    <p className="text-[#D4AF37] font-medium text-lg leading-relaxed">
+                                    <p className="text-[#996515] font-medium text-lg leading-relaxed">
                                         Profitez pleinement de votre événement : nous gérons les boissons et le service de A à Z.
                                     </p>
-                                    <p className="text-neutral-400 font-light text-sm md:text-base leading-relaxed">
+                                    <p className="text-[#4A4A4A] font-light text-sm md:text-base leading-relaxed">
                                         Une prestation tout confort pensée pour vous libérer de la logistique : matériel professionnel sur place, stock complet adapté à vos convives et équipe de service dédiée.
                                     </p>
 
                                     <div className="space-y-4 pt-2">
-                                        <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
-                                            <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0 text-lg">
+                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-[#EAE6DF] shadow-xs">
+                                            <div className="w-10 h-10 rounded-full bg-[#FAF6EB] text-[#B8860B] flex items-center justify-center shrink-0 text-lg">
                                                 ❄️
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-white text-sm mb-1">Frigo professionnel fourni</h4>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">
+                                                <h4 className="font-bold text-[#1A1A1A] text-sm mb-1">Frigo professionnel fourni</h4>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">
                                                     Mise à disposition d&apos;un frigo vitré directement sur place pour garantir des boissons parfaitement fraîches.
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
-                                            <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0 text-lg">
+                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-[#EAE6DF] shadow-xs">
+                                            <div className="w-10 h-10 rounded-full bg-[#FAF6EB] text-[#B8860B] flex items-center justify-center shrink-0 text-lg">
                                                 🔄
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-white text-sm mb-1">Consommation au réel</h4>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">
+                                                <h4 className="font-bold text-[#1A1A1A] text-sm mb-1">Consommation au réel</h4>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">
                                                     Large sélection de bières, vins, softs et eaux. Reprise intégrale des invendus non entamés à la fin de l&apos;événement (aucun gaspillage, facturation au réel).
                                                 </p>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
-                                            <div className="w-10 h-10 rounded-xl bg-[#D4AF37]/15 text-[#D4AF37] flex items-center justify-center shrink-0 text-lg">
+                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-[#EAE6DF] shadow-xs">
+                                            <div className="w-10 h-10 rounded-full bg-[#FAF6EB] text-[#B8860B] flex items-center justify-center shrink-0 text-lg">
                                                 🤵
                                             </div>
                                             <div>
-                                                <h4 className="font-bold text-white text-sm mb-1">Service au bar & en salle</h4>
-                                                <p className="text-xs text-neutral-300 leading-relaxed">
-                                                    Barman / serveur dédié pour assurer le service tout au long de la réception : <strong className="text-[#D4AF37]">18,00 € / h HTVA</strong>.
+                                                <h4 className="font-bold text-[#1A1A1A] text-sm mb-1">Service au bar & en salle</h4>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">
+                                                    Barman / serveur dédié pour assurer le service tout au long de la réception : <strong className="text-[#996515]">18,00 € / h HTVA</strong>.
                                                 </p>
                                             </div>
                                         </div>
@@ -154,14 +154,14 @@ export default function Services() {
                                     <div className="pt-4">
                                         <Link
                                             href="/contact"
-                                            className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[#D4AF37] hover:bg-white text-black font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg shadow-[#D4AF37]/20"
+                                            className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[#D4AF37] hover:bg-[#1A1A1A] hover:text-white text-black font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-md shadow-[#D4AF37]/20"
                                         >
                                             Demander un devis avec cette formule →
                                         </Link>
                                     </div>
                                 </div>
 
-                                <div className="lg:col-span-5 relative aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl border border-white/10">
+                                <div className="lg:col-span-5 relative aspect-[4/5] rounded-2xl overflow-hidden shadow-md ring-1 ring-[#E8E2D5]">
                                     <Image
                                         src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=1200&auto=format&fit=crop"
                                         alt="Service Bar & Boissons Traiteur Compère"
