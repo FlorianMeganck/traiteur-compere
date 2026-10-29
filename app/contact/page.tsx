@@ -786,6 +786,7 @@ function ContactForm() {
         const convivesParam = searchParams.get('convives');
         const serviceParam = searchParams.get('service');
         const voletParam = searchParams.get('volet');
+        const boissonsParam = searchParams.get('boissons');
 
         setFormData(prev => {
             const newData = { ...prev };
@@ -794,6 +795,19 @@ function ContactForm() {
                 newData.Service_Check = "Oui";
             } else if (serviceParam === 'non') {
                 newData.Service_Check = "Non";
+            }
+
+            if (boissonsParam === 'oui' || typeParam?.includes('boissons') || typeParam === 'brasseur') {
+                newData.Option_Brasserie_Check = "Oui";
+            }
+
+            if (typeParam?.startsWith('entreprise')) {
+                newData.Societe = "Oui";
+                newData.Type_Evenement = "Événement d'entreprise";
+            } else if (typeParam?.startsWith('mariage')) {
+                newData.Type_Evenement = "Mariage";
+            } else if (typeParam?.startsWith('fete-privee') || typeParam?.startsWith('particulier')) {
+                newData.Type_Evenement = "Fête privée";
             }
 
             // 1. Pré-sélection du type d'événement / Menu
@@ -4331,6 +4345,52 @@ function ContactForm() {
                                         </p>
                                     </div>
                                     {renderContactFields()}
+
+                                    {!isPlatPrepare && (
+                                        <div className="bg-[#FAF8F5] p-6 rounded-2xl border border-[#D4AF37]/35">
+                                            <div className="flex items-start sm:items-center gap-3 mb-2">
+                                                <input
+                                                    type="checkbox"
+                                                    name="Option_Brasserie_Check"
+                                                    id="Option_Brasserie_Check_General"
+                                                    className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5 sm:mt-0 shrink-0"
+                                                    checked={formData.Option_Brasserie_Check === "Oui"}
+                                                    onChange={handleChange}
+                                                />
+                                                <label htmlFor="Option_Brasserie_Check_General" className="text-neutral-900 font-bold cursor-pointer select-none text-left leading-tight">
+                                                    🍺 Inclure l&apos;Option Bar &amp; Gestion des Boissons (Formule Brasseur Clé en Main)
+                                                </label>
+                                            </div>
+                                            <p className="text-xs sm:text-sm text-neutral-600 ml-8">
+                                                Mise à disposition du frigo vitré professionnel, stock complet avec reprise des invendus non entamés et personnel de service sur demande (18,00 €/h HTVA).
+                                            </p>
+
+                                            <AnimatePresence>
+                                                {formData.Option_Brasserie_Check === "Oui" && (
+                                                    <motion.div
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: "auto" }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        transition={{ duration: 0.3 }}
+                                                        className="overflow-hidden mt-4 pl-0 sm:pl-8"
+                                                    >
+                                                        <label htmlFor="Option_Brasserie_Details_General" className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">
+                                                            Souhaits particuliers pour le bar &amp; les boissons (optionnel)
+                                                        </label>
+                                                        <textarea
+                                                            id="Option_Brasserie_Details_General"
+                                                            name="Option_Brasserie_Details"
+                                                            rows={2}
+                                                            value={formData.Option_Brasserie_Details}
+                                                            onChange={handleChange}
+                                                            placeholder="Ex : Vin d'honneur pétillant, fût de bière spéciale, service barman souhaité..."
+                                                            className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-800 placeholder-neutral-400 focus:border-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 transition-all"
+                                                        />
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
