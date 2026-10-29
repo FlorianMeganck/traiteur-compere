@@ -314,20 +314,19 @@ export default function Services() {
                                     key === "mariage"
                                         ? HeartHandshake
                                         : key === "entreprise"
-                                        ? Building2
-                                        : key === "famille"
-                                        ? PartyPopper
-                                        : Utensils;
+                                            ? Building2
+                                            : key === "famille"
+                                                ? PartyPopper
+                                                : Utensils;
                                 return (
                                     <button
                                         key={key}
                                         type="button"
                                         onClick={() => setActiveProfile(key)}
-                                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
-                                            isActive
+                                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${isActive
                                                 ? "bg-black text-[#D4AF37] shadow-sm"
                                                 : "bg-white text-neutral-600 border border-[#E8E2D5] hover:border-[#D4AF37] hover:text-black"
-                                        }`}
+                                            }`}
                                     >
                                         <Icon size={14} />
                                         <span>{EVENT_PROFILES[key].tabLabel}</span>
@@ -420,7 +419,7 @@ export default function Services() {
                             "/images/event_pro1.jpeg",
                             "/images/event_pro2.jpeg",
                             "/images/event_pro3.jpeg",
-                            "/images/event_pro4.jpeg"
+                            "/images/event_pro4.jpg"
                         ]}
                         decorType="geometric"
                         reverse={true}
@@ -644,11 +643,10 @@ export default function Services() {
                                         {item.question}
                                     </span>
                                     <span
-                                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${
-                                            isOpen
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen
                                                 ? "bg-black text-[#D4AF37] rotate-180"
                                                 : "bg-white text-neutral-600 border border-[#E8E2D5]"
-                                        }`}
+                                            }`}
                                     >
                                         <ChevronDown size={17} />
                                     </span>
