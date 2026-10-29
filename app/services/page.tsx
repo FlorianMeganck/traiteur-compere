@@ -68,7 +68,7 @@ export default function Services() {
                             "/images/event_pro1.jpeg",
                             "/images/event_pro2.jpeg",
                             "/images/event_pro3.jpeg",
-                            "/images/event_pro4.jpeg"
+                            "/images/event_pro4.jpg"
                         ]}
                         decorType="geometric"
                         reverse={true}
