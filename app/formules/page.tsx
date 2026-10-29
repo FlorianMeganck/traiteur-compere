@@ -219,7 +219,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
         ],
         smallPrice: 20,
         mediumPrice: 18,
-        image: '/images/Buffet froid de réception.jpg'
+        image: '/images/Buffet froid de réception.jpeg'
     },
     gala: {
         label: "Gala",
