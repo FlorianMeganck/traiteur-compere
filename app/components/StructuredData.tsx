@@ -355,7 +355,15 @@ export default function StructuredData() {
               "itemOffered": {
                 "@type": "Product",
                 "name": "Formule Barbecue Classique",
-                "description": "Formule barbecue tout compris avec 3 viandes, salades fraîches, féculents et sauces maison."
+                "description": "Formule barbecue tout compris avec 3 viandes, salades fraîches, féculents et sauces maison.",
+                "image": "https://www.traiteur-compere.be/images/hero-traiteur.png",
+                "offers": {
+                  "@type": "Offer",
+                  "priceCurrency": "EUR",
+                  "price": "15.00",
+                  "availability": "https://schema.org/InStock",
+                  "url": "https://www.traiteur-compere.be/formules"
+                }
               },
               "price": "15.00",
               "priceCurrency": "EUR",
@@ -367,7 +375,15 @@ export default function StructuredData() {
               "itemOffered": {
                 "@type": "Product",
                 "name": "Formule Barbecue Composé",
-                "description": "Formule barbecue 2 entrées + 2 viandes au choix avec accompagnements à volonté."
+                "description": "Formule barbecue 2 entrées + 2 viandes au choix avec accompagnements à volonté.",
+                "image": "https://www.traiteur-compere.be/images/hero-traiteur.png",
+                "offers": {
+                  "@type": "Offer",
+                  "priceCurrency": "EUR",
+                  "price": "21.00",
+                  "availability": "https://schema.org/InStock",
+                  "url": "https://www.traiteur-compere.be/formules"
+                }
               },
               "price": "21.00",
               "priceCurrency": "EUR",
@@ -379,7 +395,15 @@ export default function StructuredData() {
               "itemOffered": {
                 "@type": "Product",
                 "name": "Formule Buffet Froid Campagnard",
-                "description": "Buffet froid traditionnel avec charcuteries artisanales, salades fraîches et crudités."
+                "description": "Buffet froid traditionnel avec charcuteries artisanales, salades fraîches et crudités.",
+                "image": "https://www.traiteur-compere.be/images/buffet_campagnard.jpeg",
+                "offers": {
+                  "@type": "Offer",
+                  "priceCurrency": "EUR",
+                  "price": "14.00",
+                  "availability": "https://schema.org/InStock",
+                  "url": "https://www.traiteur-compere.be/formules"
+                }
               },
               "price": "14.00",
               "priceCurrency": "EUR",
@@ -391,7 +415,15 @@ export default function StructuredData() {
               "itemOffered": {
                 "@type": "Product",
                 "name": "Formule Buffet Froid Gala",
-                "description": "Buffet froid de prestige avec foie gras, cascade de fruits de mer et saumon en belle-vue."
+                "description": "Buffet froid de prestige avec foie gras, cascade de fruits de mer et saumon en belle-vue.",
+                "image": "https://www.traiteur-compere.be/images/buffet_gala.png",
+                "offers": {
+                  "@type": "Offer",
+                  "priceCurrency": "EUR",
+                  "price": "22.00",
+                  "availability": "https://schema.org/InStock",
+                  "url": "https://www.traiteur-compere.be/formules"
+                }
               },
               "price": "22.00",
               "priceCurrency": "EUR",
@@ -403,7 +435,15 @@ export default function StructuredData() {
               "itemOffered": {
                 "@type": "Product",
                 "name": "Plats Préparés Maison de Saison",
-                "description": "Plats cuisinés chaque semaine à emporter ou en livraison locale."
+                "description": "Plats cuisinés chaque semaine à emporter ou en livraison locale.",
+                "image": "https://www.traiteur-compere.be/images/hero-traiteur.png",
+                "offers": {
+                  "@type": "Offer",
+                  "priceCurrency": "EUR",
+                  "price": "11.50",
+                  "availability": "https://schema.org/InStock",
+                  "url": "https://www.traiteur-compere.be/plats-prepares"
+                }
               },
               "price": "11.50",
               "priceCurrency": "EUR",
