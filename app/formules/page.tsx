@@ -454,7 +454,7 @@ export default function Formules() {
                 </div>
 
                 {/* SECTION APÉRITIFS */}
-                <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
+                <section id="aperitifs" className="scroll-mt-28 py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
                         <div className="text-center mb-12">
@@ -548,7 +548,7 @@ export default function Formules() {
                 </section>
 
                 {/* SECTION BUFFETS FROIDS */}
-                <section className="mb-24">
+                <section id="buffets-froids" className="scroll-mt-28 mb-24">
                     <div>
                         <SectionTitle title="Buffets Froids" />
 
@@ -638,21 +638,25 @@ export default function Formules() {
                 </section>
 
                 {/* SECTION BUFFETS CHAUDS */}
-                <section className="py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
+                <section id="buffets-chauds" className="scroll-mt-28 py-16 bg-white rounded-3xl mb-24 shadow-sm border border-neutral-100">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <SectionTitle title="Buffets Chauds" />
                         <BuffetChaudSection />
                     </div>
                 </section>
 
-                <SectionTitle title="Plats Uniques & Salad Bar" />
+                <div id="collectivites" className="scroll-mt-28">
+                    <SectionTitle title="Plats Uniques & Salad Bar" />
+                </div>
 
                 {/* SECTION COLLECTIVITÉS & SALAD BAR */}
-                <div className="mb-32">
+                <div id="associatif" className="scroll-mt-28 mb-32">
                     <CollectiviteSection />
                 </div>
 
-                <SectionTitle title="Boissons & Service" />
+                <div id="boissons" className="scroll-mt-28">
+                    <SectionTitle title="Boissons & Service" />
+                </div>
 
                 {/* SECTION FORMULE BRASSERIE & BOISSONS */}
                 <div className="bg-gradient-to-br from-neutral-900 via-neutral-950 to-black text-white rounded-3xl p-8 md:p-12 shadow-2xl mb-24 border border-[#D4AF37]/30 relative overflow-hidden">
@@ -696,7 +700,7 @@ export default function Formules() {
 
                         <div className="flex flex-col sm:flex-row items-center gap-4">
                             <Link
-                                href="/contact"
+                                href="/contact?boissons=oui"
                                 className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 rounded-full bg-[#D4AF37] hover:bg-white text-black font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-lg shadow-[#D4AF37]/20"
                             >
                                 Intégrer à ma demande de devis →

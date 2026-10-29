@@ -5,26 +5,14 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import {
-    Sparkles,
-    Wine,
-    ChefHat,
-    Users,
-    Truck,
-    CheckCircle2,
     ArrowRight,
-    Clock,
-    ShieldCheck,
-    HelpCircle,
     ChevronDown,
     Utensils,
     Building2,
     HeartHandshake,
     PartyPopper,
-    MapPin,
-    Phone,
-    RefreshCw,
-    ThermometerSnowflake,
-    GlassWater
+    Wine,
+    Check
 } from "lucide-react";
 
 // --- DONNÉES STRUCTURÉES SCHEMA.ORG (CateringService + Service + FAQPage) ---
@@ -78,7 +66,7 @@ const servicesSchemaJsonLd = {
                         "itemOffered": {
                             "@type": "Service",
                             "name": "Buffets Chauds, Buffets Froids & Barbecues sur-mesure",
-                            "description": "Buffets artisanaux chauds (2 à 5 services), buffets froids de terroir ou de gala et barbecues au feu de bois pour mariages, banquets et réceptions."
+                            "description": "Buffets artisanaux chauds (2 à 5 services), buffets froids de terroir ou de gala et barbecues au feu de bois."
                         },
                         "url": "https://www.traiteur-compere.be/formules"
                     },
@@ -96,7 +84,7 @@ const servicesSchemaJsonLd = {
                         "itemOffered": {
                             "@type": "Service",
                             "name": "Service Bar & Brasseur Zéro Gaspillage (Frigo vitré & Reprise des invendus)",
-                            "description": "Mise à disposition du frigo vitré professionnel, fourniture complète des boissons (fûts, bières, vins, bulles, softs) avec reprise intégrale des invendus non entamés et gestion des vidanges."
+                            "description": "Mise à disposition du frigo vitré professionnel, fourniture complète des boissons avec reprise intégrale des invendus non entamés."
                         },
                         "url": "https://www.traiteur-compere.be/services#boissons"
                     },
@@ -113,7 +101,7 @@ const servicesSchemaJsonLd = {
                             "priceCurrency": "EUR",
                             "unitText": "par heure HTVA par serveur/barman"
                         },
-                        "url": "https://www.traiteur-compere.be/contact?type=mariage-boissons"
+                        "url": "https://www.traiteur-compere.be/contact?boissons=oui"
                     }
                 ]
             }
@@ -127,7 +115,7 @@ const servicesSchemaJsonLd = {
                     "name": "Comment fonctionne la formule Brasseur « Zéro Gaspillage » et la reprise des invendus ?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Nous livrons sur votre lieu de réception un frigo vitré professionnel ainsi qu'un stock complet de boissons (bières, vins, bulles, eaux et softs) calibré selon votre nombre d'invités. À la fin de votre événement, nous reprenons l'intégralité des bouteilles et fûts non entamés ainsi que les vidanges : vous ne payez que ce qui a réellement été consommé."
+                        "text": "Nous livrons sur votre lieu de réception un frigo vitré professionnel ainsi qu'un stock complet de boissons (bières, vins, bulles, eaux et softs). À la fin de votre événement, nous reprenons l'intégralité des bouteilles et fûts non entamés ainsi que les vidanges : vous ne payez que ce qui a réellement été consommé."
                     }
                 },
                 {
@@ -135,7 +123,7 @@ const servicesSchemaJsonLd = {
                     "name": "Fournissez-vous la vaisselle, la verrerie et le matériel de maintien au chaud ?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Oui. Le matériel de service et de maintien au chaud (bains-marie, chafing dishes, barbecues) est prévu avec nos formules chaudes. Vous pouvez également activer l'option location de vaisselle (1,50 €/pers. HTVA) et de verrerie (verres à vin, verres à soft, flûtes) directement dans votre devis, reprise sale incluse."
+                        "text": "Oui. Le matériel de service et de maintien au chaud est prévu avec nos formules chaudes. Vous pouvez également activer l'option location de vaisselle (1,50 €/pers. HTVA) et de verrerie (verres à vin, verres à soft, flûtes) directement dans votre devis."
                     }
                 },
                 {
@@ -143,7 +131,7 @@ const servicesSchemaJsonLd = {
                     "name": "Peut-on réserver le personnel en salle et au bar, ou opter pour la livraison seule ?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Les deux options sont possibles. Vous pouvez choisir la livraison seule (idéale pour les associations, clubs ou repas conviviaux) ou faire appel à notre brigade de serveurs et barmans au tarif transparent de 18,00 € / heure HTVA par membre du personnel."
+                        "text": "Les deux options sont possibles. Vous pouvez choisir la livraison seule ou faire appel à notre brigade de serveurs et barmans au tarif de 18,00 € / heure HTVA par membre du personnel."
                     }
                 },
                 {
@@ -151,7 +139,7 @@ const servicesSchemaJsonLd = {
                     "name": "Dans quelles communes de Liège, Huy-Waremme et Wallonie intervenez-vous ?",
                     "acceptedAnswer": {
                         "@type": "Answer",
-                        "text": "Basée à Saint-Georges-sur-Meuse, la Maison Compère intervient dans toute la province de Liège, l'axe Huy-Waremme (Amay, Verlaine, Villers-le-Bouillet, Hannut, Flémalle, Seraing) ainsi que partout en Wallonie pour vos mariages, événements d'entreprise et réceptions privées."
+                        "text": "Basée à Saint-Georges-sur-Meuse, la Maison Compère intervient dans toute la province de Liège, l'axe Huy-Waremme (Amay, Verlaine, Villers-le-Bouillet, Hannut, Flémalle, Seraing) ainsi que partout en Wallonie."
                     }
                 }
             ]
@@ -159,123 +147,61 @@ const servicesSchemaJsonLd = {
     ]
 };
 
-// --- DONNÉES DU SÉLECTEUR INTERACTIF PAR TYPOLOGIE D'ÉVÉNEMENT ---
+// --- DONNÉES DU SÉLECTEUR LÉGER PAR ÉVÉNEMENT ---
 type EventProfileKey = "mariage" | "entreprise" | "famille" | "association";
 
-interface EventProfileData {
-    key: EventProfileKey;
-    tabLabel: string;
-    badge: string;
-    seoSubtitle: string;
-    title: string;
-    description: string;
-    recommendedFormula: string;
-    includedPoints: string[];
-    brasseurHighlight: string;
-    primaryCtaLabel: string;
-    primaryCtaHref: string;
-    secondaryCtaLabel: string;
-    secondaryCtaHref: string;
-    image: string;
-    imageAlt: string;
-}
-
-const EVENT_PROFILES: Record<EventProfileKey, EventProfileData> = {
+const EVENT_PROFILES: Record<
+    EventProfileKey,
+    {
+        tabLabel: string;
+        title: string;
+        cuisineText: string;
+        barLogisticsText: string;
+        primaryLabel: string;
+        primaryHref: string;
+        secondaryLabel: string;
+        secondaryHref: string;
+    }
+> = {
     mariage: {
-        key: "mariage",
-        tabLabel: "Mariage & Noces",
-        badge: "Traiteur Mariage Liège & Wallonie",
-        seoSubtitle: "Réception de mariage clé en main : du vin d'honneur à la soirée dansante",
-        title: "Un mariage à votre image, sans aucune charge mentale",
-        description:
-            "Pour le plus beau jour de votre vie, nous orchestrons aussi bien l'assiette que le verre. Du cocktail apéritif aux zakouskis jusqu'au banquet chaud ou barbecue prestige, notre brigade veille sur chaque détail.",
-        recommendedFormula: "Vin d'honneur (Zakouskis & Verrines) + Buffet Chaud 3 à 5 services ou BBQ Viandes Nobles + Formule Brasseur & Service en salle",
-        includedPoints: [
-            "Rencontre personnalisée et élaboration d'un menu sur-mesure selon votre budget",
-            "Gestion complète du vin d'honneur, du repas et du buffet de desserts / mignardises",
-            "Location de vaisselle, verrerie (flûtes, verres à vin, softs) et matériel thermique",
-            "Brigade de salle et barmans dédiés (18,00 €/h HTVA) pour un service fluide"
-        ],
-        brasseurHighlight:
-            "Inclus sur demande : Frigo vitré pro installé la veille ou le matin, gestion des bulles, vins & fûts, et reprise intégrale des bouteilles non entamées.",
-        primaryCtaLabel: "Simuler mon devis Mariage & Bar",
-        primaryCtaHref: "/contact?type=mariage-boissons&boissons=oui",
-        secondaryCtaLabel: "Découvrir nos buffets & menus",
-        secondaryCtaHref: "/formules",
-        image: "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=1200&auto=format&fit=crop",
-        imageAlt: "Réception de mariage élégante par Traiteur Compère en province de Liège"
+        tabLabel: "Mariage",
+        title: "Une réception de mariage clé en main, du vin d'honneur à la soirée",
+        cuisineText: "Zakouskis & verrines à l'apéritif, suivis d'un buffet chaud (2 à 5 services), d'un buffet de Gala ou d'un barbecue viandes nobles.",
+        barLogisticsText: "Frigo vitré pro installé sur place, gestion complète des bulles, vins, bières et softs (reprise des invendus), vaisselle et brigade en salle.",
+        primaryLabel: "Voir les Buffets Chauds",
+        primaryHref: "/formules#buffets-chauds",
+        secondaryLabel: "Devis Mariage sur-mesure",
+        secondaryHref: "/contact?type=mariage"
     },
     entreprise: {
-        key: "entreprise",
-        tabLabel: "Événement d'Entreprise",
-        badge: "Traiteur Événementiel Entreprise Wallonie",
-        seoSubtitle: "Séminaires, inaugurations, vœux d'entreprise, walking dinners & repas corporate",
-        title: "Valorisez votre image de marque avec une réception irréprochable",
-        description:
-            "Qu'il s'agisse d'un lunch de direction aux petits pains garnis, d'un cocktail dînatoire pour 200 collaborateurs ou d'une journée portes ouvertes, nous garantissons ponctualité, présentation soignée et facturation transparente.",
-        recommendedFormula: "Cocktail Dînatoire (Zakouskis, Verrines 6cl/12cl, Pains Festifs) ou Salad Bar / BBQ + Bar Brasseur Clé en Main",
-        includedPoints: [
-            "Formats adaptés au rythme pro : walking dinner, buffet froid réception ou lunch rapide",
-            "Installation autonome sur votre site d'entreprise ou salle de réception en Wallonie",
-            "Prise en compte rigoureuse des régimes (végétarien, sans gluten, allergènes identifiés)",
-            "Devis HTVA clair sous 24h et facturation au réel des boissons consommées"
-        ],
-        brasseurHighlight:
-            "Zéro logistique interne : nous livrons les frigos vitrés, les softs, eaux, bières et vins, assurons le service au bar et reprenons toutes les vidanges.",
-        primaryCtaLabel: "Demander un devis Pro & Boissons",
-        primaryCtaHref: "/contact?type=entreprise-boissons&boissons=oui",
-        secondaryCtaLabel: "Voir nos formules réceptions & apéritifs",
-        secondaryCtaHref: "/formules",
-        image: "/images/event_pro1.jpeg",
-        imageAlt: "Service traiteur événementiel pour entreprises en Wallonie et à Liège"
+        tabLabel: "Entreprise",
+        title: "Séminaires, cocktails dînatoires et réceptions professionnelles",
+        cuisineText: "Petits pains garnis et wraps pour vos réunions, zakouskis et verrines pour vos walking dinners, ou salad bar et barbecue corporate.",
+        barLogisticsText: "Livraison ponctuelle sur site en Wallonie, boissons fraîches en frigo vitré avec service au bar si souhaité, et facturation HTVA claire.",
+        primaryLabel: "Voir les Apéritifs & Verrines",
+        primaryHref: "/formules#aperitifs",
+        secondaryLabel: "Demander un devis Pro",
+        secondaryHref: "/contact?type=entreprise"
     },
     famille: {
-        key: "famille",
-        tabLabel: "Fête Privée & Famille",
-        badge: "Banquets, Anniversaires, Baptêmes & Communions",
-        seoSubtitle: "À domicile ou en salle partout à Liège, Huy, Waremme et environs",
-        title: "Profitez enfin de vos invités, la Maison Compère s'occupe du reste",
-        description:
-            "Anniversaire marquant, communion, baptême ou noces d'or : recevez vos proches en toute sérénité. Nous adaptons le niveau de prestation à vos envies, du buffet déposé prêt à déguster jusqu'au service complet avec barman.",
-        recommendedFormula: "Buffet Froid (Campagnard à Gala) ou Cochon de lait / BBQ + Option Frigo Brasseur à la carte",
-        includedPoints: [
-            "Liberté totale : avec personnel de service à table/au buffet ou en installation simple",
-            "Large choix de buffets froids, barbecues au feu de bois et menus chauds dès 14 €/pers.",
-            "Option vaisselle et verrerie louées et reprises sans lavage de votre côté",
-            "Conseils précis sur les quantités pour éviter tout gaspillage"
-        ],
-        brasseurHighlight:
-            "Fini les allers-retours au supermarché et les casiers tièdes : notre frigo vitré pro garde vos boissons fraîches et nous reprenons tout le surplus.",
-        primaryCtaLabel: "Configurer ma fête privée",
-        primaryCtaHref: "/contact?type=fete-privee-boissons&boissons=oui",
-        secondaryCtaLabel: "Comparer nos formules & tarifs",
-        secondaryCtaHref: "/formules",
-        image: "/images/Buffet-froid-reception.jpeg",
-        imageAlt: "Buffet froid de réception pour fête de famille par Traiteur Compère"
+        tabLabel: "Fête de famille",
+        title: "Anniversaires, baptêmes, communions et repas entre amis",
+        cuisineText: "Barbecues conviviaux au feu de bois, cochon de lait, porchetta ou buffets froids généreux dès 14 € / pers. HTVA.",
+        barLogisticsText: "À domicile ou en salle : choisissez la simple mise en place ou ajoutez la vaisselle, le frigo brasseur et un serveur dédié.",
+        primaryLabel: "Voir les Barbecues & Buffets",
+        primaryHref: "/formules#bbq",
+        secondaryLabel: "Devis Fête privée",
+        secondaryHref: "/contact?type=fete-privee"
     },
     association: {
-        key: "association",
-        tabLabel: "Associations & Livraison",
-        badge: "Soupers d'École, Clubs Sportifs & Collectivités",
-        seoSubtitle: "Solutions généreuses, économiques et prêtes à servir dès 8 € / pers.",
-        title: "La qualité artisanale à budget maîtrisé pour vos grands rassemblements",
-        description:
-            "Vous organisez un souper de club sportif, une fête scolaire ou un repas associatif ? Nous livrons des plats mijotés savoureux (boulets à la liégeoise, lasagnes maison, carbonnade, vol-au-vent...) prêts à être servis par vos bénévoles.",
-        recommendedFormula: "Plats Chauds Collectivités (dès 8 €/pers.) ou Salad Bar + Option Boissons Brasseur sur mesure",
-        includedPoints: [
-            "Tarifs étudiés pour permettre à votre association ou club de dégager une belle marge",
-            "Conditionnement professionnel facilitant le réchauffage et le service rapide",
-            "Livraison ponctuelle sur le lieu de votre événement ou retrait à notre atelier",
-            "Possibilité de coupler avec notre fourniture de boissons et frigos en dépôt-vente"
-        ],
-        brasseurHighlight:
-            "Idéal pour la buvette de votre événement : ne prenez aucun risque financier sur le stock de boissons grâce à la reprise intégrale des invendus non entamés.",
-        primaryCtaLabel: "Devis Collectivité / Association",
-        primaryCtaHref: "/contact?menu=collectivite",
-        secondaryCtaLabel: "Voir la carte Collectivités & Salad Bar",
-        secondaryCtaHref: "/formules",
-        image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1200&auto=format&fit=crop",
-        imageAlt: "Repas traiteur pour associations et collectivités en région liégeoise"
+        tabLabel: "Association & Club",
+        title: "Soupers d'école, clubs sportifs et grands rassemblements",
+        cuisineText: "Plats mijotés faits maison (boulets liégeoise, lasagnes, carbonnade, vol-au-vent...) et salad bar dès 8 € / pers. HTVA.",
+        barLogisticsText: "Livraison chaude ou froide prête à servir par vos bénévoles, sans personnel ni vaisselle pour optimiser votre budget.",
+        primaryLabel: "Voir les Plats Collectivités",
+        primaryHref: "/formules#collectivites",
+        secondaryLabel: "Configurer un repas associatif",
+        secondaryHref: "/contact?menu=collectivite"
     }
 };
 
@@ -283,397 +209,193 @@ const EVENT_PROFILES: Record<EventProfileKey, EventProfileData> = {
 const LOGISTICS_STEPS = [
     {
         step: "01",
-        title: "Élaboration du menu & calibrage des boissons",
-        subtitle: "Conseil personnalisé & Devis sous 24h",
-        description:
-            "Ensemble, nous définissons la formule culinaire (buffet, barbecue, cocktail ou banquet) et activons, si vous le souhaitez, l'option Brasseur. Nous calibrons le volume idéal de fûts, vins, bulles et softs selon le profil de vos convives.",
-        highlights: ["Devis transparent et détaillé", "Adaptation aux allergies & régimes", "Zéro frais caché"]
+        title: "Menu & Boissons",
+        desc: "Choix de votre formule culinaire et calibrage des boissons sur-mesure. Devis clair sous 24h."
     },
     {
         step: "02",
-        title: "Livraison du matériel, vaisselle & frigos vitrés",
-        subtitle: "Installation anticipée sur votre lieu de réception",
-        description:
-            "Nous acheminons sur place (salle, chapiteau, entreprise ou domicile à Liège, Huy, Waremme et en Wallonie) le frigo vitré professionnel, le stock de boissons, la verrerie et la vaisselle afin que tout soit parfaitement frais à l'arrivée de vos invités.",
-        highlights: ["Frigo vitré professionnel fourni", "Mise au frais garantie", "Vaisselle & verrerie en option"]
+        title: "Livraison & Frigos",
+        desc: "Installation anticipée du frigo vitré pro, des boissons et de la vaisselle sur votre lieu de réception."
     },
     {
         step: "03",
-        title: "Prestation gourmande & Service le jour J",
-        subtitle: "En cuisine, en salle et derrière le bar",
-        description:
-            "Nos chefs dressent vos buffets ou assurent les cuissons minute. Si vous avez opté pour le service, notre brigade de salle et nos barmans (18,00 €/h HTVA) accueillent et servent vos convives avec discrétion et sourire.",
-        highlights: ["Produits frais faits maison", "Service fluide au bar & à table", "Ou formule livraison seule au choix"]
+        title: "Prestation le Jour J",
+        desc: "Dressage des buffets, cuissons minute et, si souhaité, service en salle et au bar (18 €/h HTVA)."
     },
     {
         step: "04",
-        title: "Reprise sans tracas & Décompte au réel",
-        subtitle: "Zéro gaspillage, zéro corvée de vidanges",
-        description:
-            "Après la fête, nous reprenons le frigo, le matériel, la vaisselle louée ainsi que toutes les bouteilles et fûts non entamés et les vidanges. Seules les boissons réellement ouvertes sont facturées.",
-        highlights: ["Reprise intégrale des invendus", "Gestion complète des vidanges", "Facturation au réel consommé"]
+        title: "Reprise sans tracas",
+        desc: "Reprise du matériel, des vidanges et des bouteilles non entamées. Facturation au réel consommé."
     }
 ];
 
 // --- DONNÉES FAQ PRESTATIONS ---
 const SERVICES_FAQ = [
     {
-        question: "Comment fonctionne concrètement la Formule Brasseur « Zéro Gaspillage » ?",
-        answer: "C'est notre solution clé en main pour vous éviter l'achat, le transport et le refroidissement des boissons. Nous mettons à disposition un frigo vitré professionnel sur le lieu de votre événement avec une sélection complète (bières, vins, bulles, softs, eaux) prévue large pour ne jamais manquer. En fin de prestation, nous reprenons toutes les bouteilles et fûts non entamés ainsi que les vidanges : vous êtes facturé uniquement sur la consommation réelle."
+        question: "Comment fonctionne la Formule Brasseur « Zéro Gaspillage » ?",
+        answer: "Nous installons un frigo vitré professionnel sur le lieu de votre réception avec un stock complet (bières, vins, bulles, softs et eaux) calibré largement pour vos invités. En fin d'événement, nous reprenons toutes les bouteilles et fûts non entamés ainsi que les vidanges : seules les boissons ouvertes sont facturées."
     },
     {
         question: "Fournissez-vous la vaisselle, les verres et le matériel de service ?",
-        answer: "Oui. Tout le matériel de présentation des buffets et de maintien au chaud est inclus dans nos prestations chaudes. En complément, vous pouvez cocher dans votre demande de devis la location de vaisselle (1,50 € / pers. HTVA) ainsi que la location de verrerie au choix (verres à vin, verres à soft, flûtes à champagne). Nous reprenons le tout après votre événement."
+        answer: "Oui. Le matériel de présentation des buffets et de maintien au chaud est prévu avec nos formules chaudes. Vous pouvez ajouter en 1 clic dans votre devis la location de vaisselle (1,50 €/pers. HTVA) et de verrerie (verres à vin, softs, flûtes)."
     },
     {
-        question: "Comment est tarifé le personnel en salle et au bar ?",
-        answer: "Vous gardez une maîtrise totale de votre budget : la mise à disposition d'un serveur en salle ou d'un barman dédié est facturée au tarif clair de 18,00 € / heure HTVA par personne. Vous pouvez également choisir nos formules en livraison seule si vous préférez gérer le service vous-même."
+        question: "Peut-on réserver uniquement le repas, avec ou sans personnel en salle ?",
+        answer: "Tout est modulable. Vous pouvez opter pour la livraison seule (idéale pour les associations ou repas en famille) ou réserver nos serveurs et barmans au tarif de 18,00 € / heure HTVA par personne."
     },
     {
-        question: "Dans quelles zones géographiques vous déplacez-vous ?",
-        answer: "Notre atelier est situé Rue Potay 3 à Saint-Georges-sur-Meuse (4470). Nous assurons les livraisons et réceptions complètes dans toute la province de Liège, sur l'axe Huy-Waremme (Amay, Verlaine, Villers-le-Bouillet, Hannut, Flémalle, Seraing) et plus largement dans toute la Wallonie."
+        question: "Dans quelles villes et régions vous déplacez-vous ?",
+        answer: "Depuis notre atelier de Saint-Georges-sur-Meuse (Rue Potay 3), nous intervenons dans toute la province de Liège, sur l'axe Huy-Waremme (Amay, Verlaine, Hannut, Flémalle, Seraing) et partout en Wallonie."
     },
     {
-        question: "Pouvez-vous adapter les menus aux allergies ou régimes particuliers ?",
-        answer: "Absolument. Qu'il s'agisse d'options végétariennes, sans porc, sans gluten ou sans lactose, nous adaptons nos compositions sur simple mention lors de votre demande de devis. De plus, notre matrice complète des 14 allergènes majeurs est consultable à tout moment en ligne."
-    },
-    {
-        question: "Peut-on réserver uniquement le repas sans les boissons (ou inversement) ?",
-        answer: "Bien sûr ! Nos prestations sont 100 % modulables. Vous pouvez commander uniquement votre buffet, barbecue ou repas associatif en livraison, ou combiner la cuisine artisanale et la Formule Brasseur pour profiter d'un interlocuteur unique du début à la fin."
+        question: "Comment gérez-vous les allergies et régimes spécifiques ?",
+        answer: "Nous adaptons nos menus (options végétariennes, sans gluten, sans lactose...) sur simple mention lors de votre demande de devis, et notre matrice des 14 allergènes est consultable en ligne."
     }
 ];
 
 // --- MAIN COMPONENT ---
 export default function Services() {
     const [activeProfile, setActiveProfile] = useState<EventProfileKey>("mariage");
-    const [activeStepIndex, setActiveStepIndex] = useState<number>(0);
-    const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+    const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
     const currentProfile = EVENT_PROFILES[activeProfile];
 
     return (
-        <main className="bg-[#FAF8F5] text-[#1A1A1A] font-sans selection:bg-[#D4AF37] selection:text-white pt-40 md:pt-48 pb-20 overflow-hidden relative">
-            {/* Injection des données structurées Schema.org */}
+        <main className="bg-white text-gray-900 font-sans selection:bg-[#D4AF37] selection:text-white pt-40 md:pt-48 pb-20 overflow-hidden relative">
+            {/* Schema.org JSON-LD */}
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(servicesSchemaJsonLd) }}
             />
 
-            {/* Halo doré supérieur subtil */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[500px] bg-gradient-to-b from-[#D4AF37]/10 via-[#D4AF37]/5 to-transparent blur-3xl pointer-events-none -z-10" />
-
-            {/* ============================================================== */}
-            {/* 1. HERO ÉDITORIAL & PROPOSITION DE VALEUR CLÉ EN MAIN           */}
-            {/* ============================================================== */}
-            <section className="px-6 mb-12 max-w-7xl mx-auto text-center relative z-10">
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FAF6EB] border border-[#D4AF37]/40 text-[#996515] text-[11px] sm:text-xs font-bold uppercase tracking-[0.22em] mb-6 shadow-2xs"
-                >
-                    <Sparkles size={13} className="text-[#D4AF37]" />
-                    <span>Maison Compère • Traiteur &amp; Brasseur Événementiel</span>
-                </motion.div>
-
+            {/* 1. INTRO & TITLE (Épuré) */}
+            <section className="px-6 mb-14 max-w-7xl mx-auto text-center relative z-10">
                 <motion.h1
-                    initial={{ opacity: 0, y: 25 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.1 }}
-                    className="text-4xl sm:text-6xl md:text-7xl font-serif text-[#111111] tracking-tight mb-6 leading-[1.1]"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                    className="text-5xl md:text-7xl font-serif text-black uppercase tracking-widest mb-6"
                 >
-                    Nos Services Traiteur &amp; Réceptions{" "}
-                    <span className="italic font-normal text-[#996515]">Clé en Main</span>
+                    NOS SERVICES
                 </motion.h1>
-
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.2 }}
-                    className="text-neutral-600 font-sans font-light text-base sm:text-lg md:text-xl max-w-3xl mx-auto mb-8 leading-relaxed"
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8, delay: 0.15 }}
+                    className="text-gray-600 font-sans font-light text-lg max-w-2xl mx-auto mb-10 italic"
                 >
-                    De la célébration intime au grand banquet de mariage ou d&apos;entreprise : nous unissons{" "}
-                    <strong className="font-medium text-neutral-900">cuisine artisanale faite maison</strong> et{" "}
-                    <strong className="font-medium text-neutral-900">service bar brasseur zéro gaspillage</strong> à Liège, Huy, Waremme et dans toute la Wallonie.
+                    &ldquo;De la célébration intime au grand banquet, nous créons l&apos;ambiance gourmande qui vous ressemble — de la cuisine jusqu&apos;au service bar.&rdquo;
                 </motion.p>
 
-                {/* Double CTA Hero */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.7, delay: 0.3 }}
-                    className="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4 max-w-xl mx-auto mb-10"
-                >
-                    <Link
-                        href="/contact?type=mariage-boissons&boissons=oui"
-                        className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#111111] hover:bg-[#D4AF37] text-white hover:text-black font-serif font-bold text-xs uppercase tracking-widest transition-all duration-300 shadow-md hover:shadow-xl flex items-center justify-center gap-2"
-                    >
-                        <span>Demander un devis sur-mesure</span>
-                        <ArrowRight size={15} />
-                    </Link>
-                    <Link
-                        href="/formules"
-                        className="w-full sm:w-auto px-8 py-4 rounded-full bg-white hover:bg-[#FAF6EB] text-neutral-900 border border-[#D4AF37] font-serif font-bold text-xs uppercase tracking-widest transition-all duration-300 shadow-2xs hover:shadow-md text-center"
-                    >
-                        Explorer nos formules &amp; tarifs
-                    </Link>
-                </motion.div>
-
-                {/* Bandeau de réassurance rapide */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto text-left bg-white/90 border border-[#E8E2D5] rounded-2xl p-4 shadow-2xs">
-                    <div className="flex items-center gap-3 px-2">
-                        <div className="w-9 h-9 rounded-xl bg-[#FAF6EB] text-[#996515] flex items-center justify-center shrink-0">
-                            <ChefHat size={18} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-bold text-neutral-900">Cuisine 100% Maison</p>
-                            <p className="text-[11px] text-neutral-500">Terroir local depuis 1821</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3 px-2">
-                        <div className="w-9 h-9 rounded-xl bg-[#FAF6EB] text-[#996515] flex items-center justify-center shrink-0">
-                            <ThermometerSnowflake size={18} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-bold text-neutral-900">Frigo Vitré Fourni</p>
-                            <p className="text-[11px] text-neutral-500">Boissons fraîches sur place</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3 px-2">
-                        <div className="w-9 h-9 rounded-xl bg-[#FAF6EB] text-[#996515] flex items-center justify-center shrink-0">
-                            <RefreshCw size={18} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-bold text-neutral-900">Zéro Gaspillage</p>
-                            <p className="text-[11px] text-neutral-500">Reprise des invendus</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-3 px-2">
-                        <div className="w-9 h-9 rounded-xl bg-[#FAF6EB] text-[#996515] flex items-center justify-center shrink-0">
-                            <Users size={18} />
-                        </div>
-                        <div>
-                            <p className="text-xs font-bold text-neutral-900">Service à la Carte</p>
-                            <p className="text-[11px] text-neutral-500">Salle &amp; bar à 18 €/h HTVA</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* VISUAL SUMMARY STICKY NAV */}
+                {/* VISUAL SUMMARY */}
                 <VisualSummary />
             </section>
 
-            {/* ============================================================== */}
-            {/* 2. SÉLECTEUR INTERACTIF PAR TYPOLOGIE D'ÉVÉNEMENT              */}
-            {/* ============================================================== */}
-            <section id="configurateur" className="scroll-mt-28 max-w-7xl mx-auto px-6 mb-24 relative z-10">
-                <div className="bg-white rounded-3xl p-6 sm:p-10 md:p-12 border border-[#E8E2D5] shadow-md">
-                    <div className="text-center max-w-3xl mx-auto mb-8">
-                        <span className="text-[11px] uppercase tracking-[0.2em] font-bold text-[#996515] bg-[#FAF6EB] px-3.5 py-1 rounded-full border border-[#D4AF37]/30">
-                            Diagnostic rapide • Quel événement préparez-vous ?
-                        </span>
-                        <h2 className="text-2xl sm:text-4xl font-serif text-[#111111] mt-3 mb-2">
-                            Visualisez en 1 clic la formule adaptée à votre réception
-                        </h2>
-                        <p className="text-sm sm:text-base text-neutral-500 font-light">
-                            Sélectionnez votre type d&apos;événement pour découvrir notre accompagnement cuisine, matériel et service bar brasseur.
-                        </p>
-                    </div>
+            {/* 2. SÉLECTEUR COMPACT PAR ÉVÉNEMENT */}
+            <section className="px-6 mb-16 max-w-5xl mx-auto relative z-10">
+                <div className="bg-[#FAF8F5] rounded-3xl p-6 sm:p-8 border border-[#E8E2D5]">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#E8E2D5]">
+                        <div>
+                            <p className="text-[11px] uppercase tracking-[0.2em] text-[#996515] font-bold">
+                                Aperçu rapide
+                            </p>
+                            <h2 className="text-xl sm:text-2xl font-serif text-black mt-0.5">
+                                Que préparez-vous ?
+                            </h2>
+                        </div>
 
-                    {/* Onglets de sélection */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-8">
-                        {(Object.keys(EVENT_PROFILES) as EventProfileKey[]).map((key) => {
-                            const item = EVENT_PROFILES[key];
-                            const isActive = activeProfile === key;
-                            const IconComponent =
-                                key === "mariage"
-                                    ? HeartHandshake
-                                    : key === "entreprise"
-                                    ? Building2
-                                    : key === "famille"
-                                    ? PartyPopper
-                                    : Utensils;
-
-                            return (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    onClick={() => setActiveProfile(key)}
-                                    className={`p-4 rounded-2xl border text-left transition-all duration-300 flex items-center gap-3 cursor-pointer ${
-                                        isActive
-                                            ? "bg-[#111111] text-white border-[#111111] shadow-lg scale-[1.01]"
-                                            : "bg-[#FAF8F5] text-neutral-700 border-[#E8E2D5] hover:border-[#D4AF37] hover:bg-white"
-                                    }`}
-                                >
-                                    <div
-                                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                        {/* 4 PILLS */}
+                        <div className="flex flex-wrap gap-2">
+                            {(Object.keys(EVENT_PROFILES) as EventProfileKey[]).map((key) => {
+                                const isActive = activeProfile === key;
+                                const Icon =
+                                    key === "mariage"
+                                        ? HeartHandshake
+                                        : key === "entreprise"
+                                        ? Building2
+                                        : key === "famille"
+                                        ? PartyPopper
+                                        : Utensils;
+                                return (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        onClick={() => setActiveProfile(key)}
+                                        className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all cursor-pointer ${
                                             isActive
-                                                ? "bg-[#D4AF37] text-black"
-                                                : "bg-white text-[#996515] border border-[#E8E2D5]"
+                                                ? "bg-black text-[#D4AF37] shadow-sm"
+                                                : "bg-white text-neutral-600 border border-[#E8E2D5] hover:border-[#D4AF37] hover:text-black"
                                         }`}
                                     >
-                                        <IconComponent size={19} />
-                                    </div>
-                                    <div>
-                                        <p
-                                            className={`text-xs sm:text-sm font-bold leading-tight ${
-                                                isActive ? "text-white" : "text-neutral-900"
-                                            }`}
-                                        >
-                                            {item.tabLabel}
-                                        </p>
-                                        <p
-                                            className={`text-[11px] mt-0.5 ${
-                                                isActive ? "text-[#D4AF37]" : "text-neutral-500"
-                                            }`}
-                                        >
-                                            Voir ce qui est inclus →
-                                        </p>
-                                    </div>
-                                </button>
-                            );
-                        })}
+                                        <Icon size={14} />
+                                        <span>{EVENT_PROFILES[key].tabLabel}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
 
-                    {/* Contenu dynamique de la typologie sélectionnée */}
                     <AnimatePresence mode="wait">
                         <motion.div
-                            key={currentProfile.key}
-                            initial={{ opacity: 0, y: 12 }}
+                            key={activeProfile}
+                            initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -12 }}
-                            transition={{ duration: 0.3 }}
-                            className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch bg-[#FAF8F5] rounded-2xl p-6 sm:p-8 border border-[#E8E2D5]"
+                            exit={{ opacity: 0, y: -8 }}
+                            transition={{ duration: 0.2 }}
+                            className="pt-6 grid grid-cols-1 md:grid-cols-12 gap-6 items-center"
                         >
-                            {/* Colonne Texte & Inclus */}
-                            <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
-                                <div className="space-y-4">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <span className="text-[11px] uppercase tracking-wider font-bold text-[#996515] bg-[#FAF6EB] px-3 py-1 rounded-full border border-[#D4AF37]/30">
-                                            {currentProfile.badge}
-                                        </span>
-                                        <span className="text-xs text-neutral-500 italic">
-                                            {currentProfile.seoSubtitle}
-                                        </span>
-                                    </div>
-
-                                    <h3 className="text-2xl sm:text-3xl font-serif text-[#111111] leading-snug">
-                                        {currentProfile.title}
-                                    </h3>
-
-                                    <p className="text-neutral-600 text-sm sm:text-base font-light leading-relaxed">
-                                        {currentProfile.description}
+                            <div className="md:col-span-8 space-y-3">
+                                <h3 className="font-serif text-xl text-black">
+                                    {currentProfile.title}
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-neutral-600 font-light">
+                                    <p className="flex items-start gap-2">
+                                        <Check size={16} className="text-[#D4AF37] shrink-0 mt-0.5" />
+                                        <span><strong className="font-medium text-neutral-900">Côté cuisine :</strong> {currentProfile.cuisineText}</span>
                                     </p>
-
-                                    {/* Configuration recommandée */}
-                                    <div className="bg-white p-4 rounded-xl border border-[#E8E2D5]">
-                                        <p className="text-[11px] uppercase tracking-widest font-bold text-[#996515] mb-1">
-                                            Configuration plébiscitée par nos clients :
-                                        </p>
-                                        <p className="text-xs sm:text-sm font-medium text-neutral-900">
-                                            {currentProfile.recommendedFormula}
-                                        </p>
-                                    </div>
-
-                                    {/* Liste de ce qui est pris en charge */}
-                                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                                        {currentProfile.includedPoints.map((pt, i) => (
-                                            <li
-                                                key={i}
-                                                className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-700 bg-white/80 p-3 rounded-xl border border-[#EAE6DF]"
-                                            >
-                                                <CheckCircle2
-                                                    size={16}
-                                                    className="text-[#D4AF37] shrink-0 mt-0.5"
-                                                />
-                                                <span>{pt}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-
-                                    {/* Encart Complément Brasseur */}
-                                    <div className="bg-[#FAF6EB] border border-[#D4AF37]/40 rounded-xl p-4 flex items-start gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-[#D4AF37] text-black flex items-center justify-center shrink-0 mt-0.5">
-                                            <Wine size={16} />
-                                        </div>
-                                        <div>
-                                            <p className="text-xs font-bold uppercase tracking-wider text-[#996515]">
-                                                Complément Naturel : Service Bar &amp; Brasseur
-                                            </p>
-                                            <p className="text-xs sm:text-sm text-neutral-700 mt-0.5 leading-relaxed">
-                                                {currentProfile.brasseurHighlight}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Boutons d'action contextualisés */}
-                                <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
-                                    <Link
-                                        href={currentProfile.primaryCtaHref}
-                                        className="w-full sm:w-auto px-7 py-3.5 rounded-full bg-[#111111] hover:bg-[#D4AF37] text-white hover:text-black font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-sm flex items-center justify-center gap-2"
-                                    >
-                                        <span>{currentProfile.primaryCtaLabel}</span>
-                                        <ArrowRight size={14} />
-                                    </Link>
-                                    <Link
-                                        href={currentProfile.secondaryCtaHref}
-                                        className="w-full sm:w-auto px-6 py-3.5 rounded-full bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-300 font-bold uppercase tracking-widest text-xs transition-all duration-300 text-center"
-                                    >
-                                        {currentProfile.secondaryCtaLabel}
-                                    </Link>
+                                    <p className="flex items-start gap-2">
+                                        <Wine size={16} className="text-[#996515] shrink-0 mt-0.5" />
+                                        <span><strong className="font-medium text-neutral-900">Côté bar &amp; logistique :</strong> {currentProfile.barLogisticsText}</span>
+                                    </p>
                                 </div>
                             </div>
 
-                            {/* Colonne Visuel */}
-                            <div className="lg:col-span-5 relative min-h-[280px] sm:min-h-[360px] rounded-2xl overflow-hidden shadow-md border border-[#E8E2D5]">
-                                <Image
-                                    src={currentProfile.image}
-                                    alt={currentProfile.imageAlt}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 1024px) 100vw, 40vw"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent flex items-end p-6">
-                                    <div className="text-white">
-                                        <p className="text-[11px] uppercase tracking-widest text-[#D4AF37] font-bold">
-                                            Maison Compère • Depuis 1821
-                                        </p>
-                                        <p className="text-base font-serif mt-0.5">
-                                            Une seule équipe pour orchestrer votre table et votre bar.
-                                        </p>
-                                    </div>
-                                </div>
+                            <div className="md:col-span-4 flex flex-col gap-2.5">
+                                <Link
+                                    href={currentProfile.primaryHref}
+                                    className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-black hover:bg-[#D4AF37] text-white hover:text-black text-xs font-bold uppercase tracking-widest transition-colors"
+                                >
+                                    <span>{currentProfile.primaryLabel}</span>
+                                    <ArrowRight size={14} />
+                                </Link>
+                                <Link
+                                    href={currentProfile.secondaryHref}
+                                    className="w-full inline-flex items-center justify-center px-5 py-2.5 rounded-full bg-white hover:bg-neutral-100 text-neutral-800 border border-[#E8E2D5] text-xs font-bold uppercase tracking-widest transition-colors"
+                                >
+                                    {currentProfile.secondaryLabel}
+                                </Link>
                             </div>
                         </motion.div>
                     </AnimatePresence>
                 </div>
             </section>
 
-            {/* ============================================================== */}
-            {/* 3. CONTENEUR DES PRESTATIONS AVEC LE FIL CONDUCTEUR DORÉ       */}
-            {/* ============================================================== */}
+            {/* 3. CONTAINER FOR SERVICES & GOLDEN THREAD */}
             <div className="relative w-full max-w-7xl mx-auto">
                 {/* THE GOLDEN THREAD (SVG) */}
                 <ServiceThread />
 
-                {/* 3.1 MARIAGES (Texte Gauche / Mosaïque Droite) */}
+                {/* MARIAGES (Texte Gauche / Mosaïque Droite) */}
                 <div id="mariages" className="scroll-mt-24 relative z-10">
                     <SectionService
-                        badge="Traiteur Mariage Liège & Wallonie"
                         title="VOTRE MARIAGE"
-                        subtitle="Du vin d'honneur pétillant au banquet gastronomique, nous donnons du goût à votre union."
-                        desc="Le repas et le service des boissons rythment toute votre journée de noces. Nous prenons le temps de vous rencontrer pour construire un menu qui vous ressemble — buffet chaud multi-services, buffet froid de gala ou barbecue d'exception — tout en coordonnant le bar et l'équipe de salle."
-                        includedBadges={[
-                            "Vin d'honneur & Zakouskis",
-                            "Buffet Chaud, Gala ou BBQ",
-                            "Bar Brasseur & Verrerie",
-                            "Brigade en salle dédiée"
-                        ]}
-                        ctaLabel="Construire mon devis Mariage"
-                        ctaLink="/contact?type=mariage-boissons&boissons=oui"
-                        secondaryCtaLabel="Voir nos buffets & formules"
-                        secondaryCtaLink="/formules"
+                        desc="Le repas est au cœur de cette journée spéciale. Nous prenons le temps de vous rencontrer pour construire un menu qui vous ressemble — vin d'honneur, buffet chaud ou froid et service bar — en respectant votre budget et vos goûts. Pas de stress, on gère."
+                        ctaLabel="En discuter ensemble"
+                        ctaLink="/contact?type=mariage"
+                        secondaryLabel="Voir nos buffets chauds"
+                        secondaryLink="/formules#buffets-chauds"
                         images={[
                             "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?q=80&w=1000&auto=format&fit=crop",
                             "https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1000&auto=format&fit=crop",
@@ -685,23 +407,15 @@ export default function Services() {
                     />
                 </div>
 
-                {/* 3.2 ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
+                {/* ENTREPRISES (Mosaïque Gauche / Texte Droite) */}
                 <div id="entreprises" className="scroll-mt-24 relative z-10">
                     <SectionService
-                        badge="Traiteur Événementiel Entreprise Wallonie"
                         title="VOS ÉVÉNEMENTS PRO"
-                        subtitle="Une logistique sans faille et une cuisine raffinée à la hauteur de votre réputation."
-                        desc="Du lunch de réunion aux petits pains garnis jusqu'au grand cocktail dînatoire pour vos vœux d'entreprise, anniversaires de société ou séminaires. Nous assurons une ponctualité stricte, un dressage élégant et, si souhaité, un bar complet avec barmans pour recevoir vos clients et collaborateurs."
-                        includedBadges={[
-                            "Cocktails & Walking Dinners",
-                            "Petits Pains, Wraps & Verrines",
-                            "Frigos & Boissons clé en main",
-                            "Facturation Pro HTVA claire"
-                        ]}
-                        ctaLabel="Demander un devis Entreprise"
-                        ctaLink="/contact?type=entreprise-boissons&boissons=oui"
-                        secondaryCtaLabel="Découvrir la carte apéritive"
-                        secondaryCtaLink="/formules"
+                        desc="Du sandwich garni pour une réunion rapide au cocktail dînatoire pour vos vœux d'entreprise en Wallonie. Nous savons que votre image est en jeu, c'est pourquoi nous garantissons un service fluide, ponctuel et une qualité constante."
+                        ctaLabel="Demander un devis Pro"
+                        ctaLink="/contact?type=entreprise"
+                        secondaryLabel="Voir nos apéritifs & verrines"
+                        secondaryLink="/formules#aperitifs"
                         images={[
                             "/images/event_pro1.jpeg",
                             "/images/event_pro2.jpeg",
@@ -713,23 +427,15 @@ export default function Services() {
                     />
                 </div>
 
-                {/* 3.3 PARTICULIERS & FÊTES DE FAMILLE (Texte Gauche / Mosaïque Droite) */}
+                {/* PARTICULIERS (Texte Gauche / Mosaïque Droite) */}
                 <div id="particuliers" className="scroll-mt-24 relative z-10">
                     <SectionService
-                        badge="Réceptions Privées • Liège, Huy & Waremme"
                         title="VOS FÊTES DE FAMILLE"
-                        subtitle="Savourez chaque instant avec vos proches, sans passer votre journée en cuisine ni derrière le bar."
-                        desc="Un anniversaire, un baptême, une communion ou des noces d'or ? À domicile, sous chapiteau ou en salle, nous nous adaptons à votre espace et à l'ambiance souhaitée : buffet froid généreux, cochon de lait à la broche, barbecue convivial ou menu chaud servi avec le sourire."
-                        includedBadges={[
-                            "Dès 14 € / pers. HTVA",
-                            "À domicile ou en salle",
-                            "Option Vaisselle & Verrerie",
-                            "Avec ou sans personnel"
-                        ]}
-                        ctaLabel="Simuler ma réception privée"
-                        ctaLink="/contact?type=fete-privee-boissons&boissons=oui"
-                        secondaryCtaLabel="Explorer nos formules"
-                        secondaryCtaLink="/formules"
+                        desc="Un anniversaire, un baptême ou simplement un repas entre amis ? Nous nous occupons de tout pour que vous puissiez profiter de vos invités. Barbecue au feu de bois, buffet froid ou service à table : on s'adapte à l'ambiance que vous voulez donner."
+                        ctaLabel="Découvrir nos Barbecues & Buffets"
+                        ctaLink="/formules#bbq"
+                        secondaryLabel="Voir nos buffets froids"
+                        secondaryLink="/formules#buffets-froids"
                         images={[
                             "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=1000&auto=format&fit=crop",
                             "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?q=80&w=1000&auto=format&fit=crop",
@@ -741,174 +447,110 @@ export default function Services() {
                     />
                 </div>
 
-                {/* ============================================================== */}
-                {/* 4. INTÉGRATION NATURELLE : CUISINE & SERVICE BAR BRASSEUR      */}
-                {/* ============================================================== */}
-                <section id="boissons" className="scroll-mt-24 relative z-10 py-16 px-6">
-                    <div className="bg-white rounded-3xl p-8 sm:p-12 md:p-16 border-2 border-[#D4AF37]/35 shadow-xl relative overflow-hidden">
-                        {/* Décor lumineux discret */}
-                        <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#FAF6EB] rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none" />
-
-                        {/* En-tête de la section Brasseur */}
-                        <div className="max-w-3xl mx-auto text-center space-y-4 mb-12 relative z-10">
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FAF6EB] border border-[#D4AF37]/40 text-[#996515] text-xs uppercase tracking-widest font-bold">
-                                <Wine size={14} />
-                                <span>L&apos;Alliance Parfaite • Cuisine &amp; Brasseur</span>
-                            </div>
-                            <h2 className="text-3xl sm:text-5xl font-serif text-[#111111] leading-tight">
-                                La Formule Clé en Main :{" "}
-                                <span className="italic font-normal text-[#996515]">
-                                    Cuisine Artisanale &amp; Service Bar Complet
-                                </span>
-                            </h2>
-                            <p className="text-neutral-600 text-base sm:text-lg font-light leading-relaxed">
-                                Pourquoi multiplier les prestataires entre le traiteur, le brasseur et le loueur de frigos ? En complément de nos menus, nous prenons en charge{" "}
-                                <strong className="font-medium text-neutral-900">
-                                    100 % de la logistique boissons à Liège, Huy-Waremme et en Wallonie
-                                </strong>{" "}
-                                avec une règle d&apos;or : vous ne payez que ce qui est consommé.
-                            </p>
-                        </div>
-
-                        {/* Grille des 4 piliers du parcours sans friction */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12 relative z-10">
-                            <div className="bg-[#FAF8F5] rounded-2xl p-6 border border-[#E8E2D5] flex flex-col justify-between hover:border-[#D4AF37] transition-colors">
-                                <div>
-                                    <div className="w-12 h-12 rounded-2xl bg-white border border-[#D4AF37]/30 text-[#996515] flex items-center justify-center mb-4 shadow-2xs">
-                                        <ThermometerSnowflake size={22} />
+                {/* 4. FORMULE BRASSERIE & BOISSONS (Intégrée avec sobriété) */}
+                <section id="boissons" className="scroll-mt-24 relative z-10 pt-12 pb-16">
+                    <div className="max-w-7xl mx-auto px-6">
+                        <div className="bg-[#FAF8F5] text-neutral-800 rounded-3xl p-8 md:p-14 border border-[#E8E2D5] relative overflow-hidden shadow-sm">
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl pointer-events-none" />
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
+                                <div className="lg:col-span-7 space-y-6">
+                                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FAF6EB] border border-[#D4AF37]/30 text-[#996515] text-xs uppercase tracking-widest font-bold">
+                                        <span>🍺</span> La Formule Clé en Main • Cuisine &amp; Brasseur
                                     </div>
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#996515]">
-                                        1. Équipement Pro
-                                    </span>
-                                    <h3 className="font-serif text-xl font-bold text-[#111111] mt-1 mb-2">
-                                        Frigo vitré pro mis à disposition
-                                    </h3>
-                                    <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                                        Plus besoin de remplir des bacs de glaçons : nous installons directement sur votre lieu de réception un frigo vitré professionnel haute capacité.
+                                    <h2 className="text-3xl md:text-5xl font-serif text-[#1A1A1A] tracking-wide">
+                                        Service Bar &amp; Boissons (Formule Brasserie)
+                                    </h2>
+                                    <p className="text-[#4A4A4A] font-light text-base md:text-lg leading-relaxed">
+                                        En complément naturel de notre cuisine, nous gérons vos boissons de A à Z à Liège, Huy et Waremme : matériel pro installé sur place, stock complet et reprise des invendus.
                                     </p>
-                                </div>
-                                <p className="text-xs font-semibold text-[#996515] mt-4 pt-3 border-t border-[#E8E2D5]">
-                                    ✓ Température idéale garantie
-                                </p>
-                            </div>
 
-                            <div className="bg-[#FAF8F5] rounded-2xl p-6 border border-[#E8E2D5] flex flex-col justify-between hover:border-[#D4AF37] transition-colors">
-                                <div>
-                                    <div className="w-12 h-12 rounded-2xl bg-white border border-[#D4AF37]/30 text-[#996515] flex items-center justify-center mb-4 shadow-2xs">
-                                        <GlassWater size={22} />
+                                    <div className="space-y-3.5 pt-1">
+                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-[#EAE6DF]">
+                                            <div className="w-10 h-10 rounded-full bg-[#FAF6EB] text-[#B8860B] flex items-center justify-center shrink-0 text-lg">
+                                                ❄️
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-[#1A1A1A] text-sm mb-0.5">Frigo vitré professionnel fourni</h3>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">
+                                                    Mis à disposition directement sur votre lieu de réception pour garantir des boissons fraîches dès le premier verre.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-[#EAE6DF]">
+                                            <div className="w-10 h-10 rounded-full bg-[#FAF6EB] text-[#B8860B] flex items-center justify-center shrink-0 text-lg">
+                                                🔄
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-[#1A1A1A] text-sm mb-0.5">Zéro gaspillage : consommation au réel</h3>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">
+                                                    Fûts, bières, vins, bulles, softs et eaux. Reprise intégrale des bouteilles non entamées et des vidanges en fin de fête.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-4 p-4 rounded-xl bg-white border border-[#EAE6DF]">
+                                            <div className="w-10 h-10 rounded-full bg-[#FAF6EB] text-[#B8860B] flex items-center justify-center shrink-0 text-lg">
+                                                🤵
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-[#1A1A1A] text-sm mb-0.5">Service au bar &amp; en salle si souhaité</h3>
+                                                <p className="text-sm text-neutral-500 leading-relaxed">
+                                                    Barman ou serveur dédié tout au long de la réception : <strong className="text-[#996515]">18,00 € / h HTVA</strong> (location de verrerie également disponible).
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#996515]">
-                                        2. Carte Complète
-                                    </span>
-                                    <h3 className="font-serif text-xl font-bold text-[#111111] mt-1 mb-2">
-                                        Fûts, bouteilles, vins &amp; softs
-                                    </h3>
-                                    <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                                        Bières belges, vins blancs, rouges et rosés sélectionnés pour s&apos;accorder à votre menu, bulles pour le toast, eaux plates/pétillantes et softs.
-                                    </p>
-                                </div>
-                                <p className="text-xs font-semibold text-[#996515] mt-4 pt-3 border-t border-[#E8E2D5]">
-                                    ✓ Quantités calibrées sans rupture
-                                </p>
-                            </div>
 
-                            <div className="bg-[#FAF8F5] rounded-2xl p-6 border border-[#E8E2D5] flex flex-col justify-between hover:border-[#D4AF37] transition-colors">
-                                <div>
-                                    <div className="w-12 h-12 rounded-2xl bg-white border border-[#D4AF37]/30 text-[#996515] flex items-center justify-center mb-4 shadow-2xs">
-                                        <RefreshCw size={22} />
+                                    <div className="pt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                        <Link
+                                            href="/contact?boissons=oui"
+                                            className="inline-flex items-center justify-center px-7 py-4 rounded-full bg-[#D4AF37] hover:bg-[#1A1A1A] hover:text-white text-black font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-sm"
+                                        >
+                                            Devis avec Formule Brasseur →
+                                        </Link>
+                                        <Link
+                                            href="/formules"
+                                            className="inline-flex items-center justify-center px-6 py-4 rounded-full bg-white hover:bg-neutral-100 text-neutral-800 border border-[#EAE6DF] font-bold uppercase tracking-widest text-xs transition-all duration-300"
+                                        >
+                                            Choisir un menu repas
+                                        </Link>
                                     </div>
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#996515]">
-                                        3. Zéro Gaspillage
-                                    </span>
-                                    <h3 className="font-serif text-xl font-bold text-[#111111] mt-1 mb-2">
-                                        Reprise des invendus &amp; vidanges
-                                    </h3>
-                                    <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                                        Nous prévoyons large pour votre tranquillité, mais vous ne payez que les bouteilles et fûts entamés. Nous reprenons tout le stock intact et gérons les vidanges.
-                                    </p>
                                 </div>
-                                <p className="text-xs font-semibold text-[#996515] mt-4 pt-3 border-t border-[#E8E2D5]">
-                                    ✓ Facturation 100 % au réel
-                                </p>
-                            </div>
 
-                            <div className="bg-[#FAF8F5] rounded-2xl p-6 border border-[#E8E2D5] flex flex-col justify-between hover:border-[#D4AF37] transition-colors">
-                                <div>
-                                    <div className="w-12 h-12 rounded-2xl bg-white border border-[#D4AF37]/30 text-[#996515] flex items-center justify-center mb-4 shadow-2xs">
-                                        <Users size={22} />
+                                <div className="lg:col-span-5 relative aspect-[4/5] rounded-2xl overflow-hidden shadow-md ring-1 ring-[#E8E2D5]">
+                                    <Image
+                                        src="https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=1200&auto=format&fit=crop"
+                                        alt="Service Bar & Boissons Traiteur Compère à Liège"
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 1024px) 100vw, 40vw"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
+                                        <div className="text-white">
+                                            <p className="text-xs uppercase tracking-widest text-[#D4AF37] font-bold">Zéro Gaspillage</p>
+                                            <p className="text-sm font-light text-neutral-200">Seules les bouteilles entamées sont facturées</p>
+                                        </div>
                                     </div>
-                                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#996515]">
-                                        4. Service &amp; Verrerie
-                                    </span>
-                                    <h3 className="font-serif text-xl font-bold text-[#111111] mt-1 mb-2">
-                                        Équipe de service si souhaité
-                                    </h3>
-                                    <p className="text-sm text-neutral-600 font-light leading-relaxed">
-                                        Besoin de barmans ou de serveurs pour le vin d&apos;honneur et la soirée ? Notre personnel qualifié assure le service et la tenue du bar.
-                                    </p>
                                 </div>
-                                <p className="text-xs font-semibold text-[#996515] mt-4 pt-3 border-t border-[#E8E2D5]">
-                                    ✓ Tarif clair : 18,00 € / h HTVA
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Bandeau récapitulatif & Double CTA Brasseur */}
-                        <div className="bg-[#FAF6EB] rounded-2xl p-6 sm:p-8 border border-[#D4AF37]/40 flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
-                            <div className="space-y-1.5 text-center lg:text-left max-w-2xl">
-                                <p className="text-xs font-bold uppercase tracking-widest text-[#996515]">
-                                    Location matériel &amp; bar brasseur • Liège, Saint-Georges, Huy &amp; Waremme
-                                </p>
-                                <h4 className="text-xl sm:text-2xl font-serif text-[#111111]">
-                                    Activez l&apos;option Bar &amp; Boissons en 1 clic dans votre demande de devis
-                                </h4>
-                                <p className="text-xs sm:text-sm text-neutral-600 font-light">
-                                    L&apos;option sera automatiquement pré-cochée dans notre formulaire pour que nous puissions chiffrer votre repas et vos boissons ensemble.
-                                </p>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full lg:w-auto">
-                                <Link
-                                    href="/contact?type=mariage-boissons&boissons=oui"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full bg-[#111111] hover:bg-[#D4AF37] text-white hover:text-black font-bold uppercase tracking-widest text-xs transition-all duration-300 shadow-md"
-                                >
-                                    <span>Devis Cuisine + Formule Brasseur</span>
-                                    <ArrowRight size={15} />
-                                </Link>
-                                <Link
-                                    href="/formules"
-                                    className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-4 rounded-full bg-white hover:bg-neutral-100 text-neutral-900 border border-[#D4AF37]/50 font-bold uppercase tracking-widest text-xs transition-all duration-300 text-center"
-                                >
-                                    Choisir d&apos;abord mon menu
-                                </Link>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* 3.4 LIVRAISON SEULE & ASSOCIATIONS (Mosaïque Gauche / Texte Droite) */}
-                <section id="livraison" className="scroll-mt-24 relative z-10">
+                {/* 5. LIVRAISON SEULE & ASSOCIATIONS (Mosaïque Gauche / Texte Droite) */}
+                <section id="livraison" className="scroll-mt-24 relative z-10 pt-8">
                     <SectionService
-                        badge="Collectivités, Écoles & Clubs Sportifs"
-                        title="LIVRAISON SEULE & ASSOCIATIONS"
-                        subtitle="Des plats conviviaux, généreux et prêts à servir pour maximiser la réussite de vos soupers."
-                        desc="Idéal pour vos soupers d'école, clubs sportifs, mouvements de jeunesse ou fêtes de quartier. Nous livrons des plats chauds ou froids généreux, prêts à être servis par vos soins. Une solution économique et pratique sans personnel ni vaisselle, qui ne sacrifie rien au goût artisanal de la Maison Compère."
-                        includedBadges={[
-                            "Plats chauds dès 8 € / pers.",
-                            "Conditionnement pro pratique",
-                            "Livraison ou retrait atelier",
-                            "Option dépôt-vente boissons"
-                        ]}
-                        ctaLabel="Devis Repas Associatif"
-                        ctaLink="/contact?menu=collectivite"
-                        secondaryCtaLabel="Voir les plats collectivités"
-                        secondaryCtaLink="/formules"
+                        title="Livraison Seule & Associations"
+                        desc="Idéal pour vos soupers d'école, clubs sportifs ou fêtes de quartier. Nous livrons des plats généreux et conviviaux, prêts à être servis par vos soins. Une solution économique et pratique sans personnel ni vaisselle, qui ne sacrifie rien à la qualité."
+                        ctaLabel="Voir nos Plats Uniques & Salad Bar"
+                        ctaLink="/formules#collectivites"
+                        secondaryLabel="Devis repas associatif"
+                        secondaryLink="/contact?menu=collectivite"
                         images={[
-                            "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1200&auto=format&fit=crop",
-                            "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1200&auto=format&fit=crop",
-                            "https://images.unsplash.com/photo-1600891964092-4316c288032e?q=80&w=1200&auto=format&fit=crop",
-                            "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop"
+                            "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1981&auto=format&fit=crop",
+                            "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1974&auto=format&fit=crop",
+                            "https://images.unsplash.com/photo-1600891964092-4316c288032e?q=80&w=2070&auto=format&fit=crop"
                         ]}
                         decorType="geometric"
                         reverse={true}
@@ -916,217 +558,81 @@ export default function Services() {
                 </section>
             </div>
 
-            {/* ============================================================== */}
-            {/* 5. SECTION INTERACTIVE : LA LOGISTIQUE SIMPLIFIÉE (TIMELINE)   */}
-            {/* ============================================================== */}
-            <section id="logistique" className="scroll-mt-24 max-w-7xl mx-auto px-6 py-20 relative z-10">
-                <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-                    <span className="text-[11px] uppercase tracking-[0.22em] font-bold text-[#996515] bg-[#FAF6EB] px-4 py-1.5 rounded-full border border-[#D4AF37]/30">
-                        Organisation Sans Stress • De A à Z
-                    </span>
-                    <h2 className="text-3xl sm:text-5xl font-serif text-[#111111]">
+            {/* 6. LA LOGISTIQUE SIMPLIFIÉE (4 étapes lisibles d'un coup d'œil) */}
+            <section id="logistique" className="scroll-mt-24 px-6 my-24 max-w-7xl mx-auto relative z-10">
+                <div className="text-center max-w-2xl mx-auto mb-12">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[#996515] font-bold mb-2">
+                        Organisation sereine
+                    </p>
+                    <h2 className="text-3xl md:text-4xl font-serif text-black">
                         La logistique simplifiée en 4 étapes
                     </h2>
-                    <p className="text-neutral-600 font-light text-base sm:text-lg">
-                        De votre première demande de devis jusqu&apos;à la reprise des vidanges le lendemain, voici comment se déroule votre réception.
-                    </p>
                 </div>
 
-                {/* Sélecteur d'étapes interactif + Cartes */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    {LOGISTICS_STEPS.map((item, idx) => {
-                        const isSelected = activeStepIndex === idx;
-                        return (
-                            <button
-                                key={item.step}
-                                type="button"
-                                onClick={() => setActiveStepIndex(idx)}
-                                className={`text-left p-6 rounded-2xl border transition-all duration-300 cursor-pointer flex flex-col justify-between relative overflow-hidden ${
-                                    isSelected
-                                        ? "bg-[#111111] text-white border-[#111111] shadow-xl scale-[1.02]"
-                                        : "bg-white text-neutral-800 border-[#E8E2D5] hover:border-[#D4AF37]"
-                                }`}
-                            >
-                                <div>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <span
-                                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
-                                                isSelected
-                                                    ? "bg-[#D4AF37] text-black"
-                                                    : "bg-[#FAF6EB] text-[#996515]"
-                                            }`}
-                                        >
-                                            Étape {item.step}
-                                        </span>
-                                        {idx < LOGISTICS_STEPS.length - 1 && (
-                                            <ArrowRight
-                                                size={16}
-                                                className={isSelected ? "text-[#D4AF37]" : "text-neutral-300"}
-                                            />
-                                        )}
-                                    </div>
-                                    <h3
-                                        className={`font-serif text-lg sm:text-xl font-bold leading-snug mb-2 ${
-                                            isSelected ? "text-white" : "text-[#111111]"
-                                        }`}
-                                    >
-                                        {item.title}
-                                    </h3>
-                                    <p
-                                        className={`text-xs leading-relaxed ${
-                                            isSelected ? "text-neutral-300" : "text-neutral-500"
-                                        }`}
-                                    >
-                                        {item.subtitle}
-                                    </p>
-                                </div>
-
-                                <div
-                                    className={`mt-4 pt-3 border-t text-[11px] font-bold uppercase tracking-wider ${
-                                        isSelected
-                                            ? "border-white/15 text-[#D4AF37]"
-                                            : "border-neutral-100 text-[#996515]"
-                                    }`}
-                                >
-                                    {isSelected ? "Étape sélectionnée" : "Voir le détail →"}
-                                </div>
-                            </button>
-                        );
-                    })}
-                </div>
-
-                {/* Détail de l'étape active */}
-                <AnimatePresence mode="wait">
-                    <motion.div
-                        key={activeStepIndex}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.25 }}
-                        className="bg-white rounded-3xl p-8 sm:p-10 border border-[#E8E2D5] shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8"
-                    >
-                        <div className="space-y-4 max-w-3xl">
-                            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#996515]">
-                                <span className="w-7 h-7 rounded-full bg-[#D4AF37] text-black flex items-center justify-center font-serif">
-                                    {LOGISTICS_STEPS[activeStepIndex].step}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {LOGISTICS_STEPS.map((item) => (
+                        <div
+                            key={item.step}
+                            className="bg-[#FAF8F5] rounded-2xl p-6 border border-[#E8E2D5] flex flex-col justify-between"
+                        >
+                            <div>
+                                <span className="inline-block font-serif text-2xl font-bold text-[#D4AF37] mb-3">
+                                    {item.step}.
                                 </span>
-                                <span>{LOGISTICS_STEPS[activeStepIndex].subtitle}</span>
-                            </div>
-                            <h3 className="text-2xl sm:text-3xl font-serif text-[#111111]">
-                                {LOGISTICS_STEPS[activeStepIndex].title}
-                            </h3>
-                            <p className="text-neutral-600 text-sm sm:text-base font-light leading-relaxed">
-                                {LOGISTICS_STEPS[activeStepIndex].description}
-                            </p>
-                            <div className="flex flex-wrap gap-2.5 pt-1">
-                                {LOGISTICS_STEPS[activeStepIndex].highlights.map((h, i) => (
-                                    <span
-                                        key={i}
-                                        className="inline-flex items-center gap-1.5 text-xs font-medium bg-[#FAF8F5] text-neutral-800 px-3.5 py-1.5 rounded-full border border-[#E8E2D5]"
-                                    >
-                                        <CheckCircle2 size={14} className="text-[#D4AF37]" />
-                                        {h}
-                                    </span>
-                                ))}
+                                <h3 className="font-serif text-lg font-bold text-black mb-2">
+                                    {item.title}
+                                </h3>
+                                <p className="text-sm text-neutral-600 font-light leading-relaxed">
+                                    {item.desc}
+                                </p>
                             </div>
                         </div>
-
-                        <div className="flex flex-col sm:flex-row lg:flex-col gap-3 w-full lg:w-auto shrink-0">
-                            {activeStepIndex < LOGISTICS_STEPS.length - 1 ? (
-                                <button
-                                    type="button"
-                                    onClick={() => setActiveStepIndex(activeStepIndex + 1)}
-                                    className="px-6 py-3.5 rounded-full bg-[#FAF6EB] hover:bg-[#D4AF37] text-[#996515] hover:text-black font-bold text-xs uppercase tracking-widest transition-colors border border-[#D4AF37]/40 cursor-pointer"
-                                >
-                                    Étape suivante ({LOGISTICS_STEPS[activeStepIndex + 1].step}/04) →
-                                </button>
-                            ) : null}
-                            <Link
-                                href="/contact?type=mariage-boissons&boissons=oui"
-                                className="px-7 py-4 rounded-full bg-[#111111] hover:bg-[#D4AF37] text-white hover:text-black font-bold text-xs uppercase tracking-widest transition-colors text-center shadow-sm"
-                            >
-                                Lancer l&apos;étape 1 : Mon devis gratuit
-                            </Link>
-                        </div>
-                    </motion.div>
-                </AnimatePresence>
+                    ))}
+                </div>
             </section>
 
-            {/* ============================================================== */}
-            {/* 6. VALEURS & ANCRAGE LOCAL (LIÈGE, HUY, WAREMME, WALLONIE)     */}
-            {/* ============================================================== */}
-            <section className="px-6 py-16 max-w-7xl mx-auto relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-14">
+            {/* 7. NOS VALEURS (Style épuré d'origine) */}
+            <section className="px-6 my-24 max-w-7xl mx-auto text-center relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 justify-center max-w-6xl mx-auto">
                     <ValueItem
-                        title="Fait Maison & Terroir Local"
+                        title="Fait Maison & Local"
                         path="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-                        desc="Pas de secret : pour que ce soit bon, il faut de bons produits. Nous privilégions les producteurs de notre région et la cuisine préparée dans notre atelier."
+                        desc="Pas de secret : pour que ce soit bon, il faut de bons produits. Nous privilégions les producteurs de la région et la cuisine faite minute."
                         delay={0.1}
                     />
                     <ValueItem
-                        title="Sur-Mesure & Écoute"
+                        title="Sur Mesure & Écoute"
                         path="M9 11.75c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zm6 0c-.69 0-1.25.56-1.25 1.25s.56 1.25 1.25 1.25 1.25-.56 1.25-1.25-.56-1.25-1.25-1.25zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-.29.02-.58.05-.86 2.36-1.05 4.23-2.98 5.21-5.37C11.07 8.33 14.05 10 17.42 10c.78 0 1.53-.09 2.25-.26.21 1.01.33 2.05.33 3.1 0 5.5-4.5 10-10 10z"
-                        desc="Un régime spécial, une allergie ou une envie particulière ? Nous construisons le menu et la carte des boissons avec vous pour qu'ils vous ressemblent."
+                        desc="Un régime spécial ? Une envie particulière ? Nous ne vous imposons rien. Nous construisons le menu et la carte des boissons avec vous."
                         delay={0.2}
                     />
                     <ValueItem
                         title="Transparence Totale"
                         path="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"
-                        desc="Aucune mauvaise surprise sur la facture. Nos devis sont clairs, nos tarifs de service affichés (18 €/h HTVA) et les boissons non entamées sont intégralement reprises."
+                        desc="Pas de mauvaise surprise sur la facture. Nos devis sont clairs, détaillés et respectés. Seules les boissons entamées sont facturées."
                         delay={0.3}
                     />
                 </div>
-
-                {/* Encart SEO Local : Zones de déplacement */}
-                <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E2D5] shadow-2xs flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="flex items-start gap-4">
-                        <div className="w-11 h-11 rounded-2xl bg-[#FAF6EB] text-[#996515] border border-[#D4AF37]/30 flex items-center justify-center shrink-0 mt-0.5">
-                            <MapPin size={20} />
-                        </div>
-                        <div>
-                            <h3 className="font-serif text-lg sm:text-xl font-bold text-[#111111]">
-                                Votre traiteur &amp; brasseur en Province de Liège, Huy-Waremme et Wallonie
-                            </h3>
-                            <p className="text-xs sm:text-sm text-neutral-600 font-light mt-1 leading-relaxed">
-                                Depuis notre atelier de <strong>Saint-Georges-sur-Meuse</strong>, nous assurons la livraison, l&apos;installation des frigos et le service complet à{" "}
-                                <strong>Liège, Huy, Waremme, Amay, Verlaine, Villers-le-Bouillet, Flémalle, Seraing, Hannut</strong> et dans l&apos;ensemble de la Wallonie.
-                            </p>
-                        </div>
-                    </div>
-                    <a
-                        href="tel:+32468385082"
-                        className="shrink-0 inline-flex items-center gap-2 px-5 py-3 rounded-full bg-[#FAF8F5] hover:bg-[#FAF6EB] border border-[#D4AF37]/40 text-xs font-bold text-neutral-900 transition-colors"
-                    >
-                        <Phone size={14} className="text-[#996515]" />
-                        <span>+32 468 38 50 82</span>
-                    </a>
-                </div>
             </section>
 
-            {/* ============================================================== */}
-            {/* 7. FAQ DÉDIÉE AUX PRESTATIONS TRAITEUR & BRASSEUR              */}
-            {/* ============================================================== */}
-            <section id="faq" className="scroll-mt-24 max-w-4xl mx-auto px-6 py-16 relative z-10">
-                <div className="text-center mb-12 space-y-3">
-                    <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#FAF6EB] border border-[#D4AF37]/30 text-[#996515] text-xs font-bold uppercase tracking-widest">
-                        <HelpCircle size={14} />
-                        <span>Questions Fréquentes</span>
-                    </div>
-                    <h2 className="text-3xl sm:text-4xl font-serif text-[#111111]">
-                        Tout savoir sur nos prestations &amp; la formule Brasseur
-                    </h2>
-                    <p className="text-neutral-600 text-sm sm:text-base font-light">
-                        Vaisselle, personnel en salle, gestion des invendus boissons et déplacements : nos réponses claires.
+            {/* 8. FAQ DÉDIÉE EN BAS DE PAGE */}
+            <section id="faq" className="scroll-mt-24 max-w-4xl mx-auto px-6 my-24 relative z-10">
+                <div className="text-center mb-10">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[#996515] font-bold mb-2">
+                        Questions fréquentes
                     </p>
+                    <h2 className="text-3xl md:text-4xl font-serif text-black">
+                        Vos questions sur nos prestations
+                    </h2>
                 </div>
 
-                <div className="space-y-3.5">
+                <div className="space-y-3">
                     {SERVICES_FAQ.map((item, idx) => {
                         const isOpen = openFaqIndex === idx;
                         return (
                             <div
                                 key={idx}
-                                className="bg-white rounded-2xl border border-[#E8E2D5] overflow-hidden shadow-2xs transition-colors hover:border-[#D4AF37]/60"
+                                className="bg-[#FAF8F5] rounded-2xl border border-[#E8E2D5] overflow-hidden transition-colors hover:border-[#D4AF37]/60"
                             >
                                 <button
                                     type="button"
@@ -1134,17 +640,17 @@ export default function Services() {
                                     className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer"
                                     aria-expanded={isOpen}
                                 >
-                                    <span className="font-serif font-bold text-base sm:text-lg text-[#111111]">
+                                    <span className="font-serif font-bold text-base sm:text-lg text-black">
                                         {item.question}
                                     </span>
                                     <span
                                         className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${
                                             isOpen
-                                                ? "bg-[#111111] text-[#D4AF37] rotate-180"
-                                                : "bg-[#FAF8F5] text-neutral-600"
+                                                ? "bg-black text-[#D4AF37] rotate-180"
+                                                : "bg-white text-neutral-600 border border-[#E8E2D5]"
                                         }`}
                                     >
-                                        <ChevronDown size={18} />
+                                        <ChevronDown size={17} />
                                     </span>
                                 </button>
                                 <AnimatePresence initial={false}>
@@ -1153,10 +659,10 @@ export default function Services() {
                                             initial={{ height: 0, opacity: 0 }}
                                             animate={{ height: "auto", opacity: 1 }}
                                             exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.25 }}
+                                            transition={{ duration: 0.22 }}
                                             className="overflow-hidden"
                                         >
-                                            <div className="px-6 pb-6 pt-1 text-sm sm:text-base text-neutral-600 font-light leading-relaxed border-t border-neutral-100">
+                                            <div className="px-6 pb-5 pt-1 text-sm sm:text-base text-neutral-600 font-light leading-relaxed">
                                                 {item.answer}
                                             </div>
                                         </motion.div>
@@ -1168,38 +674,31 @@ export default function Services() {
                 </div>
             </section>
 
-            {/* ============================================================== */}
-            {/* 8. CALL TO ACTION FINAL (PARALLAX)                             */}
-            {/* ============================================================== */}
+            {/* 9. Call to Action Footer (Parallax) */}
             <ParallaxCta />
         </main>
     );
 }
 
-// --- VISUAL SUMMARY (STICKY SUB-NAVIGATION) ---
+// --- VISUAL SUMMARY ---
 function VisualSummary() {
     return (
-        <nav
-            aria-label="Navigation des services"
-            className="flex flex-wrap justify-center gap-4 sm:gap-8 md:gap-10 border-t border-b border-[#E8E2D5] py-4 px-4 mt-10 bg-white/90 backdrop-blur-md sticky top-20 z-40 rounded-2xl shadow-2xs transition-all duration-300 text-center"
-        >
+        <nav className="flex flex-wrap md:flex-nowrap justify-center gap-6 md:gap-10 border-t border-b border-neutral-100 py-5 mt-8 bg-white/85 backdrop-blur-sm sticky top-20 z-40 transition-all duration-300 text-center">
             {[
-                { label: "Par Événement", href: "#configurateur" },
                 { label: "Mariages", href: "#mariages" },
                 { label: "Entreprises", href: "#entreprises" },
-                { label: "Fêtes Privées", href: "#particuliers" },
-                { label: "Bar & Brasseur", href: "#boissons" },
-                { label: "Associations", href: "#livraison" },
-                { label: "Logistique 4 Étapes", href: "#logistique" },
+                { label: "Particuliers", href: "#particuliers" },
+                { label: "Bar & Boissons", href: "#boissons" },
+                { label: "Livraison seule", href: "#livraison" },
                 { label: "FAQ", href: "#faq" }
             ].map((item) => (
                 <Link
                     key={item.label}
                     href={item.href}
-                    className="text-xs sm:text-sm uppercase tracking-[0.16em] font-semibold text-neutral-600 hover:text-[#996515] transition-colors duration-300 relative group py-1"
+                    className="text-xs md:text-sm uppercase tracking-[0.2em] text-neutral-500 hover:text-[#D4AF37] transition-colors duration-300 relative group"
                 >
                     {item.label}
-                    <span className="absolute bottom-0 left-1/2 w-0 h-[1.5px] bg-[#D4AF37] group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
+                    <span className="absolute -bottom-2 left-1/2 w-0 h-[1px] bg-[#D4AF37] group-hover:w-full group-hover:left-0 transition-all duration-300"></span>
                 </Link>
             ))}
         </nav>
@@ -1213,30 +712,30 @@ function ServiceThread() {
             <svg
                 className="w-full h-full"
                 preserveAspectRatio="none"
-                viewBox="0 0 100 400"
+                viewBox="0 0 100 300"
             >
                 <motion.path
                     d="M 50 0 
-                       C 50 25, 28 25, 28 60 
-                       C 28 95, 50 95, 50 130
-                       C 50 165, 72 165, 72 200
-                       C 72 235, 50 235, 50 270
-                       C 50 305, 28 305, 28 340
-                       C 28 375, 50 375, 50 400"
+                       C 50 20, 30 20, 30 50 
+                       C 30 80, 50 80, 50 100
+                       C 50 120, 70 120, 70 150
+                       C 70 180, 50 180, 50 200
+                       C 50 220, 30 220, 30 250
+                       C 30 280, 50 280, 50 300"
                     fill="none"
                     stroke="url(#goldGradient)"
-                    strokeWidth="0.45"
+                    strokeWidth="0.5"
                     initial={{ pathLength: 0, opacity: 0 }}
                     whileInView={{ pathLength: 1, opacity: 1 }}
-                    viewport={{ once: true, amount: 0.05 }}
+                    viewport={{ once: true, amount: 0.1 }}
                     transition={{ duration: 2.5, ease: "easeInOut" }}
                 />
                 <defs>
                     <linearGradient id="goldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" stopColor="#D4AF37" stopOpacity="0" />
-                        <stop offset="10%" stopColor="#D4AF37" stopOpacity="0.45" />
-                        <stop offset="50%" stopColor="#D4AF37" stopOpacity="0.85" />
-                        <stop offset="90%" stopColor="#D4AF37" stopOpacity="0.45" />
+                        <stop offset="10%" stopColor="#D4AF37" stopOpacity="0.4" />
+                        <stop offset="50%" stopColor="#D4AF37" stopOpacity="0.8" />
+                        <stop offset="90%" stopColor="#D4AF37" stopOpacity="0.4" />
                         <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
                     </linearGradient>
                 </defs>
@@ -1245,30 +744,24 @@ function ServiceThread() {
     );
 }
 
-// --- REUSABLE SECTION SERVICE ---
+// --- REUSABLE SECTION SERVICE (Épuré & Aéré) ---
 function SectionService({
-    badge,
     title,
-    subtitle,
     desc,
-    includedBadges,
     ctaLabel = "En savoir plus",
     ctaLink = "/contact",
-    secondaryCtaLabel,
-    secondaryCtaLink,
+    secondaryLabel,
+    secondaryLink,
     images,
     decorType,
     reverse
 }: {
-    badge?: string;
     title: string;
-    subtitle: string;
     desc: string;
-    includedBadges?: string[];
     ctaLabel?: string;
     ctaLink?: string;
-    secondaryCtaLabel?: string;
-    secondaryCtaLink?: string;
+    secondaryLabel?: string;
+    secondaryLink?: string;
     images: string[];
     decorType: "flower" | "herb" | "geometric";
     reverse: boolean;
@@ -1276,8 +769,8 @@ function SectionService({
     const ref = useRef(null);
     const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
 
-    const yBg = useTransform(scrollYProgress, [0, 1], [0, 50]);
-    const yDecor = useTransform(scrollYProgress, [0, 1], [0, -50]);
+    const yBg = useTransform(scrollYProgress, [0, 1], [0, 60]);
+    const yDecor = useTransform(scrollYProgress, [0, 1], [0, -60]);
 
     const blobRadius = reverse
         ? "30% 70% 70% 30% / 30% 30% 70% 70%"
@@ -1287,7 +780,7 @@ function SectionService({
     let decorClass = "";
 
     if (decorType === "flower") {
-        decorClass = "w-48 md:w-64 -top-20 -right-12 md:-right-20 rotate-12 opacity-30 text-[#D4AF37]";
+        decorClass = "w-48 md:w-64 -top-24 -right-16 md:-right-24 rotate-12 opacity-30 text-[#D4AF37]";
         DecorSVG = (
             <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5" className="w-full h-full">
                 <path d="M50 50 C20 80 0 50 20 20 C40 0 60 0 80 20 C100 50 80 80 50 50 Z M50 50 Q30 30 50 10 M50 50 Q70 30 50 10 M50 50 Q30 70 50 90 M50 50 Q70 70 50 90" />
@@ -1296,7 +789,7 @@ function SectionService({
             </svg>
         );
     } else if (decorType === "herb") {
-        decorClass = "w-40 md:w-56 -bottom-16 -left-10 md:-left-16 -rotate-12 opacity-30 text-[#996515]";
+        decorClass = "w-40 md:w-56 -bottom-20 -left-12 md:-left-20 -rotate-12 opacity-30 text-gray-400";
         DecorSVG = (
             <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1" className="w-full h-full">
                 <path d="M50 100 Q50 50 80 10" />
@@ -1307,7 +800,7 @@ function SectionService({
             </svg>
         );
     } else {
-        decorClass = "w-56 md:w-72 -top-16 -left-12 md:-left-20 opacity-20 text-[#D4AF37]";
+        decorClass = "w-56 md:w-72 -top-20 -left-16 md:-left-24 opacity-20 text-[#D4AF37]";
         DecorSVG = (
             <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="0.5" className="w-full h-full">
                 <circle cx="50" cy="50" r="40" />
@@ -1320,22 +813,23 @@ function SectionService({
     }
 
     return (
-        <section ref={ref} className="relative py-20 md:py-28 w-full overflow-hidden">
-            {/* Organic background card layer */}
+        <section ref={ref} className="relative py-24 md:py-28 w-full overflow-hidden">
+            {/* A. TEXTURE LAYER (CSS Organic Blob) */}
             <motion.div
                 style={{
                     y: yBg,
                     borderRadius: blobRadius
                 }}
-                className={`absolute top-4 bottom-4 bg-white border border-[#EAE6DF] w-[92%] md:w-[78%] -z-20 shadow-xs
-                ${reverse ? "-left-16" : "-right-16"}
+                className={`absolute top-0 bottom-0 bg-[#F9F7F1] w-[90%] md:w-[75%] -z-20 
+                ${reverse ? "-left-20" : "-right-20"}
+                ${reverse ? "origin-left" : "origin-right"}
                 transition-all duration-700 ease-out`}
             />
 
             <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <div className={`flex flex-col md:flex-row items-center gap-12 md:gap-20 ${reverse ? "md:flex-row-reverse" : ""}`}>
-                    {/* EDITORIAL CONTENT */}
-                    <div className="w-full md:w-5/12 space-y-6 relative bg-white/90 md:bg-white p-6 sm:p-8 rounded-3xl border border-[#E8E2D5] shadow-sm">
+                <div className={`flex flex-col md:flex-row items-center gap-16 md:gap-24 ${reverse ? "md:flex-row-reverse" : ""}`}>
+                    {/* B. CONTENT EDITORIAL */}
+                    <div className="w-full md:w-5/12 space-y-8 relative">
                         <motion.div
                             style={{ y: yDecor }}
                             className={`absolute pointer-events-none z-0 ${decorClass} hidden md:block`}
@@ -1344,88 +838,68 @@ function SectionService({
                         </motion.div>
 
                         <motion.div
-                            initial={{ opacity: 0, x: reverse ? 30 : -30 }}
+                            initial={{ opacity: 0, x: reverse ? 50 : -50 }}
                             whileInView={{ opacity: 1, x: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="relative z-10 space-y-5"
+                            transition={{ duration: 0.8 }}
+                            className="relative z-10"
                         >
-                            {badge && (
-                                <span className="inline-block text-[11px] uppercase tracking-widest font-bold text-[#996515] bg-[#FAF6EB] px-3 py-1 rounded-full border border-[#D4AF37]/30">
-                                    {badge}
-                                </span>
-                            )}
-
-                            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif uppercase tracking-wider text-[#111111]">
+                            <h2 className="text-4xl md:text-5xl font-serif uppercase tracking-widest text-black relative inline-block">
                                 {title}
                             </h2>
 
-                            <div className="border-l-2 border-[#D4AF37] pl-4 py-1">
-                                <p className="font-sans text-neutral-800 text-base sm:text-lg font-medium leading-snug">
-                                    {subtitle}
+                            <div className="border-l border-[#D4AF37] pl-6 py-2 mt-8">
+                                <p className="font-sans text-gray-700 text-lg font-medium">
+                                    Une équipe dédiée à la réussite de votre événement, avec des produits frais, locaux et un savoir-faire authentique.
                                 </p>
                             </div>
 
-                            <p className="text-neutral-600 font-sans font-light leading-relaxed text-sm sm:text-base">
+                            <p className="text-gray-600 font-sans font-light leading-relaxed text-lg mt-8 bg-white/60 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none rounded-2xl p-2 md:p-0">
                                 {desc}
                             </p>
 
-                            {includedBadges && includedBadges.length > 0 && (
-                                <div className="flex flex-wrap gap-2 pt-1">
-                                    {includedBadges.map((b, i) => (
-                                        <span
-                                            key={i}
-                                            className="text-xs font-medium bg-[#FAF8F5] text-neutral-800 px-3 py-1.5 rounded-xl border border-[#E8E2D5] flex items-center gap-1.5"
-                                        >
-                                            <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37]" />
-                                            {b}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-
-                            <div className="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                                <Link
-                                    href={ctaLink}
-                                    className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[#111111] hover:bg-[#D4AF37] text-white hover:text-black text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-xs"
-                                >
-                                    <span>{ctaLabel}</span>
-                                    <ArrowRight size={14} />
+                            <div className="pt-8 flex flex-wrap items-center gap-6">
+                                <Link href={ctaLink} className="group relative inline-flex items-center text-sm font-bold uppercase tracking-widest text-black pb-1">
+                                    {ctaLabel}
+                                    <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-[#D4AF37] w-full absolute bottom-0"></span>
+                                    <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                                    </svg>
                                 </Link>
 
-                                {secondaryCtaLabel && secondaryCtaLink && (
+                                {secondaryLabel && secondaryLink && (
                                     <Link
-                                        href={secondaryCtaLink}
-                                        className="inline-flex items-center justify-center px-5 py-3.5 rounded-full bg-[#FAF8F5] hover:bg-[#FAF6EB] text-neutral-800 border border-[#D4AF37]/40 text-xs font-bold uppercase tracking-widest transition-all duration-300"
+                                        href={secondaryLink}
+                                        className="text-xs font-bold uppercase tracking-widest text-[#996515] hover:text-black transition-colors"
                                     >
-                                        {secondaryCtaLabel}
+                                        {secondaryLabel} →
                                     </Link>
                                 )}
                             </div>
                         </motion.div>
                     </div>
 
-                    {/* MOSAIC GRID (2x2) */}
+                    {/* C. MOSAIC GRID (2x2) */}
                     <div className="w-full md:w-7/12 relative">
                         <div className="grid grid-cols-2 gap-4 md:gap-6">
                             {images.map((img, idx) => (
                                 <motion.div
                                     key={idx}
-                                    initial={{ opacity: 0, y: 25 }}
+                                    initial={{ opacity: 0, y: 30 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ duration: 0.5, delay: 0.1 + idx * 0.08 }}
-                                    className={`relative aspect-[4/4] sm:aspect-[3/4] overflow-hidden shadow-lg rounded-2xl border border-[#E8E2D5]
-                                        ${idx === 1 ? "mt-6 md:mt-10" : ""} 
-                                        ${idx === 2 ? "-mt-6 md:-mt-10" : ""}
+                                    transition={{ duration: 0.6, delay: 0.2 + idx * 0.1 }}
+                                    className={`relative aspect-[3/4] overflow-hidden shadow-2xl shadow-neutral-200 rounded-2xl
+                                        ${idx === 1 ? "mt-8 md:mt-12" : ""} 
+                                        ${idx === 2 ? "-mt-8 md:-mt-12" : ""}
                                     `}
                                 >
                                     <Image
                                         src={img}
-                                        alt={`${title} - Prestation ${idx + 1} - Traiteur Compère Liège`}
+                                        alt={`${title} - Présentation ${idx + 1} - Traiteur Compère`}
                                         fill
                                         className="object-cover hover:scale-105 transition-transform duration-700"
-                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 28vw, 320px"
+                                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 300px"
                                     />
                                 </motion.div>
                             ))}
@@ -1438,10 +912,10 @@ function SectionService({
 }
 
 function ParallaxCta({
-    text = "Prêt à donner vie à votre événement ?",
-    subText = "Composez votre menu et activez l'option Bar Brasseur en quelques clics : devis personnalisé sous 24h.",
-    link = "/contact?type=mariage-boissons&boissons=oui",
-    buttonText = "DEMANDER UN DEVIS GRATUIT",
+    text = "Prêt à sublimer votre événement ?",
+    subText = "Discutons de vos envies et créons ensemble un menu sur mesure.",
+    link = "/contact",
+    buttonText = "DEMANDER UN DEVIS",
     image = "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop"
 }: {
     text?: string;
@@ -1456,46 +930,35 @@ function ParallaxCta({
         offset: ["start end", "end start"]
     });
 
-    const y = useTransform(scrollYProgress, [0, 1], ["-15%", "15%"]);
+    const y = useTransform(scrollYProgress, [0, 1], ["-20%", "20%"]);
 
     return (
-        <section ref={ref} className="relative w-full h-[55vh] md:h-[65vh] flex items-center justify-center overflow-hidden mt-16">
-            <motion.div style={{ y }} className="absolute inset-0 w-full h-[135%] -top-[18%] z-0">
+        <section ref={ref} className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden mt-24">
+            <motion.div style={{ y }} className="absolute inset-0 w-full h-[140%] -top-[20%] z-0">
                 <Image
                     src={image}
-                    alt="Ambiance réception, service bar et traiteur haut de gamme - Traiteur Compère"
+                    alt="Ambiance réception et traiteur haut de gamme - Traiteur Compère"
                     fill
                     className="object-cover"
                     sizes="100vw"
                 />
             </motion.div>
 
-            <div className="absolute inset-0 bg-black/65 z-10" />
+            <div className="absolute inset-0 bg-black/60 z-10" />
 
-            <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-6">
-                <span className="inline-block text-xs uppercase tracking-[0.25em] text-[#D4AF37] font-bold">
-                    Maison Compère • Cuisine &amp; Brasseur
-                </span>
+            <div className="relative z-20 text-center px-6 max-w-4xl mx-auto space-y-8">
                 <h2 className="text-3xl md:text-5xl font-serif text-white leading-tight">
                     {text}
                 </h2>
-                <p className="text-white/90 font-sans font-light text-base md:text-xl max-w-2xl mx-auto">
+                <p className="text-white/90 font-sans text-lg md:text-xl">
                     {subText}
                 </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
-                    <Link
-                        href={link}
-                        className="w-full sm:w-auto inline-block bg-[#D4AF37] text-black px-8 py-4 rounded-full uppercase tracking-widest text-xs font-bold hover:bg-white transition-all duration-300 shadow-lg"
-                    >
-                        {buttonText}
-                    </Link>
-                    <Link
-                        href="/formules"
-                        className="w-full sm:w-auto inline-block bg-white/10 backdrop-blur-sm border border-white/40 text-white px-8 py-4 rounded-full uppercase tracking-widest text-xs font-bold hover:bg-white hover:text-black transition-all duration-300"
-                    >
-                        VOIR NOS FORMULES &amp; TARIFS
-                    </Link>
-                </div>
+                <Link
+                    href={link}
+                    className="inline-block bg-white text-black px-8 py-4 uppercase tracking-widest text-sm font-bold hover:bg-[#D4AF37] hover:text-white transition-all duration-300"
+                >
+                    {buttonText}
+                </Link>
             </div>
         </section>
     );
@@ -1508,15 +971,15 @@ function ValueItem({ title, desc, path, delay }: { title: string; desc: string; 
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay }}
-            className="flex flex-col items-center text-center p-8 bg-white rounded-3xl border border-[#E8E2D5] shadow-2xs"
+            className="flex flex-col items-center px-4"
         >
-            <div className="w-12 h-12 mb-5 text-[#D4AF37] bg-[#FAF6EB] p-3 rounded-2xl border border-[#D4AF37]/30">
+            <div className="w-12 h-12 mb-6 text-[#D4AF37]">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-full h-full">
                     <path d={path} />
                 </svg>
             </div>
-            <h3 className="font-serif text-xl text-[#111111] mb-3 uppercase tracking-wider font-bold">{title}</h3>
-            <p className="text-sm sm:text-base text-neutral-600 font-light leading-relaxed">
+            <h3 className="font-serif text-xl text-black mb-4 uppercase tracking-widest">{title}</h3>
+            <p className="text-lg text-neutral-700 leading-relaxed">
                 {desc}
             </p>
         </motion.div>
