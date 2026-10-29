@@ -1,23 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Demande de Devis en Ligne Gratuit',
+  title: "Contact & Devis | Traiteur Compère",
   description:
-    'Composez votre formule en quelques clics et recevez votre devis personnalisé sous 24h pour vos événements en région liégeoise.',
+    "Contactez la Maison Compère pour une demande de devis personnalisé ou pour commander vos repas traiteur.",
   alternates: {
     canonical: '/contact',
   },
   openGraph: {
-    title: 'Demande de Devis en Ligne Gratuit | Traiteur Compère',
+    title: "Contact & Devis | Traiteur Compère",
     description:
-      'Composez votre formule en quelques clics et recevez votre devis personnalisé sous 24h pour vos événements en région liégeoise.',
+      "Contactez la Maison Compère pour une demande de devis personnalisé ou pour commander vos repas traiteur.",
     url: 'https://www.traiteur-compere.be/contact',
     images: [
       {
         url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Traiteur Compère - Demande de Devis en Ligne',
+        alt: 'Contact & Devis | Traiteur Compère',
       },
     ],
   },

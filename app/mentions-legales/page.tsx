@@ -2,16 +2,16 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Mentions Légales & Informations Juridiques",
+  title: "Mentions Légales | Traiteur Compère",
   description:
-    "Mentions légales, informations d'entreprise et conditions d'utilisation du site officiel de la Maison Compère SRL, traiteur à Saint-Georges-sur-Meuse.",
+    "Mentions légales, éditeur du site et politique de confidentialité de la Maison Compère.",
   alternates: {
     canonical: "/mentions-legales",
   },
   openGraph: {
-    title: "Mentions Légales & Informations Juridiques | Traiteur Compère",
+    title: "Mentions Légales | Traiteur Compère",
     description:
-      "Mentions légales, informations d'entreprise et conditions d'utilisation du site officiel de la Maison Compère SRL, traiteur à Saint-Georges-sur-Meuse.",
+      "Mentions légales, éditeur du site et politique de confidentialité de la Maison Compère.",
     url: "https://www.traiteur-compere.be/mentions-legales",
     images: [
       {

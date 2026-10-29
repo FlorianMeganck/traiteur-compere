@@ -1,23 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Formules & Menus (BBQ, Buffets, Plats Uniques)',
+  title: "Nos Formules | Traiteur Compère",
   description:
-    "Consultez notre carte complète : barbecues au feu de bois, buffets froids d'exception, salad bar et formules pour grandes tablées.",
+    "Buffets chauds et froids, barbecues, réceptions privées et événements d'entreprise.",
   alternates: {
     canonical: '/formules',
   },
   openGraph: {
-    title: 'Formules & Menus (BBQ, Buffets, Plats Uniques) | Traiteur Compère',
+    title: "Nos Formules | Traiteur Compère",
     description:
-      "Consultez notre carte complète : barbecues au feu de bois, buffets froids d'exception, salad bar et formules pour grandes tablées.",
+      "Buffets chauds et froids, barbecues, réceptions privées et événements d'entreprise.",
     url: 'https://www.traiteur-compere.be/formules',
     images: [
       {
         url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Traiteur Compère - Formules & Menus',
+        alt: 'Nos Formules | Traiteur Compère',
       },
     ],
   },

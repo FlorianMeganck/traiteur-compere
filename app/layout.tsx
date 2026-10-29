@@ -16,10 +16,7 @@ const lato = Lato({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.traiteur-compere.be'),
-  title: {
-    default: 'Traiteur Compère | Traiteur Événementiel & Mariages en Province de Liège',
-    template: '%s | Traiteur Compère',
-  },
+  title: 'Traiteur Compère | Traiteur Événementiel & Mariages en Province de Liège',
   description: 'Traiteur artisanal en région liégeoise : barbecues gourmands, buffets chauds et froids, salad bars, formules collectivités et plats préparés sur-mesure.',
   keywords: ['traiteur liège', 'barbecue traiteur', 'buffet froid', 'saint-georges-sur-meuse', 'traiteur entreprise', 'salad bar'],
   authors: [{ name: 'Traiteur Compère' }],
@@ -50,6 +47,32 @@ import CookieBanner from "./components/CookieBanner";
 import ScrollToTop from "./components/ScrollToTop";
 import StructuredData from "./components/StructuredData";
 
+const siteNavigationJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SiteNavigationElement",
+      "name": "Menus de Fêtes",
+      "url": "https://www.traiteur-compere.be/menus-fetes"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": "Formules",
+      "url": "https://www.traiteur-compere.be/formules"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": "Services",
+      "url": "https://www.traiteur-compere.be/services"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": "Contact",
+      "url": "https://www.traiteur-compere.be/contact"
+    }
+  ]
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,6 +80,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationJsonLd) }}
+        />
+      </head>
       <body
         className={`${playfair.variable} ${lato.variable} antialiased bg-white text-black font-sans`}
       >

@@ -1,24 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Services Traiteur : Mariages, Entreprises & Événements Privés',
+  title: "Nos Services Traiteur | Événements & Réceptions",
   description:
-    'Organisation traiteur sur-mesure pour vos mariages, réceptions professionnelles et fêtes privées à Liège et en Wallonie avec un service haut de gamme.',
+    "Organisation de banquets, mariages, anniversaires et service boissons complet.",
   alternates: {
     canonical: '/services',
   },
   openGraph: {
-    title:
-      'Services Traiteur : Mariages, Entreprises & Événements Privés | Traiteur Compère',
+    title: "Nos Services Traiteur | Événements & Réceptions",
     description:
-      'Organisation traiteur sur-mesure pour vos mariages, réceptions professionnelles et fêtes privées à Liège et en Wallonie avec un service haut de gamme.',
+      "Organisation de banquets, mariages, anniversaires et service boissons complet.",
     url: 'https://www.traiteur-compere.be/services',
     images: [
       {
         url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Traiteur Compère - Services Traiteur',
+        alt: 'Nos Services Traiteur | Événements & Réceptions',
       },
     ],
   },

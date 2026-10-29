@@ -425,73 +425,31 @@ export default function StructuredData() {
         "hasPart": [
           {
             "@type": "WebPage",
+            "@id": "https://www.traiteur-compere.be/menus-fetes",
+            "name": "Menus de Fêtes 2026 | Traiteur Compère",
+            "url": "https://www.traiteur-compere.be/menus-fetes",
+            "description": "Découvrez nos menus de réveillon, formules festives et compositions à la carte pour Noël et Nouvel An à Liège."
+          },
+          {
+            "@type": "WebPage",
             "@id": "https://www.traiteur-compere.be/formules",
-            "name": "Formules & Menus",
+            "name": "Nos Formules | Traiteur Compère",
             "url": "https://www.traiteur-compere.be/formules",
-            "description": "Découvrez toutes nos formules : barbecues au feu de bois, buffets froids & chauds, salad bars."
+            "description": "Buffets chauds et froids, barbecues, réceptions privées et événements d'entreprise."
           },
           {
             "@type": "WebPage",
             "@id": "https://www.traiteur-compere.be/services",
-            "name": "Services Traiteur",
+            "name": "Nos Services Traiteur | Événements & Réceptions",
             "url": "https://www.traiteur-compere.be/services",
-            "description": "Prestations pour mariages, banquets, réceptions d'entreprise et événements privés."
-          },
-          {
-            "@type": "WebPage",
-            "@id": "https://www.traiteur-compere.be/plats-prepares",
-            "name": "Plats Préparés",
-            "url": "https://www.traiteur-compere.be/plats-prepares",
-            "description": "Menus hebdomadaires de plats cuisinés maison et commande en ligne."
+            "description": "Organisation de banquets, mariages, anniversaires et service boissons complet."
           },
           {
             "@type": "WebPage",
             "@id": "https://www.traiteur-compere.be/contact",
-            "name": "Contact & Devis",
+            "name": "Contact & Devis | Traiteur Compère",
             "url": "https://www.traiteur-compere.be/contact",
-            "description": "Demandez votre devis gratuit sur-mesure pour votre événement."
-          }
-        ]
-      },
-      {
-        "@type": "ItemList",
-        "@id": "https://www.traiteur-compere.be/#site-navigation",
-        "name": "Navigation Principale Traiteur Compère",
-        "itemListElement": [
-          {
-            "@type": "SiteNavigationElement",
-            "position": 1,
-            "name": "Formules",
-            "description": "Formules barbecues, buffets chauds et froids, salad bars et réceptions",
-            "url": "https://www.traiteur-compere.be/formules"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "position": 2,
-            "name": "Services",
-            "description": "Services traiteur pour mariages, entreprises, anniversaires et événements",
-            "url": "https://www.traiteur-compere.be/services"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "position": 3,
-            "name": "Plats Préparés",
-            "description": "Plats cuisinés maison chaque semaine à emporter ou en livraison",
-            "url": "https://www.traiteur-compere.be/plats-prepares"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "position": 4,
-            "name": "Contact & Devis",
-            "description": "Demandez un devis gratuit et personnalisé pour votre événement",
-            "url": "https://www.traiteur-compere.be/contact"
-          },
-          {
-            "@type": "SiteNavigationElement",
-            "position": 5,
-            "name": "À Propos",
-            "description": "Histoire et savoir-faire bicentenaire de la Maison Compère",
-            "url": "https://www.traiteur-compere.be/a-propos"
+            "description": "Contactez la Maison Compère pour une demande de devis personnalisé ou pour commander vos repas traiteur."
           }
         ]
       }

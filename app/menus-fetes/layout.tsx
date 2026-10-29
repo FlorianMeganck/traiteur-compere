@@ -1,23 +1,23 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Menus des Fêtes 2026 • Réveillons de Noël & Nouvel An | Traiteur Compère',
+  title: "Menus de Fêtes 2026 | Traiteur Compère",
   description:
-    'Découvrez nos 3 formules gastronomiques 4 services et notre carte festive à composer librement pour vos réveillons de Noël et Nouvel An. Retrait artisanal à Saint-Georges-sur-Meuse et livraison en région liégeoise.',
+    "Découvrez nos menus de réveillon, formules festives et compositions à la carte pour Noël et Nouvel An à Liège.",
   alternates: {
     canonical: '/menus-fetes',
   },
   openGraph: {
-    title: 'Menus des Fêtes 2026 • Réveillons de Noël & Nouvel An | Traiteur Compère',
+    title: "Menus de Fêtes 2026 | Traiteur Compère",
     description:
-      'Découvrez nos 3 formules gastronomiques 4 services et notre carte festive à composer librement pour vos réveillons de Noël et Nouvel An. Retrait artisanal à Saint-Georges-sur-Meuse et livraison en région liégeoise.',
+      "Découvrez nos menus de réveillon, formules festives et compositions à la carte pour Noël et Nouvel An à Liège.",
     url: 'https://www.traiteur-compere.be/menus-fetes',
     images: [
       {
         url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Traiteur Compère - Menus des Fêtes 2026',
+        alt: 'Menus de Fêtes 2026 | Traiteur Compère',
       },
     ],
   },
