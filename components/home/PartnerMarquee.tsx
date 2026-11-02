@@ -7,6 +7,7 @@ export interface PartnerItem {
   href: string;
   logo: string;
   alt: string;
+  sizeClass?: string;
 }
 
 export const PARTNERS: PartnerItem[] = [
@@ -47,10 +48,11 @@ export const PARTNERS: PartnerItem[] = [
     alt: "Justice de Paix de Grâce-Hollogne - Partenaire Traiteur Compère",
   },
   {
-    name: "R.R.F.C. Stockay",
+    name: "Royal Stockay Saint-Georges",
     href: "https://www.royalstockaysaintgeorges.be/",
-    logo: "/images/partenaires/foot-stockay.png",
-    alt: "R.R.F.C. Stockay - Partenaire Traiteur Compère",
+    logo: "/images/partenaires/royal-stockay.png",
+    alt: "Royal Stockay Saint-Georges S/M - Partenaire Traiteur Compère",
+    sizeClass: "h-14 max-h-[58px]",
   },
   {
     name: "HEL",
@@ -103,7 +105,7 @@ export default function PartnerMarquee() {
               alt={partner.alt}
               width={260}
               height={95}
-              className="h-12 md:h-14 max-h-[55px] w-auto max-w-[210px] md:max-w-[240px] object-contain opacity-100 group-hover:scale-105 transition-transform duration-300"
+              className={`${partner.sizeClass ?? "h-12 md:h-14 max-h-[55px]"} w-auto max-w-[210px] md:max-w-[240px] object-contain opacity-100 group-hover:scale-105 transition-transform duration-300`}
             />
           </a>
         ))}
