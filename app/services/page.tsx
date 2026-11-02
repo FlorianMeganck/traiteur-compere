@@ -400,6 +400,9 @@ export default function Services() {
                                 }`}
                             >
                                 {/* En-tête du Pilier (Hiérarchie sémantique H2) */}
+                                {pillar.id === "pole-bar-boissons" && (
+                                    <div id="brasseur" className="scroll-mt-28" aria-hidden="true" />
+                                )}
                                 <div className="max-w-3xl mb-8">
                                     <div className="flex items-center gap-3 mb-2">
                                         <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#996515] bg-[#FAF6EB] px-3 py-1 rounded-full border border-[#D4AF37]/30">

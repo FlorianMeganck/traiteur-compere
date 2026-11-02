@@ -10,7 +10,7 @@ export default function StructuredData() {
         "alternateName": ["Traiteur Compère Saint-Georges", "Maison Compère"],
         "description": "Traiteur haut de gamme pour mariages, banquets, réceptions d'entreprise et événements privés à Saint-Georges-sur-Meuse et en région liégeoise. Maison fondée en 1821.",
         "url": "https://www.traiteur-compere.be",
-        "telephone": "+32 476 86 54 07",
+        "telephone": "+32 468 38 50 82",
         "email": "contact@traiteur-compere.be",
         "logo": "https://www.traiteur-compere.be/images/logo-2.png",
         "image": "https://www.traiteur-compere.be/images/hero-traiteur.png",
@@ -31,6 +31,11 @@ export default function StructuredData() {
           "longitude": 5.35824
         },
         "areaServed": [
+          "Liège",
+          "Saint-Georges-sur-Meuse",
+          "Huy",
+          "Waremme",
+          "Grâce-Hollogne",
           {
             "@type": "AdministrativeArea",
             "name": "Wallonie"
@@ -38,36 +43,15 @@ export default function StructuredData() {
           {
             "@type": "AdministrativeArea",
             "name": "Province de Liège"
-          },
-          {
-            "@type": "Place",
-            "name": "Liège et environs"
-          },
-          {
-            "@type": "Place",
-            "name": "Saint-Georges-sur-Meuse"
-          },
-          {
-            "@type": "Place",
-            "name": "Huy"
-          },
-          {
-            "@type": "Place",
-            "name": "Waremme"
-          },
-          {
-            "@type": "Place",
-            "name": "Flémalle"
-          },
-          {
-            "@type": "Place",
-            "name": "Amay"
-          },
-          {
-            "@type": "Place",
-            "name": "Verlaine"
           }
         ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "5.0",
+          "bestRating": "5",
+          "worstRating": "1",
+          "ratingCount": "48"
+        },
         "openingHoursSpecification": [
           {
             "@type": "OpeningHoursSpecification",

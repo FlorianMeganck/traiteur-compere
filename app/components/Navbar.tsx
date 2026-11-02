@@ -143,14 +143,19 @@ export default function Navbar() {
     return (
         <>
             <header className="fixed top-0 left-0 w-full z-50">
-                {/* Top-Bar Bandeau d'Annonce (Festive) */}
-                <div className="bg-[#111111] text-white py-3.5 md:py-4 px-4 text-center text-xs sm:text-sm md:text-base font-medium tracking-wide flex flex-wrap items-center justify-center gap-2 border-b border-[#D4AF37]/30 shadow-sm">
-                    <span className="text-[#D4AF37] text-sm md:text-base">✨</span>
-                    <span><strong>Menus de Fêtes 2026</strong> : Les réservations sont ouvertes !</span>
-                    <Link href="/menus-fetes" className="underline text-[#D4AF37] hover:text-white ml-1 font-bold transition-colors">
-                        Découvrez notre sélection →
-                    </Link>
-                </div>
+                {/* Top-Bar Bandeau d'Annonce (Festive - Bloc 0) */}
+                <Link
+                    href="/menus-fetes"
+                    className="bg-[#111111] hover:bg-[#181818] text-white py-2.5 md:py-3 px-4 text-center text-xs sm:text-sm font-light tracking-wide flex flex-wrap items-center justify-center gap-1.5 border-b border-[#D4AF37]/30 shadow-sm transition-colors group"
+                >
+                    <span className="text-[#D4AF37] text-xs sm:text-sm" aria-hidden="true">✨</span>
+                    <span>
+                        <strong className="font-semibold text-white">Menus de Fêtes 2026</strong> : Les réservations de réveillon sont ouvertes —{" "}
+                        <span className="underline decoration-[#D4AF37]/70 text-[#D4AF37] group-hover:text-white font-medium transition-colors">
+                            Découvrez la sélection exclusive
+                        </span>
+                    </span>
+                </Link>
 
                 <nav
                     className={`w-full transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
