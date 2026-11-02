@@ -17,7 +17,7 @@ html {
   --color-primary: var(--primary);
   --font-serif: var(--font-playfair);
   --font-sans: var(--font-lato);
-  --animate-marquee: marquee 30s linear infinite;
+  --animate-marquee: marquee 42s linear infinite;
 }
 
 @keyframes marquee {
@@ -32,7 +32,7 @@ html {
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee 30s linear infinite;
+  animation: marquee 42s linear infinite;
 }
 
 .animate-marquee:hover,
