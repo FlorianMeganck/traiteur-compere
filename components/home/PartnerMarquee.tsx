@@ -76,7 +76,7 @@ export default function PartnerMarquee() {
   const marqueeItems = [...PARTNERS, ...PARTNERS];
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto overflow-hidden py-3">
+    <div className="relative w-full max-w-6xl mx-auto overflow-hidden py-4">
       {/* Fondus latéraux sur le fond ivoire #FAF8F5 pour une entrée/sortie douce */}
       <div
         className="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-24 md:w-32 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/85 to-transparent z-10"
@@ -87,7 +87,7 @@ export default function PartnerMarquee() {
         aria-hidden="true"
       />
 
-      {/* Carrousel continu lent : 2 logos visibles sur mobile, 3 à 4 sur desktop */}
+      {/* Carrousel continu lent : 2 logos visibles sur mobile, 3 à 4 sur desktop, en vraies couleurs */}
       <div className="animate-marquee items-center">
         {marqueeItems.map((partner, index) => (
           <a
@@ -96,14 +96,14 @@ export default function PartnerMarquee() {
             target="_blank"
             rel="noopener noreferrer"
             title={partner.name}
-            className="group shrink-0 w-[170px] sm:w-[220px] md:w-[270px] lg:w-[290px] px-5 sm:px-8 md:px-10 py-2 flex items-center justify-center transition-opacity duration-300"
+            className="group shrink-0 w-[190px] sm:w-[240px] md:w-[280px] lg:w-[300px] px-5 sm:px-8 md:px-10 py-2.5 flex items-center justify-center"
           >
             <Image
               src={partner.logo}
               alt={partner.alt}
-              width={240}
-              height={90}
-              className="h-11 sm:h-13 md:h-15 w-auto object-contain grayscale opacity-55 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
+              width={260}
+              height={95}
+              className="h-12 md:h-14 max-h-[55px] w-auto max-w-[210px] md:max-w-[240px] object-contain opacity-100 group-hover:scale-105 transition-transform duration-300"
             />
           </a>
         ))}

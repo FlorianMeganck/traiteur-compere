@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import PartnerMarquee from "@/components/home/PartnerMarquee";
 import StickyMobileBar from "@/components/home/StickyMobileBar";
-import GoldenThread from "@/components/home/GoldenThread";
 
 export const metadata: Metadata = {
   title:
@@ -255,20 +254,21 @@ export default function Home() {
       </section>
 
       {/* ================================================================= */}
-      {/* PARCOURS CONTINU RELIÉ PAR LE FIL CONDUCTEUR DORÉ                 */}
+      {/* BLOC 2 : BANDEAU PARTENAIRES EN COULEUR & TAILLE VALORISANTE      */}
       {/* ================================================================= */}
-      <div className="relative">
-        <GoldenThread />
+      <section
+        aria-label="Références et partenaires"
+        className="relative overflow-hidden bg-[#FAF8F5] pt-14 pb-12 md:pt-18 md:pb-14 px-4 sm:px-6"
+      >
+        {/* Lueur radiale champagne diffuse (7 %) */}
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(212,175,55,0.07)_0%,_transparent_70%)]"
+          aria-hidden="true"
+        />
 
-        {/* =============================================================== */}
-        {/* BLOC 2 : BANDEAU PARTENAIRES FLUIDE & DISCRET                   */}
-        {/* =============================================================== */}
-        <section
-          aria-label="Références et partenaires"
-          className="relative z-10 pt-12 pb-8 md:pt-16 md:pb-10 px-4 sm:px-6 max-w-6xl mx-auto"
-        >
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center mb-6">
-            <h2 className="text-xs sm:text-sm font-sans uppercase tracking-[0.2em] text-neutral-500 font-semibold">
+        <div className="relative z-10 max-w-6xl mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center mb-7">
+            <h2 className="text-xs sm:text-sm font-sans uppercase tracking-[0.2em] text-neutral-600 font-semibold">
               Ils nous font confiance pour leurs réceptions &amp; événements
             </h2>
             <span className="hidden sm:inline text-[#D4AF37]/60">•</span>
@@ -284,22 +284,30 @@ export default function Home() {
           </div>
 
           <PartnerMarquee />
-        </section>
+        </div>
+      </section>
 
-        {/* Connecteur vertical doré */}
+      {/* Séparateur horizontal doré satiné */}
+      <div
+        className="h-[1px] w-full max-w-5xl mx-auto bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent"
+        aria-hidden="true"
+      />
+
+      {/* ================================================================= */}
+      {/* BLOC 3 : L'AIGUILLAGE EXPRESS (3 PORTES D'ENTRÉE AÉRÉES)          */}
+      {/* ================================================================= */}
+      <section
+        aria-labelledby="univers-heading"
+        className="relative overflow-hidden bg-[#FAF8F5] py-20 md:py-28 px-4 sm:px-6"
+      >
+        {/* Mesh / Radial Glow ambre doux sur le côté droit */}
         <div
-          className="relative z-10 w-[1px] h-10 bg-[#D4AF37]/40 mx-auto"
+          className="pointer-events-none absolute -top-24 right-0 w-[520px] h-[520px] rounded-full bg-[radial-gradient(circle,_rgba(212,175,55,0.07)_0%,_transparent_70%)]"
           aria-hidden="true"
         />
 
-        {/* =============================================================== */}
-        {/* BLOC 3 : L'AIGUILLAGE EXPRESS (3 PORTES D'ENTRÉE AÉRÉES)        */}
-        {/* =============================================================== */}
-        <section
-          aria-labelledby="univers-heading"
-          className="relative z-10 py-14 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto"
-        >
-          <div className="text-center max-w-2xl mx-auto mb-14">
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-16">
             <span className="inline-block text-[11px] font-bold uppercase tracking-[0.22em] text-[#996515] mb-2">
               À chaque occasion sa formule
             </span>
@@ -353,16 +361,30 @@ export default function Home() {
               </article>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* =============================================================== */}
-        {/* BLOC 4 : FOCUS SAISONNALITÉ — MENUS DE FÊTES 2026               */}
-        {/* =============================================================== */}
-        <section
-          aria-labelledby="fetes-2026-heading"
-          className="relative z-10 py-14 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto"
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+      {/* Séparateur horizontal doré satiné */}
+      <div
+        className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent"
+        aria-hidden="true"
+      />
+
+      {/* ================================================================= */}
+      {/* BLOC 4 : FOCUS SAISONNALITÉ — MENUS DE FÊTES 2026 (ZONE BLANC PUR)*/}
+      {/* ================================================================= */}
+      <section
+        aria-labelledby="fetes-2026-heading"
+        className="relative overflow-hidden bg-white py-20 md:py-28 px-4 sm:px-6"
+      >
+        {/* Dégradés d'ambiance Mesh / Radial Glows (champagne & ambre 6-8 %) */}
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_20%_50%,_rgba(212,175,55,0.08)_0%,_transparent_60%),radial-gradient(ellipse_at_85%_20%,_rgba(180,130,40,0.05)_0%,_transparent_55%)]"
+          aria-hidden="true"
+        />
+
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Visuel festif */}
             <div className="lg:col-span-5 order-2 lg:order-1">
               <div className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-md">
@@ -376,8 +398,8 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Texte éditorial ouvert sur le fond ivoire */}
-            <div className="lg:col-span-7 order-1 lg:order-2 space-y-5">
+            {/* Texte éditorial sur blanc pur et halo chaud */}
+            <div className="lg:col-span-7 order-1 lg:order-2 space-y-6">
               <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-[#996515]">
                 <Sparkles size={14} className="text-[#D4AF37]" />
                 <span>Saison Festive • Noël &amp; Nouvel An 2026</span>
@@ -396,7 +418,7 @@ export default function Home() {
                 mi-cuit maison, gibiers nobles et bûchettes de chez La Pavée.
               </p>
 
-              {/* Repères pratiques en ligne, sans boîtes */}
+              {/* Repères pratiques en ligne */}
               <div className="flex flex-wrap gap-y-3 gap-x-8 pt-2 text-xs sm:text-sm text-neutral-700">
                 <div className="flex items-center gap-2">
                   <MapPin size={16} className="text-[#D4AF37] shrink-0" />
@@ -439,22 +461,30 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Connecteur vertical doré */}
+      {/* Séparateur horizontal doré satiné */}
+      <div
+        className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent"
+        aria-hidden="true"
+      />
+
+      {/* ================================================================= */}
+      {/* BLOC 5 : NOS FORMULES RÉCEPTIONS PHARES (SUR FOND IVOIRE #FAF8F5) */}
+      {/* ================================================================= */}
+      <section
+        aria-labelledby="formules-phares-heading"
+        className="relative overflow-hidden bg-[#FAF8F5] py-20 md:py-28 px-4 sm:px-6"
+      >
+        {/* Halo radial champagne diffus au centre */}
         <div
-          className="relative z-10 w-[1px] h-10 bg-[#D4AF37]/40 mx-auto"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,_rgba(212,175,55,0.06)_0%,_transparent_65%)]"
           aria-hidden="true"
         />
 
-        {/* =============================================================== */}
-        {/* BLOC 5 : NOS FORMULES RÉCEPTIONS PHARES (SANS CARTES FERMÉES)   */}
-        {/* =============================================================== */}
-        <section
-          aria-labelledby="formules-phares-heading"
-          className="relative z-10 py-14 md:py-20 px-4 sm:px-6 max-w-7xl mx-auto"
-        >
-          <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="relative z-10 max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="inline-block text-[11px] font-bold uppercase tracking-[0.22em] text-[#996515] mb-2">
               La Carte des Réceptions
             </span>
@@ -470,7 +500,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-9">
             {FORMULES_PHARES.map((item) => (
               <article
                 key={item.title}
@@ -515,15 +545,29 @@ export default function Home() {
               </article>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* =============================================================== */}
-        {/* BLOC 6 : LA LOGISTIQUE CLÉ EN MAIN & SERVICE BRASSEUR           */}
-        {/* =============================================================== */}
-        <section
-          aria-labelledby="logistique-brasseur-heading"
-          className="relative z-10 py-14 md:py-22 px-4 sm:px-6 max-w-7xl mx-auto"
-        >
+      {/* Séparateur horizontal doré satiné */}
+      <div
+        className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent"
+        aria-hidden="true"
+      />
+
+      {/* ================================================================= */}
+      {/* BLOC 6 : LA LOGISTIQUE CLÉ EN MAIN & SERVICE BRASSEUR             */}
+      {/* ================================================================= */}
+      <section
+        aria-labelledby="logistique-brasseur-heading"
+        className="relative overflow-hidden bg-gradient-to-b from-white via-white to-[#FAF8F5] py-20 md:py-28 px-4 sm:px-6"
+      >
+        {/* Lueur chaude diffuse ambre/champagne (7 %) */}
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_75%_50%,_rgba(212,175,55,0.07)_0%,_transparent_65%)]"
+          aria-hidden="true"
+        />
+
+        <div className="relative z-10 max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Colonne gauche : Visuel bar événementiel */}
             <div className="lg:col-span-5">
@@ -538,7 +582,7 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Colonne droite : Texte ouvert sur le fond ivoire */}
+            {/* Colonne droite : Texte ouvert */}
             <div className="lg:col-span-7 space-y-6">
               <div>
                 <span className="inline-block text-[11px] font-bold uppercase tracking-[0.22em] text-[#996515] mb-2">
@@ -585,20 +629,46 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Connecteur vertical doré */}
+      {/* Séparateur horizontal doré satiné */}
+      <div
+        className="h-[1px] w-full max-w-5xl mx-auto bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent"
+        aria-hidden="true"
+      />
+
+      {/* ================================================================= */}
+      {/* TRANSITION STRATÉGIQUE AVEC FILIGRANE DU BLASON MAISON COMPÈRE    */}
+      {/* BLOC 7 (HÉRITAGE 1821) + BLOC 8 (CONTACT FINAL)                   */}
+      {/* ================================================================= */}
+      <div className="relative overflow-hidden bg-[#FAF8F5]">
+        {/* Lueurs chaudes diffuses (Mesh / Radial Glows champagne & ambre 7-9 %) */}
         <div
-          className="relative z-10 w-[1px] h-10 bg-[#D4AF37]/40 mx-auto"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_30%,_rgba(212,175,55,0.08)_0%,_transparent_65%),radial-gradient(ellipse_at_50%_90%,_rgba(180,130,40,0.06)_0%,_transparent_60%)]"
           aria-hidden="true"
         />
+
+        {/* Filigrane géant de l'arabesque / blason Maison Compère (opacité ~2.8 %) */}
+        <div
+          className="pointer-events-none select-none absolute top-8 left-1/2 -translate-x-1/2 w-[580px] sm:w-[760px] md:w-[940px] flex justify-center z-0"
+          aria-hidden="true"
+        >
+          <Image
+            src="/images/Logo_traiteur.png"
+            alt=""
+            width={940}
+            height={496}
+            className="w-full h-auto object-contain opacity-[0.028]"
+          />
+        </div>
 
         {/* =============================================================== */}
         {/* BLOC 7 : L'HÉRITAGE ARTISANAL — MAISON COMPÈRE (BICENTENAIRE)   */}
         {/* =============================================================== */}
         <section
           aria-labelledby="heritage-heading"
-          className="relative z-10 py-14 md:py-20 px-4 sm:px-6 max-w-5xl mx-auto text-center"
+          className="relative z-10 py-20 md:py-28 px-4 sm:px-6 max-w-5xl mx-auto text-center"
         >
           <span className="inline-block text-[11px] font-bold uppercase tracking-[0.22em] text-[#996515] mb-2">
             Savoir-Faire Familial • Saint-Georges-sur-Meuse
@@ -615,7 +685,7 @@ export default function Home() {
             100 % faite maison, mijotée sans conservateurs industriels à partir
             de viandes nobles locales.
           </p>
-          <div className="mb-12">
+          <div className="mb-14">
             <Link
               href="/a-propos"
               className="inline-flex items-center text-xs sm:text-sm font-bold text-[#996515] hover:text-[#111111] border-b border-[#D4AF37]/60 pb-0.5 transition-colors"
@@ -624,8 +694,12 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* 3 Piliers ouverts sans boîtes */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#E8E2D5] border-y border-[#E8E2D5] py-8">
+          {/* 3 Piliers encadrés par de fins séparateurs dorés satinés */}
+          <div
+            className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent"
+            aria-hidden="true"
+          />
+          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[#E8E2D5] py-10">
             {PILIERS_HERITAGE.map((stat) => (
               <div key={stat.value} className="py-4 sm:py-0 px-4">
                 <p className="text-4xl sm:text-5xl font-serif text-[#111111] mb-1.5">
@@ -637,6 +711,10 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <div
+            className="h-[1px] w-full bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent"
+            aria-hidden="true"
+          />
         </section>
 
         {/* =============================================================== */}
@@ -644,13 +722,8 @@ export default function Home() {
         {/* =============================================================== */}
         <section
           aria-labelledby="contact-cta-heading"
-          className="relative z-10 pt-8 pb-20 md:pb-28 px-4 sm:px-6 max-w-3xl mx-auto text-center"
+          className="relative z-10 pt-4 pb-24 md:pb-32 px-4 sm:px-6 max-w-3xl mx-auto text-center"
         >
-          <div
-            className="w-[1px] h-12 bg-[#D4AF37] mx-auto mb-8"
-            aria-hidden="true"
-          />
-
           <h2
             id="contact-cta-heading"
             className="text-3xl sm:text-5xl font-serif text-[#111111] mb-4"
