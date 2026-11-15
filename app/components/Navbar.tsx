@@ -152,7 +152,7 @@ export default function Navbar() {
                     <span>
                         <strong className="font-semibold text-white">Menus de Fêtes 2026</strong> : Les réservations de réveillon sont ouvertes —{" "}
                         <span className="underline decoration-[#D4AF37]/70 text-[#D4AF37] group-hover:text-white font-medium transition-colors">
-                            Découvrez la sélection exclusive
+                            Découvrez nos menus
                         </span>
                     </span>
                 </Link>

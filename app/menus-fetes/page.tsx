@@ -564,13 +564,13 @@ export default function MenusFetesPage() {
                     <div className="text-center max-w-2xl mx-auto">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black text-[#D4AF37] text-xs font-bold uppercase tracking-wider mb-3">
                             <Award size={14} />
-                            <span>Sélection Gastronomique 4 Services</span>
+                            <span>Menus 4 Services</span>
                         </div>
                         <h2 className="text-3xl sm:text-5xl font-serif text-black font-bold">
                             Nos 3 Formules de Fêtes
                         </h2>
                         <p className="font-serif italic text-neutral-600 text-sm sm:text-base mt-2">
-                            Harmonie de saveurs et réchauffage facile • Cliquez sur &laquo; Composer ce menu &raquo; pour choisir vos déclinaisons
+                            Préparés maison et faciles à réchauffer • Cliquez sur &laquo; Composer ce menu &raquo; pour choisir vos plats
                         </p>
                     </div>
 
@@ -690,13 +690,13 @@ export default function MenusFetesPage() {
                         <div>
                             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/15 text-[#927116] text-xs font-bold uppercase tracking-wider mb-2">
                                 <BookOpen size={14} />
-                                <span>Livret de table • Carte Gastronomique</span>
+                                <span>Livret de table • Carte à l&apos;unité</span>
                             </div>
                             <h2 className="text-3xl sm:text-4xl font-serif text-black font-bold">
                                 Le Livret de Table
                             </h2>
                             <p className="font-serif italic text-neutral-600 text-sm sm:text-base mt-1">
-                                Tournez les pages de notre carte et composez librement vos mets pour vos réveillons et tables de fête.
+                                Tournez les pages de notre carte et composez librement votre repas à la pièce ou à la portion.
                             </p>
                         </div>
 

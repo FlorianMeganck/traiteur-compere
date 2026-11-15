@@ -292,7 +292,7 @@ export const BOOKLET_PAGES: BookletPage[] = [
         tabLabel: "1. Zakouskis & Potages",
         tabShort: "Zakouskis & Potages",
         pageTitle: "L'Apéritif & Les Potages",
-        pageTagline: "Pour éveiller les papilles et débuter les festivités tout en délicatesse",
+        pageTagline: "Nos bouchées froides et potages maison pour bien commencer votre repas",
         nextPageTitle: "Découvrir les Entrées",
         subsections: [
             {
@@ -365,13 +365,13 @@ export const BOOKLET_PAGES: BookletPage[] = [
         tabLabel: "2. Entrées",
         tabShort: "Entrées",
         pageTitle: "Les Entrées de Fête",
-        pageTagline: "Le raffinement de la terre et de la mer pour sublimer vos tables",
+        pageTagline: "Entrées froides et chaudes préparées maison, servies à la portion",
         prevPageTitle: "Zakouskis & Potages",
         nextPageTitle: "Découvrir les Plats",
         subsections: [
             {
                 subtitle: "Les Entrées Froides",
-                note: "Fraîcheur noble & dressage délicat",
+                note: "Prêtes à servir",
                 dishes: [
                     {
                         id: "ef-foie-gras",
@@ -477,13 +477,13 @@ export const BOOKLET_PAGES: BookletPage[] = [
         tabLabel: "4. Bûchettes",
         tabShort: "Bûchettes",
         pageTitle: "La Touche Sucrée",
-        pageTagline: "L'élégance pâtissière artisanale pour clore votre repas en apothéose",
+        pageTagline: "Nos bûchettes individuelles artisanales pour terminer le repas en douceur",
         prevPageTitle: "Les Plats",
         footnote: "Tout est préparé maison • Bûchettes artisanales de chez La Pavée",
         subsections: [
             {
                 subtitle: "Bûchettes de chez La Pavée",
-                note: "Créations individuelles d'exception signées par la pâtisserie La Pavée • 8,00 € / pièce TVAC",
+                note: "Pâtisseries individuelles réalisées par La Pavée • 8,00 € / pièce TVAC",
                 dishes: [
                     {
                         id: "buch-framboise",
@@ -575,7 +575,7 @@ export const FORMULES_FETES: FestiveFormule[] = [
         title: "Formule Zakouskis",
         badge: "Conviviale & Gourmande",
         tagline: "4 Services",
-        subtitle: "La convivialité festive autour de bouchées fines et d'un plat savoureux",
+        subtitle: "Idéal pour commencer la soirée avec un assortiment de zakouskis, suivi d'un plat chaud et d'un dessert.",
         price: 49.00,
         priceFormatted: "49,00 €",
         steps: [
@@ -618,7 +618,7 @@ export const FORMULES_FETES: FestiveFormule[] = [
         title: "Formule Réveillon",
         badge: "Le Grand Classique",
         tagline: "4 Services",
-        subtitle: "L'équilibre parfait entre tradition festive et raffinement gastronomique",
+        subtitle: "Notre menu traditionnel complet en 4 services : potage, entrée au choix, plat de fête et dessert.",
         price: 59.00,
         priceFormatted: "59,00 €",
         steps: [
@@ -662,9 +662,9 @@ export const FORMULES_FETES: FestiveFormule[] = [
     {
         id: "formule-prestige",
         title: "Formule Prestige",
-        badge: "Haute Gastronomie",
-        tagline: "4 Services Nobles",
-        subtitle: "L'excellence des produits d'exception : Saint-Jacques, Ris de veau & Chevreuil",
+        badge: "Produits d'exception",
+        tagline: "4 Services",
+        subtitle: "Nos plus beaux produits de saison à votre table : Saint-Jacques, ris de veau, homard et chevreuil.",
         price: 69.00,
         priceFormatted: "69,00 €",
         steps: [
@@ -679,7 +679,7 @@ export const FORMULES_FETES: FestiveFormule[] = [
             {
                 id: "step-entree",
                 stepNumber: 2,
-                stepTitle: "1 Entrée prestigieuse au choix",
+                stepTitle: "1 Entrée au choix",
                 selectionCount: 1,
                 selectionType: "single",
                 options: [
@@ -1010,7 +1010,7 @@ export interface FestiveOrderPricingSummary {
  */
 export function calculateFestiveOrderPricing(
     cartItems: Array<{ id?: string; itemType?: string; semaineId?: string; nomPlat?: string; prixTotalLigne: number }>,
-    validationMode: FestiveValidationMode = 'acompte_30',
+    validationMode: FestiveValidationMode = 'totalite_100',
     currentDate: Date = new Date()
 ): FestiveOrderPricingSummary {
     let festiveSubtotal = 0;

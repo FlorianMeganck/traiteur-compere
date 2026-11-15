@@ -673,10 +673,10 @@ function ContactForm() {
     const isPlatPrepare = typeParam === 'plat_prepare' || isMenusFetes;
 
     // Mode de validation spécifique aux Menus de Fêtes (Acompte 30% vs Totalité 100%)
-    // Jusqu'au 10 décembre inclus : Acompte de 30% disponible et recommandé
-    // À partir du 11 décembre : Totalité 100% uniquement
+    // Par défaut : Règlement intégral (100%) coché à l'ouverture
+    // Jusqu'au 10 décembre inclus : Acompte de 30% disponible au clic
     const depositAvailable = isDepositAllowed();
-    const [validationMode, setValidationMode] = useState<FestiveValidationMode>(depositAvailable ? 'acompte_30' : 'totalite_100');
+    const [validationMode, setValidationMode] = useState<FestiveValidationMode>('totalite_100');
 
     // Synthèse financière dynamique (Early Bird -5% et décomposition acompte/totalité)
     const festivePricing = useMemo(() => {
