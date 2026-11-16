@@ -158,7 +158,7 @@ export default function Navbar() {
                 </Link>
 
                 <nav
-                    className={`w-full transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/90 backdrop-blur-md shadow-sm" : "bg-transparent"
+                    className={`w-full transition-colors duration-500 ease-in-out h-24 flex items-center ${!isTransparent && !isMenuOpen ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-neutral-100" : "bg-transparent"
                         }`}
                 >
                     <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-12 relative">
@@ -210,7 +210,7 @@ export default function Navbar() {
                                         src="/images/Logo_traiteur.png"
                                         alt="Traiteur Compère"
                                         fill
-                                        className="object-contain"
+                                        className={`object-contain transition-all duration-500 ${isTransparent ? "brightness-0 invert drop-shadow-xs" : ""}`}
                                         priority
                                     />
                                 </Link>
@@ -274,7 +274,7 @@ export default function Navbar() {
                                     src="/images/Logo_traiteur.png"
                                     alt="Traiteur Compère"
                                     fill
-                                    className="object-contain"
+                                    className={`object-contain transition-all duration-500 ${isTransparent || isMenuOpen ? "brightness-0 invert drop-shadow-xs" : ""}`}
                                     priority
                                 />
                             </Link>
