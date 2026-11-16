@@ -4508,31 +4508,33 @@ function ContactForm() {
                                             </tbody>
                                         </table>
                                     </div>
-                                    {/* SECTION SPÉCIFIQUE MENUS DES FÊTES : CHOIX ACOMPTE 30% OU TOTALITÉ 100% */}
-                                    {isMenusFetes && (
-                                        <div className="bg-[#FAF9F6] p-5 sm:p-6 rounded-2xl border border-[#D4AF37]/50 mt-6 mb-6 shadow-sm space-y-4">
-                                            <div className="flex items-start gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-black text-[#D4AF37] flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
-                                                    ✓
+                                    {/* SECTION SPÉCIFIQUE MENUS DES FÊTES : CHOIX TOTALITÉ 100% OU ACOMPTE 30% */}
+                                    {isMenusFetes && (() => {
+                                        const previewDeposit = Math.round(festivePricing.totalNet * 0.30 * 100) / 100;
+                                        const previewBalance = Math.round((festivePricing.totalNet - previewDeposit) * 100) / 100;
+                                        return (
+                                            <div className="bg-[#FAF9F6] p-5 sm:p-6 rounded-2xl border border-[#D4AF37]/50 mt-6 mb-6 shadow-sm space-y-4">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-black text-[#D4AF37] flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                                                        ✓
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-serif font-bold text-lg text-black">
+                                                            Mode de règlement de votre commande
+                                                        </h4>
+                                                        <p className="text-xs text-neutral-600 font-serif italic mt-0.5">
+                                                            {depositAvailable
+                                                                ? "Réglez la totalité dès maintenant pour un retrait rapide en 1 clic, ou optez pour un acompte de 30 %."
+                                                                : "À partir du 11 décembre, seul le règlement intégral (100 %) est proposé pour finaliser votre commande."}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <h4 className="font-serif font-bold text-lg text-black">
-                                                        Mode de règlement de votre commande
-                                                    </h4>
-                                                    <p className="text-xs text-neutral-600 font-serif italic mt-0.5">
-                                                        {depositAvailable
-                                                            ? "Choisissez l'acompte pour bloquer votre réservation tout en gardant vos convives ajustables, ou réglez la totalité."
-                                                            : "À partir du 11 décembre, seul le règlement intégral (100 %) est proposé pour finaliser votre commande."}
-                                                    </p>
-                                                </div>
-                                            </div>
 
-                                            <div className="space-y-3 pt-1">
-                                                {/* Option 1 : Acompte 30% (Disponible uniquement jusqu'au 10 décembre inclus) */}
-                                                {depositAvailable && (
+                                                <div className="space-y-3 pt-1">
+                                                    {/* Option 1 (En haut, par défaut) : Totalité 100% */}
                                                     <label
                                                         className={`block p-4 sm:p-5 rounded-xl border cursor-pointer transition-all ${
-                                                            validationMode === 'acompte_30'
+                                                            validationMode === 'totalite_100'
                                                                 ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
                                                                 : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40'
                                                         }`}
@@ -4541,68 +4543,78 @@ function ContactForm() {
                                                             <input
                                                                 type="radio"
                                                                 name="mode_validation_fetes"
-                                                                value="acompte_30"
-                                                                checked={validationMode === 'acompte_30'}
-                                                                onChange={() => setValidationMode('acompte_30')}
+                                                                value="totalite_100"
+                                                                checked={validationMode === 'totalite_100'}
+                                                                onChange={() => setValidationMode('totalite_100')}
                                                                 className="mt-1 text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
                                                             />
                                                             <div className="space-y-1.5 flex-1">
                                                                 <div className="flex items-baseline justify-between flex-wrap gap-2">
                                                                     <div className="flex items-center gap-2">
                                                                         <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
-                                                                            Verser un acompte de 30 %
+                                                                            Régler la totalité (100 %)
                                                                         </span>
                                                                         <span className="text-[10px] bg-[#D4AF37] text-black font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
                                                                             Recommandé
                                                                         </span>
                                                                     </div>
-                                                                    <span className="font-serif font-bold text-sm sm:text-base text-[#927116] bg-[#D4AF37]/15 px-2.5 py-0.5 rounded-full">
-                                                                        {festivePricing.depositAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                                    <span className={`font-serif font-bold text-sm sm:text-base px-2.5 py-0.5 rounded-full ${
+                                                                        validationMode === 'totalite_100'
+                                                                            ? 'text-[#927116] bg-[#D4AF37]/15'
+                                                                            : 'text-neutral-700 bg-neutral-100'
+                                                                    }`}>
+                                                                        {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                                                                     </span>
                                                                 </div>
                                                                 <p className="text-xs text-neutral-600 leading-relaxed">
-                                                                    Bloque la remise de -5 % sur votre sélection actuelle. Convives modifiables jusqu&apos;à J-7 (les ajouts post-1er décembre sont au tarif plein). Solde ({festivePricing.remainingBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) à régler au plus tard 7 jours avant le retrait.
+                                                                    Règlement unique (-5 % Early Bird appliqué). Aucune démarche supplémentaire, votre commande est directement prête pour le jour J.
                                                                 </p>
                                                             </div>
                                                         </div>
                                                     </label>
-                                                )}
 
-                                                {/* Option 2 : Totalité 100% */}
-                                                <label
-                                                    className={`block p-4 sm:p-5 rounded-xl border cursor-pointer transition-all ${
-                                                        validationMode === 'totalite_100'
-                                                            ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
-                                                            : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40'
-                                                    }`}
-                                                >
-                                                    <div className="flex items-start gap-3">
-                                                        <input
-                                                            type="radio"
-                                                            name="mode_validation_fetes"
-                                                            value="totalite_100"
-                                                            checked={validationMode === 'totalite_100'}
-                                                            onChange={() => setValidationMode('totalite_100')}
-                                                            className="mt-1 text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
-                                                        />
-                                                        <div className="space-y-1.5 flex-1">
-                                                            <div className="flex items-baseline justify-between flex-wrap gap-2">
-                                                                <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
-                                                                    Régler la totalité (100 %)
-                                                                </span>
-                                                                <span className="font-serif font-bold text-sm sm:text-base text-black bg-neutral-100 px-2.5 py-0.5 rounded-full">
-                                                                    {festivePricing.totalNet.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
-                                                                </span>
+                                                    {/* Option 2 (En bas) : Acompte 30% (Disponible uniquement jusqu'au 10 décembre inclus) */}
+                                                    {depositAvailable && (
+                                                        <label
+                                                            className={`block p-4 sm:p-5 rounded-xl border cursor-pointer transition-all ${
+                                                                validationMode === 'acompte_30'
+                                                                    ? 'bg-white border-[#D4AF37] ring-2 ring-[#D4AF37]/30 shadow-md'
+                                                                    : 'bg-white/70 border-neutral-200 hover:border-[#D4AF37]/40'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-start gap-3">
+                                                                <input
+                                                                    type="radio"
+                                                                    name="mode_validation_fetes"
+                                                                    value="acompte_30"
+                                                                    checked={validationMode === 'acompte_30'}
+                                                                    onChange={() => setValidationMode('acompte_30')}
+                                                                    className="mt-1 text-[#D4AF37] focus:ring-[#D4AF37] h-4 w-4"
+                                                                />
+                                                                <div className="space-y-1.5 flex-1">
+                                                                    <div className="flex items-baseline justify-between flex-wrap gap-2">
+                                                                        <span className="font-serif font-bold text-neutral-900 text-sm sm:text-base">
+                                                                            Verser un acompte de 30 %
+                                                                        </span>
+                                                                        <span className={`font-serif font-bold text-sm sm:text-base px-2.5 py-0.5 rounded-full ${
+                                                                            validationMode === 'acompte_30'
+                                                                                ? 'text-[#927116] bg-[#D4AF37]/15'
+                                                                                : 'text-neutral-700 bg-neutral-100'
+                                                                        }`}>
+                                                                            {previewDeposit.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
+                                                                        </span>
+                                                                    </div>
+                                                                    <p className="text-xs text-neutral-600 leading-relaxed">
+                                                                        Bloque la remise de -5 % sur votre sélection actuelle. Convives modifiables jusqu&apos;à J-7 (les ajouts post-1er décembre sont au tarif plein). Solde ({previewBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €) à régler au plus tard 7 jours avant le retrait.
+                                                                    </p>
+                                                                </div>
                                                             </div>
-                                                            <p className="text-xs text-neutral-600 leading-relaxed">
-                                                                Montant intégral. Commande ferme et définitive (convives non modifiables).
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </label>
+                                                        </label>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        );
+                                    })()}
 
                                     {/* RÉCAPITULATIF FINANCIER & PROMOTION EARLY BIRD */}
                                     {isMenusFetes ? (
