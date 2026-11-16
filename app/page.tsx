@@ -83,8 +83,9 @@ const PORTES_ENTREE = [
       "Du vin d'honneur au dessert, avec ou sans personnel de salle",
       "Location de vaisselle, verrerie et frigo bar en option",
     ],
-    ctaLabel: "Explorer nos formules buffets →",
+    ctaLabel: "Explorer nos formules buffets",
     ctaHref: "/formules",
+    isFestiveAccent: false,
   },
   {
     tag: "Séminaires • Banquets • Networking",
@@ -95,8 +96,9 @@ const PORTES_ENTREE = [
       "Mise en place clé en main dans vos locaux ou en salle",
       "Facturation professionnelle HTVA claire et devis sous 24h",
     ],
-    ctaLabel: "Découvrir nos services entreprises →",
+    ctaLabel: "Découvrir nos services entreprises",
     ctaHref: "/services",
+    isFestiveAccent: false,
   },
   {
     tag: "Noël & Nouvel An • Plats à emporter",
@@ -107,8 +109,9 @@ const PORTES_ENTREE = [
       "Zakouskis, foie gras maison, gibiers nobles et bûchettes",
       "Retrait fluide à l'atelier de Saint-Georges avec conseils du chef",
     ],
-    ctaLabel: "Commander pour les fêtes →",
+    ctaLabel: "Commander pour les fêtes",
     ctaHref: "/menus-fetes",
+    isFestiveAccent: true,
   },
 ];
 
@@ -323,10 +326,10 @@ export default function Home() {
             {PORTES_ENTREE.map((item) => (
               <article
                 key={item.title}
-                className="py-8 md:py-2 md:px-8 lg:px-10 first:pt-0 last:pb-0 md:first:pl-2 md:last:pr-2 flex flex-col justify-between group"
+                className="py-8 first:pt-0 last:pb-0 md:py-4 md:first:pt-4 md:last:pb-4 md:px-8 lg:px-10 md:first:pl-2 md:last:pr-2 flex flex-col h-full group"
               >
                 <div>
-                  <div className="w-8 h-[1.5px] bg-[#D4AF37] mb-4 group-hover:w-14 transition-all duration-300" />
+                  <div className="w-8 h-[2px] bg-[#C5A059] mb-4 group-hover:w-16 transition-all duration-300" />
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#996515] mb-2">
                     {item.tag}
                   </p>
@@ -337,25 +340,35 @@ export default function Home() {
                     {item.lead}
                   </p>
 
-                  <ul className="space-y-2.5 mb-6">
+                  <ul className="space-y-2.5">
                     {item.bullets.map((bullet, idx) => (
                       <li
                         key={idx}
                         className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-700 leading-snug"
                       >
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] shrink-0 mt-1.5" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059] shrink-0 mt-1.5" />
                         <span>{bullet}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="pt-2">
+                <div className="mt-auto pt-6">
                   <Link
                     href={item.ctaHref}
-                    className="inline-flex items-center text-sm font-bold text-[#111111] hover:text-[#996515] border-b border-[#D4AF37] pb-1 transition-colors"
+                    className={
+                      item.isFestiveAccent
+                        ? "inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium bg-[#FAF3E0] border border-[#C5A059] text-[#1A1A1A] shadow-sm hover:bg-[#C5A059] hover:text-white hover:shadow-md transition-all duration-300"
+                        : "inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium border border-[#C5A059]/60 bg-white/60 text-[#1A1A1A] shadow-sm hover:bg-[#1A1A1A] hover:text-white hover:border-[#1A1A1A] hover:shadow-md transition-all duration-300"
+                    }
                   >
                     <span>{item.ctaLabel}</span>
+                    <span
+                      className="inline-block group-hover:translate-x-1 transition-transform duration-300"
+                      aria-hidden="true"
+                    >
+                      →
+                    </span>
                   </Link>
                 </div>
               </article>
