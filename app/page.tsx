@@ -75,43 +75,46 @@ const homeJsonLd = {
 
 const PORTES_ENTREE = [
   {
-    tag: "Mariages • Anniversaires • Baptêmes",
+    tag: "MARIAGES • ANNIVERSAIRES • BAPTÊMES",
     title: "Particuliers & Célébrations",
-    lead: "Profitez de vos proches autour d'une table généreuse, livrée à domicile ou servie en salle.",
+    image: "/images/Buffet-froid-reception.jpeg",
+    imageAlt: "Buffet froid et chaud pour réceptions privées et mariages — Traiteur Compère",
     bullets: [
-      "Buffets froids, banquets chauds (2 à 5 services) et barbecues",
-      "Du vin d'honneur au dessert, avec ou sans personnel de salle",
-      "Location de vaisselle, verrerie et frigo bar en option",
+      "Buffets froids, banquets chauds & barbecues",
+      "Formules avec ou sans personnel de salle",
+      "Option bar brasseur, verrerie et vaisselle",
     ],
     ctaLabel: "Explorer nos formules buffets",
     ctaHref: "/formules",
-    isFestiveAccent: false,
+    badge: null,
   },
   {
-    tag: "Séminaires • Banquets • Networking",
+    tag: "SÉMINAIRES • BANQUETS • NETWORKING",
     title: "Entreprises & Collectivités",
-    lead: "Une logistique ponctuelle et soignée pour vos réceptions professionnelles et repas d'équipe.",
+    image: "/images/entreprise.jpeg",
+    imageAlt: "Cocktail dînatoire et réception d'entreprise — Traiteur Compère",
     bullets: [
-      "Cocktails dînatoires, walking dinners, pains garnis et salad bars",
-      "Mise en place clé en main dans vos locaux ou en salle",
-      "Facturation professionnelle HTVA claire et devis sous 24h",
+      "Cocktails dînatoires, walking dinners & buffets",
+      "Installation clé en main dans vos locaux ou en salle",
+      "Facturation professionnelle HTVA et devis sous 24h",
     ],
     ctaLabel: "Découvrir nos services entreprises",
     ctaHref: "/services",
-    isFestiveAccent: false,
+    badge: null,
   },
   {
-    tag: "Noël & Nouvel An • Plats à emporter",
+    tag: "NOËL & NOUVEL AN • PLATS À EMPORTER",
     title: "Fêtes & Plats Cuisinés",
-    lead: "Retrouvez le goût du fait maison pour vos tables de réveillon et vos repas de la semaine.",
+    image: "/images/buffet-5.jpg",
+    imageAlt: "Menus de fêtes et plats cuisinés maison à emporter — Traiteur Compère",
     bullets: [
-      "Menus de réveillon 4 services (dès 49 €) et carte festive libre",
-      "Zakouskis, foie gras maison, gibiers nobles et bûchettes",
-      "Retrait fluide à l'atelier de Saint-Georges avec conseils du chef",
+      "Menus de réveillon 4 services (dès 49 €)",
+      "Zakouskis, foie gras maison, gibiers et bûchettes",
+      "Retrait rapide à l'atelier de Saint-Georges",
     ],
     ctaLabel: "Commander pour les fêtes",
     ctaHref: "/menus-fetes",
-    isFestiveAccent: true,
+    badge: "DE SAISON",
   },
 ];
 
@@ -322,56 +325,64 @@ export default function Home() {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-[#E8E2D5]">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {PORTES_ENTREE.map((item) => (
-              <article
+              <Link
                 key={item.title}
-                className="py-8 first:pt-0 last:pb-0 md:py-4 md:first:pt-4 md:last:pb-4 md:px-8 lg:px-10 md:first:pl-2 md:last:pr-2 flex flex-col h-full group"
+                href={item.ctaHref}
+                className="group flex flex-col overflow-hidden rounded-2xl bg-white border border-[#E8E2D5]/80 shadow-sm hover:shadow-xl hover:border-[#C5A059]/50 transition-all duration-300"
               >
-                <div>
-                  <div className="w-8 h-[2px] bg-[#C5A059] mb-4 group-hover:w-16 transition-all duration-300" />
+                {/* En-tête photo */}
+                <div className="relative h-56 w-full overflow-hidden">
+                  <Image
+                    src={item.image}
+                    alt={item.imageAlt}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {item.badge && (
+                    <span className="absolute top-4 right-4 z-10 bg-[#C5A059] text-white text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+
+                {/* Corps de la carte */}
+                <div className="p-7 flex flex-col flex-1">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#996515] mb-2">
                     {item.tag}
                   </p>
-                  <h3 className="text-2xl font-serif text-[#111111] mb-3 group-hover:text-[#996515] transition-colors">
+                  <h3 className="text-2xl font-serif text-[#111111] mb-4 group-hover:text-[#996515] transition-colors">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-neutral-600 font-light leading-relaxed mb-5">
-                    {item.lead}
-                  </p>
 
-                  <ul className="space-y-2.5">
+                  <ul className="space-y-2.5 mb-6">
                     {item.bullets.map((bullet, idx) => (
                       <li
                         key={idx}
-                        className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-700 leading-snug"
+                        className="flex items-start gap-2.5 text-sm text-neutral-700 leading-snug"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-[#C5A059] shrink-0 mt-1.5" />
                         <span>{bullet}</span>
                       </li>
                     ))}
                   </ul>
-                </div>
 
-                <div className="mt-auto pt-6">
-                  <Link
-                    href={item.ctaHref}
-                    className={
-                      item.isFestiveAccent
-                        ? "inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium bg-[#FAF3E0] border border-[#C5A059] text-[#1A1A1A] shadow-sm hover:bg-[#C5A059] hover:text-white hover:shadow-md transition-all duration-300"
-                        : "inline-flex items-center gap-3 rounded-full px-6 py-3 text-sm font-medium border border-[#C5A059]/60 bg-white/60 text-[#1A1A1A] shadow-sm hover:bg-[#1A1A1A] hover:text-white hover:border-[#1A1A1A] hover:shadow-md transition-all duration-300"
-                    }
-                  >
-                    <span>{item.ctaLabel}</span>
+                  {/* Pied de carte & Action */}
+                  <div className="mt-auto pt-5 border-t border-[#F2EFE9] flex items-center justify-between">
+                    <span className="text-sm font-medium text-[#1A1A1A] group-hover:text-[#C5A059] transition-colors">
+                      {item.ctaLabel}
+                    </span>
                     <span
-                      className="inline-block group-hover:translate-x-1 transition-transform duration-300"
+                      className="w-9 h-9 rounded-full bg-[#FAF8F5] border border-[#E8E2D5] flex items-center justify-center text-[#1A1A1A] group-hover:bg-[#C5A059] group-hover:border-[#C5A059] group-hover:text-white transition-all duration-300"
                       aria-hidden="true"
                     >
                       →
                     </span>
-                  </Link>
+                  </div>
                 </div>
-              </article>
+              </Link>
             ))}
           </div>
         </div>
