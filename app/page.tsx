@@ -105,7 +105,7 @@ const PORTES_ENTREE = [
   {
     tag: "NOËL & NOUVEL AN • PLATS À EMPORTER",
     title: "Fêtes & Plats Cuisinés",
-    image: "/images/buffet-5.jpg",
+    image: "/images/Plats-préparés-accueil.jpeg",
     imageAlt: "Menus de fêtes et plats cuisinés maison à emporter — Traiteur Compère",
     bullets: [
       "Menus de réveillon 4 services (dès 49 €)",
