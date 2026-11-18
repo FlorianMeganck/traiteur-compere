@@ -372,6 +372,13 @@ export async function POST(req: Request) {
         const traiteurCartTableHTML = buildCartTableHTML(true);
         const clientCartTableHTML = buildCartTableHTML(false);
 
+        // Date/heure réelle de soumission de la commande (fuseau horaire Belgique)
+        const submittedAtFormatted = new Intl.DateTimeFormat('fr-BE', {
+            dateStyle: 'long',
+            timeStyle: 'short',
+            timeZone: 'Europe/Brussels'
+        }).format(new Date());
+
         // 3. Préparation et envoi des emails via Resend (Sécurisé et non-bloquant)
         if (resend) {
             try {
@@ -449,7 +456,7 @@ export async function POST(req: Request) {
                                                             </tr>` : ''}
                                                             <tr>
                                                                 <td style="padding: 2px 0; width: 35%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Date de saisie :</td>
-                                                                <td style="padding: 2px 0; color: #555555;">${dateSoumission || new Date().toLocaleDateString('fr-BE')}</td>
+                                                                <td style="padding: 2px 0; color: #555555;">${submittedAtFormatted}</td>
                                                             </tr>
                                                             ${isFestiveOrder ? `
                                                             <tr>
