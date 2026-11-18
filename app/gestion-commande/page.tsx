@@ -415,11 +415,17 @@ function GestionCommandeContent() {
                                     <span className="px-3.5 py-1.5 rounded-full bg-black text-[#D4AF37] border border-[#D4AF37]/40 text-xs font-mono font-bold uppercase tracking-wider">
                                         N° {order.id}
                                     </span>
-                                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${order.status === 'solde_regle'
+                                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold ${(order.status === 'solde_regle' || order.status === 'fully_paid')
                                             ? 'bg-emerald-100 text-emerald-800'
                                             : 'bg-amber-100 text-amber-900 border border-amber-200'
                                         }`}>
-                                        {order.status === 'solde_regle' ? 'Solde réglé' : 'Acompte enregistré (En attente de solde)'}
+                                        {(order.status === 'solde_regle' || order.status === 'fully_paid')
+                                            ? 'Commande réglée intégralement'
+                                            : (order.status === 'deposit_paid' || order.status === 'acompte_valide')
+                                                ? 'Acompte validé (En attente de solde)'
+                                                : (order.status === 'pending_payment' || order.status === 'en_attente')
+                                                    ? 'En attente de réception du règlement'
+                                                    : 'Acompte enregistré (En attente de solde)'}
                                     </span>
                                 </div>
                             </div>
@@ -691,7 +697,7 @@ function GestionCommandeContent() {
                                             </div>
                                         </div>
 
-                                        {order.status === 'solde_regle' ? (
+                                        {(order.status === 'solde_regle' || order.status === 'fully_paid') ? (
                                             <div className="bg-emerald-50 border border-emerald-300 p-4 rounded-2xl text-xs sm:text-sm text-emerald-900 font-semibold text-center">
                                                 ✓ Le solde de cette commande a déjà été intégralement réglé. Merci pour votre confiance !
                                             </div>

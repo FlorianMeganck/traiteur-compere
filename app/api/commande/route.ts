@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import crypto from 'crypto';
 import { MENU_DATA } from '../../data/plats-prepares';
 import {
     MENUS_FETES_DATA,
@@ -10,6 +11,7 @@ import {
     FestiveValidationMode
 } from '../../data/menus-fetes';
 import { insertFestiveOrder } from '../../lib/db';
+import { buildEpcQrImageUrl } from '../../lib/festive-emails';
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = (resendApiKey && resendApiKey.startsWith('re_')) ? new Resend(resendApiKey) : null;
@@ -190,6 +192,19 @@ export async function POST(req: Request) {
         const amountToPayNow = isFestiveOrder ? Number(festivePricing.amountToPayNow || 0) : Number(finalTotalPrice || 0);
         const totalNetPrice = isFestiveOrder ? Number(festivePricing.totalNet || 0) : Number(finalTotalPrice || 0);
 
+        // Jeton unique (UUID) pour validation en 1 clic par le traiteur (statut initial : pending_payment)
+        const validationToken = isFestiveOrder ? crypto.randomUUID() : null;
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ||
+            (process.env.VERCEL_PROJECT_PRODUCTION_URL
+                ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+                : 'https://www.traiteur-compere.be');
+        const confirmPaymentUrl = validationToken
+            ? `${baseUrl.replace(/\/$/, '')}/api/orders/confirm-payment?token=${encodeURIComponent(validationToken)}`
+            : '';
+
+        // QR Code EPC SEPA pour le montant choisi (30% ou 100%)
+        const epcQrUrl = buildEpcQrImageUrl(amountToPayNow, COMMUNICATION);
+
         // 2.5 Persistance en Base de Données (festive_orders)
         if (isFestiveOrder) {
             try {
@@ -202,7 +217,8 @@ export async function POST(req: Request) {
                     repas_date: String(dateEvenement || '2026-12-24'),
                     retrait_slot: String(creneauRetrait || ''),
                     payment_mode: isAcompteMode ? 'acompte_30' : 'total_100',
-                    status: 'en_attente',
+                    status: 'pending_payment',
+                    validation_token: validationToken,
                     total_initial: totalNetPrice,
                     early_bird_discount: festivePricing.discountAmount || 0,
                     amount_paid_initial: amountToPayNow,
@@ -281,7 +297,7 @@ export async function POST(req: Request) {
             </div>
         ` : '';
 
-        const tableFooterHTML = isFestiveOrder ? `
+        const buildTableFooterHTML = (includeRemainingBalanceRow: boolean) => isFestiveOrder ? `
             <tfoot>
                 ${festivePricing.isEarlyBirdEligible && festivePricing.discountAmount > 0 ? `
                     <tr>
@@ -310,10 +326,11 @@ export async function POST(req: Request) {
                             ${(festivePricing.depositAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €
                         </td>
                     </tr>
+                    ${includeRemainingBalanceRow ? `
                     <tr>
                         <td colspan="2" style="padding: 6px 14px 10px 14px; text-align: right; font-size: 11px; color: #777777;">Solde restant (au plus tard 7 jours avant le retrait) :</td>
                         <td style="padding: 6px 14px 10px 14px; text-align: right; font-size: 11px; color: #777777; white-space: nowrap;">${(festivePricing.remainingBalance || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
-                    </tr>
+                    </tr>` : ''}
                 ` : `
                     <tr style="background-color: #FAF6EB;">
                         <td colspan="2" style="padding: 10px 14px; text-align: right; font-size: 13px; font-weight: bold; color: #8A6D1F; border-top: 1px solid #E8D8A6;">
@@ -334,7 +351,7 @@ export async function POST(req: Request) {
             </tfoot>
         `;
 
-        const cartTableHTML = `
+        const buildCartTableHTML = (includeRemainingBalanceRow: boolean) => `
             <div style="border: 1px solid #EFECE6; border-radius: 8px; overflow: hidden; margin: 12px 0 24px 0; background-color: #FFFFFF;">
                 <table style="width: 100%; border-collapse: collapse; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                     <thead>
@@ -347,10 +364,13 @@ export async function POST(req: Request) {
                     <tbody>
                         ${htmlCartDetails}
                     </tbody>
-                    ${tableFooterHTML}
+                    ${buildTableFooterHTML(includeRemainingBalanceRow)}
                 </table>
             </div>
         `;
+
+        const traiteurCartTableHTML = buildCartTableHTML(true);
+        const clientCartTableHTML = buildCartTableHTML(false);
 
         // 3. Préparation et envoi des emails via Resend (Sécurisé et non-bloquant)
         if (resend) {
@@ -447,7 +467,7 @@ export async function POST(req: Request) {
                                                     <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 8px;">
                                                         DÉTAIL DU PANIER
                                                     </div>
-                                                    ${cartTableHTML}
+                                                    ${traiteurCartTableHTML}
 
                                                     <!-- PRODUCTION CUISINE -->
                                                     ${kitchenSummaryTableHTML}
@@ -458,6 +478,29 @@ export async function POST(req: Request) {
                                                             REMARQUES DU CLIENT / ALLERGIES
                                                         </div>
                                                         <div style="font-size: 13px; color: #1A1A1A; line-height: 1.5; white-space: pre-line;">${details_projet}</div>
+                                                    </div>` : ''}
+
+                                                    ${isFestiveOrder && confirmPaymentUrl ? `
+                                                    <!-- BOUTON DE VALIDATION PAIEMENT EN 1 CLIC (TRAITEUR) -->
+                                                    <div style="margin-top: 28px; background-color: #F2F8F3; border: 2px solid #246131; border-radius: 10px; padding: 22px 20px; text-align: center;">
+                                                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #246131; margin-bottom: 8px;">
+                                                            VALIDATION PAIEMENT EN 1 CLIC • STATUT : EN ATTENTE
+                                                        </div>
+                                                        <p style="margin: 0 0 12px 0; font-size: 13px; color: #1A1A1A; line-height: 1.5;">
+                                                            Dès que le virement de <strong>${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> apparaît sur votre compte bancaire, cliquez ci-dessous pour valider la commande et envoyer automatiquement l'e-mail de confirmation définitive au client :
+                                                        </p>
+                                                        <div style="margin: 0 0 16px 0; font-family: monospace; font-size: 12px; color: #3D5242; background-color: #FFFFFF; border: 1px solid #CBE2CB; border-radius: 6px; padding: 8px 10px; display: inline-block;">
+                                                            Com. attendue : <strong>${COMMUNICATION}</strong>
+                                                        </div>
+                                                        <div>
+                                                            <a href="${confirmPaymentUrl}"
+                                                               style="display: inline-block; background-color: #246131; color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 700; padding: 14px 26px; border-radius: 9999px; text-decoration: none; box-shadow: 0 3px 10px rgba(36,97,49,0.28);">
+                                                                ✓ Valider la réception du paiement (${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €)
+                                                            </a>
+                                                        </div>
+                                                        <div style="margin-top: 12px; font-size: 11px; color: #666666; word-break: break-all;">
+                                                            Lien direct : <a href="${confirmPaymentUrl}" style="color: #246131;">${confirmPaymentUrl}</a>
+                                                        </div>
                                                     </div>` : ''}
                                                 </td>
                                             </tr>
@@ -481,19 +524,23 @@ export async function POST(req: Request) {
                     console.error("Erreur Resend email traiteur :", errTraiteur);
                 }
 
-                // Email au Client (Maison Compère — Raffiné et Gastronomique)
+                // E-mail n°1 au Client (Envoyé immédiatement à la soumission — En attente de règlement)
+                const clientSubject = isFestiveOrder
+                    ? 'Votre réservation Fêtes est enregistrée (En attente de règlement)'
+                    : `Confirmation de votre réservation ${formattedOrderNumber} - Maison Compère`;
+
                 const { error: errClient } = await resend.emails.send({
                     from: fromAddress,
                     to: Mail,
                     replyTo: 'contact@traiteur-compere.be',
-                    subject: `Confirmation de votre réservation ${formattedOrderNumber} - Maison Compère`,
+                    subject: clientSubject,
                     html: `
                         <!DOCTYPE html>
                         <html lang="fr">
                         <head>
                             <meta charset="utf-8">
                             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                            <title>Confirmation de commande - Maison Compère</title>
+                            <title>${clientSubject}</title>
                         </head>
                         <body style="margin: 0; padding: 0; background-color: #F7F5F0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1A1A1A; -webkit-font-smoothing: antialiased;">
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F7F5F0; padding: 30px 12px;">
@@ -513,8 +560,8 @@ export async function POST(req: Request) {
                                                     <div style="width: 48px; height: 1px; background-color: #D4AF37; margin: 16px auto;"></div>
                                                     
                                                     <!-- BADGE STATUT -->
-                                                    <div style="display: inline-block; background-color: #F7F5F0; border: 1px solid #E8E2D5; border-radius: 9999px; padding: 6px 18px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #1A1A1A;">
-                                                        RÉSERVATION ENREGISTRÉE • N° ${formattedOrderNumber}
+                                                    <div style="display: inline-block; background-color: #FAF6EB; border: 1px solid #E8D8A6; border-radius: 9999px; padding: 6px 18px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #8A6D1F;">
+                                                        ${isFestiveOrder ? `EN ATTENTE DE RÈGLEMENT • N° ${formattedOrderNumber}` : `RÉSERVATION ENREGISTRÉE • N° ${formattedOrderNumber}`}
                                                     </div>
                                                 </td>
                                             </tr>
@@ -529,39 +576,22 @@ export async function POST(req: Request) {
                                                         Nous vous remercions chaleureusement pour votre commande. Votre réservation pour vos <strong>${orderTitle}</strong> a bien été enregistrée sous la référence <strong>${formattedOrderNumber}</strong>.
                                                     </p>
 
-                                                    <!-- ENCART ACOMPTE (ACTION REQUISE) -->
+                                                    <!-- ENCART ACTION REQUISE (VIREMENT SOUS 48H) -->
                                                     <div style="background-color: #FAF6EB; border: 1px solid #E8D8A6; border-radius: 8px; padding: 20px; margin: 0 0 28px 0;">
                                                         <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 6px;">
                                                             VALIDATION SOUS RÉSERVE DE VIREMENT SOUS 48H
                                                         </div>
                                                         <div style="font-size: 15px; font-weight: 700; color: #1A1A1A; margin-bottom: 8px;">
                                                             ${isFestiveOrder && festivePricing.validationMode === 'acompte_30'
-                                                                ? `Acompte de 30 % : <span style="color: #B89327; font-size: 19px;">${(festivePricing.depositAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>`
-                                                                : `Règlement total : <span style="color: #B89327; font-size: 19px;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>`}
+                                                                ? `Acompte de 30 % à verser sous 48h : <span style="color: #B89327; font-size: 19px;">${(festivePricing.depositAmount || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>`
+                                                                : `Règlement total à verser sous 48h : <span style="color: #B89327; font-size: 19px;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</span>`}
                                                         </div>
                                                         <p style="margin: 0; font-size: 13px; color: #555555; line-height: 1.55;">
-                                                            ${isFestiveOrder && festivePricing.validationMode === 'acompte_30'
-                                                                ? `Le solde de <strong>${(festivePricing.remainingBalance || 0).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> sera à régler au plus tard 7 jours avant le retrait. Vos convives restent ajustables jusqu'à 7 jours avant le retrait.`
-                                                                : `Merci de bien vouloir effectuer votre virement intégral sous 48h afin de valider définitivement votre réservation.`}
+                                                            ${isFestiveOrder
+                                                                ? `Merci de bien vouloir effectuer votre virement sous <strong>48h</strong> à l'aide du QR code ou des coordonnées bancaires ci-dessous. Dès réception de votre paiement par notre atelier, vous recevrez un e-mail de confirmation définitive.`
+                                                                : `Merci de bien vouloir effectuer votre virement sous 48h afin de valider définitivement votre réservation.`}
                                                         </p>
                                                     </div>
-
-                                                    <!-- ENCART ACCÈS ESPACE GESTION & SOLDE -->
-                                                    ${isFestiveOrder ? `
-                                                    <div style="background-color: #FAF6EB; border: 1px solid #D4AF37; border-radius: 10px; padding: 20px; margin: 0 0 28px 0; text-align: center;">
-                                                        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A6D1F; margin-bottom: 6px;">
-                                                            ESPACE PERSONNEL DE SUIVI
-                                                        </div>
-                                                        <div style="font-size: 13px; font-weight: 600; color: #1A1A1A; margin-bottom: 14px; line-height: 1.45;">
-                                                            ${festivePricing.validationMode === 'acompte_30'
-                                                                ? 'Ajustez vos convives jusqu\'à 7 jours avant le retrait et réglez votre solde en toute sérénité.'
-                                                                : 'Consultez les détails et le suivi de votre réservation à tout moment.'}
-                                                        </div>
-                                                        <a href="https://www.traiteur-compere.be/gestion-commande?order=${encodeURIComponent(formattedOrderNumber)}&email=${encodeURIComponent(Mail)}" 
-                                                           style="display: inline-block; background-color: #D4AF37; color: #000000; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 12px 24px; border-radius: 9999px; text-decoration: none; box-shadow: 0 2px 6px rgba(212,175,55,0.3);">
-                                                            Gérer ma commande &amp; Solder mon acompte →
-                                                        </a>
-                                                    </div>` : ''}
 
                                                     <!-- RENDEZ-VOUS DE RETRAIT & MODALITES -->
                                                     <div style="background-color: #FBFBF9; border: 1px solid #EFECE6; border-radius: 8px; padding: 20px; margin: 0 0 28px 0;">
@@ -598,13 +628,25 @@ export async function POST(req: Request) {
                                                     <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 8px;">
                                                         RÉCAPITULATIF DE VOTRE TABLE
                                                     </div>
-                                                    ${cartTableHTML}
+                                                    ${clientCartTableHTML}
 
-                                                    <!-- ENCART COORDONNEES BANCAIRES -->
+                                                    <!-- ENCART COORDONNEES BANCAIRES & QR CODE EPC -->
                                                     <div style="background-color: #FBFBF9; border: 1px solid #EFECE6; border-radius: 8px; padding: 22px; margin: 28px 0 20px 0;">
                                                         <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 12px;">
-                                                            COORDONNÉES BANCAIRES POUR VIREMENT
+                                                            QR CODE &amp; COORDONNÉES BANCAIRES POUR VIREMENT
                                                         </div>
+
+                                                        <!-- QR CODE EPC SCANNABLE -->
+                                                        <div style="text-align: center; background-color: #FFFFFF; border: 1px solid #E8E2D5; border-radius: 8px; padding: 18px; margin-bottom: 18px;">
+                                                            <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #1A1A1A; margin-bottom: 10px;">
+                                                                Scanner avec votre application bancaire
+                                                            </div>
+                                                            <img src="${epcQrUrl}" width="180" height="180" alt="QR Code SEPA EPC - ${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €" style="display: block; margin: 0 auto; border-radius: 6px;" />
+                                                            <div style="font-size: 12px; color: #777777; margin-top: 8px;">
+                                                                Montant pré-rempli : <strong style="color: #B89327;">${amountToPayNow.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong> (virement sous 48h)
+                                                            </div>
+                                                        </div>
+
                                                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 13px; line-height: 1.6;">
                                                             <tr>
                                                                 <td style="padding: 3px 0; width: 38%; color: #777777; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; font-weight: 600;">Bénéficiaire :</td>

@@ -132,7 +132,8 @@ async function handleCronExecution(req: Request) {
             // Détermination du template selon le mode de paiement et le solde restant
             const hasPendingBalance = order.payment_mode === 'acompte_30' &&
                 Number(order.balance_remaining || 0) > 0 &&
-                order.status !== 'solde_regle';
+                order.status !== 'solde_regle' &&
+                order.status !== 'fully_paid';
 
             const emailData = hasPendingBalance
                 ? generateReminderEmailAcompte(order, baseUrl)

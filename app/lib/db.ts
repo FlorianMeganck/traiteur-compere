@@ -32,6 +32,8 @@ export interface FestiveOrderRecord {
     created_at?: string;
     updated_at?: string;
     reminder_sent_at?: string | null;
+    validation_token?: string | null;
+    payment_validated_at?: string | null;
     prenom: string;
     nom: string;
     email: string;
@@ -39,7 +41,7 @@ export interface FestiveOrderRecord {
     repas_date: string;
     retrait_slot: string;
     payment_mode: 'acompte_30' | 'total_100';
-    status: 'en_attente' | 'acompte_valide' | 'solde_regle' | string;
+    status: 'pending_payment' | 'deposit_paid' | 'fully_paid' | 'en_attente' | 'acompte_valide' | 'solde_regle' | string;
     total_initial: number;
     early_bird_discount: number;
     amount_paid_initial: number;
@@ -124,6 +126,8 @@ export async function ensureFestiveOrdersTable(): Promise<boolean> {
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
                 reminder_sent_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+                validation_token VARCHAR(100) UNIQUE DEFAULT NULL,
+                payment_validated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
                 prenom VARCHAR(100) NOT NULL,
                 nom VARCHAR(100) NOT NULL,
                 email VARCHAR(255) NOT NULL,
@@ -131,7 +135,7 @@ export async function ensureFestiveOrdersTable(): Promise<boolean> {
                 repas_date VARCHAR(50) NOT NULL,
                 retrait_slot VARCHAR(100) NOT NULL,
                 payment_mode VARCHAR(20) NOT NULL,
-                status VARCHAR(30) DEFAULT 'en_attente',
+                status VARCHAR(30) DEFAULT 'pending_payment',
                 total_initial NUMERIC(10, 2) NOT NULL,
                 early_bird_discount NUMERIC(10, 2) DEFAULT 0,
                 amount_paid_initial NUMERIC(10, 2) NOT NULL,
@@ -142,10 +146,23 @@ export async function ensureFestiveOrdersTable(): Promise<boolean> {
             );
         `;
 
-        // Évolution de schéma : ajout idempotent de la colonne reminder_sent_at si table existante
+        // Évolutions de schéma idempotentes si table déjà existante
         await sql`
             ALTER TABLE festive_orders 
             ADD COLUMN IF NOT EXISTS reminder_sent_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+        `;
+        await sql`
+            ALTER TABLE festive_orders 
+            ADD COLUMN IF NOT EXISTS validation_token VARCHAR(100) DEFAULT NULL;
+        `;
+        await sql`
+            ALTER TABLE festive_orders 
+            ADD COLUMN IF NOT EXISTS payment_validated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+        `;
+        await sql`
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_festive_orders_validation_token
+            ON festive_orders (validation_token)
+            WHERE validation_token IS NOT NULL;
         `;
 
         isTableInitialized = true;
@@ -154,6 +171,32 @@ export async function ensureFestiveOrdersTable(): Promise<boolean> {
         console.error("Erreur ensureFestiveOrdersTable:", err);
         return false;
     }
+}
+
+function mapRowToOrder(row: Record<string, unknown>): FestiveOrderRecord {
+    return {
+        id: String(row.id),
+        created_at: row.created_at ? String(row.created_at) : undefined,
+        updated_at: row.updated_at ? String(row.updated_at) : undefined,
+        reminder_sent_at: row.reminder_sent_at ? new Date(String(row.reminder_sent_at)).toISOString() : null,
+        validation_token: row.validation_token ? String(row.validation_token) : null,
+        payment_validated_at: row.payment_validated_at ? new Date(String(row.payment_validated_at)).toISOString() : null,
+        prenom: String(row.prenom || ''),
+        nom: String(row.nom || ''),
+        email: String(row.email || ''),
+        telephone: String(row.telephone || ''),
+        repas_date: String(row.repas_date || ''),
+        retrait_slot: String(row.retrait_slot || ''),
+        payment_mode: row.payment_mode === 'acompte_30' ? 'acompte_30' : 'total_100',
+        status: String(row.status || 'pending_payment'),
+        total_initial: Number(row.total_initial || 0),
+        early_bird_discount: Number(row.early_bird_discount || 0),
+        amount_paid_initial: Number(row.amount_paid_initial || 0),
+        balance_remaining: Number(row.balance_remaining || 0),
+        items: typeof row.items === 'string' ? JSON.parse(row.items) : ((row.items as FestiveOrderItem[]) || []),
+        additional_items: typeof row.additional_items === 'string' ? JSON.parse(row.additional_items) : ((row.additional_items as FestiveOrderItem[]) || []),
+        notes: row.notes ? String(row.notes) : ''
+    };
 }
 
 export async function insertFestiveOrder(order: FestiveOrderRecord): Promise<boolean> {
@@ -170,7 +213,8 @@ export async function insertFestiveOrder(order: FestiveOrderRecord): Promise<boo
             INSERT INTO festive_orders (
                 id, prenom, nom, email, telephone, repas_date, retrait_slot,
                 payment_mode, status, total_initial, early_bird_discount,
-                amount_paid_initial, balance_remaining, items, additional_items, notes, reminder_sent_at
+                amount_paid_initial, balance_remaining, items, additional_items, notes,
+                reminder_sent_at, validation_token, payment_validated_at
             ) VALUES (
                 ${order.id},
                 ${order.prenom},
@@ -180,7 +224,7 @@ export async function insertFestiveOrder(order: FestiveOrderRecord): Promise<boo
                 ${order.repas_date},
                 ${order.retrait_slot},
                 ${order.payment_mode},
-                ${order.status || 'en_attente'},
+                ${order.status || 'pending_payment'},
                 ${order.total_initial},
                 ${order.early_bird_discount || 0},
                 ${order.amount_paid_initial},
@@ -188,7 +232,9 @@ export async function insertFestiveOrder(order: FestiveOrderRecord): Promise<boo
                 ${JSON.stringify(order.items)},
                 ${JSON.stringify(order.additional_items || [])},
                 ${order.notes || ''},
-                ${order.reminder_sent_at || null}
+                ${order.reminder_sent_at || null},
+                ${order.validation_token || null},
+                ${order.payment_validated_at || null}
             )
             ON CONFLICT (id) DO UPDATE SET
                 updated_at = CURRENT_TIMESTAMP,
@@ -197,7 +243,8 @@ export async function insertFestiveOrder(order: FestiveOrderRecord): Promise<boo
                 balance_remaining = EXCLUDED.balance_remaining,
                 items = EXCLUDED.items,
                 additional_items = EXCLUDED.additional_items,
-                notes = EXCLUDED.notes;
+                notes = EXCLUDED.notes,
+                validation_token = COALESCE(festive_orders.validation_token, EXCLUDED.validation_token);
         `;
         return true;
     } catch (err) {
@@ -228,27 +275,7 @@ export async function getFestiveOrder(orderId: string, email?: string): Promise<
                     return null;
                 }
 
-                return {
-                    id: String(row.id),
-                    created_at: row.created_at ? String(row.created_at) : undefined,
-                    updated_at: row.updated_at ? String(row.updated_at) : undefined,
-                    reminder_sent_at: row.reminder_sent_at ? new Date(String(row.reminder_sent_at)).toISOString() : null,
-                    prenom: String(row.prenom || ''),
-                    nom: String(row.nom || ''),
-                    email: String(row.email || ''),
-                    telephone: String(row.telephone || ''),
-                    repas_date: String(row.repas_date || ''),
-                    retrait_slot: String(row.retrait_slot || ''),
-                    payment_mode: row.payment_mode === 'acompte_30' ? 'acompte_30' : 'total_100',
-                    status: String(row.status || 'en_attente'),
-                    total_initial: Number(row.total_initial || 0),
-                    early_bird_discount: Number(row.early_bird_discount || 0),
-                    amount_paid_initial: Number(row.amount_paid_initial || 0),
-                    balance_remaining: Number(row.balance_remaining || 0),
-                    items: typeof row.items === 'string' ? JSON.parse(row.items) : ((row.items as FestiveOrderItem[]) || []),
-                    additional_items: typeof row.additional_items === 'string' ? JSON.parse(row.additional_items) : ((row.additional_items as FestiveOrderItem[]) || []),
-                    notes: row.notes ? String(row.notes) : ''
-                };
+                return mapRowToOrder(row);
             }
         } catch (err) {
             console.error("Erreur getFestiveOrder SQL:", err);
@@ -256,6 +283,95 @@ export async function getFestiveOrder(orderId: string, email?: string): Promise<
     }
 
     return getFallbackOrder(cleanId, cleanEmail);
+}
+
+export async function getFestiveOrderByToken(token: string): Promise<FestiveOrderRecord | null> {
+    const cleanToken = (token || '').trim();
+    if (!cleanToken) return null;
+
+    const sql = getDb();
+    if (sql) {
+        try {
+            await ensureFestiveOrdersTable();
+            const rows = await sql`
+                SELECT * FROM festive_orders
+                WHERE validation_token = ${cleanToken}
+                LIMIT 1;
+            `;
+            if (rows && rows.length > 0) {
+                return mapRowToOrder(rows[0] as Record<string, unknown>);
+            }
+        } catch (err) {
+            console.error("Erreur getFestiveOrderByToken SQL:", err);
+        }
+    }
+
+    loadDevFallbackOrders();
+    for (const order of memoryFallbackOrders.values()) {
+        if (order.validation_token && order.validation_token === cleanToken) {
+            return order;
+        }
+    }
+    return null;
+}
+
+export async function confirmFestiveOrderPaymentByToken(token: string): Promise<{
+    result: 'not_found' | 'already_validated' | 'validated';
+    order?: FestiveOrderRecord;
+}> {
+    const cleanToken = (token || '').trim();
+    if (!cleanToken) return { result: 'not_found' };
+
+    const existing = await getFestiveOrderByToken(cleanToken);
+    if (!existing) {
+        return { result: 'not_found' };
+    }
+
+    const alreadyValidatedStatuses = ['deposit_paid', 'fully_paid', 'solde_regle'];
+    if (alreadyValidatedStatuses.includes(existing.status) || Boolean(existing.payment_validated_at)) {
+        return { result: 'already_validated', order: existing };
+    }
+
+    const nextStatus: 'deposit_paid' | 'fully_paid' =
+        existing.payment_mode === 'acompte_30' ? 'deposit_paid' : 'fully_paid';
+    const nowIso = new Date().toISOString();
+
+    const sql = getDb();
+    if (sql) {
+        try {
+            await ensureFestiveOrdersTable();
+            // Mise à jour atomique conditionnelle pour garantir l'idempotence stricte même en cas de double clic simultané
+            const updatedRows = await sql`
+                UPDATE festive_orders
+                SET status = ${nextStatus},
+                    payment_validated_at = CURRENT_TIMESTAMP,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE validation_token = ${cleanToken}
+                  AND status NOT IN ('deposit_paid', 'fully_paid', 'solde_regle')
+                  AND payment_validated_at IS NULL
+                RETURNING *;
+            `;
+
+            if (!updatedRows || updatedRows.length === 0) {
+                const refreshed = await getFestiveOrderByToken(cleanToken);
+                return { result: 'already_validated', order: refreshed || existing };
+            }
+
+            const updatedOrder = mapRowToOrder(updatedRows[0] as Record<string, unknown>);
+            saveFallbackOrder(updatedOrder);
+            return { result: 'validated', order: updatedOrder };
+        } catch (err) {
+            console.error("Erreur confirmFestiveOrderPaymentByToken SQL:", err);
+            throw err;
+        }
+    }
+
+    // Fallback mémoire / dev
+    existing.status = nextStatus;
+    existing.payment_validated_at = nowIso;
+    existing.updated_at = nowIso;
+    saveFallbackOrder(existing);
+    return { result: 'validated', order: existing };
 }
 
 export async function getFestiveOrdersPendingReminder(): Promise<FestiveOrderRecord[]> {
@@ -268,30 +384,7 @@ export async function getFestiveOrdersPendingReminder(): Promise<FestiveOrderRec
                 WHERE reminder_sent_at IS NULL;
             `;
 
-            return (rows || []).map((r) => {
-                const row = r as Record<string, unknown>;
-                return {
-                    id: String(row.id),
-                    created_at: row.created_at ? String(row.created_at) : undefined,
-                    updated_at: row.updated_at ? String(row.updated_at) : undefined,
-                    reminder_sent_at: row.reminder_sent_at ? new Date(String(row.reminder_sent_at)).toISOString() : null,
-                    prenom: String(row.prenom || ''),
-                    nom: String(row.nom || ''),
-                    email: String(row.email || ''),
-                    telephone: String(row.telephone || ''),
-                    repas_date: String(row.repas_date || ''),
-                    retrait_slot: String(row.retrait_slot || ''),
-                    payment_mode: row.payment_mode === 'acompte_30' ? 'acompte_30' : 'total_100',
-                    status: String(row.status || 'en_attente'),
-                    total_initial: Number(row.total_initial || 0),
-                    early_bird_discount: Number(row.early_bird_discount || 0),
-                    amount_paid_initial: Number(row.amount_paid_initial || 0),
-                    balance_remaining: Number(row.balance_remaining || 0),
-                    items: typeof row.items === 'string' ? JSON.parse(row.items) : ((row.items as FestiveOrderItem[]) || []),
-                    additional_items: typeof row.additional_items === 'string' ? JSON.parse(row.additional_items) : ((row.additional_items as FestiveOrderItem[]) || []),
-                    notes: row.notes ? String(row.notes) : ''
-                };
-            });
+            return (rows || []).map((r) => mapRowToOrder(r as Record<string, unknown>));
         } catch (err) {
             console.error("Erreur getFestiveOrdersPendingReminder SQL:", err);
         }
