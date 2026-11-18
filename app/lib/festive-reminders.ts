@@ -167,11 +167,19 @@ export function renderOrderItemsTable(items: FestiveOrderItem[], additionalItems
  * 1. Template Email Rappel Solde (acompte_30 avec solde restant)
  */
 export function generateReminderEmailAcompte(order: FestiveOrderRecord, baseUrl: string = 'https://www.traiteur-compere.be'): { subject: string; html: string } {
-    const subject = `Votre réveillon approche : pensez à solder votre commande Traiteur Compère (N° ${order.id})`;
+    const subject = `Votre réveillon approche : il vous reste 3 jours pour solder votre commande Traiteur Compère (N° ${order.id})`;
     const balanceFormatted = formatPrice(order.balance_remaining);
     const prenomClean = cleanCapitalize(order.prenom);
     const orderManagementUrl = `${baseUrl.replace(/\/$/, '')}/gestion-commande?order=${encodeURIComponent(order.id)}&email=${encodeURIComponent(order.email)}`;
     const communicationSolde = `${order.id} - SOLDE FINAL`;
+
+    const mealDate = parseRepasDate(order.repas_date);
+    let j7DateFormatted = '';
+    if (mealDate) {
+        const j7Date = new Date(mealDate);
+        j7Date.setDate(j7Date.getDate() - 7);
+        j7DateFormatted = j7Date.toLocaleDateString('fr-BE', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
 
     const html = `
 <!DOCTYPE html>
@@ -218,14 +226,15 @@ export function generateReminderEmailAcompte(order: FestiveOrderRecord, baseUrl:
                             <!-- ENCART SOLDE RESTANT & BOUTON ACTION DIRECT -->
                             <div style="background-color: #FAF6EB; border: 1px solid #E8D8A6; border-radius: 10px; padding: 24px; margin: 0 0 26px 0; text-align: center;">
                                 <div style="font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #8A6D1F; margin-bottom: 6px;">
-                                    SOLDE RESTANT EN ATTENTE DE RÈGLEMENT
+                                    SOLDE RESTANT (70 %) — ÉCHÉANCE SOUS 3 JOURS (J-7)
                                 </div>
                                 <div style="font-size: 32px; font-weight: 800; color: #B89327; margin: 4px 0 12px 0;">
                                     ${balanceFormatted} €
                                 </div>
                                 <p style="margin: 0 0 20px 0; font-size: 13px; color: #555555; line-height: 1.55; max-width: 480px; margin-left: auto; margin-right: auto;">
-                                    Pour assurer une organisation irréprochable et un retrait fluide le jour J, pensez à régler votre solde dès aujourd'hui. 
-                                    <strong>Le nombre de convives et vos mets restent ajustables jusqu'à 7 jours avant le retrait.</strong>
+                                    Vous disposez de <strong>3 jours</strong> pour régler le solde restant des 70 % — soit <strong>au plus tard 7 jours avant la date du repas (J-7${j7DateFormatted ? `, le ${j7DateFormatted}` : ''})</strong>.
+                                    <br/><br/>
+                                    <strong>C'est également jusqu'à J-7 que vous pouvez encore ajuster le nombre de convives ou ajouter des mets sur votre espace de gestion.</strong>
                                 </p>
 
                                 <!-- BOUTON DORÉ DIRECT -->
@@ -295,6 +304,10 @@ export function generateReminderEmailAcompte(order: FestiveOrderRecord, baseUrl:
                                     <div style="font-family: monospace; font-size: 15px; font-weight: 700; color: #1A1A1A; letter-spacing: 0.5px;">
                                         ${communicationSolde}
                                     </div>
+                                </div>
+
+                                <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid #E8E2D5; font-size: 13px; color: #1A1A1A;">
+                                    <strong>Solde (70 %) à régler sous 3 jours (au plus tard à J-7${j7DateFormatted ? `, le ${j7DateFormatted}` : ''}) :</strong> <span style="font-size: 16px; font-weight: 700; color: #B89327;">${balanceFormatted} €</span>
                                 </div>
                             </div>
 
