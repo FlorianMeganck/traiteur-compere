@@ -1,4 +1,5 @@
 import { neon, NeonQueryFunction } from '@neondatabase/serverless';
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
@@ -34,6 +35,8 @@ export interface FestiveOrderRecord {
     reminder_sent_at?: string | null;
     validation_token?: string | null;
     payment_validated_at?: string | null;
+    balance_validation_token?: string | null;
+    balance_validated_at?: string | null;
     prenom: string;
     nom: string;
     email: string;
@@ -128,6 +131,8 @@ export async function ensureFestiveOrdersTable(): Promise<boolean> {
                 reminder_sent_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
                 validation_token VARCHAR(100) UNIQUE DEFAULT NULL,
                 payment_validated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+                balance_validation_token VARCHAR(100) UNIQUE DEFAULT NULL,
+                balance_validated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL,
                 prenom VARCHAR(100) NOT NULL,
                 nom VARCHAR(100) NOT NULL,
                 email VARCHAR(255) NOT NULL,
@@ -164,6 +169,19 @@ export async function ensureFestiveOrdersTable(): Promise<boolean> {
             ON festive_orders (validation_token)
             WHERE validation_token IS NOT NULL;
         `;
+        await sql`
+            ALTER TABLE festive_orders 
+            ADD COLUMN IF NOT EXISTS balance_validation_token VARCHAR(100) DEFAULT NULL;
+        `;
+        await sql`
+            ALTER TABLE festive_orders 
+            ADD COLUMN IF NOT EXISTS balance_validated_at TIMESTAMP WITH TIME ZONE DEFAULT NULL;
+        `;
+        await sql`
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_festive_orders_balance_token
+            ON festive_orders (balance_validation_token)
+            WHERE balance_validation_token IS NOT NULL;
+        `;
 
         isTableInitialized = true;
         return true;
@@ -181,6 +199,8 @@ function mapRowToOrder(row: Record<string, unknown>): FestiveOrderRecord {
         reminder_sent_at: row.reminder_sent_at ? new Date(String(row.reminder_sent_at)).toISOString() : null,
         validation_token: row.validation_token ? String(row.validation_token) : null,
         payment_validated_at: row.payment_validated_at ? new Date(String(row.payment_validated_at)).toISOString() : null,
+        balance_validation_token: row.balance_validation_token ? String(row.balance_validation_token) : null,
+        balance_validated_at: row.balance_validated_at ? new Date(String(row.balance_validated_at)).toISOString() : null,
         prenom: String(row.prenom || ''),
         nom: String(row.nom || ''),
         email: String(row.email || ''),
@@ -327,27 +347,29 @@ export async function confirmFestiveOrderPaymentByToken(token: string): Promise<
         return { result: 'not_found' };
     }
 
-    const alreadyValidatedStatuses = ['deposit_paid', 'fully_paid', 'solde_regle'];
+    const alreadyValidatedStatuses = ['deposit_paid', 'fully_paid', 'solde_regle', 'solde_en_attente'];
     if (alreadyValidatedStatuses.includes(existing.status) || Boolean(existing.payment_validated_at)) {
         return { result: 'already_validated', order: existing };
     }
 
-    const nextStatus: 'deposit_paid' | 'fully_paid' =
-        existing.payment_mode === 'acompte_30' ? 'deposit_paid' : 'fully_paid';
+    const isDepositMode = existing.payment_mode === 'acompte_30';
+    const nextStatus: 'deposit_paid' | 'fully_paid' = isDepositMode ? 'deposit_paid' : 'fully_paid';
+    const balanceToken = isDepositMode ? (existing.balance_validation_token || crypto.randomUUID()) : null;
     const nowIso = new Date().toISOString();
 
     const sql = getDb();
     if (sql) {
         try {
             await ensureFestiveOrdersTable();
-            // Mise à jour atomique conditionnelle pour garantir l'idempotence stricte même en cas de double clic simultané
+            // Mise à jour atomique conditionnelle pour garantir l'idempotence stricte même en cas de double soumission
             const updatedRows = await sql`
                 UPDATE festive_orders
                 SET status = ${nextStatus},
                     payment_validated_at = CURRENT_TIMESTAMP,
+                    balance_validation_token = COALESCE(balance_validation_token, ${balanceToken}),
                     updated_at = CURRENT_TIMESTAMP
                 WHERE validation_token = ${cleanToken}
-                  AND status NOT IN ('deposit_paid', 'fully_paid', 'solde_regle')
+                  AND status NOT IN ('deposit_paid', 'fully_paid', 'solde_regle', 'solde_en_attente')
                   AND payment_validated_at IS NULL
                 RETURNING *;
             `;
@@ -369,9 +391,100 @@ export async function confirmFestiveOrderPaymentByToken(token: string): Promise<
     // Fallback mémoire / dev
     existing.status = nextStatus;
     existing.payment_validated_at = nowIso;
+    existing.balance_validation_token = balanceToken;
     existing.updated_at = nowIso;
     saveFallbackOrder(existing);
     return { result: 'validated', order: existing };
+}
+
+export async function getFestiveOrderByBalanceToken(token: string): Promise<FestiveOrderRecord | null> {
+    const cleanToken = (token || '').trim();
+    if (!cleanToken) return null;
+
+    const sql = getDb();
+    if (sql) {
+        try {
+            await ensureFestiveOrdersTable();
+            const rows = await sql`
+                SELECT * FROM festive_orders
+                WHERE balance_validation_token = ${cleanToken}
+                LIMIT 1;
+            `;
+            if (rows && rows.length > 0) {
+                return mapRowToOrder(rows[0] as Record<string, unknown>);
+            }
+        } catch (err) {
+            console.error("Erreur getFestiveOrderByBalanceToken SQL:", err);
+        }
+    }
+
+    loadDevFallbackOrders();
+    for (const order of memoryFallbackOrders.values()) {
+        if (order.balance_validation_token && order.balance_validation_token === cleanToken) {
+            return order;
+        }
+    }
+    return null;
+}
+
+export async function confirmFestiveOrderBalanceByToken(token: string): Promise<{
+    result: 'not_found' | 'already_validated' | 'validated';
+    order?: FestiveOrderRecord;
+    balancePaidAmount?: number;
+}> {
+    const cleanToken = (token || '').trim();
+    if (!cleanToken) return { result: 'not_found' };
+
+    const existing = await getFestiveOrderByBalanceToken(cleanToken);
+    if (!existing) {
+        return { result: 'not_found' };
+    }
+
+    const fullyPaidStatuses = ['fully_paid', 'solde_regle'];
+    if (fullyPaidStatuses.includes(existing.status) || Boolean(existing.balance_validated_at)) {
+        return { result: 'already_validated', order: existing };
+    }
+
+    const balancePaidAmount = Number(existing.balance_remaining || 0);
+    const nowIso = new Date().toISOString();
+
+    const sql = getDb();
+    if (sql) {
+        try {
+            await ensureFestiveOrdersTable();
+            const updatedRows = await sql`
+                UPDATE festive_orders
+                SET status = 'fully_paid',
+                    balance_remaining = 0,
+                    balance_validated_at = CURRENT_TIMESTAMP,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE balance_validation_token = ${cleanToken}
+                  AND status NOT IN ('fully_paid', 'solde_regle')
+                  AND balance_validated_at IS NULL
+                RETURNING *;
+            `;
+
+            if (!updatedRows || updatedRows.length === 0) {
+                const refreshed = await getFestiveOrderByBalanceToken(cleanToken);
+                return { result: 'already_validated', order: refreshed || existing };
+            }
+
+            const updatedOrder = mapRowToOrder(updatedRows[0] as Record<string, unknown>);
+            saveFallbackOrder(updatedOrder);
+            return { result: 'validated', order: updatedOrder, balancePaidAmount };
+        } catch (err) {
+            console.error("Erreur confirmFestiveOrderBalanceByToken SQL:", err);
+            throw err;
+        }
+    }
+
+    // Fallback mémoire / dev
+    existing.status = 'fully_paid';
+    existing.balance_remaining = 0;
+    existing.balance_validated_at = nowIso;
+    existing.updated_at = nowIso;
+    saveFallbackOrder(existing);
+    return { result: 'validated', order: existing, balancePaidAmount };
 }
 
 export async function getFestiveOrdersPendingReminder(): Promise<FestiveOrderRecord[]> {

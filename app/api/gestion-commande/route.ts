@@ -265,13 +265,46 @@ export async function POST(req: Request) {
                     html: avenantEmailHtml
                 });
 
-                // Copie au traiteur
+                // Copie au traiteur (avec bouton de validation du solde actualisé si disponible)
+                const balanceToken = updatedOrder?.balance_validation_token || existingOrder.balance_validation_token;
+                const baseUrl = (
+                    process.env.NEXT_PUBLIC_SITE_URL ||
+                    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+                        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+                        : 'https://www.traiteur-compere.be')
+                ).replace(/\/$/, '');
+                const balanceConfirmUrl = balanceToken
+                    ? `${baseUrl}/api/orders/confirm-payment?token=${encodeURIComponent(balanceToken)}&step=balance`
+                    : '';
+
+                const traiteurAvenantHtml = balanceConfirmUrl
+                    ? avenantEmailHtml.replace(
+                        '</td>\n                                        </tr>\n\n                                        <tr>\n                                            <td style="padding: 20px 32px;',
+                        `<div style="margin-top: 24px; background-color: #F2F8F3; border: 2px solid #246131; border-radius: 10px; padding: 20px; text-align: center;">
+                            <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #246131; margin-bottom: 8px;">
+                                VALIDATION DU SOLDE FINAL ACTUALISÉ (TRAITEUR)
+                            </div>
+                            <p style="margin: 0 0 14px 0; font-size: 13px; color: #1A1A1A; line-height: 1.5;">
+                                Dès réception du virement de <strong>${Number(newBalanceTotal).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong>, cliquez ci-dessous pour solder la commande :
+                            </p>
+                            <a href="${balanceConfirmUrl}" style="display: inline-block; background-color: #246131; color: #FFFFFF; font-size: 13px; font-weight: 700; padding: 12px 22px; border-radius: 9999px; text-decoration: none;">
+                                ✓ Valider la réception du solde (${Number(newBalanceTotal).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €)
+                            </a>
+                        </div>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td style="padding: 20px 32px;`
+                    )
+                    : avenantEmailHtml;
+
                 await resend.emails.send({
                     from: fromAddress,
                     to: traiteurEmail,
                     replyTo: email,
                     subject: `[${existingOrder.id}] AJOUTS CLIENT REÇUS - ${fullNameUpper} - Solde: ${Number(newBalanceTotal).toFixed(2)} €`,
-                    html: avenantEmailHtml
+                    html: traiteurAvenantHtml
                 });
             } catch (emailErr) {
                 console.error("Erreur envoi Resend avenant (non-bloquante):", emailErr);

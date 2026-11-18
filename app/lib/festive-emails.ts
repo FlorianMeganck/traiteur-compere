@@ -253,3 +253,199 @@ export function generatePaymentConfirmedEmail(
 
     return { subject, html };
 }
+
+/**
+ * E-mail interne envoyé au Traiteur après validation de l'acompte 30 % (deposit_paid)
+ * pour garder à portée de main le lien sécurisé de validation du solde 70 % (deposit_paid → fully_paid).
+ */
+export function generateTraiteurBalanceValidationEmail(
+    order: FestiveOrderRecord,
+    balanceConfirmUrl: string
+): { subject: string; html: string } {
+    const fullNameUpper = `${(order.nom || '').trim().toUpperCase()} ${(order.prenom || '').trim().toUpperCase()}`.trim();
+    const balanceFormatted = formatPrice(order.balance_remaining);
+    const depositFormatted = formatPrice(order.amount_paid_initial);
+    const communicationSolde = `${order.id} - SOLDE FINAL - ${fullNameUpper}`;
+
+    const subject = `[${order.id}] SUIVI SOLDE 70 % (${balanceFormatted} €) — ${fullNameUpper}`;
+
+    const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${subject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F7F5F0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1A1A1A;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F7F5F0; padding: 30px 12px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #FFFFFF; border-radius: 12px; border: 1px solid #E8E2D5; overflow: hidden;">
+                    <tr>
+                        <td style="padding: 28px 32px 20px 32px; text-align: center; border-bottom: 1px solid #F0ECE4;">
+                            <div style="font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #B89327; margin-bottom: 6px;">
+                                SUIVI ATELIER • ACOMPTE 30 % VALIDÉ
+                            </div>
+                            <h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: #1A1A1A;">
+                                Lien de validation du solde 70 % — ${order.id}
+                            </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 28px 32px;">
+                            <p style="margin: 0 0 16px 0; font-size: 14px; color: #333333; line-height: 1.6;">
+                                L'acompte de <strong>${depositFormatted} €</strong> pour <strong>${cleanCapitalize(order.prenom)} ${order.nom.toUpperCase()}</strong> a bien été validé (statut : <code>deposit_paid</code>).
+                            </p>
+
+                            <div style="background-color: #FAF9F6; border: 1px solid #E8E2D5; border-radius: 8px; padding: 16px 18px; margin-bottom: 22px; font-size: 13px; line-height: 1.65;">
+                                <div><strong>Client :</strong> ${cleanCapitalize(order.prenom)} ${order.nom.toUpperCase()} (${order.email})</div>
+                                <div><strong>Date du repas :</strong> ${order.repas_date || '-'}</div>
+                                <div><strong>Solde attendu (70 %) :</strong> <strong style="color: #B89327;">${balanceFormatted} €</strong> <span style="color: #777777; font-size: 12px;">(hors éventuels ajouts ultérieurs)</span></div>
+                                <div><strong>Communication attendue :</strong> <code>${communicationSolde}</code></div>
+                            </div>
+
+                            <div style="background-color: #F2F8F3; border: 2px solid #246131; border-radius: 10px; padding: 22px 20px; text-align: center;">
+                                <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #246131; margin-bottom: 8px;">
+                                    À UTILISER LORS DE LA RÉCEPTION DU SOLDE (70 %)
+                                </div>
+                                <p style="margin: 0 0 16px 0; font-size: 13px; color: #1A1A1A; line-height: 1.5;">
+                                    Une fois le virement du solde repéré sur votre compte bancaire, cliquez ci-dessous pour passer la commande en <strong>fully_paid</strong>, stopper les relances automatiques J-10 et prévenir le client :
+                                </p>
+                                <a href="${balanceConfirmUrl}"
+                                   style="display: inline-block; background-color: #246131; color: #FFFFFF; font-size: 14px; font-weight: 700; padding: 14px 26px; border-radius: 9999px; text-decoration: none;">
+                                    ✓ Valider la réception du solde (${balanceFormatted} €)
+                                </a>
+                                <div style="margin-top: 12px; font-size: 11px; color: #666666; word-break: break-all;">
+                                    Lien direct : <a href="${balanceConfirmUrl}" style="color: #246131;">${balanceConfirmUrl}</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 16px 32px; background-color: #FAF9F6; border-top: 1px solid #F0ECE4; text-align: center; font-size: 11px; color: #888888;">
+                            Système de commande Traiteur Compère • Gardez cet e-mail jusqu'au règlement final
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    `;
+
+    return { subject, html };
+}
+
+/**
+ * E-mail court envoyé automatiquement au client dès validation du solde des 70 % (deposit_paid → fully_paid).
+ */
+export function generateBalancePaidEmail(
+    order: FestiveOrderRecord,
+    balancePaidAmount: number
+): { subject: string; html: string } {
+    const prenomClean = cleanCapitalize(order.prenom);
+    const paidFormatted = formatPrice(balancePaidAmount);
+    const subject = `Solde reçu — Votre commande Fêtes est intégralement réglée (N° ${order.id}) - Maison Compère`;
+
+    const html = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${subject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F7F5F0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1A1A1A; -webkit-font-smoothing: antialiased;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F7F5F0; padding: 30px 12px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 600px; background-color: #FFFFFF; border-radius: 12px; border: 1px solid #E8E2D5; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+                    <tr>
+                        <td style="padding: 36px 32px 24px 32px; text-align: center; border-bottom: 1px solid #F0ECE4;">
+                            <h1 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; letter-spacing: 3px; color: #1A1A1A; text-transform: uppercase;">
+                                MAISON COMPÈRE
+                            </h1>
+                            <div style="margin-top: 6px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #777777;">
+                                Depuis 1821
+                            </div>
+                            <div style="width: 48px; height: 1px; background-color: #D4AF37; margin: 16px auto;"></div>
+                            <div style="display: inline-block; background-color: #F2F8F3; border: 1px solid #B7D9BE; border-radius: 9999px; padding: 6px 18px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #246131;">
+                                ✓ COMMANDE SOLDÉE • N° ${order.id}
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 32px 32px 24px 32px;">
+                            <p style="margin: 0 0 16px 0; font-size: 15px; color: #1A1A1A; line-height: 1.5;">
+                                Bonjour <strong>${prenomClean}</strong>,
+                            </p>
+
+                            <div style="background-color: #F2F8F3; border: 1px solid #B7D9BE; border-radius: 10px; padding: 20px 22px; margin: 0 0 24px 0;">
+                                <div style="font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #246131; margin-bottom: 6px;">
+                                    ✓ SOLDE FINAL BIEN REÇU
+                                </div>
+                                <div style="font-size: 16px; font-weight: 700; color: #1A1A1A; margin-bottom: 8px;">
+                                    Nous confirmons la réception de votre solde de <span style="color: #246131;">${paidFormatted} €</span>.
+                                </div>
+                                <p style="margin: 0; font-size: 13px; color: #3D5242; line-height: 1.55;">
+                                    Votre commande N° <strong>${order.id}</strong> est désormais intégralement soldée. Vous n'avez plus aucun montant à régler : tout sera prêt pour votre retrait !
+                                </p>
+                            </div>
+
+                            <div style="background-color: #FBFBF9; border: 1px solid #EFECE6; border-radius: 8px; padding: 20px; margin: 0 0 24px 0;">
+                                <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 12px;">
+                                    RAPPEL DE VOTRE RETRAIT À L'ATELIER
+                                </div>
+                                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="font-size: 13px; line-height: 1.55;">
+                                    ${order.repas_date ? `
+                                    <tr>
+                                        <td style="padding: 4px 0; width: 38%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Date du repas :</td>
+                                        <td style="padding: 4px 0; color: #1A1A1A; font-weight: 600;">${order.repas_date}</td>
+                                    </tr>` : ''}
+                                    ${order.retrait_slot ? `
+                                    <tr>
+                                        <td style="padding: 5px 0; width: 38%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Créneau de retrait :</td>
+                                        <td style="padding: 5px 0; color: #1A1A1A; font-weight: 600;">${String(order.retrait_slot).split(' | ').join('<br/>')}</td>
+                                    </tr>` : ''}
+                                    <tr>
+                                        <td style="padding: 5px 0; width: 38%; color: #777777; font-size: 11px; text-transform: uppercase; font-weight: 600;">Lieu de retrait :</td>
+                                        <td style="padding: 5px 0; color: #1A1A1A;">
+                                            ${LIEU_RETRAIT}
+                                            <div style="margin-top: 4px;">
+                                                <a href="${GOOGLE_MAPS_URL}" style="color: #B89327; font-size: 12px; text-decoration: none; font-weight: 600;">Itinéraire Google Maps →</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <p style="margin: 20px 0 0 0; font-size: 13px; color: #666666; line-height: 1.5; text-align: center;">
+                                À très bientôt à l'atelier ! Pour toute question, contactez-nous au <a href="tel:${ATELIER_TEL.replace(/\s+/g, '')}" style="color: #1A1A1A; font-weight: 600; text-decoration: none;">${ATELIER_TEL}</a>.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 24px 32px 32px 32px; background-color: #FAF9F6; border-top: 1px solid #F0ECE4; text-align: center;">
+                            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 16px; font-weight: 700; letter-spacing: 2px; color: #1A1A1A; text-transform: uppercase; margin-bottom: 6px;">
+                                MAISON COMPÈRE
+                            </div>
+                            <div style="font-size: 12px; color: #777777; margin-bottom: 8px;">
+                                ${LIEU_RETRAIT}, Belgique
+                            </div>
+                            <div style="font-size: 12px; color: #888888; font-style: italic;">
+                                Toute l'équipe Traiteur Compère vous souhaite d'excellentes fêtes de fin d'année.
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    `;
+
+    return { subject, html };
+}
