@@ -203,7 +203,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Rôti de porc froid moutardé",
             "Salades et féculents"
         ],
-        smallPrice: 17,
+        smallPrice: 18,
         mediumPrice: 16,
         image: '/images/buffet_ardennais.jpeg'
     },

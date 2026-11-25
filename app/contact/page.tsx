@@ -184,9 +184,9 @@ const feculentsBBQ = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenail
 
 const BUFFET_FROID_PRICES: Record<string, { small: number; medium: number }> = {
     buffet_campagnard: { small: 17, medium: 14 },
-    buffet_ardenais: { small: 17, medium: 16 },
-    buffet_ardennais: { small: 17, medium: 16 },
-    ardennais: { small: 17, medium: 16 },
+    buffet_ardenais: { small: 18, medium: 16 },
+    buffet_ardennais: { small: 18, medium: 16 },
+    ardennais: { small: 18, medium: 16 },
     buffet_reception: { small: 20, medium: 18 },
     buffet_gala: { small: 24, medium: 22 }
 };

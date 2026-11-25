@@ -190,11 +190,11 @@ export default function StructuredData() {
                   "description": "Jambon d'Ardenne, saucisson gaumais, boudin blanc et noir, rôti de porc froid moutardé, salades et féculents.",
                   "offers": {
                     "@type": "Offer",
-                    "price": "15.00",
+                    "price": "16.00",
                     "priceCurrency": "EUR",
                     "priceSpecification": {
                       "@type": "UnitPriceSpecification",
-                      "price": "15.00",
+                      "price": "16.00",
                       "priceCurrency": "EUR",
                       "unitText": "par personne HTVA"
                     }
