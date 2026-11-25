@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Lato } from "next/font/google";
-import { Suspense } from "react";
+import Script from "next/script";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -42,7 +42,6 @@ export const metadata: Metadata = {
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import GoogleAnalytics from "./components/GoogleAnalytics";
 import CookieBanner from "./components/CookieBanner";
 import ScrollToTop from "./components/ScrollToTop";
 import StructuredData from "./components/StructuredData";
@@ -85,6 +84,18 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationJsonLd) }}
         />
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=GTM-PPZWV4GV"
+          strategy="afterInteractive"
+        />
+        <Script id="google-tag-manager" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+          `}
+        </Script>
       </head>
       <body
         className={`${playfair.variable} ${lato.variable} antialiased bg-white text-black font-sans`}
@@ -93,9 +104,6 @@ export default function RootLayout({
         <Navbar />
         {children}
         <CookieBanner />
-        <Suspense fallback={null}>
-          <GoogleAnalytics GA_MEASUREMENT_ID='G-DM739YH09F' />
-        </Suspense>
         <Footer />
         <ScrollToTop />
       </body>
