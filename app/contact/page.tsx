@@ -795,6 +795,7 @@ function ContactForm() {
         const serviceParam = searchParams.get('service');
         const voletParam = searchParams.get('volet');
         const boissonsParam = searchParams.get('boissons');
+        const materielParam = searchParams.get('materiel');
 
         setFormData(prev => {
             const newData = { ...prev };
@@ -807,6 +808,10 @@ function ContactForm() {
 
             if (boissonsParam === 'oui' || typeParam?.includes('boissons') || typeParam === 'brasseur') {
                 newData.Option_Brasserie_Check = "Oui";
+            }
+
+            if (materielParam === 'oui') {
+                newData.Location_Vaisselle_Check = "Oui";
             }
 
             if (typeParam?.startsWith('entreprise')) {
@@ -1552,7 +1557,11 @@ function ContactForm() {
             ...(isSurDevisOrMinusOne && totalPrice.perPerson > 0 && { "💡 Prix indicatif de base (Info Interne)": `${totalPrice.perPerson.toLocaleString('fr-BE', { minimumFractionDigits: 2 })}€ / pers` }),
             "📅 Date de l'événement": formData.Date,
             "👥 Nombre de convives": formData.Nombre_Convives,
-            ...(isAnyBBQ && { "🧑‍🍳 Prestation Service": formData.Service_Check === "Oui" ? "Oui (+2,5€/pers)" : "Non" }),
+            ...(isAnyBBQ
+                ? { "🧑‍🍳 Prestation Service": formData.Service_Check === "Oui" ? "Oui (+2,5€/pers)" : "Non" }
+                : formData.Service_Check === "Oui"
+                ? { "🧑‍🍳 Prestation Service": "Oui (Personnel de salle souhaité - 18,00 €/h HTVA)" }
+                : {}),
 
             // COORDONNÉES
             "👤 Nom complet": `${formData.Nom} ${formData.Prenom}`,
@@ -4391,48 +4400,43 @@ function ContactForm() {
                                     {renderContactFields()}
 
                                     {!isPlatPrepare && (
-                                        <div className="bg-[#FAF8F5] p-6 rounded-2xl border border-[#D4AF37]/35">
-                                            <div className="flex items-start sm:items-center gap-3 mb-2">
-                                                <input
-                                                    type="checkbox"
-                                                    name="Option_Brasserie_Check"
-                                                    id="Option_Brasserie_Check_General"
-                                                    className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5 sm:mt-0 shrink-0"
-                                                    checked={formData.Option_Brasserie_Check === "Oui"}
-                                                    onChange={handleChange}
-                                                />
-                                                <label htmlFor="Option_Brasserie_Check_General" className="text-neutral-900 font-bold cursor-pointer select-none text-left leading-tight">
-                                                    🍺 Inclure l&apos;Option Bar &amp; Gestion des Boissons (Formule Brasseur Clé en Main)
-                                                </label>
+                                        <div className="space-y-4">
+                                            <div className={`p-5 rounded-2xl border transition-all duration-300 ${
+                                                formData.Service_Check === "Oui"
+                                                    ? "border-[#D4AF37] bg-white shadow-xs ring-1 ring-[#D4AF37]/20"
+                                                    : "bg-white border-neutral-200 hover:border-neutral-300"
+                                            }`}>
+                                                <div className="flex items-start gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        name="Service_Check"
+                                                        id="Service_Check_General"
+                                                        className="w-5 h-5 text-[#D4AF37] accent-[#D4AF37] border-gray-300 rounded focus:ring-[#D4AF37] cursor-pointer mt-0.5"
+                                                        checked={formData.Service_Check === "Oui"}
+                                                        onChange={(e) =>
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                Service_Check: e.target.checked ? "Oui" : "Non",
+                                                            }))
+                                                        }
+                                                    />
+                                                    <label htmlFor="Service_Check_General" className="cursor-pointer select-none flex-1">
+                                                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                            <span className="font-bold text-neutral-800 text-sm md:text-base">
+                                                                🧑‍🍳 Personnel de salle &amp; Service
+                                                            </span>
+                                                            <span className="bg-[#D4AF37]/10 text-[#D4AF37] text-xs font-bold px-2.5 py-0.5 rounded-full border border-[#D4AF37]/30">
+                                                                18,00 € / h HTVA
+                                                            </span>
+                                                        </div>
+                                                        <span className="block text-xs text-neutral-500 mt-1 leading-relaxed">
+                                                            Mise en place, service au buffet ou à table et débarrassage par notre équipe.
+                                                        </span>
+                                                    </label>
+                                                </div>
                                             </div>
-                                            <p className="text-xs sm:text-sm text-neutral-600 ml-8">
-                                                Mise à disposition du frigo vitré professionnel, stock complet avec reprise des invendus non entamés et personnel de service sur demande (18,00 €/h HTVA).
-                                            </p>
 
-                                            <AnimatePresence>
-                                                {formData.Option_Brasserie_Check === "Oui" && (
-                                                    <motion.div
-                                                        initial={{ opacity: 0, height: 0 }}
-                                                        animate={{ opacity: 1, height: "auto" }}
-                                                        exit={{ opacity: 0, height: 0 }}
-                                                        transition={{ duration: 0.3 }}
-                                                        className="overflow-hidden mt-4 pl-0 sm:pl-8"
-                                                    >
-                                                        <label htmlFor="Option_Brasserie_Details_General" className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">
-                                                            Souhaits particuliers pour le bar &amp; les boissons (optionnel)
-                                                        </label>
-                                                        <textarea
-                                                            id="Option_Brasserie_Details_General"
-                                                            name="Option_Brasserie_Details"
-                                                            rows={2}
-                                                            value={formData.Option_Brasserie_Details}
-                                                            onChange={handleChange}
-                                                            placeholder="Ex : Vin d'honneur pétillant, fût de bière spéciale, service barman souhaité..."
-                                                            className="w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-800 placeholder-neutral-400 focus:border-[#D4AF37] focus:outline-none focus:ring-2 focus:ring-[#D4AF37]/20 transition-all"
-                                                        />
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
+                                            {renderLogisticsOptions()}
                                         </div>
                                     )}
                                 </div>
