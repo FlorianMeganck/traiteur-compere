@@ -10,7 +10,7 @@ import {
     isFestiveCartItem,
     FestiveValidationMode
 } from '../../data/menus-fetes';
-import { insertFestiveOrder } from '../../lib/db';
+import { insertFestiveOrder, buildFestiveOrderResume } from '../../lib/db';
 import { buildEpcQrImageUrl } from '../../lib/festive-emails';
 
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -221,6 +221,7 @@ export async function POST(req: Request) {
         if (isFestiveOrder) {
             const MAX_ID_ATTEMPTS = 10;
             let inserted = false;
+            const resumeCommande = buildFestiveOrderResume(cartItems, []);
 
             for (let attempt = 1; attempt <= MAX_ID_ATTEMPTS; attempt++) {
                 const candidateDigits = Math.floor(Math.random() * 90000) + 10000;
@@ -243,6 +244,7 @@ export async function POST(req: Request) {
                     balance_remaining: isAcompteMode ? (festivePricing.remainingBalance || 0) : 0,
                     items: cartItems,
                     additional_items: [],
+                    resume_commande: resumeCommande,
                     notes: details_projet || ''
                 });
 

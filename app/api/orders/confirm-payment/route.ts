@@ -126,8 +126,13 @@ function renderAdminHtmlPage(params: {
                 </tr>` : ''}
                 ${order.retrait_slot ? `
                 <tr>
-                    <td style="color: #777777; padding: 3px 0;">Retrait :</td>
+                    <td style="color: #777777; padding: 3px 0; vertical-align: top;">Retrait :</td>
                     <td style="color: #1A1A1A; padding: 3px 0;">${escapeHtml(order.retrait_slot)}</td>
+                </tr>` : ''}
+                ${order.resume_commande ? `
+                <tr>
+                    <td style="color: #777777; padding: 4px 0; vertical-align: top;">Mets commandés :</td>
+                    <td style="color: #1A1A1A; font-size: 12px; line-height: 1.5; padding: 4px 0;">${escapeHtml(order.resume_commande)}</td>
                 </tr>` : ''}
             </table>
         </div>
