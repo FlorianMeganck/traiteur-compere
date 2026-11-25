@@ -52,6 +52,8 @@ function GestionCommandeContent() {
     // Données de la commande
     const [order, setOrder] = useState<OrderData | null>(null);
     const [canAdjust, setCanAdjust] = useState(false);
+    const [canAdjustReason, setCanAdjustReason] = useState<string | null>(null);
+    const [adjustmentMessage, setAdjustmentMessage] = useState<string | null>(null);
     const [isEarlyBirdOnAdditions, setIsEarlyBirdOnAdditions] = useState(false);
 
     // Nouveaux ajouts en cours (non encore validés)
@@ -89,6 +91,8 @@ function GestionCommandeContent() {
             if (res.ok && data.success && data.order) {
                 setOrder(data.order);
                 setCanAdjust(Boolean(data.canAdjust));
+                setCanAdjustReason(data.canAdjustReason || null);
+                setAdjustmentMessage(data.adjustmentMessage || null);
                 setIsEarlyBirdOnAdditions(Boolean(data.isEarlyBirdOnAdditions));
             } else {
                 setOrder(null);
@@ -221,6 +225,7 @@ function GestionCommandeContent() {
             let currentOrderData = order;
 
             // 1. Si des ajouts sont en attente : enregistrement en DB (statut solde_en_attente) & envoi email avenant
+            let effectiveBalanceToPay = finalNewBalanceTotal;
             if (pendingAdditions.length > 0) {
                 const res = await fetch("/api/gestion-commande", {
                     method: "POST",
@@ -228,9 +233,7 @@ function GestionCommandeContent() {
                     body: JSON.stringify({
                         orderId: order.id,
                         email: order.email,
-                        additionalItems: pendingAdditions,
-                        additionalAmount: additionsTotalAmount,
-                        newBalanceTotal: finalNewBalanceTotal
+                        additionalItems: pendingAdditions
                     })
                 });
 
@@ -242,6 +245,9 @@ function GestionCommandeContent() {
                 }
                 if (data.order) {
                     currentOrderData = data.order;
+                    effectiveBalanceToPay = Number(data.order.balance_remaining ?? finalNewBalanceTotal);
+                } else if (typeof data.newBalanceTotal === "number") {
+                    effectiveBalanceToPay = data.newBalanceTotal;
                 }
             }
 
@@ -267,7 +273,7 @@ function GestionCommandeContent() {
                 email: currentOrderData.email,
                 telephone: currentOrderData.telephone,
                 total: grandTotal,
-                toPay: finalNewBalanceTotal,
+                toPay: effectiveBalanceToPay,
                 paymentMode: 'solde_final',
                 mode: 'solde_final',
                 isSoldeFinal: true,
@@ -568,12 +574,33 @@ function GestionCommandeContent() {
                             ) : (
                                 <div className="space-y-6">
                                     {!canAdjust ? (
-                                        <div className="bg-amber-50 border border-amber-300 p-4 rounded-2xl text-xs sm:text-sm text-amber-900 flex items-start gap-2.5">
-                                            <AlertCircle size={18} className="text-amber-800 shrink-0 mt-0.5" />
-                                            <span>
-                                                La date limite d&apos;ajustement (7 jours avant la date de retrait) est atteinte. La production en cuisine est verrouillée pour garantir une fraîcheur irréprochable. Vous pouvez toutefois régler votre solde ci-dessous.
-                                            </span>
-                                        </div>
+                                        (order.status === 'pending_payment' || order.status === 'en_attente' || canAdjustReason === 'pending_payment') ? (
+                                            <div className="bg-[#FAF6EB] border border-[#D4AF37]/70 p-4 sm:p-5 rounded-2xl text-xs sm:text-sm text-neutral-800 flex items-start gap-3">
+                                                <Clock size={19} className="text-[#927116] shrink-0 mt-0.5" />
+                                                <div className="space-y-1">
+                                                    <p className="font-serif font-bold text-black text-sm sm:text-base">
+                                                        Acompte de 30 % en attente de validation par notre atelier
+                                                    </p>
+                                                    <p className="text-neutral-700 leading-relaxed">
+                                                        {adjustmentMessage || "L'ajout de convives et de mets supplémentaires sera automatiquement débloqué dès validation de la réception de votre acompte de 30 % par notre atelier."}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ) : (order.status === 'fully_paid' || order.status === 'solde_regle' || canAdjustReason === 'fully_paid') ? (
+                                            <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-xs sm:text-sm text-emerald-900 flex items-start gap-2.5">
+                                                <ShieldCheck size={18} className="text-emerald-700 shrink-0 mt-0.5" />
+                                                <span>
+                                                    {adjustmentMessage || "Votre commande est déjà intégralement soldée. Pour toute demande complémentaire, contactez notre atelier au +32 468 38 50 82."}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div className="bg-amber-50 border border-amber-300 p-4 rounded-2xl text-xs sm:text-sm text-amber-900 flex items-start gap-2.5">
+                                                <AlertCircle size={18} className="text-amber-800 shrink-0 mt-0.5" />
+                                                <span>
+                                                    {adjustmentMessage || "La date limite d'ajustement (7 jours avant la date de retrait) est atteinte. La production en cuisine est verrouillée pour garantir une fraîcheur irréprochable. Vous pouvez toutefois régler votre solde ci-dessous."}
+                                                </span>
+                                            </div>
+                                        )
                                     ) : (
                                         <>
                                             <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">

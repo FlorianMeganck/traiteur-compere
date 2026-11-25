@@ -89,9 +89,12 @@ export default function Confidentialite() {
                     </section>
 
                     <section>
-                        <h2 className="text-2xl font-serif text-black mb-3">7. Cookies</h2>
+                        <h2 className="text-2xl font-serif text-black mb-3">7. Cookies &amp; Mesure d&apos;Audience</h2>
                         <p>
-                            Ce site utilise uniquement des cookies techniques essentiels au fonctionnement. Aucun traçage publicitaire n&apos;est effectué sans votre consentement explicite.
+                            Outre les cookies techniques strictement essentiels au bon fonctionnement du site (panier de commande, sécurité et mémorisation de vos choix), nous utilisons <strong>Google Tag Manager</strong> et <strong>Google Analytics 4</strong> afin de mesurer l&apos;audience et d&apos;améliorer nos services.
+                        </p>
+                        <p className="mt-2">
+                            Conformément au RGPD et au mode de consentement Google (Consent Mode v2), les traceurs analytiques et marketing sont désactivés par défaut et ne sont activés qu&apos;avec votre consentement préalable explicite. Vous pouvez consulter, personnaliser ou retirer votre consentement à tout moment depuis notre page de <Link href="/gestion-cookies" className="text-[#D4AF37] hover:underline font-medium">Gestion des cookies</Link>.
                         </p>
                     </section>
                 </div>

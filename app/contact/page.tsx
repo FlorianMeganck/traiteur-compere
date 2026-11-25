@@ -625,11 +625,13 @@ function ContactForm() {
     const handleFormStart = () => {
         if (!isStarted) {
             setIsStarted(true);
-            const win = typeof window !== 'undefined' ? (window as Window & { gtag?: (cmd: string, action: string, params: Record<string, unknown>) => void }) : null;
-            if (win?.gtag) {
-                win.gtag('event', 'form_start', {
-                    'event_category': 'engagement',
-                    'event_label': 'debut_saisie_formulaire'
+            if (typeof window !== 'undefined') {
+                const win = window as Window & { dataLayer?: Record<string, unknown>[] };
+                win.dataLayer = win.dataLayer || [];
+                win.dataLayer.push({
+                    event: 'form_start',
+                    event_category: 'engagement',
+                    event_label: 'debut_saisie_formulaire'
                 });
             }
         }
@@ -1859,10 +1861,12 @@ function ContactForm() {
 
                 if (result.success) {
                     if (typeof window !== 'undefined') {
-                        const win = window as Window & { gtag?: (type: string, name: string, options?: Record<string, unknown>) => void };
-                        win.gtag?.('event', 'generate_lead', {
-                            'event_category': 'formulaire',
-                            'event_label': 'contact_traiteur'
+                        const win = window as Window & { dataLayer?: Record<string, unknown>[] };
+                        win.dataLayer = win.dataLayer || [];
+                        win.dataLayer.push({
+                            event: 'generate_lead',
+                            event_category: 'formulaire',
+                            event_label: 'contact_traiteur'
                         });
                     }
                     // Affichage du V vert

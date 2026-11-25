@@ -221,15 +221,20 @@ function mapRowToOrder(row: Record<string, unknown>): FestiveOrderRecord {
 
 export async function insertFestiveOrder(order: FestiveOrderRecord): Promise<boolean> {
     const sql = getDb();
-    saveFallbackOrder(order);
 
     if (!sql) {
+        loadDevFallbackOrders();
+        const idKey = order.id.toUpperCase();
+        if (memoryFallbackOrders.has(idKey)) {
+            return false;
+        }
+        saveFallbackOrder(order);
         return true;
     }
 
     try {
         await ensureFestiveOrdersTable();
-        await sql`
+        const insertedRows = await sql`
             INSERT INTO festive_orders (
                 id, prenom, nom, email, telephone, repas_date, retrait_slot,
                 payment_mode, status, total_initial, early_bird_discount,
@@ -256,16 +261,15 @@ export async function insertFestiveOrder(order: FestiveOrderRecord): Promise<boo
                 ${order.validation_token || null},
                 ${order.payment_validated_at || null}
             )
-            ON CONFLICT (id) DO UPDATE SET
-                updated_at = CURRENT_TIMESTAMP,
-                total_initial = EXCLUDED.total_initial,
-                amount_paid_initial = EXCLUDED.amount_paid_initial,
-                balance_remaining = EXCLUDED.balance_remaining,
-                items = EXCLUDED.items,
-                additional_items = EXCLUDED.additional_items,
-                notes = EXCLUDED.notes,
-                validation_token = COALESCE(festive_orders.validation_token, EXCLUDED.validation_token);
+            ON CONFLICT (id) DO NOTHING
+            RETURNING id;
         `;
+
+        if (!insertedRows || insertedRows.length === 0) {
+            return false;
+        }
+
+        saveFallbackOrder(order);
         return true;
     } catch (err) {
         console.error("Erreur insertFestiveOrder SQL:", err);
@@ -487,6 +491,13 @@ export async function confirmFestiveOrderBalanceByToken(token: string): Promise<
     return { result: 'validated', order: existing, balancePaidAmount };
 }
 
+export const VALIDATED_REMINDER_STATUSES = [
+    'deposit_paid',
+    'solde_en_attente',
+    'fully_paid',
+    'solde_regle'
+] as const;
+
 export async function getFestiveOrdersPendingReminder(): Promise<FestiveOrderRecord[]> {
     const sql = getDb();
     if (sql) {
@@ -494,7 +505,8 @@ export async function getFestiveOrdersPendingReminder(): Promise<FestiveOrderRec
             await ensureFestiveOrdersTable();
             const rows = await sql`
                 SELECT * FROM festive_orders 
-                WHERE reminder_sent_at IS NULL;
+                WHERE reminder_sent_at IS NULL
+                  AND status IN ('deposit_paid', 'solde_en_attente', 'fully_paid', 'solde_regle');
             `;
 
             return (rows || []).map((r) => mapRowToOrder(r as Record<string, unknown>));
@@ -505,7 +517,9 @@ export async function getFestiveOrdersPendingReminder(): Promise<FestiveOrderRec
 
     // Fallback mémoire / dev
     loadDevFallbackOrders();
-    return Array.from(memoryFallbackOrders.values()).filter(o => !o.reminder_sent_at);
+    return Array.from(memoryFallbackOrders.values()).filter(
+        o => !o.reminder_sent_at && (VALIDATED_REMINDER_STATUSES as readonly string[]).includes(o.status)
+    );
 }
 
 export async function markFestiveOrderReminderSent(orderId: string): Promise<boolean> {
@@ -573,33 +587,5 @@ export async function updateFestiveOrderAdditions(
     existing.status = 'solde_en_attente';
     saveFallbackOrder(existing);
 
-    return existing;
-}
-
-export async function updateFestiveOrderStatus(
-    orderId: string,
-    email: string,
-    newStatus: string
-): Promise<FestiveOrderRecord | null> {
-    const existing = await getFestiveOrder(orderId, email);
-    if (!existing) return null;
-
-    const sql = getDb();
-    if (sql) {
-        try {
-            await ensureFestiveOrdersTable();
-            await sql`
-                UPDATE festive_orders SET
-                    status = ${newStatus},
-                    updated_at = CURRENT_TIMESTAMP
-                WHERE UPPER(id) = ${existing.id.toUpperCase()};
-            `;
-        } catch (err) {
-            console.error("Erreur updateFestiveOrderStatus SQL:", err);
-        }
-    }
-
-    existing.status = newStatus;
-    saveFallbackOrder(existing);
     return existing;
 }

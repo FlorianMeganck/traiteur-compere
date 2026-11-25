@@ -1,41 +1,158 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { getFestiveOrder, updateFestiveOrderAdditions } from '../../lib/db';
-import { isEarlyBirdFestivePromoActive } from '../../data/menus-fetes';
+import { getFestiveOrder, updateFestiveOrderAdditions, FestiveOrderItem } from '../../lib/db';
+import {
+    FORMULES_FETES,
+    CARTE_FETES_ITEMS,
+    isEarlyBirdFestivePromoActive
+} from '../../data/menus-fetes';
+import { parseRepasDate, getDiffCalendarDays } from '../../lib/festive-reminders';
+import { buildEpcQrImageUrl } from '../../lib/festive-emails';
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = (resendApiKey && resendApiKey.startsWith('re_')) ? new Resend(resendApiKey) : null;
 
-// Vérifie si l'ajustement est encore possible (J-7 avant le retrait)
+const ADJUSTABLE_ORDER_STATUSES = ['deposit_paid', 'solde_en_attente'] as const;
+
+export type CanAdjustReason =
+    | 'not_deposit_mode'
+    | 'pending_payment'
+    | 'fully_paid'
+    | 'deadline_passed'
+    | 'status_locked'
+    | null;
+
+// Vérifie si l'ajustement est encore possible (J-7 avant le retrait au plus tôt, fail-closed si date invalide)
 function isAdjustmentAllowed(repasDateStr: string, currentDate: Date = new Date()): boolean {
-    if (!repasDateStr) return true;
+    if (!repasDateStr || !repasDateStr.trim()) return false;
 
-    let targetDate: Date | null = null;
-    const isoMatch = repasDateStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-    if (isoMatch) {
-        targetDate = new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]), 12, 0, 0);
-    } else {
-        const dayMatch = repasDateStr.match(/(\d{1,2})\s*(décembre|janvier)/i);
-        if (dayMatch) {
-            const day = Number(dayMatch[1]);
-            const monthStr = dayMatch[2].toLowerCase();
-            const year = monthStr.includes('janv') ? 2027 : 2026;
-            const month = monthStr.includes('janv') ? 0 : 11;
-            targetDate = new Date(year, month, day, 12, 0, 0);
-        }
-    }
-
-    if (!targetDate) return true; // Si date non déterminable, autoriser par bienveillance
+    const targetDate = parseRepasDate(repasDateStr);
+    if (!targetDate) return false;
 
     // Date de retrait au plus tôt = la veille
     const earliestPickup = new Date(targetDate);
     earliestPickup.setDate(earliestPickup.getDate() - 1);
 
-    const todayMidnight = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-    const pickupMidnight = new Date(earliestPickup.getFullYear(), earliestPickup.getMonth(), earliestPickup.getDate());
-
-    const diffDays = Math.round((pickupMidnight.getTime() - todayMidnight.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = getDiffCalendarDays(earliestPickup, currentDate);
     return diffDays >= 7;
+}
+
+function evaluateOrderAdjustability(
+    order: { payment_mode: string; status: string; repas_date: string },
+    currentDate: Date = new Date()
+): { canAdjust: boolean; canAdjustReason: CanAdjustReason; adjustmentMessage: string | null } {
+    if (order.payment_mode !== 'acompte_30') {
+        return {
+            canAdjust: false,
+            canAdjustReason: 'not_deposit_mode',
+            adjustmentMessage: 'Les modifications en ligne sont réservées aux commandes avec versement d\'acompte de 30 %.'
+        };
+    }
+
+    if (order.status === 'pending_payment' || order.status === 'en_attente') {
+        return {
+            canAdjust: false,
+            canAdjustReason: 'pending_payment',
+            adjustmentMessage: 'L\'ajout de convives et de mets supplémentaires sera débloqué dès validation de votre acompte de 30 % par notre atelier.'
+        };
+    }
+
+    if (order.status === 'fully_paid' || order.status === 'solde_regle') {
+        return {
+            canAdjust: false,
+            canAdjustReason: 'fully_paid',
+            adjustmentMessage: 'Votre commande est déjà intégralement soldée. Pour toute demande particulière, veuillez contacter notre atelier.'
+        };
+    }
+
+    if (!(ADJUSTABLE_ORDER_STATUSES as readonly string[]).includes(order.status)) {
+        return {
+            canAdjust: false,
+            canAdjustReason: 'status_locked',
+            adjustmentMessage: 'Le statut actuel de votre commande ne permet pas de modification en ligne.'
+        };
+    }
+
+    if (!isAdjustmentAllowed(order.repas_date, currentDate)) {
+        return {
+            canAdjust: false,
+            canAdjustReason: 'deadline_passed',
+            adjustmentMessage: 'La date limite d\'ajustement (7 jours avant la date de retrait) est atteinte.'
+        };
+    }
+
+    return {
+        canAdjust: true,
+        canAdjustReason: null,
+        adjustmentMessage: null
+    };
+}
+
+function recalculateAdditionItemServerSide(
+    rawItem: FestiveOrderItem,
+    isEarlyBird: boolean
+): FestiveOrderItem | null {
+    const qty = Math.floor(Number(rawItem.quantitePlat ?? rawItem.quantite ?? rawItem.qty ?? 0));
+    if (!Number.isFinite(qty) || qty < 1) {
+        return null;
+    }
+
+    const rawId = String(rawItem.id || '').trim();
+    const rawIdLower = rawId.toLowerCase();
+    const rawNom = String(rawItem.nomPlat || rawItem.title || rawItem.nom || '').trim();
+    const rawNomLower = rawNom.toLowerCase();
+
+    const matchedFormule = FORMULES_FETES.find(f => {
+        const titleLower = f.title.toLowerCase();
+        return (
+            rawIdLower === f.id.toLowerCase() ||
+            rawIdLower.startsWith(`${f.id.toLowerCase()}-`) ||
+            rawIdLower.startsWith(`addition-formule-${f.id.toLowerCase()}`) ||
+            rawNomLower === titleLower ||
+            rawNomLower.startsWith(`${titleLower} (`)
+        );
+    });
+
+    const matchedCarte = !matchedFormule
+        ? CARTE_FETES_ITEMS.find(c => {
+            const cIdLower = c.id.toLowerCase();
+            return (
+                rawIdLower === cIdLower ||
+                rawIdLower === `carte-${cIdLower}` ||
+                rawIdLower === `addition-carte-${cIdLower}` ||
+                rawIdLower.startsWith(`addition-carte-${cIdLower}-`) ||
+                c.title.toLowerCase() === rawNomLower
+            );
+        })
+        : undefined;
+
+    if (!matchedFormule && !matchedCarte) {
+        return null;
+    }
+
+    const baseCatalogPrice = matchedFormule ? matchedFormule.price : matchedCarte!.price;
+    const discountRate = isEarlyBird ? 0.05 : 0;
+    const unitPriceNet = Math.round(baseCatalogPrice * (1 - discountRate) * 100) / 100;
+    const lineTotal = Math.round(unitPriceNet * qty * 100) / 100;
+
+    const officialLabel = matchedFormule
+        ? `${matchedFormule.title} (${matchedFormule.price}€)`
+        : matchedCarte!.title;
+
+    const cleanSummary = Array.isArray(rawItem.coursesSummary)
+        ? rawItem.coursesSummary.map(s => String(s || '').trim()).filter(Boolean)
+        : undefined;
+
+    return {
+        id: rawId || `addition-${Date.now()}`,
+        nomPlat: officialLabel,
+        quantitePlat: qty,
+        prixUnitairePlat: unitPriceNet,
+        prixTotalLigne: lineTotal,
+        ...(cleanSummary && cleanSummary.length > 0 ? { coursesSummary: cleanSummary } : {}),
+        badge: matchedFormule ? 'Formule Fêtes' : (matchedCarte!.categoryLabel || 'À la carte'),
+        isAddition: true
+    };
 }
 
 // 1. GET : Récupération sécurisée d'une commande
@@ -61,13 +178,16 @@ export async function GET(req: Request) {
             }, { status: 404 });
         }
 
-        const canAdjust = order.payment_mode === 'acompte_30' && isAdjustmentAllowed(order.repas_date);
+        const now = new Date();
+        const adjustability = evaluateOrderAdjustability(order, now);
 
         return NextResponse.json({
             success: true,
             order,
-            canAdjust,
-            isEarlyBirdOnAdditions: isEarlyBirdFestivePromoActive(new Date())
+            canAdjust: adjustability.canAdjust,
+            canAdjustReason: adjustability.canAdjustReason,
+            adjustmentMessage: adjustability.adjustmentMessage,
+            isEarlyBirdOnAdditions: isEarlyBirdFestivePromoActive(now)
         });
 
     } catch (err: unknown) {
@@ -80,11 +200,11 @@ export async function GET(req: Request) {
     }
 }
 
-// 2. POST : Enregistrement d'un avenant / ajouts et recalcul du solde
+// 2. POST : Enregistrement d'un avenant / ajouts et recalcul serveur du solde
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { orderId, email, additionalItems, additionalAmount, newBalanceTotal } = body;
+        const { orderId, email, additionalItems } = body;
 
         if (!orderId || !email) {
             return NextResponse.json({ success: false, error: 'Paramètres manquants' }, { status: 400 });
@@ -99,37 +219,60 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'Commande introuvable' }, { status: 404 });
         }
 
-        if (existingOrder.payment_mode !== 'acompte_30') {
+        const now = new Date();
+        const adjustability = evaluateOrderAdjustability(existingOrder, now);
+        if (!adjustability.canAdjust) {
             return NextResponse.json({
                 success: false,
-                error: 'Les modifications ne sont autorisées que pour les commandes avec versement d\'acompte 30%.'
+                canAdjustReason: adjustability.canAdjustReason,
+                error: adjustability.adjustmentMessage || 'Les modifications ne sont pas autorisées pour cette commande.'
             }, { status: 403 });
         }
 
-        if (!isAdjustmentAllowed(existingOrder.repas_date)) {
-            return NextResponse.json({
-                success: false,
-                error: 'Le délai d\'ajustement (7 jours avant le retrait) est dépassé.'
-            }, { status: 403 });
+        // Recalcul strict côté serveur de chaque article ajouté
+        const isEarlyBird = isEarlyBirdFestivePromoActive(now);
+        const verifiedAdditions: FestiveOrderItem[] = [];
+
+        for (const rawItem of additionalItems) {
+            if (!rawItem || typeof rawItem !== 'object') {
+                return NextResponse.json({ success: false, error: 'Format d\'article ajouté invalide.' }, { status: 400 });
+            }
+            const recalculated = recalculateAdditionItemServerSide(rawItem as FestiveOrderItem, isEarlyBird);
+            if (!recalculated) {
+                return NextResponse.json(
+                    { success: false, error: 'Un ou plusieurs articles ajoutés sont invalides ou non reconnus au catalogue officiel.' },
+                    { status: 400 }
+                );
+            }
+            verifiedAdditions.push(recalculated);
         }
+
+        const previousBalance = Math.round(Number(existingOrder.balance_remaining || 0) * 100) / 100;
+        const additionalAmount = Math.round(
+            verifiedAdditions.reduce((sum, item) => sum + Number(item.prixTotalLigne || 0), 0) * 100
+        ) / 100;
+        const newBalanceTotal = Math.round((previousBalance + additionalAmount) * 100) / 100;
 
         // Mise à jour en base de données
         const updatedOrder = await updateFestiveOrderAdditions(
             orderId,
             email,
-            additionalItems,
-            Number(newBalanceTotal)
+            verifiedAdditions,
+            newBalanceTotal
         );
 
-        // Préparation des informations bancaires pour l'email
+        // Préparation des informations bancaires et du QR Code SEPA EPC actualisé
         const IBAN = "BE22 0689 4683 8447";
         const BIC = "GKCCBEBB";
         const BENEFICIAIRE = "JEAN COMPERE";
         const fullNameUpper = `${existingOrder.nom.toUpperCase()} ${existingOrder.prenom.toUpperCase()}`.trim();
         const COMMUNICATION_SOLDE = `${existingOrder.id} - SOLDE FINAL - ${fullNameUpper}`;
+        const avenantQrUrl = newBalanceTotal > 0
+            ? buildEpcQrImageUrl(newBalanceTotal, COMMUNICATION_SOLDE)
+            : '';
 
-        // Tableau HTML des ajouts
-        const addedRowsHTML = additionalItems.map(item => `
+        // Tableau HTML des ajouts (montants certifiés serveur)
+        const addedRowsHTML = verifiedAdditions.map(item => `
             <tr>
                 <td style="padding: 10px 14px; border-bottom: 1px solid #EFECE6; font-size: 13px; color: #1A1A1A;">
                     <strong>${item.nomPlat || 'Mets ajouté'}</strong>
@@ -208,25 +351,38 @@ export async function POST(req: Request) {
                                                     </div>
                                                     <table style="width: 100%; font-size: 13px; line-height: 1.6;">
                                                         <tr>
-                                                            <td style="color: #666666;">Solde restant commande initiale (70%) :</td>
-                                                            <td style="text-align: right; font-weight: 600;">${(existingOrder.total_initial - existingOrder.amount_paid_initial).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                                                            <td style="color: #666666;">Solde restant avant cet avenant :</td>
+                                                            <td style="text-align: right; font-weight: 600;">${previousBalance.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                                                         </tr>
                                                         <tr>
                                                             <td style="color: #666666;">Montant des nouveaux ajouts :</td>
-                                                            <td style="text-align: right; font-weight: 600; color: #B89327;">+ ${Number(additionalAmount).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                                                            <td style="text-align: right; font-weight: 600; color: #B89327;">+ ${additionalAmount.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                                                         </tr>
                                                         <tr style="border-top: 1px solid #E8D8A6;">
                                                             <td style="padding-top: 8px; font-size: 14px; font-weight: bold; color: #1A1A1A;">Nouveau solde total à verser :</td>
-                                                            <td style="padding-top: 8px; text-align: right; font-size: 18px; font-weight: bold; color: #B89327;">${Number(newBalanceTotal).toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
+                                                            <td style="padding-top: 8px; text-align: right; font-size: 18px; font-weight: bold; color: #B89327;">${newBalanceTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</td>
                                                         </tr>
                                                     </table>
                                                 </div>
 
-                                                <!-- COORDONNÉES BANCAIRES POUR LE SOLDE -->
+                                                <!-- COORDONNÉES BANCAIRES & QR CODE SEPA POUR LE SOLDE -->
                                                 <div style="background-color: #FBFBF9; border: 1px solid #EFECE6; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-                                                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 10px;">
-                                                        COORDONNÉES BANCAIRES (SOLDE FINAL)
+                                                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #B89327; margin-bottom: 12px;">
+                                                        QR CODE &amp; COORDONNÉES BANCAIRES (SOLDE FINAL ACTUALISÉ)
                                                     </div>
+
+                                                    ${avenantQrUrl ? `
+                                                    <div style="text-align: center; background-color: #FFFFFF; border: 1px solid #E8E2D5; border-radius: 8px; padding: 18px; margin-bottom: 16px;">
+                                                        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #1A1A1A; margin-bottom: 10px;">
+                                                            Scanner avec votre application bancaire
+                                                        </div>
+                                                        <img src="${avenantQrUrl}" width="180" height="180" alt="QR Code SEPA EPC - Nouveau solde ${newBalanceTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €" style="display: block; margin: 0 auto; border-radius: 6px;" />
+                                                        <div style="font-size: 12px; color: #777777; margin-top: 8px;">
+                                                            Nouveau solde pré-rempli : <strong style="color: #B89327;">${newBalanceTotal.toLocaleString('fr-BE', { minimumFractionDigits: 2 })} €</strong>
+                                                        </div>
+                                                    </div>
+                                                    ` : ''}
+
                                                     <div style="font-size: 13px; margin-bottom: 6px;">Bénéficiaire : <strong>${BENEFICIAIRE}</strong></div>
                                                     <div style="font-size: 13px; margin-bottom: 6px;">IBAN : <strong style="font-family: monospace; background-color: #EDE8DF; padding: 2px 6px; border-radius: 4px;">${IBAN}</strong></div>
                                                     <div style="font-size: 13px; margin-bottom: 12px;">BIC : <strong>${BIC}</strong></div>
@@ -314,6 +470,8 @@ export async function POST(req: Request) {
         return NextResponse.json({
             success: true,
             order: updatedOrder,
+            additionalAmount,
+            newBalanceTotal,
             message: 'Avenant enregistré et email de confirmation envoyé avec succès.'
         });
 

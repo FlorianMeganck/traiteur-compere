@@ -43,6 +43,38 @@ function GestionCookiesContent() {
 
     const handleSave = () => {
         localStorage.setItem("cookie_preferences", JSON.stringify(preferences));
+
+        if (typeof window !== "undefined") {
+            const win = window as Window & {
+                dataLayer?: unknown[];
+                gtag?: (...args: unknown[]) => void;
+            };
+            win.dataLayer = win.dataLayer || [];
+            const analyticsState = preferences.analytical ? "granted" : "denied";
+            const marketingState = preferences.marketing ? "granted" : "denied";
+            const consentPayload = {
+                analytics_storage: analyticsState,
+                ad_storage: marketingState,
+                ad_user_data: marketingState,
+                ad_personalization: marketingState,
+            };
+
+            if (typeof win.gtag === "function") {
+                win.gtag("consent", "update", consentPayload);
+            } else {
+                (function (..._args: unknown[]) {
+                    void _args;
+                    // eslint-disable-next-line prefer-rest-params
+                    win.dataLayer!.push(arguments);
+                })("consent", "update", consentPayload);
+            }
+
+            win.dataLayer.push({
+                event: "cookie_consent_updated",
+                ...consentPayload,
+            });
+        }
+
         // Envoi du signal pour cacher le bandeau et mettre à jour GA4
         window.dispatchEvent(new Event('cookie-preferences-updated'));
         

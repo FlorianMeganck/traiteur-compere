@@ -165,6 +165,52 @@ function CommandeConfirmeeContent() {
     // État de copie des coordonnées avec feedback temporaire
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
+    // Tracking GTM DataLayer : événement purchase unique par transaction_id (protégé via sessionStorage)
+    useEffect(() => {
+        if (isLoading || !order || typeof window === "undefined") return;
+
+        const txId = String(order.orderId || "").trim();
+        if (!txId || txId === "NOEL-XXXXX") return;
+
+        const isSolde = Boolean(
+            order.isSoldeFinal ||
+            order.paymentMode === "solde_final" ||
+            order.mode === "solde_final"
+        );
+        const resolvedPaymentMode = isSolde
+            ? "solde_final"
+            : (order.mode === "acompte_30" || order.paymentMode === "acompte")
+                ? "acompte_30"
+                : "totalite_100";
+
+        const rawAmount = isSolde
+            ? Number(order.toPay ?? order.total ?? 0)
+            : Number(order.total ?? order.toPay ?? 0);
+        const numericValue = Number.isFinite(rawAmount)
+            ? Math.round(rawAmount * 100) / 100
+            : 0;
+
+        const storageFlagKey = `gtm_purchase_sent_${txId}`;
+        try {
+            if (sessionStorage.getItem(storageFlagKey) === "1") {
+                return;
+            }
+            sessionStorage.setItem(storageFlagKey, "1");
+        } catch {
+            // Poursuivre même si sessionStorage est restreint
+        }
+
+        const win = window as Window & { dataLayer?: Record<string, unknown>[] };
+        win.dataLayer = win.dataLayer || [];
+        win.dataLayer.push({
+            event: "purchase",
+            transaction_id: txId,
+            value: numericValue,
+            currency: "EUR",
+            payment_mode: resolvedPaymentMode,
+        });
+    }, [isLoading, order]);
+
     const handleCopy = (text: string, key: string) => {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text);

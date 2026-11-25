@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Check } from "lucide-react";
+import { CalendarDays, Clock, CreditCard, Gift, UtensilsCrossed, ShoppingCart, X, Plus, Minus, Check, Sparkles, ArrowRight } from "lucide-react";
 
 import { MENU_DATA, isPlatVisible } from "../data/plats-prepares";
 import { useCart, CartItem } from "../hooks/useCart";
@@ -39,6 +40,11 @@ export default function PlatsPrepares() {
     const firstAvailableWeek = displayedWeeks.find(menu =>
         menu.days.some(dayItem => isVisible(dayItem.day, menu.id))
     )?.id || displayedWeeks[0].id;
+
+    const hasAnyAvailableMeal = useMemo(
+        () => displayedWeeks.some(menu => menu.days.some(dayItem => isVisible(dayItem.day, menu.id))),
+        [displayedWeeks, isVisible]
+    );
 
     const [activeTab, setActiveTab] = useState(firstAvailableWeek);
 
@@ -335,7 +341,7 @@ export default function PlatsPrepares() {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-neutral-900 mb-1">1. Consultez le menu</h3>
-                                    <p className="text-neutral-600 text-sm leading-relaxed">Retrouvez notre menu du mois <a href="/menu/menu_mai_2026.pdf" target="_blank" rel="noopener noreferrer" className="text-[#D4AF37] hover:underline font-semibold">ici</a></p>
+                                    <p className="text-neutral-600 text-sm leading-relaxed">Découvrez chaque semaine nos plats mijotés et potages maison directement dans le calendrier ci-dessous.</p>
                                 </div>
                             </li>
                             <li className="flex items-start gap-4">
@@ -409,7 +415,36 @@ export default function PlatsPrepares() {
                         </div>
                     </div>
 
-                    {/* Menu Tabs */}
+                    {/* Menu Tabs ou Pause Saisonnière Fêtes */}
+                    {!hasAnyAvailableMeal ? (
+                        <div className="bg-white rounded-3xl shadow-xl border border-[#D4AF37]/40 p-8 sm:p-12 md:p-14 text-center max-w-4xl mx-auto relative overflow-hidden">
+                            <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#D4AF37]/10 rounded-full blur-3xl" />
+                            <div className="relative z-10 space-y-6">
+                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FAF6EB] border border-[#D4AF37]/40 text-[#927116] text-xs font-bold uppercase tracking-widest">
+                                    <Sparkles size={14} className="text-[#D4AF37]" />
+                                    <span>Pause Saisonnière • Période des Fêtes</span>
+                                </div>
+
+                                <h3 className="text-2xl sm:text-4xl font-serif text-black leading-snug">
+                                    Nos plats préparés de la semaine font une pause pour les Fêtes de fin d&apos;année
+                                </h3>
+
+                                <p className="text-neutral-600 text-base sm:text-lg font-light leading-relaxed max-w-2xl mx-auto">
+                                    Toute la brigade de notre atelier de Saint-Georges-sur-Meuse se consacre désormais à la préparation artisanale de vos <strong>Menus de Noël et de Nouvel An 2026</strong>. Retrouvez nos 3 formules 4 services et notre carte festive à emporter !
+                                </p>
+
+                                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-4">
+                                    <Link
+                                        href="/menus-fetes"
+                                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-black hover:bg-[#D4AF37] text-[#D4AF37] hover:text-black font-bold text-xs sm:text-sm uppercase tracking-wider shadow-md hover:shadow-xl transition-all duration-300"
+                                    >
+                                        <span>Découvrir les Menus de Fêtes 2026</span>
+                                        <ArrowRight size={16} />
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
                     <div className="bg-white rounded-3xl shadow-lg border border-neutral-100 overflow-hidden">
                         {/* Tab Headers */}
                         <div className="flex flex-wrap border-b border-neutral-100">
@@ -508,6 +543,7 @@ export default function PlatsPrepares() {
                             </AnimatePresence>
                         </div>
                     </div>
+                    )}
                 </div>
 
                 {/* FOOTER CTA */}

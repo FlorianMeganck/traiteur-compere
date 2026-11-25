@@ -4,6 +4,7 @@ import {
     getFestiveOrdersPendingReminder,
     getFestiveOrder,
     markFestiveOrderReminderSent,
+    VALIDATED_REMINDER_STATUSES,
     FestiveOrderRecord
 } from '../../../lib/db';
 import {
@@ -17,34 +18,26 @@ const resend = (resendApiKey && resendApiKey.startsWith('re_')) ? new Resend(res
 const FROM_EMAIL = 'Traiteur Compère <contact@traiteur-compere.be>';
 
 /**
- * Vérification de sécurité :
- * - Vercel Cron Job envoie le header "Authorization: Bearer <CRON_SECRET>"
- * - Permet le test manuel via ?key=test-compere ou ?key=<CRON_SECRET>
- * - Autorise l'exécution locale en dev
+ * Vérification stricte de sécurité :
+ * - En production : exige exclusivement le header "Authorization: Bearer <CRON_SECRET>"
+ * - Hors production : autorise l'exécution locale en dev, mais bloque les paramètres sensibles sans CRON_SECRET
  */
-function isAuthorized(req: Request): boolean {
+function evaluateAuth(req: Request): { authorized: boolean; hasCronSecret: boolean } {
     const authHeader = req.headers.get('authorization');
-    const { searchParams } = new URL(req.url);
-    const testKey = searchParams.get('key') || searchParams.get('secret');
+    const cronSecret = process.env.CRON_SECRET?.trim();
+    const hasCronSecret = Boolean(cronSecret && authHeader === `Bearer ${cronSecret}`);
 
-    const isValidCron = Boolean(process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`);
-    const isValidManualTest = testKey === 'test-compere' || Boolean(process.env.CRON_SECRET && testKey === process.env.CRON_SECRET);
-
-    if (isValidCron || isValidManualTest) {
-        return true;
+    if (process.env.NODE_ENV === 'production') {
+        return { authorized: hasCronSecret, hasCronSecret };
     }
 
-    // Autoriser en local / dev
-    if (process.env.NODE_ENV !== 'production') {
-        return true;
-    }
-
-    return false;
+    return { authorized: true, hasCronSecret };
 }
 
 async function handleCronExecution(req: Request) {
     // 1. Sécurité
-    if (!isAuthorized(req)) {
+    const { authorized, hasCronSecret } = evaluateAuth(req);
+    if (!authorized) {
         return NextResponse.json({
             success: false,
             error: 'Unauthorized'
@@ -52,10 +45,18 @@ async function handleCronExecution(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
+    const hasDangerousTestParams = searchParams.has('forceSend') || searchParams.has('targetDate');
+    if (hasDangerousTestParams && !hasCronSecret) {
+        return NextResponse.json({
+            success: false,
+            error: 'Forbidden: forceSend et targetDate exigent une authentification Bearer CRON_SECRET.'
+        }, { status: 403 });
+    }
+
     const dryRun = searchParams.get('dryRun') === 'true';
     const forceOrderId = searchParams.get('order') || searchParams.get('orderId');
-    const forceSend = searchParams.get('forceSend') === 'true';
-    const targetDateParam = searchParams.get('targetDate'); // YYYY-MM-DD pour simulation
+    const forceSend = hasCronSecret && searchParams.get('forceSend') === 'true';
+    const targetDateParam = hasCronSecret ? searchParams.get('targetDate') : null; // YYYY-MM-DD pour simulation authentifiée
     const allowCatchUp = searchParams.get('catchUp') === 'true';
 
     // Date de référence (aujourd'hui ou date simulée pour test)
@@ -110,6 +111,27 @@ async function handleCronExecution(req: Request) {
 
         // 3. Traitement de chaque commande
         for (const order of candidates) {
+            // Vérification défensive : ignorer strictement toute commande dont le paiement initial n'est pas validé
+            if (
+                order.status === 'pending_payment' ||
+                order.status === 'en_attente' ||
+                !(VALIDATED_REMINDER_STATUSES as readonly string[]).includes(order.status)
+            ) {
+                skippedCount++;
+                results.push({
+                    orderId: order.id,
+                    email: order.email,
+                    mode: order.payment_mode,
+                    balanceRemaining: Number(order.balance_remaining || 0),
+                    repasDate: order.repas_date,
+                    retraitSlot: order.retrait_slot,
+                    diffPickupDays: null,
+                    diffMealDays: null,
+                    status: 'skipped'
+                });
+                continue;
+            }
+
             const check = isOrderDueForReminder(order, referenceDate, { allowCatchUp });
             const isEligible = forceSend || check.isDue;
 

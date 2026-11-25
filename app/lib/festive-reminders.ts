@@ -14,23 +14,41 @@ export const ATELIER_TEL = "+32 468 38 50 82";
 export function parseRepasDate(repasDateStr: string): Date | null {
     if (!repasDateStr) return null;
     const str = repasDateStr.trim();
+    if (!str) return null;
 
     // 1. Format ISO : YYYY-MM-DD
     const isoMatch = str.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
     if (isoMatch) {
-        return new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]), 12, 0, 0);
+        const year = Number(isoMatch[1]);
+        const month = Number(isoMatch[2]) - 1;
+        const day = Number(isoMatch[3]);
+        const candidate = new Date(year, month, day, 12, 0, 0);
+        if (
+            candidate.getFullYear() === year &&
+            candidate.getMonth() === month &&
+            candidate.getDate() === day
+        ) {
+            return candidate;
+        }
+        return null;
     }
 
-    // 2. Format français textuel : "Jeudi 24 Décembre 2026", "24 Décembre", "1er Janvier 2027", etc.
-    const frMatch = str.match(/(?:1er|\d{1,2})\s*(décembre|decembre|janvier)(?:\s*(\d{4}))?/i);
+    // 2. Format français textuel : "Jeudi 24 Décembre 2026", "24 Décembre", "Vendredi 1er Janvier 2027", etc.
+    const frMatch = str.match(/(\d{1,2})(?:er|ère)?\s*(décembre|decembre|janvier)(?:\s*(\d{4}))?/i);
     if (frMatch) {
-        const isPremier = /1er/i.test(frMatch[0]);
-        const dayNumberMatch = str.match(/\d{1,2}/);
-        const day = isPremier ? 1 : (dayNumberMatch ? Number(dayNumberMatch[0]) : 1);
-        const monthStr = frMatch[1].toLowerCase();
-        const year = frMatch[2] ? Number(frMatch[2]) : (monthStr.includes('janv') ? 2027 : 2026);
+        const day = Number(frMatch[1]);
+        const monthStr = frMatch[2].toLowerCase();
+        const year = frMatch[3] ? Number(frMatch[3]) : (monthStr.includes('janv') ? 2027 : 2026);
         const month = monthStr.includes('janv') ? 0 : 11;
-        return new Date(year, month, day, 12, 0, 0);
+        const candidate = new Date(year, month, day, 12, 0, 0);
+        if (
+            candidate.getFullYear() === year &&
+            candidate.getMonth() === month &&
+            candidate.getDate() === day
+        ) {
+            return candidate;
+        }
+        return null;
     }
 
     // 3. Fallback standard Date.parse

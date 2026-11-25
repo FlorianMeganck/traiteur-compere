@@ -27,6 +27,38 @@ export default function CookieBanner() {
         };
     }, []);
 
+    const pushConsentUpdate = (prefs: { essential: boolean; analytical: boolean; marketing: boolean }) => {
+        if (typeof window === 'undefined') return;
+        const win = window as Window & {
+            dataLayer?: unknown[];
+            gtag?: (...args: unknown[]) => void;
+        };
+        win.dataLayer = win.dataLayer || [];
+        const analyticsState = prefs.analytical ? 'granted' : 'denied';
+        const marketingState = prefs.marketing ? 'granted' : 'denied';
+        const consentPayload = {
+            analytics_storage: analyticsState,
+            ad_storage: marketingState,
+            ad_user_data: marketingState,
+            ad_personalization: marketingState
+        };
+
+        if (typeof win.gtag === 'function') {
+            win.gtag('consent', 'update', consentPayload);
+        } else {
+            (function (..._args: unknown[]) {
+                void _args;
+                // eslint-disable-next-line prefer-rest-params
+                win.dataLayer!.push(arguments);
+            })('consent', 'update', consentPayload);
+        }
+
+        win.dataLayer.push({
+            event: 'cookie_consent_updated',
+            ...consentPayload
+        });
+    };
+
     const handleRefuseAll = () => {
         const preferences = {
             essential: true,
@@ -34,6 +66,8 @@ export default function CookieBanner() {
             marketing: false
         };
         localStorage.setItem("cookie_preferences", JSON.stringify(preferences));
+        pushConsentUpdate(preferences);
+        window.dispatchEvent(new Event('cookie-preferences-updated'));
         setIsVisible(false);
     };
 
@@ -44,7 +78,7 @@ export default function CookieBanner() {
             marketing: true
         };
         localStorage.setItem("cookie_preferences", JSON.stringify(preferences));
-        // Dispatch event if needed for analytics scripts to pick up immediately
+        pushConsentUpdate(preferences);
         window.dispatchEvent(new Event('cookie-preferences-updated'));
         setIsVisible(false);
     };

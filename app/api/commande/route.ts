@@ -35,16 +35,37 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'Votre panier est vide' }, { status: 400 });
         }
 
-        // 1.5 Validation reCAPTCHA côté serveur (sécurisée et non-bloquante si configuration incomplète)
-        if (captchaToken && process.env.RECAPTCHA_SECRET_KEY) {
+        // 1.5 Validation stricte reCAPTCHA côté serveur lorsque RECAPTCHA_SECRET_KEY est défini
+        if (process.env.RECAPTCHA_SECRET_KEY) {
+            if (!captchaToken || typeof captchaToken !== 'string' || !captchaToken.trim()) {
+                return NextResponse.json(
+                    { success: false, error: 'Veuillez valider le contrôle anti-robot (reCAPTCHA).' },
+                    { status: 400 }
+                );
+            }
+
             try {
-                await fetch('https://www.google.com/recaptcha/api/siteverify', {
+                const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}`
+                    body: new URLSearchParams({
+                        secret: process.env.RECAPTCHA_SECRET_KEY,
+                        response: captchaToken.trim()
+                    }).toString()
                 });
-            } catch {
-                // Non bloquant
+                const verifyData = (await verifyRes.json()) as { success?: boolean };
+                if (verifyData.success !== true) {
+                    return NextResponse.json(
+                        { success: false, error: 'La validation reCAPTCHA a échoué ou a expiré. Veuillez réessayer.' },
+                        { status: 400 }
+                    );
+                }
+            } catch (captchaErr) {
+                console.error('Erreur lors de la vérification reCAPTCHA :', captchaErr);
+                return NextResponse.json(
+                    { success: false, error: 'Impossible de vérifier le reCAPTCHA. Veuillez réessayer.' },
+                    { status: 400 }
+                );
             }
         }
 
@@ -167,10 +188,6 @@ export async function POST(req: Request) {
         const isFestiveOrder = isOrderFestiveContext || hasFestiveItem;
         const orderTitle = isFestiveOrder ? 'Menus de Fêtes 2026' : 'Plats Préparés';
 
-        // Génère un numéro unique à 5 chiffres (préfixé NOEL- pour les fêtes)
-        const randomDigits = Math.floor(Math.random() * 90000) + 10000;
-        const formattedOrderNumber = isFestiveOrder ? `NOEL-${randomDigits}` : String(randomDigits);
-
         // Informations bancaires officielles
         const IBAN = "BE22 0689 4683 8447";
         const BIC = "GKCCBEBB";
@@ -178,9 +195,6 @@ export async function POST(req: Request) {
         const cleanNom = String(Nom || '').trim().toUpperCase();
         const cleanPrenom = String(Prenom || '').trim().toUpperCase();
         const isAcompteMode = isFestiveOrder && validationMode === 'acompte_30';
-        const COMMUNICATION = isFestiveOrder
-            ? `${formattedOrderNumber} - ${isAcompteMode ? 'ACOMPTE 30%' : 'TOTAL 100%'} - ${cleanNom} ${cleanPrenom}`
-            : `COMMANDE #${formattedOrderNumber} ${cleanNom} ${cleanPrenom}`;
 
         // Calcul tarifaire certifié côté serveur (Early Bird -5% et acompte 30% / 100%)
         const festivePricing = calculateFestiveOrderPricing(
@@ -202,14 +216,18 @@ export async function POST(req: Request) {
             ? `${baseUrl.replace(/\/$/, '')}/api/orders/confirm-payment?token=${encodeURIComponent(validationToken)}`
             : '';
 
-        // QR Code EPC SEPA pour le montant choisi (30% ou 100%)
-        const epcQrUrl = buildEpcQrImageUrl(amountToPayNow, COMMUNICATION);
-
-        // 2.5 Persistance en Base de Données (festive_orders)
+        // 2.5 Génération garantie d'un numéro unique NOEL-XXXXX et persistance en Base de Données (jusqu'à 10 tentatives)
+        let formattedOrderNumber = '';
         if (isFestiveOrder) {
-            try {
-                await insertFestiveOrder({
-                    id: formattedOrderNumber,
+            const MAX_ID_ATTEMPTS = 10;
+            let inserted = false;
+
+            for (let attempt = 1; attempt <= MAX_ID_ATTEMPTS; attempt++) {
+                const candidateDigits = Math.floor(Math.random() * 90000) + 10000;
+                const candidateOrderNumber = `NOEL-${candidateDigits}`;
+
+                const ok = await insertFestiveOrder({
+                    id: candidateOrderNumber,
                     prenom: cleanPrenom,
                     nom: cleanNom,
                     email: String(Mail).trim().toLowerCase(),
@@ -227,10 +245,35 @@ export async function POST(req: Request) {
                     additional_items: [],
                     notes: details_projet || ''
                 });
-            } catch (dbErr) {
-                console.error("Erreur enregistrement DB festive_orders (non-bloquante) :", dbErr);
+
+                if (ok) {
+                    formattedOrderNumber = candidateOrderNumber;
+                    inserted = true;
+                    break;
+                }
             }
+
+            if (!inserted) {
+                console.error('Échec critique : impossible de générer un identifiant NOEL-XXXXX unique après 10 tentatives.');
+                return NextResponse.json(
+                    {
+                        success: false,
+                        error: 'Impossible d\'enregistrer la commande après plusieurs tentatives. Veuillez réessayer dans un instant.'
+                    },
+                    { status: 500 }
+                );
+            }
+        } else {
+            const randomDigits = Math.floor(Math.random() * 90000) + 10000;
+            formattedOrderNumber = String(randomDigits);
         }
+
+        const COMMUNICATION = isFestiveOrder
+            ? `${formattedOrderNumber} - ${isAcompteMode ? 'ACOMPTE 30%' : 'TOTAL 100%'} - ${cleanNom} ${cleanPrenom}`
+            : `COMMANDE #${formattedOrderNumber} ${cleanNom} ${cleanPrenom}`;
+
+        // QR Code EPC SEPA pour le montant choisi (30% ou 100%)
+        const epcQrUrl = buildEpcQrImageUrl(amountToPayNow, COMMUNICATION);
 
         // Totalisation de la production cuisine pour le traiteur
         const kitchenTotals: Record<string, { category: string; count: number }> = {};

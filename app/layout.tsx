@@ -84,6 +84,35 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavigationJsonLd) }}
         />
+        <script
+          id="google-consent-mode"
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+window.gtag = gtag;
+gtag('consent', 'default', {
+  'analytics_storage': 'denied',
+  'ad_storage': 'denied',
+  'ad_user_data': 'denied',
+  'ad_personalization': 'denied',
+  'wait_for_update': 500
+});
+try {
+  var savedPrefs = localStorage.getItem('cookie_preferences');
+  if (savedPrefs) {
+    var parsedPrefs = JSON.parse(savedPrefs);
+    var analyticsConsent = parsedPrefs && parsedPrefs.analytical === true ? 'granted' : 'denied';
+    var marketingConsent = parsedPrefs && parsedPrefs.marketing === true ? 'granted' : 'denied';
+    gtag('consent', 'update', {
+      'analytics_storage': analyticsConsent,
+      'ad_storage': marketingConsent,
+      'ad_user_data': marketingConsent,
+      'ad_personalization': marketingConsent
+    });
+  }
+} catch (e) {}`,
+          }}
+        />
         <Script
           id="google-tag-manager"
           strategy="afterInteractive"
