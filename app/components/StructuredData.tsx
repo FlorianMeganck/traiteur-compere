@@ -174,13 +174,13 @@ export default function StructuredData() {
                   "description": "Assortiment de charcuteries artisanales, pâté de campagne, cornichons, salades de pommes de terre, crudités variées et œufs durs.",
                   "offers": {
                     "@type": "Offer",
-                    "price": "14.00",
+                    "price": "16.00",
                     "priceCurrency": "EUR",
                     "priceSpecification": {
                       "@type": "UnitPriceSpecification",
-                      "price": "14.00",
+                      "price": "16.00",
                       "priceCurrency": "EUR",
-                      "unitText": "par personne HTVA"
+                      "unitText": "par personne HTVA (min. 10 personnes)"
                     }
                   }
                 },
@@ -190,13 +190,13 @@ export default function StructuredData() {
                   "description": "Jambon d'Ardenne, saucisson gaumais, boudin blanc et noir, rôti de porc froid moutardé, salades et féculents.",
                   "offers": {
                     "@type": "Offer",
-                    "price": "16.00",
+                    "price": "18.00",
                     "priceCurrency": "EUR",
                     "priceSpecification": {
                       "@type": "UnitPriceSpecification",
-                      "price": "16.00",
+                      "price": "18.00",
                       "priceCurrency": "EUR",
-                      "unitText": "par personne HTVA"
+                      "unitText": "par personne HTVA (min. 10 personnes)"
                     }
                   }
                 },
@@ -206,13 +206,13 @@ export default function StructuredData() {
                   "description": "Saumon fumé extra doux, carpaccio de bœuf parfumé, assortiment de viandes froides nobles et salades raffinées.",
                   "offers": {
                     "@type": "Offer",
-                    "price": "18.00",
+                    "price": "20.00",
                     "priceCurrency": "EUR",
                     "priceSpecification": {
                       "@type": "UnitPriceSpecification",
-                      "price": "18.00",
+                      "price": "20.00",
                       "priceCurrency": "EUR",
-                      "unitText": "par personne HTVA"
+                      "unitText": "par personne HTVA (min. 10 personnes)"
                     }
                   }
                 },
@@ -228,7 +228,23 @@ export default function StructuredData() {
                       "@type": "UnitPriceSpecification",
                       "price": "22.00",
                       "priceCurrency": "EUR",
-                      "unitText": "par personne HTVA"
+                      "unitText": "par personne HTVA (min. 10 personnes)"
+                    }
+                  }
+                },
+                {
+                  "@type": "MenuItem",
+                  "name": "Buffet Gibier",
+                  "description": "Jambon de sanglier, assortiment de boudins de Noël, rosbif et rôti de porc cuit, pilons de poulet, dinde et canard farcis, mousse de foie, duo de saumon, tomate-crevettes grises, assortiment de pâtés de gibier.",
+                  "offers": {
+                    "@type": "Offer",
+                    "price": "23.00",
+                    "priceCurrency": "EUR",
+                    "priceSpecification": {
+                      "@type": "UnitPriceSpecification",
+                      "price": "23.00",
+                      "priceCurrency": "EUR",
+                      "unitText": "par personne HTVA (min. 10 personnes)"
                     }
                   }
                 }
@@ -384,12 +400,12 @@ export default function StructuredData() {
                 "offers": {
                   "@type": "Offer",
                   "priceCurrency": "EUR",
-                  "price": "14.00",
+                  "price": "16.00",
                   "availability": "https://schema.org/InStock",
                   "url": "https://www.traiteur-compere.be/formules"
                 }
               },
-              "price": "14.00",
+              "price": "16.00",
               "priceCurrency": "EUR",
               "availability": "https://schema.org/InStock",
               "url": "https://www.traiteur-compere.be/formules"
@@ -410,6 +426,26 @@ export default function StructuredData() {
                 }
               },
               "price": "22.00",
+              "priceCurrency": "EUR",
+              "availability": "https://schema.org/InStock",
+              "url": "https://www.traiteur-compere.be/formules"
+            },
+            {
+              "@type": "Offer",
+              "itemOffered": {
+                "@type": "Product",
+                "name": "Formule Buffet Froid Gibier",
+                "description": "Buffet froid festif : jambon de sanglier, boudins de Noël, dinde et canard farcis, duo de saumon, tomate-crevettes grises et pâtés de gibier.",
+                "image": "https://www.traiteur-compere.be/images/buffet_ardennais.jpeg",
+                "offers": {
+                  "@type": "Offer",
+                  "priceCurrency": "EUR",
+                  "price": "23.00",
+                  "availability": "https://schema.org/InStock",
+                  "url": "https://www.traiteur-compere.be/formules"
+                }
+              },
+              "price": "23.00",
               "priceCurrency": "EUR",
               "availability": "https://schema.org/InStock",
               "url": "https://www.traiteur-compere.be/formules"

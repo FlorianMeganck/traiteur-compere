@@ -168,7 +168,7 @@ const BBQ_OPTIONS: Record<BBQType, {
     }
 };
 
-type BuffetFroidType = 'campagnard' | 'ardenais' | 'reception' | 'gala';
+type BuffetFroidType = 'campagnard' | 'ardenais' | 'reception' | 'gala' | 'gibier';
 
 const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
     label: string;
@@ -189,8 +189,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Salades de pommes de terre",
             "Crudités variées et œuf dur"
         ],
-        smallPrice: 17,
-        mediumPrice: 14,
+        smallPrice: 18,
+        mediumPrice: 16,
         image: '/images/buffet_campagnard.jpeg'
     },
     ardenais: {
@@ -203,8 +203,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Rôti de porc froid moutardé",
             "Salades et féculents"
         ],
-        smallPrice: 18,
-        mediumPrice: 16,
+        smallPrice: 20,
+        mediumPrice: 18,
         image: '/images/buffet_ardennais.jpeg'
     },
     reception: {
@@ -217,8 +217,8 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
             "Assortiment de viandes froides nobles",
             "Salades raffinées"
         ],
-        smallPrice: 20,
-        mediumPrice: 18,
+        smallPrice: 22,
+        mediumPrice: 20,
         image: '/images/Buffet-froid-reception.jpeg'
     },
     gala: {
@@ -234,6 +234,20 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
         smallPrice: 24,
         mediumPrice: 22,
         image: '/images/buffet_gala.png'
+    },
+    gibier: {
+        label: "Gibier",
+        id: "buffet_gibier",
+        description: "Un buffet de caractère aux saveurs forestières et festives, préparé artisanalement.",
+        composition: [
+            "Jambon de sanglier et assortiment de pâtés de gibier",
+            "Assortiment de boudins de Noël et mousse de foie",
+            "Dinde et canard farcis, rosbif, rôti de porc cuit et pilons de poulet",
+            "Duo de saumon et tomate-crevettes grises"
+        ],
+        smallPrice: 25,
+        mediumPrice: 23,
+        image: '/images/buffet_ardennais.jpeg'
     }
 };
 
@@ -557,12 +571,12 @@ export default function Formules() {
                             <div className="lg:col-span-5 space-y-8">
 
                                 {/* Navigation des onglets */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
                                     {(Object.keys(BUFFETS_FROIDS_OPTIONS) as Array<BuffetFroidType>).map((key) => (
                                         <button
                                             key={key}
                                             onClick={() => setActiveBuffetTab(key)}
-                                            className={`px-4 py-3 rounded-lg text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 ${activeBuffetTab === key
+                                            className={`px-3 py-3 rounded-lg text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 ${activeBuffetTab === key
                                                 ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
                                                 : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
                                                 }`}
@@ -597,15 +611,15 @@ export default function Formules() {
                                     <div className="flex flex-wrap gap-4 mt-8">
                                         <Link
                                             href={`/contact?menu=${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].id}&convives=moins_25`}
-                                            className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                                            className="flex-1 min-w-[140px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                                         >
-                                            <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Moins de 25 pers.</p>
+                                            <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">10 à 24 pers.</p>
                                             <p className="text-xl font-bold text-neutral-800 font-serif">{BUFFETS_FROIDS_OPTIONS[activeBuffetTab].smallPrice}€ <span className="text-sm font-normal text-neutral-500 font-sans">/ pers HTVA</span></p>
                                         </Link>
 
                                         <Link
                                             href={`/contact?menu=${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].id}&convives=25_250`}
-                                            className="flex-1 bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
+                                            className="flex-1 min-w-[140px] bg-black p-4 rounded-xl text-center shadow-lg transform hover:-translate-y-1 hover:shadow-xl transition-all duration-300 flex flex-col justify-center cursor-pointer relative overflow-hidden scale-105"
                                         >
                                             <div className="absolute top-0 left-0 w-full h-1 bg-[#D4AF37]" />
                                             <p className="text-xs font-bold text-[#D4AF37] mb-1 uppercase tracking-wider">25 à 250 pers.</p>
@@ -614,12 +628,16 @@ export default function Formules() {
 
                                         <Link
                                             href={`/contact?menu=${BUFFETS_FROIDS_OPTIONS[activeBuffetTab].id}&convives=plus_250`}
-                                            className="flex-1 bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
+                                            className="flex-1 min-w-[140px] bg-neutral-50 p-4 rounded-xl text-center border border-neutral-200 hover:border-black hover:shadow-md transition-all duration-300 group flex flex-col justify-center cursor-pointer hover:-translate-y-0.5"
                                         >
                                             <p className="text-xs font-bold text-neutral-500 mb-1 uppercase tracking-wider group-hover:text-black transition-colors">Plus de 250 pers.</p>
                                             <p className="text-xl font-bold text-neutral-800 font-serif">Sur devis</p>
                                         </Link>
                                     </div>
+
+                                    <p className="mt-4 text-xs font-semibold text-[#996515] bg-[#FAF8F5] border border-[#E8E2D5] rounded-xl px-4 py-2.5 text-center">
+                                        ℹ️ Commande minimum de 10 personnes
+                                    </p>
                                 </div>
                             </div>
 

@@ -34,6 +34,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ success: false, error: 'Champs obligatoires manquants (Nom, Email)' }, { status: 400 });
         }
 
+        // Minimum 10 personnes pour les buffets froids
+        if (typeof Type_Evenement === 'string' && Type_Evenement.includes('Buffet Froid') && Nombre_Convives !== undefined) {
+            const numericMatch = String(Nombre_Convives).trim().match(/^\d+$/);
+            if (numericMatch && parseInt(numericMatch[0], 10) < 10) {
+                return NextResponse.json(
+                    { success: false, error: 'Commande minimum de 10 personnes pour les buffets froids.' },
+                    { status: 400 }
+                );
+            }
+        }
+
         // Verify captcha if provided and configured
         if (captchaToken && process.env.RECAPTCHA_SECRET_KEY) {
             try {

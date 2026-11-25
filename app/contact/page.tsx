@@ -183,12 +183,13 @@ const SIDES_COLD = ["Salade de Pâtes Pesto", "Salade de Pâtes Curry", "Salade 
 const feculentsBBQ = ["Pomme de terre en chemise", "Gratin Dauphinois", "Grenailles au Romarin", "Baguette", "Petit pain"];
 
 const BUFFET_FROID_PRICES: Record<string, { small: number; medium: number }> = {
-    buffet_campagnard: { small: 17, medium: 14 },
-    buffet_ardenais: { small: 18, medium: 16 },
-    buffet_ardennais: { small: 18, medium: 16 },
-    ardennais: { small: 18, medium: 16 },
-    buffet_reception: { small: 20, medium: 18 },
-    buffet_gala: { small: 24, medium: 22 }
+    buffet_campagnard: { small: 18, medium: 16 },
+    buffet_ardenais: { small: 20, medium: 18 },
+    buffet_ardennais: { small: 20, medium: 18 },
+    ardennais: { small: 20, medium: 18 },
+    buffet_reception: { small: 22, medium: 20 },
+    buffet_gala: { small: 24, medium: 22 },
+    buffet_gibier: { small: 25, medium: 23 }
 };
 
 const feculentsFroids = [
@@ -227,6 +228,11 @@ const buffetCompositions: Record<string, string[]> = {
         "Duo de jambon sur griffe", "Mousse de foie de canard au Sauternes", "Trio de viandes braisées",
         "Pilon de poulet braisé", "Saumon aux deux saveurs", "Farandole de langoustines",
         "Tomates aux crevettes grises", "Terrine de sandre au basilic"
+    ],
+    'Buffet Froid Gibier': [
+        "Jambon de sanglier", "Assortiment de boudins de Noël", "Rosbif et rôti de porc cuit",
+        "Pilons de poulet", "Dinde et canard farcis", "Mousse de foie",
+        "Duo de saumon", "Tomate-crevettes grises", "Assortiment de pâtés de gibier"
     ]
 };
 
@@ -424,7 +430,7 @@ const SAUCES_CHAUDES_LIST = [
 
 // OPTIONS
 const OPTIONS_STANDARD = ["Moins de 20", "20 à 50", "50 à 100", "Plus de 100"];
-const OPTIONS_BUFFET_FROID = ["Moins de 25", "25 à 250", "Plus de 250"];
+const OPTIONS_BUFFET_FROID = ["10 à 24", "25 à 250", "Plus de 250"];
 const OPTIONS_BBQ = ["Moins de 30", "30 à 90", "90 à 170", "170 à 250", "Plus de 250"];
 const OPTIONS_COCHON = ["Moins de 25", "25 à 180", "Plus de 180"]; // Specific for Cochon/Porchetta
 const OPTIONS_BUFFET = ["Moins de 40", "40 et plus"];
@@ -823,6 +829,8 @@ function ContactForm() {
                     newData.Type_Evenement = 'Buffet Froid Réception';
                 } else if (menuParam === 'buffet_gala') {
                     newData.Type_Evenement = 'Buffet Froid Gala';
+                } else if (menuParam === 'buffet_gibier') {
+                    newData.Type_Evenement = 'Buffet Froid Gibier';
                 } else if (menuParam === 'ardennais') {
                     newData.Type_Evenement = 'Buffet Ardennais';
                 } else if (menuParam === 'gala') {
@@ -891,8 +899,16 @@ function ContactForm() {
                 } else {
                     // Keyword/Range fallback detection
                     let found = "";
-                    if (safeParam.includes("moins")) {
-                        found = opts.find(o => o.startsWith("Moins de")) || "";
+                    if (safeParam.includes("moins") || safeParam === "10_24" || safeParam === "10a24") {
+                        found = opts.find(o => o.startsWith("Moins de") || o.startsWith("10 à 24")) || "";
+                    } else if (/^\d+$/.test(safeParam)) {
+                        const num = parseInt(safeParam, 10);
+                        if (isBuffetFroidMode) {
+                            if (num < 10) found = safeParam;
+                            else if (num < 25) found = "10 à 24";
+                            else if (num <= 250) found = "25 à 250";
+                            else found = "Plus de 250";
+                        }
                     } else if (safeParam.includes("plus") || safeParam.includes("plus de") || safeParam.includes("et plus")) {
                         found = opts.find(o => o.startsWith("Plus de") || o.endsWith("plus")) || "";
                     } else if (safeParam.includes("30") && safeParam.includes("90")) {
@@ -977,7 +993,9 @@ function ContactForm() {
         } else if (isBuffetFroidMode) {
             const prices = BUFFET_FROID_PRICES[menuParam || ''];
             if (prices) {
-                if (formData.Nombre_Convives === 'Moins de 25') {
+                if (formData.Nombre_Convives === 'Plus de 250') {
+                    base = -1; // Sur devis
+                } else if (formData.Nombre_Convives === '10 à 24' || formData.Nombre_Convives === 'Moins de 25') {
                     base = prices.small;
                 } else {
                     base = prices.medium;
@@ -1327,7 +1345,14 @@ function ContactForm() {
         if (!isPlatPrepare && !formData.Date.trim()) newErrors.Date = "Requis";
 
         // Pour un plat préparé, on ne force pas le nombre de convives
-        if (!isPlatPrepare && !formData.Nombre_Convives.trim()) newErrors.Nombre_Convives = "Requis";
+        if (!isPlatPrepare && !formData.Nombre_Convives.trim()) {
+            newErrors.Nombre_Convives = "Requis";
+        } else if (isBuffetFroid) {
+            const numericMatch = formData.Nombre_Convives.trim().match(/^\d+$/);
+            if (numericMatch && parseInt(numericMatch[0], 10) < 10) {
+                newErrors.Nombre_Convives = "Commande minimum de 10 personnes pour les buffets froids.";
+            }
+        }
 
         // Dynamic Validation
         if (isMenusFetes) {
@@ -2996,9 +3021,15 @@ function ContactForm() {
 
         return (
             <div className="space-y-8 animate-fade-in mt-8">
-                <h3 className="text-xl font-bold text-neutral-800 mb-6 border-b pb-2 uppercase tracking-wide">
-                    Composition de votre Buffet
-                </h3>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2 mb-6">
+                    <h3 className="text-xl font-bold text-neutral-800 uppercase tracking-wide">
+                        Composition de votre Buffet
+                    </h3>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#996515] bg-[#FAF8F5] border border-[#E8E2D5] px-3 py-1 rounded-full w-fit">
+                        <span>ℹ️</span>
+                        <span>Commande minimum de 10 personnes</span>
+                    </span>
+                </div>
                 {FormAllergenLink({ section: 'buffets' })}
 
                 {renderServiceToggle("Sur devis", "Mise en place, réassort et service de votre buffet sur place.")}
@@ -3881,6 +3912,15 @@ function ContactForm() {
                             hasError={!!errors.Nombre_Convives}
                             onSelect={handleSelectMeat}
                         />
+                        {isBuffetFroid && (
+                            <p className="mt-2 text-xs font-medium text-[#996515] flex items-center gap-1.5">
+                                <span>ℹ️</span>
+                                <span>Commande minimum de 10 personnes (tarif &lt; 25 pers. appliqué de 10 à 24 pers.).</span>
+                            </p>
+                        )}
+                        {errors.Nombre_Convives && (
+                            <p className="mt-1 text-xs text-red-600 font-medium">{errors.Nombre_Convives}</p>
+                        )}
                     </div>
                 </div>
             )}

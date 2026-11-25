@@ -121,7 +121,7 @@ const PORTES_ENTREE = [
 const FORMULES_PHARES = [
   {
     title: "Buffet Froid Campagnard",
-    priceLabel: "dès 14 € / pers.",
+    priceLabel: "dès 16 € / pers.",
     subtitle:
       "Charcuteries artisanales, pâté de campagne, salades maison et crudités fraîches.",
     image: "/images/formule-buffet-campagnard.jpg",
