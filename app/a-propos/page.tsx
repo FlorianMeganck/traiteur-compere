@@ -7,18 +7,18 @@ import Link from "next/link";
 const ENGAGEMENTS_ATELIER = [
     {
         num: "01",
-        title: "Provenance & sélection des pièces",
-        text: "Nous travaillons en circuit court avec des éleveurs et artisans de Hesbaye et de la province de Liège, dont la Boucherie Otte à Saint-Georges-sur-Meuse, afin de garantir la tenue, l'origine et la fraîcheur de chaque coupe.",
+        title: "Proximité & Ancrage en Hesbaye",
+        text: "Entre notre atelier de Fexhe-le-Haut-Clocher et le partenariat historique avec la Boucherie Otte à Saint-Georges-sur-Meuse, nous privilégions le circuit court avec les producteurs de Hesbaye et de la province de Liège, et assurons une grande réactivité pour nos clients de Waremme, Liège, Ans, Awans et Hannut.",
     },
     {
         num: "02",
-        title: "Fait-maison & cuissons lentes",
-        text: "Dans notre atelier de Fexhe-le-Haut-Clocher, chaque préparation repose sur la transmission du geste : fonds réduits, cuissons lentes, haute charcuterie et plats cuisinés au rythme des saisons, sans conservateurs industriels.",
+        title: "Qualité & Travail artisanal en atelier",
+        text: "Chaque commande repose sur une sélection rigoureuse des viandes et matières premières, une fraîcheur irréprochable et une préparation maison en atelier : charcuteries fines, plats cuisinés, buffets froids et chauds, servis en portions généreuses préparées à la commande, sans conservateurs industriels.",
     },
     {
         num: "03",
-        title: "Arts de la table & service sur-mesure",
-        text: "Du repas familial aux réceptions d'entreprise à Waremme, Liège, Ans, Awans, Crisnée, Bierset ou Hannut, nous veillons au dressage soigné, à la générosité des portions et à une organisation ponctuelle.",
+        title: "Événements, Réceptions & Grands Rassemblements",
+        text: "De la table familiale aux grandes réceptions — mariages, banquets et événements d'entreprise — jusqu'aux rendez-vous festifs populaires tels que les fêtes locales, marchés et chalets de Noël, notre équipe s'appuie sur une logistique rodée, un dressage soigné et un service ponctuel.",
     },
 ];
 
@@ -42,7 +42,7 @@ export default function About() {
                     </h1>
                     <div className="w-24 h-[1px] bg-[#D4AF37] mx-auto mb-8" />
                     <blockquote className="text-lg sm:text-xl md:text-2xl font-serif italic text-neutral-700 leading-relaxed max-w-3xl mx-auto">
-                        « Depuis deux siècles, notre Maison unit la rigueur bouchère aux arts de la table : sélection des pièces, cuissons lentes et dressage soigné pour vos réceptions en province de Liège. »
+                        « Depuis deux siècles, notre Maison unit la rigueur bouchère aux arts de la table : sélection des pièces, préparations maison et dressage soigné pour vos réceptions en province de Liège. »
                     </blockquote>
                 </motion.div>
             </section>
@@ -236,7 +236,7 @@ export default function About() {
                                         Aujourd&apos;hui, Christophe Compère dirige l&apos;atelier de Fexhe-le-Haut-Clocher et perpétue l&apos;activité familiale autour des arts de la table : buffets froids et chauds, plats préparés de la semaine et menus de fêtes.
                                     </p>
                                     <p>
-                                        De la présence hivernale au Chalet de Noël de Saint-Georges-sur-Meuse aux banquets d&apos;entreprises et d&apos;institutions à Waremme, Liège, Ans, Awans, Crisnée, Bierset et Hannut, l&apos;équipe assure des cuissons lentes, un dressage soigné et une logistique complète sur place.
+                                        De la présence hivernale au Chalet de Noël de Saint-Georges-sur-Meuse aux banquets d&apos;entreprises et d&apos;institutions à Waremme, Liège, Ans, Awans, Crisnée, Bierset et Hannut, l&apos;équipe assure des préparations fraîches, un dressage soigné et une logistique complète sur place.
                                     </p>
                                 </div>
 
