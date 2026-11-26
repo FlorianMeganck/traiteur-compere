@@ -4,6 +4,10 @@ export const metadata: Metadata = {
   title: 'Gestion des Cookies & Préférences',
   description:
     'Gérez vos préférences relatives aux cookies et traceurs utilisés sur le site Traiteur Compère pour une expérience de navigation respectueuse.',
+  robots: {
+    index: false,
+    follow: true,
+  },
   alternates: {
     canonical: '/gestion-cookies',
   },

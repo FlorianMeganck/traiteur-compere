@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "Mentions Légales | Traiteur Compère",
   description:
     "Mentions légales, éditeur du site et politique de confidentialité de la Maison Compère.",
+  robots: {
+    index: false,
+    follow: true,
+  },
   alternates: {
     canonical: "/mentions-legales",
   },

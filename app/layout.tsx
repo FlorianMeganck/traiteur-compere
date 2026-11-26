@@ -24,6 +24,10 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/images/Logo_traiteur.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'fr_BE',
@@ -51,7 +55,7 @@ const siteNavigationJsonLd = {
   "@graph": [
     {
       "@type": "SiteNavigationElement",
-      "name": "Menus de Fêtes",
+      "name": "Menus de Fêtes 2026",
       "url": "https://www.traiteur-compere.be/menus-fetes"
     },
     {
@@ -63,6 +67,16 @@ const siteNavigationJsonLd = {
       "@type": "SiteNavigationElement",
       "name": "Services",
       "url": "https://www.traiteur-compere.be/services"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": "Plats Préparés",
+      "url": "https://www.traiteur-compere.be/plats-prepares"
+    },
+    {
+      "@type": "SiteNavigationElement",
+      "name": "Notre Histoire",
+      "url": "https://www.traiteur-compere.be/a-propos"
     },
     {
       "@type": "SiteNavigationElement",

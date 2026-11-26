@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "Politique de Confidentialité & Données Personnelles",
   description:
     "Découvrez comment Traiteur Compère protège votre vie privée et traite vos données personnelles conformément au Règlement Général sur la Protection des Données.",
+  robots: {
+    index: false,
+    follow: true,
+  },
   alternates: {
     canonical: "/legal/confidentialite",
   },

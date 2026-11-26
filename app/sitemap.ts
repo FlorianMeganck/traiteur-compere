@@ -29,52 +29,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
     },
     {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.85,
-    },
-    {
       url: `${baseUrl}/plats-prepares`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 0.6,
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/a-propos`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
-      priority: 0.3,
+      priority: 0.6,
     },
     {
       url: `${baseUrl}/allergenes`,
       lastModified: new Date(),
       changeFrequency: 'yearly',
-      priority: 0.3,
+      priority: 0.4,
     },
     {
-      url: `${baseUrl}/mentions-legales`,
+      url: `${baseUrl}/contact`,
       lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.1,
-    },
-    {
-      url: `${baseUrl}/legal/confidentialite`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.1,
-    },
-    {
-      url: `${baseUrl}/legal/cgv`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.1,
-    },
-    {
-      url: `${baseUrl}/gestion-cookies`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.1,
+      changeFrequency: 'weekly',
+      priority: 0.85,
     },
   ];
 }
