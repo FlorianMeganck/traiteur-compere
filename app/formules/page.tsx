@@ -570,14 +570,14 @@ export default function Formules() {
                             {/* Colonne Gauche : Onglets & Infos */}
                             <div className="lg:col-span-5 space-y-8">
 
-                                {/* Navigation des onglets */}
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+                                {/* Navigation des onglets (3 en haut, 2 en bas sur sm+) */}
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                                     {(Object.keys(BUFFETS_FROIDS_OPTIONS) as Array<BuffetFroidType>).map((key) => (
                                         <button
                                             key={key}
                                             onClick={() => setActiveBuffetTab(key)}
-                                            className={`px-3 py-3 rounded-lg text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 ${activeBuffetTab === key
-                                                ? "bg-black text-[#D4AF37] border-black shadow-lg scale-105"
+                                            className={`px-4 py-3 rounded-lg text-xs sm:text-sm font-bold tracking-wider uppercase transition-all duration-300 w-full border flex flex-col items-center justify-center text-center gap-1 whitespace-nowrap ${activeBuffetTab === key
+                                                ? "bg-black text-[#D4AF37] border-black shadow-md"
                                                 : "bg-white text-neutral-500 border-neutral-200 hover:border-[#D4AF37] hover:text-black hover:bg-neutral-50"
                                                 }`}
                                         >
