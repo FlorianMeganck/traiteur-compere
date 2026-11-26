@@ -8,7 +8,7 @@ const ENGAGEMENTS_ATELIER = [
     {
         num: "01",
         title: "Proximité & Ancrage en Hesbaye",
-        text: "Entre notre atelier de Fexhe-le-Haut-Clocher et le partenariat historique avec la Boucherie Otte à Saint-Georges-sur-Meuse, nous privilégions le circuit court avec les producteurs de Hesbaye et de la province de Liège, et assurons une grande réactivité pour nos clients de Waremme, Liège, Ans, Awans et Hannut.",
+        text: "Implanté Rue Potay 3 à Saint-Georges-sur-Meuse, notre atelier travaille main dans la main avec la Boucherie Otte toute proche. Nous privilégions le circuit court avec les producteurs de Hesbaye et de la province de Liège, et assurons une grande réactivité pour nos clients de Waremme, Liège, Huy, Ans, Awans, Fexhe-le-Haut-Clocher et Hannut.",
     },
     {
         num: "02",
@@ -81,7 +81,7 @@ export default function About() {
                                         Lorsque le fondateur décède brutalement, renversé par sa propre charrette, son épouse reprend seule l&apos;étal. Par sa ténacité, elle maintient la clientèle locale et assure la transmission du geste au sein de l&apos;atelier familial.
                                     </p>
                                     <p>
-                                        La génération suivante traverse la Première Guerre mondiale à Odeur, avant d&apos;établir la maison à Momalle, rue Fond du Ruisseau puis rue Michel Heyne 21. En 1996, la boucherie s&apos;ouvre au métier de traiteur événementiel, prolongeant ses recettes familiales depuis Fexhe-le-Haut-Clocher vers toute la province de Liège.
+                                        La génération suivante traverse la Première Guerre mondiale à Odeur, avant d&apos;établir la maison à Momalle, rue Fond du Ruisseau puis rue Michel Heyne 21. En 1996, la boucherie s&apos;ouvre au métier de traiteur événementiel, prolongeant ses recettes familiales depuis Saint-Georges-sur-Meuse vers toute la province de Liège.
                                     </p>
                                 </div>
                             </motion.div>
@@ -226,17 +226,17 @@ export default function About() {
                                 className="w-full lg:w-6/12"
                             >
                                 <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#996515] mb-2">
-                                    Aujourd&apos;hui • Fexhe-le-Haut-Clocher
+                                    Aujourd&apos;hui • Saint-Georges-sur-Meuse (4470)
                                 </p>
                                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#111111] mb-6 pb-4 border-b border-[#D4AF37]/30">
                                     Christophe Compère &amp; l&apos;atelier de réception
                                 </h2>
                                 <div className="space-y-5 text-base sm:text-lg font-light leading-relaxed text-neutral-600 text-justify">
                                     <p>
-                                        Aujourd&apos;hui, Christophe Compère dirige l&apos;atelier de Fexhe-le-Haut-Clocher et perpétue l&apos;activité familiale autour des arts de la table : buffets froids et chauds, plats préparés de la semaine et menus de fêtes.
+                                        Aujourd&apos;hui, Christophe Compère dirige l&apos;atelier de Saint-Georges-sur-Meuse (Rue Potay 3) et perpétue l&apos;activité familiale autour des arts de la table : buffets froids et chauds, plats préparés de la semaine et menus de fêtes.
                                     </p>
                                     <p>
-                                        De la présence hivernale au Chalet de Noël de Saint-Georges-sur-Meuse aux banquets d&apos;entreprises et d&apos;institutions à Waremme, Liège, Ans, Awans, Crisnée, Bierset et Hannut, l&apos;équipe assure des préparations fraîches, un dressage soigné et une logistique complète sur place.
+                                        De la présence hivernale au Chalet de Noël de Saint-Georges-sur-Meuse aux banquets d&apos;entreprises et d&apos;institutions à Waremme, Liège, Ans, Awans, Fexhe-le-Haut-Clocher, Crisnée, Bierset et Hannut, l&apos;équipe assure des préparations fraîches, un dressage soigné et une logistique complète sur place.
                                     </p>
                                 </div>
 
@@ -251,6 +251,20 @@ export default function About() {
                                         <Image src="/images/bouffe/Bouffe8.jpeg" alt="Pains saucisses artisanaux préparés sur place" fill className="object-cover hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 33vw, 15vw" />
                                     </div>
                                 </div>
+
+                                <div className="mt-7">
+                                    <a
+                                        href="https://www.facebook.com/profile.php?id=61582940090708"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full border border-[#D4AF37]/70 bg-white text-sm font-semibold text-[#111111] hover:bg-[#111111] hover:text-white hover:border-[#111111] transition-all duration-300 shadow-xs"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                                        </svg>
+                                        <span>Suivre nos prochains événements sur Facebook →</span>
+                                    </a>
+                                </div>
                             </motion.div>
 
                             <motion.div
@@ -262,7 +276,7 @@ export default function About() {
                             >
                                 <Image
                                     src="/images/Releve1.jpeg"
-                                    alt="Christophe Compère, traiteur à Fexhe-le-Haut-Clocher"
+                                    alt="Christophe Compère, traiteur à Saint-Georges-sur-Meuse"
                                     fill
                                     className="object-cover"
                                     sizes="(max-width: 1024px) 100vw, 42vw"
@@ -314,7 +328,7 @@ export default function About() {
             <section className="max-w-4xl mx-auto px-6">
                 <div className="bg-white border border-[#D4AF37]/30 rounded-3xl p-8 sm:p-12 md:p-14 text-center shadow-xs">
                     <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-[#996515] mb-3">
-                        Maison Compère • Fexhe-le-Haut-Clocher
+                        Maison Compère • Rue Potay 3, 4470 Saint-Georges-sur-Meuse
                     </p>
                     <h2 className="text-2xl sm:text-4xl font-serif text-[#111111] mb-4">
                         À table avec notre Maison

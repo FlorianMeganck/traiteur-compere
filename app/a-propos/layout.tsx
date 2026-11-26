@@ -1,24 +1,24 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Notre Histoire depuis 1821 | Traiteur Compère à Fexhe-le-Haut-Clocher (Liège)',
+  title: 'Notre Histoire depuis 1821 | Traiteur Compère à Saint-Georges-sur-Meuse (Liège)',
   description:
-    'Maison Compère, traiteur artisanal depuis 1821 en Hesbaye (Fexhe-le-Haut-Clocher, province de Liège). Partenariat avec la Boucherie Otte, buffets froids et chauds, plats préparés et menus de fêtes à Liège, Waremme, Ans, Awans, Crisnée, Bierset et Hannut.',
+    'Maison Compère, traiteur artisanal depuis 1821 à Saint-Georges-sur-Meuse (4470, province de Liège). Partenariat avec la Boucherie Otte, buffets froids et chauds, plats préparés et menus de fêtes livrés en Hesbaye et à Liège, Waremme, Huy, Ans, Awans, Fexhe-le-Haut-Clocher et Hannut.',
   alternates: {
     canonical: '/a-propos',
   },
   openGraph: {
     title:
-      'Notre Histoire depuis 1821 | Traiteur Compère à Fexhe-le-Haut-Clocher (Liège)',
+      'Notre Histoire depuis 1821 | Traiteur Compère à Saint-Georges-sur-Meuse (Liège)',
     description:
-      'Découvrez le parcours de la Maison Compère depuis 1821 : boucherie familiale devenue traiteur événementiel en Hesbaye et province de Liège, avec Christophe Compère et la Boucherie Otte.',
+      'Découvrez le parcours de la Maison Compère depuis 1821 : boucherie familiale devenue traiteur événementiel à Saint-Georges-sur-Meuse en province de Liège, avec Christophe Compère et la Boucherie Otte.',
     url: 'https://www.traiteur-compere.be/a-propos',
     images: [
       {
         url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Traiteur Compère — Maison Compère depuis 1821 à Fexhe-le-Haut-Clocher (Liège)',
+        alt: 'Traiteur Compère — Maison Compère depuis 1821 à Saint-Georges-sur-Meuse (Liège)',
       },
     ],
   },
@@ -29,9 +29,9 @@ const aboutJsonLd = {
   '@type': 'AboutPage',
   '@id': 'https://www.traiteur-compere.be/a-propos#aboutpage',
   url: 'https://www.traiteur-compere.be/a-propos',
-  name: 'Notre Histoire depuis 1821 | Traiteur Compère à Fexhe-le-Haut-Clocher',
+  name: 'Notre Histoire depuis 1821 | Traiteur Compère à Saint-Georges-sur-Meuse',
   description:
-    'Histoire de la Maison Compère depuis 1821 en Hesbaye et province de Liège : activité de traiteur événementiel, buffets froids et chauds, plats préparés et menus de fêtes.',
+    'Histoire de la Maison Compère depuis 1821 à Saint-Georges-sur-Meuse en province de Liège : activité de traiteur événementiel, buffets froids et chauds, plats préparés et menus de fêtes.',
   mainEntity: {
     '@type': ['FoodEstablishment', 'CateringService'],
     '@id': 'https://www.traiteur-compere.be/#localbusiness',
@@ -53,22 +53,25 @@ const aboutJsonLd = {
     servesCuisine: 'Cuisine artisanale belge, boucherie-charcuterie et traiteur',
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'Fexhe-le-Haut-Clocher',
-      addressRegion: 'Province de Liège (Hesbaye)',
+      streetAddress: 'Rue Potay 3',
+      addressLocality: 'Saint-Georges-sur-Meuse',
+      postalCode: '4470',
+      addressRegion: 'Province de Liège',
       addressCountry: 'BE',
     },
     areaServed: [
-      'Fexhe-le-Haut-Clocher',
+      'Saint-Georges-sur-Meuse',
       'Hesbaye',
       'Province de Liège',
       'Waremme',
       'Liège',
+      'Huy',
       'Ans',
       'Awans',
+      'Fexhe-le-Haut-Clocher',
       'Crisnée',
       'Bierset',
       'Hannut',
-      'Saint-Georges-sur-Meuse',
     ],
     knowsAbout: [
       'Traiteur événementiel',
