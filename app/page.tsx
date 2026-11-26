@@ -124,9 +124,9 @@ const FORMULES_PHARES = [
     priceLabel: "dès 16 € / pers.",
     subtitle:
       "Charcuteries artisanales, pâté de campagne, salades maison et crudités fraîches.",
-    image: "/images/formule-buffet-campagnard.jpg",
-    imageWidth: 740,
-    imageHeight: 492,
+    image: "/images/buffet-campagnard.jpg",
+    imageWidth: 1200,
+    imageHeight: 800,
     alt: "Buffet Froid Campagnard artisanal - Traiteur Compère Liège",
     href: "/formules#buffets-froids",
   },

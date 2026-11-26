@@ -191,7 +191,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
         ],
         smallPrice: 18,
         mediumPrice: 16,
-        image: '/images/buffet_campagnard.jpeg'
+        image: '/images/buffet-campagnard.jpg'
     },
     ardenais: {
         label: "Ardennais",
@@ -205,7 +205,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
         ],
         smallPrice: 20,
         mediumPrice: 18,
-        image: '/images/buffet_ardennais.jpeg'
+        image: '/images/buffet-ardennais.jpg'
     },
     reception: {
         label: "Réception",
@@ -247,7 +247,7 @@ const BUFFETS_FROIDS_OPTIONS: Record<BuffetFroidType, {
         ],
         smallPrice: 25,
         mediumPrice: 23,
-        image: '/images/buffet_ardennais.jpeg'
+        image: '/images/buffet-gibier.jpg'
     }
 };
 

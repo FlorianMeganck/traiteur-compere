@@ -396,7 +396,7 @@ export default function StructuredData() {
                 "@type": "Product",
                 "name": "Formule Buffet Froid Campagnard",
                 "description": "Buffet froid traditionnel avec charcuteries artisanales, salades fraîches et crudités.",
-                "image": "https://www.traiteur-compere.be/images/buffet_campagnard.jpeg",
+                "image": "https://www.traiteur-compere.be/images/buffet-campagnard.jpg",
                 "offers": {
                   "@type": "Offer",
                   "priceCurrency": "EUR",
@@ -436,7 +436,7 @@ export default function StructuredData() {
                 "@type": "Product",
                 "name": "Formule Buffet Froid Gibier",
                 "description": "Buffet froid festif : jambon de sanglier, boudins de Noël, dinde et canard farcis, duo de saumon, tomate-crevettes grises et pâtés de gibier.",
-                "image": "https://www.traiteur-compere.be/images/buffet_ardennais.jpeg",
+                "image": "https://www.traiteur-compere.be/images/buffet-gibier.jpg",
                 "offers": {
                   "@type": "Offer",
                   "priceCurrency": "EUR",
