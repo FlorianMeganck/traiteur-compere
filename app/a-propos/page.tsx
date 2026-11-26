@@ -14,7 +14,9 @@ export default function About() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
                 >
-                    <h1 className="text-5xl md:text-7xl font-serif text-black tracking-tight mb-6">Notre Maison</h1>
+                    <h1 className="text-5xl md:text-7xl font-serif text-black tracking-tight mb-6">
+                        Maison Compère, traiteur en Hesbaye
+                    </h1>
                     <div className="w-24 h-1 bg-[#D4AF37] mx-auto rounded-full" />
                 </motion.div>
             </section>
@@ -31,20 +33,20 @@ export default function About() {
                         className="w-full lg:w-1/2"
                     >
                         <h2 className="text-3xl md:text-4xl font-serif text-black mb-8 border-l-4 border-[#D4AF37] pl-4">
-                            Notre Histoire <span className="block text-xl text-neutral-400 font-light mt-2 font-sans tracking-widest">(1821 - Aujourd'hui)</span>
+                            Notre Histoire <span className="block text-xl text-neutral-400 font-light mt-2 font-sans tracking-widest">(1821 - Aujourd&apos;hui)</span>
                         </h2>
                         <div className="space-y-6 text-lg font-light leading-relaxed text-neutral-600 text-justify">
                             <p>
-                                L'histoire de notre boucherie commence en 1821, à Oreye, près de la grand-route. Fondée par notre arrière-arrière-grand-père, l'établissement était à l'origine une boucherie traditionnelle, sans activité de charcuterie. À cette époque, le métier s'exerçait avec rigueur, passion et un profond respect du produit.
+                                L&apos;histoire de la Maison Compère débute en 1821 à Oreye, le long de la grand-route, en Hesbaye. Fondée par notre arrière-arrière-grand-père, l&apos;adresse était alors une boucherie de village traditionnelle, sans comptoir de charcuterie, où la découpe artisanale se faisait à la main dans le respect des morceaux.
                             </p>
                             <p>
-                                Un drame a marqué les débuts de notre histoire: notre fondateur est tragiquement décédé, renversé par sa propre charrette. Malgré cette épreuve, son épouse a courageusement repris l'activité, perpétuant ainsi le savoir-faire familial et assurant la continuité de la boucherie.
+                                Peu après l&apos;ouverture, le fondateur décède brutalement, renversé par sa propre charrette. Son épouse reprend alors seule la boucherie, assure les découpes et maintient la clientèle locale pour faire vivre l&apos;atelier familial.
                             </p>
                             <p>
-                                La génération suivante, le père de notre grand-père, a repris le flambeau. Durant la première guerre mondiale, la boucherie a été déplacée à Odeur, preuve de la résilience et de la détermination de la famille face aux circonstances difficiles de l'époque. Plus tard, l'activité s'est installée à Momalle. Le magasin a d'abord été situé rue Fond du Ruisseau, avant de déménager rue Michel Heyne 21, afin d'offrir un cadre plus adapté à l'évolution de l'entreprise et aux besoins de la clientèle.
+                                La génération suivante, le père de notre grand-père, reprend ensuite le commerce. Durant la Première Guerre mondiale, la boucherie est déplacée à Odeur pour poursuivre l&apos;activité malgré les réquisitions, avant de s&apos;installer durablement à Momalle : d&apos;abord rue Fond du Ruisseau, puis rue Michel Heyne 21 dans des locaux mieux adaptés au travail en atelier.
                             </p>
                             <p>
-                                Un tournant important a lieu en 1996: la boucherie se transforme et développe son activité de traiteur. Cette évolution marque une nouvelle étape dans l'histoire familiale, élargissant les services proposés tout en conservant l'exigence de qualité et le savoir-faire artisanal transmis depuis 1821. Depuis plus de deux siècles, notre maison est avant tout une histoire de famille, de travail et de passion. Chaque génération a su préserver les valeurs fondatrices tout en adaptant l'entreprise aux attentes de son époque.
+                                En 1996, l&apos;entreprise prend un nouveau virage en développant son activité de traiteur événementiel, tout en conservant les recettes familiales et la maîtrise bouchère transmises depuis 1821. Aujourd&apos;hui établie à Fexhe-le-Haut-Clocher, en province de Liège, notre maison prépare en atelier des buffets froids et chauds, des plats préparés et des menus de fêtes avec des portions généreuses.
                             </p>
                         </div>
                     </motion.div>
@@ -60,7 +62,7 @@ export default function About() {
                         <div className="relative col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-xl group">
                             <Image
                                 src="/images/histoire/Histoire1.jpeg"
-                                alt="Archives des fondateurs - Maison Compère"
+                                alt="Archives des fondateurs - Maison Compère en Hesbaye"
                                 fill
                                 priority
                                 className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
@@ -97,7 +99,7 @@ export default function About() {
                         <div className="relative rounded-2xl overflow-hidden shadow-lg group hidden md:block">
                             <Image
                                 src="/images/histoire/Histoire5.jpeg"
-                                alt="Savoir-faire artisanal bicentenaire"
+                                alt="Atelier de boucherie et préparations maison depuis 1821"
                                 fill
                                 className="object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 sepia-[.3]"
                                 sizes="(max-width: 1024px) 50vw, 25vw"
@@ -117,7 +119,7 @@ export default function About() {
                             viewport={{ once: true }}
                             className="text-3xl md:text-5xl font-serif text-black mb-6"
                         >
-                            L'Exigence sur tous les terrains
+                            De l&apos;atelier à vos réceptions en province de Liège
                         </motion.h2>
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -139,17 +141,17 @@ export default function About() {
                             >
                                 <h3 className="text-2xl font-serif text-black mb-6 flex items-center gap-3">
                                     <span className="w-8 h-px bg-[#D4AF37] inline-block" />
-                                    L'artisanat local
+                                    Viandes en circuit court &amp; Boucherie Otte
                                 </h3>
                                 <div className="space-y-4 text-lg font-light leading-relaxed text-neutral-600 text-justify">
                                     <p>
-                                        Dans une volonté constante de qualité et de respect envers nos clients, nous avons mis en place une sélection rigoureuse de nos viandes afin de vous offrir une expérience irréprochable. C'est tout naturellement que nous avons choisi de collaborer avec la boucherie Otte, récemment installée à Saint-Georges-sur-Meuse. Bien que nouvelle dans le paysage local, elle bénéficie déjà d'une solide réputation fondée sur le sérieux et la qualité de ses produits. En travaillant en étroite collaboration avec Steve, le patron de la boucherie, nous vous garantissons une parfaite maîtrise de la qualité ainsi qu'une traçabilité claire de l'origine de nos viandes.
+                                        Pour nos buffets froids et chauds comme pour nos grillades, nous travaillons avec des produits frais sélectionnés en circuit court. Nous collaborons au quotidien avec la Boucherie Otte, installée à Saint-Georges-sur-Meuse et reconnue pour la fraîcheur et la tenue de ses viandes. Aux côtés de Steve, son patron, nous suivons chaque lot de la découpe artisanale jusqu&apos;à nos préparations maison afin d&apos;assurer une traçabilité claire sur l&apos;origine de nos bêtes.
                                     </p>
                                     <Link 
                                         href="/formules#bbq"
                                         className="inline-block mt-8 px-6 py-3 bg-black text-white rounded-full hover:bg-zinc-800 transition-colors duration-300 shadow-lg"
                                     >
-                                        découvrez notre sélection de viandes ! →
+                                        Découvrir notre sélection de viandes →
                                     </Link>
                                 </div>
                             </motion.div>
@@ -170,7 +172,7 @@ export default function About() {
                                 >
                                     <Image
                                         src="/images/Maison_otte1.jpeg"
-                                        alt="Logo de la Maison Otte"
+                                        alt="Logo de la Boucherie Otte à Saint-Georges-sur-Meuse"
                                         fill
                                         className="object-cover"
                                         sizes="(max-width: 768px) 100vw, 25vw"
@@ -187,7 +189,7 @@ export default function About() {
                                 >
                                     <Image
                                         src="/images/Maison_otte2.jpeg"
-                                        alt="Boutique et ateliers de La Maison Otte"
+                                        alt="Comptoir et ateliers de la Boucherie Otte"
                                         fill
                                         className="object-cover"
                                         sizes="(max-width: 768px) 100vw, 35vw"
@@ -206,13 +208,13 @@ export default function About() {
                                 className="w-full lg:w-1/2 grid grid-cols-2 gap-4"
                             >
                                 <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md">
-                                    <Image src="/images/Event2.jpeg" alt="Chalet de Noël de Saint-Georges" fill className="object-cover transition-transform duration-700 hover:scale-105" sizes="(max-width: 768px) 50vw, 25vw" />
+                                    <Image src="/images/Event2.jpeg" alt="Chalet de Noël de Saint-Georges-sur-Meuse" fill className="object-cover transition-transform duration-700 hover:scale-105" sizes="(max-width: 768px) 50vw, 25vw" />
                                 </div>
                                 <div className="relative aspect-square rounded-2xl overflow-hidden shadow-md mt-8">
-                                    <Image src="/images/Event1.jpeg" alt="L'Affiche gourmande au chalet" fill className="object-cover transition-transform duration-700 hover:scale-105" sizes="(max-width: 768px) 50vw, 25vw" />
+                                    <Image src="/images/Event1.jpeg" alt="Carte hivernale au chalet de Noël" fill className="object-cover transition-transform duration-700 hover:scale-105" sizes="(max-width: 768px) 50vw, 25vw" />
                                 </div>
                                 <div className="relative aspect-[2/1] col-span-2 rounded-2xl overflow-hidden shadow-md">
-                                    <Image src="/images/bouffe/Bouffe8.jpeg" alt="Les pains saucisses artisanaux du chalet" fill className="object-cover transition-transform duration-700 hover:scale-105" sizes="(max-width: 768px) 100vw, 50vw" />
+                                    <Image src="/images/bouffe/Bouffe8.jpeg" alt="Pains saucisses préparés sur place" fill className="object-cover transition-transform duration-700 hover:scale-105" sizes="(max-width: 768px) 100vw, 50vw" />
                                 </div>
                             </motion.div>
 
@@ -225,11 +227,11 @@ export default function About() {
                             >
                                 <h3 className="text-2xl font-serif text-black mb-6 flex items-center gap-3">
                                     <span className="w-8 h-px bg-[#D4AF37] inline-block" />
-                                    Événements & Confiance Corporate
+                                    Réceptions publiques &amp; d&apos;entreprise en Hesbaye
                                 </h3>
                                 <div className="text-lg font-light leading-relaxed text-neutral-600 text-justify">
                                     <p>
-                                        Notre savoir-faire s'exporte sur le terrain et lors de vos plus grands événements. Durant l'hiver 2025, nous avons notamment eu le plaisir de vous retrouver au Chalet de Noël de Saint-Georges pour partager un moment de convivialité autour de nos spécialités hivernales et de nos incontournables pains saucisses. Au-delà des événements publics et des soirées privées, nous sommes fiers de la confiance que nous accordent de grands groupes d'envergure nationale et internationale pour l'organisation de leurs réceptions professionnelles. Des défis de grande taille que notre équipe relève toujours avec la même exigence de qualité et de sur-mesure.
+                                        Notre travail en atelier s&apos;étend aussi sur le terrain, lors de fêtes locales comme le Chalet de Noël de Saint-Georges-sur-Meuse où nous servons nos spécialités de saison et nos pains saucisses grillés. Au fil des années, des entreprises, administrations et associations de Waremme, Liège, Ans, Awans, Crisnée, Bierset et Hannut nous confient leurs banquets, séminaires et réceptions privées, avec un service ponctuel et des portions généreuses adaptées au nombre de convives.
                                     </p>
                                 </div>
                             </motion.div>
@@ -251,7 +253,7 @@ export default function About() {
                     >
                         <Image
                             src="/images/Releve1.jpeg"
-                            alt="Christophe Compère, la relève de la Maison Compère"
+                            alt="Christophe Compère, traiteur à Fexhe-le-Haut-Clocher"
                             fill
                             className="object-cover"
                             sizes="(max-width: 1024px) 100vw, 42vw"
@@ -266,13 +268,13 @@ export default function About() {
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="w-full lg:w-7/12"
                     >
-                        <h2 className="text-3xl md:text-5xl font-serif text-black mb-8">La Relève</h2>
+                        <h2 className="text-3xl md:text-5xl font-serif text-black mb-8">La Relève avec Christophe Compère</h2>
                         <div className="space-y-6 text-lg font-light leading-relaxed text-neutral-600">
                             <p>
-                                Aujourd'hui, une nouvelle génération se prépare à prendre le relais. Christophe s'inscrit pleinement dans cette continuité et se forme activement afin de reprendre l'entreprise familiale.
+                                Aujourd&apos;hui, Christophe Compère reprend le flambeau et poursuit le développement de l&apos;entreprise familiale depuis l&apos;atelier de Fexhe-le-Haut-Clocher, en Hesbaye.
                             </p>
                             <p>
-                                Animé par la passion du métier et le respect des valeurs qui ont toujours guidé la maison, il développe ses compétences avec un objectif clair: assurer la pérennité de la société tout en l'accompagnant vers l'avenir. Entre tradition et modernité, il incarne la volonté de faire perdurer un savoir-faire tout en répondant aux attentes d'aujourd'hui et de demain.
+                                Formé au métier de bouche, il pilote au quotidien les préparations maison : buffets froids et chauds, plats préparés de la semaine et menus de fêtes. Son objectif reste simple et concret : cuisiner des produits frais au rythme des saisons, préserver nos recettes familiales et assurer les livraisons et réceptions dans toute la province de Liège.
                             </p>
                         </div>
                     </motion.div>
